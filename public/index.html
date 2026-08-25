@@ -145,8 +145,66 @@ document.addEventListener("DOMContentLoaded", function () {
   const status = document.getElementById("status");
   const result = document.getElementById("result");
 
-  button.addEventListener("click", function () {
-    status.textContent = "✅ Le bouton fonctionne !";
+  button.addEventListener("click", async function () {
+
+    const prompt = promptInput.value.trim();
+
+    if (!prompt) {
+      status.textContent = "⚠️ Écris une idée avant de générer.";
+      return;
+    }
+
+    button.disabled = true;
+    status.textContent = "⏳ Génération en cours...";
+    result.innerHTML = "";
+
+    try {
+
+      const response = await fetch("/api/images/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          size: "1024x1536",
+          quality: "low"
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Erreur de génération.");
+      }
+
+      const imageUrl = data.image?.url || data.url;
+
+      if (!imageUrl) {
+        throw new Error("Aucune image reçue.");
+      }
+
+      status.textContent = "✅ Image générée !";
+
+      result.innerHTML = `
+        <img
+          src="${imageUrl}"
+          alt="Image générée"
+          style="width:100%;border-radius:16px;margin-top:20px;"
+        >
+      `;
+
+    } catch (error) {
+
+      console.error(error);
+      status.textContent = "❌ " + error.message;
+
+    } finally {
+
+      button.disabled = false;
+
+    }
+
   });
 
 });
