@@ -176,4 +176,20 @@ button.addEventListener("click", async () => {
 
     status.textContent = "✅ Image générée !";
 
-    const
+  const imageUrl = data.image?.url || data.url;
+
+if (!imageUrl) {
+  throw new Error("Aucune image reçue.");
+}
+
+result.innerHTML = `
+  <img src="${imageUrl}" alt="Image générée"
+       style="width:100%;border-radius:16px;margin-top:20px;">
+`;
+      
+} catch (error) {
+  console.error(error);
+  status.textContent = "❌ " + error.message;
+} finally {
+  button.disabled = false;
+  }
