@@ -1,64 +1,218 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import OpenAI from 'openai';
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
 
-if (!process.env.OPENAI_API_KEY) {
-  console.warn('OPENAI_API_KEY is missing. Image generation will return a clear setup error.');
-}
+app.use(cors({ origin: true }));
+app.use(express.json({ limit: '2mb' }));
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const API_KEY = process.env.OPENAI_API_KEY;
 
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || true
-}));
-app.use(express.json({ limit: '1mb' }));
+// ===============================
+// HEALTH CHECK
+// ===============================
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'VIRA backend', version: '0.1.0' });
+  res.json({
+    ok: true,
+    service: 'VIRA backend',
+    version: '0.2.0',
+    openai: Boolean(API_KEY)
+  });
 });
 
-app.post('/api/images/generate', async (req, res) => {
+// ===============================
+// GENERATE SCENARIO
+// ===============================
+
+async function generateScenario(req, res) {
   try {
-    const { prompt, size = '1024x1536', quality = 'medium' } = req.body || {};
-
-    if (typeof prompt !== 'string' || prompt.trim().length < 3) {
-      return res.status(400).json({ error: 'A valid prompt is required.' });
-    }
-
-    if (!process.env.OPENAI_API_KEY) {
+    if (!API_KEY) {
       return res.status(503).json({
-        error: 'OPENAI_API_KEY is not configured on the server.'
+        ok: false,
+        error: 'OPENAI_API_KEY is not configured on Render.'
       });
     }
 
-    const response = await client.images.generate({
-      model: 'gpt-image-1',
-      prompt: prompt.trim(),
-      size,
-      quality
-    });
+    const {
+      prompt,
+      duration = 30,
+      format = 'short'
+    } = req.body || {};
 
-    const image = response?.data?.[0]?.b64_json;
-    if (!image) {
-      return res.status(502).json({ error: 'The image provider returned no image.' });
+    if (typeof prompt !== 'string' || !prompt.trim()) {
+      return res.status(400).json({
+        ok: false,
+        error: 'A video idea is required.'
+      });
     }
 
-    res.json({
+    const instruction = `
+Tu es VIRA, une IA professionnelle de création vidéo.
+
+Crée un scénario prêt à produire à partir de cette idée :
+
+"${prompt.trim()}"
+
+Format : ${format}
+Durée : ${duration} secondes.
+
+Le scénario doit être captivant, visuel et adapté aux réseaux sociaux.
+
+Structure obligatoire :
+
+TITRE:
+HOOK:
+SCÈNE 1:
+SCÈNE 2:
+SCÈNE 3:
+SCÈNE 4:
+SCÈNE 5:
+VOIX OFF:
+FIN:
+
+Réponse en français.
+`;
+
+    const response = await fetch(
+      'https://api.openai.com/v1/responses',
+      {
+       headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-5.6-luna',
+        input: instruction
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('OpenAI error:', data);
+
+      return res.status(response.status).json({
+        ok: false,
+        error: data?.error?.message || 'OpenAI request failed.'
+      });
+    }
+
+    const text = data?.output_text;
+
+    if (!text) {
+      return res.status(502).json({
+        ok: false,
+        error: 'No scenario was returned by OpenAI.'
+      });
+    }
+
+    return res.json({
+      ok: true,
+      scenario: text,
+      script: text,
+      text
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error?.message || 'Scenario generation failed.'
+    });
+  }
+}
+
+// Routes scénario
+app.post('/api/scenario/generate', generateScenario);
+app.post('/api/scenario', generateScenario);
+app.post('/api/script/generate', generateScenario);
+
+// ===============================
+// GENERATE IMAGE
+// ===============================
+
+app.post('/api/images/generate', async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: 'OPENAI_API_KEY is not configured on Render.'
+      });
+    }
+
+    const {
+      prompt,
+      size = '1024x1536',
+      quality = 'medium'
+    } = req.body || {};
+
+    if (typeof prompt !== 'string' || !prompt.trim()) {
+      return res.status(400).json({
+        ok: false,
+        error: 'A valid image prompt is required.'
+      });
+    }
+
+    const response = await fetch(
+      'https://api.openai.com/v1/images/generations',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-image-2',
+          prompt: prompt.trim(),
+          size,
+          quality
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('OpenAI image error:', data);
+
+      return res.status(response.status).json({
+        ok: false,
+        error: data?.error?.message || 'Image generation failed.'
+      });
+    }
+
+    const image = data?.data?.[0]?.b64_json;
+
+    if (!image) {
+      return res.status(502).json({
+        ok: false,
+        error: 'No image was returned by OpenAI.'
+      });
+    }
+
+    return res.json({
       ok: true,
       image: `data:image/png;base64,${image}`
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+
+    return res.status(500).json({
+      ok: false,
       error: error?.message || 'Image generation failed.'
     });
   }
 });
 
+// ===============================
+// START SERVER
+// ===============================
+
 app.listen(port, () => {
-  console.log(`VIRA backend running at http://localhost:${port}`);
-});
+  console.log(`VIRA backend running on port ${port}`);
+});      
