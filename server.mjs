@@ -7,7 +7,7 @@ const port = Number(process.env.PORT || 3000);
 
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: '2mb' }));
-
+app.use(express.static('public'));
 const API_KEY = process.env.OPENAI_API_KEY;
 
 // ===============================
