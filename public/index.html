@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIRA — Création vidéo IA</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0b10;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 42px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 35px;
+    }
+
+    .card {
+      background: #15151d;
+      border: 1px solid #292936;
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      border: 1px solid #333342;
+      border-radius: 14px;
+      background: #0d0d13;
+      color: white;
+      padding: 15px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #8b5cf6;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 16px;
+      border: 0;
+      border-radius: 14px;
+      background: #7c3aed;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    #status {
+      margin-top: 18px;
+      text-align: center;
+      color: #aaa;
+    }
+
+    #result {
+      margin-top: 25px;
+      text-align: center;
+    }
+
+    #result img {
+      max-width: 100%;
+      border-radius: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="logo">VIRA</div>
+
+    <div class="subtitle">
+      Crée tes contenus avec l'intelligence artificielle
+    </div>
+
+    <div class="card">
+
+      <label for="prompt">
+        Décris ton idée
+      </label>
+
+      <textarea
+        id="prompt"
+        placeholder="Exemple : Une ville futuriste sous la pluie, vue cinématographique..."
+      ></textarea>
+
+      <button id="generate">
+        ✨ Générer
+      </button>
+
+      <div id="status"></div>
+
+      <div id="result"></div>
+
+    </div>
+
+  </div>
+
+<script>
+const button = document.getElementById("generate");
+const promptInput = document.getElementById("prompt");
+const status = document.getElementById("status");
+const result = document.getElementById("result");
+
+button.addEventListener("click", async () => {
+
+  const prompt = promptInput.value.trim();
+
+  if (!prompt) {
+    status.textContent = "Écris une idée avant de générer.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "⏳ Génération en cours...";
+  result.innerHTML = "";
+
+  try {
+
+    const response = await fetch("/api/images/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+        size: "1024x1536",
+        quality: "low"
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Erreur de génération");
+    }
+
+    status.textContent = "✅ Image générée !";
+
+    const
