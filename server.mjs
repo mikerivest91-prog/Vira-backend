@@ -60,11 +60,29 @@ Réponds en français.`
       })
     });
 
+  const data = await response.json();
 
-        error: data?.error?.message || "Erreur lors de la création du scénario."
-      });
-    }
+if (!response.ok) {
+  console.error("OPENAI SCENARIO ERROR:", JSON.stringify(data));
 
+  return res.status(response.status).json({
+    ok: false,
+    error: data?.error?.message || "Erreur lors de la création du scénario."
+  });
+}
+
+const scenario =
+  data?.output_text ||
+  data?.output?.[0]?.content?.[0]?.text ||
+  data?.output?.[0]?.content?.find(x => x.text)?.text ||
+  "";
+
+if (!scenario) {
+  return res.status(500).json({
+    ok: false,
+    error: "Aucun texte de scénario reçu d'OpenAI."
+  });
+}  
 return res.json({
   ok: true,
   scenario: scenario,
