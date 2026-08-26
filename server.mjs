@@ -326,7 +326,7 @@ app.post("/api/video/generate", async (req, res) => {
 
     const { prompt } = req.body || {};
 
-    if (typeof prompt !== "string" || !prompt.trim()) {
+if (typeof prompt !== "string" || !prompt.trim()) {
       return res.status(400).json({
         ok: false,
         error: "A valid video prompt is required."
