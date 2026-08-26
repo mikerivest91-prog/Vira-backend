@@ -387,7 +387,7 @@ app.post("/api/video/generate", async (req, res) => {
       );
 
       video = await statusResponse.json();
-
+console.log("VIRA VIDEO RAW STATUS:", JSON.stringify(video));
       console.log(
         "VIRA VIDEO STATUS:",
         video.status,
