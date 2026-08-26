@@ -333,6 +333,9 @@ app.post("/api/video/generate", async (req, res) => {
       });
     }
 
+    console.log("VIRA VIDEO REQUEST:", prompt.trim());
+
+    // 1. Créer le job vidéo
     const response = await fetch(
       "https://api.openai.com/v1/videos",
       {
@@ -352,18 +355,88 @@ app.post("/api/video/generate", async (req, res) => {
 
     const data = await response.json();
 
-    console.log("VIRA VIDEO RESPONSE:", data);
+    console.log("VIRA VIDEO CREATED:", data);
 
     if (!response.ok) {
       return res.status(response.status).json({
         ok: false,
-        error: data?.error?.message || "Erreur de génération vidéo."
+        error: data?.error?.message || "Erreur lors de la création de la vidéo."
       });
     }
 
+    if (!data?.id) {
+      return res.status(500).json({
+        ok: false,
+        error: "Aucun identifiant vidéo reçu du serveur OpenAI."
+      });
+    }
+
+    // 2. Attendre que la vidéo soit terminée
+    let video = data;
+
+    for (let attempt = 0; attempt < 60; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      const statusResponse = await fetch(
+        `https://api.openai.com/v1/videos/${data.id}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${API_KEY}`
+          }
+        }
+      );
+
+      video = await statusResponse.json();
+
+      console.log(
+        "VIRA VIDEO STATUS:",
+        video.status,
+        video.progress
+      );
+
+      if (!statusResponse.ok) {
+        return res.status(statusResponse.status).json({
+          ok: false,
+          error:
+            video?.error?.message ||
+            "Impossible de récupérer le statut de la vidéo."
+        });
+      }
+
+      if (video.status === "completed") {
+        break;
+      }
+
+      if (video.status === "failed") {
+        return res.status(500).json({
+          ok: false,
+          error:
+            video?.error?.message ||
+            "La génération de la vidéo a échoué."
+        });
+      }
+    }
+
+    if (video.status !== "completed") {
+      return res.status(504).json({
+        ok: false,
+        error: "La génération de la vidéo prend trop de temps."
+      });
+    }
+
+    console.log("VIRA VIDEO COMPLETED:", video.id);
+
+    // 3. URL interne VIRA pour lire la vidéo
+    const videoUrl =
+      `/api/video/${encodeURIComponent(video.id)}/content`;
+
     return res.json({
       ok: true,
-      video: data
+      video: {
+        id: video.id,
+        url: videoUrl,
+        status: video.status
+      }
     });
 
   } catch (error) {
@@ -373,11 +446,63 @@ app.post("/api/video/generate", async (req, res) => {
       ok: false,
       error: error?.message || "Erreur interne du serveur."
     });
-  }  
+  }
 });
 
-app.listen(port, () => {
-  console.log(
-    `VIRA backend running on port ${port}`
-  );
+
+// Proxy sécurisé pour récupérer le fichier vidéo OpenAI
+app.get("/api/video/:id/content", async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(503).json({
+        error: "OPENAI_API_KEY is not configured."
+      });
+    }
+
+    const videoId = req.params.id;
+
+    const response = await fetch(
+      `https://api.openai.com/v1/videos/${encodeURIComponent(videoId)}/content`,
+      {
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error(
+        "VIRA VIDEO CONTENT ERROR:",
+        errorText
+      );
+
+      return res.status(response.status).send(errorText);
+    }
+
+    const buffer = Buffer.from(
+      await response.arrayBuffer()
+    );
+
+    res.setHeader("Content-Type", "video/mp4");
+    res.setHeader(
+      "Content-Length",
+      buffer.length
+    );
+
+    res.send(buffer);
+
+  } catch (error) {
+    console.error(
+      "VIRA VIDEO CONTENT ERROR:",
+      error
+    );
+
+    res.status(500).json({
+      error:
+        error?.message ||
+        "Impossible de récupérer la vidéo."
+    });
+  }
 });
