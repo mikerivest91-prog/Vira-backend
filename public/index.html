@@ -150,7 +150,12 @@
       const status = document.getElementById("status");
       const result = document.getElementById("result");
 
-      button.addEventListener("click", async function () {
+
+const scenarioButton = document.getElementById("scenario");
+const scenarioStatus = document.getElementById("scenarioStatus");
+const scenarioResult = document.getElementById("scenarioResult");
+
+button.addEventListener("click", async function () {
 
         const prompt = promptInput.value.trim();
 
