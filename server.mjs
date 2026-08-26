@@ -179,26 +179,25 @@ app.post("/api/images/generate", async (req, res) => {
       });
     }
 
-    console.log("VIRA IMAGE RECEIVED: YES");
+ console.log("VIRA IMAGE CREATED");
 
-    return res.json({
-      ok: true,
-      image: `data:image/png;base64,${image}`
-    });
-
-  } catch (error) {
-    console.error(
-      "VIRA SERVER ERROR:",
-      error
-    );
-
-    return res.status(500).json({
-      ok: false,
-      error:
-        error?.message ||
-        "Internal server error."
-    });
+return res.json({
+  ok: true,
+  url: imageUrl,
+  image: {
+    url: imageUrl
   }
+});
+
+} catch (error) {
+  console.error("VIRA SERVER ERROR:", error);
+
+  return res.status(500).json({
+    ok: false,
+    error: error?.message || "Erreur serveur."
+  });
+}
+
 });
 // ===============================
 // VIRA - GENERATION DE SCENARIO
