@@ -298,6 +298,67 @@ Le scénario doit être dynamique, facile à transformer en images et en vidéo.
     });
   }
 });
+app.post("/api/video/generate", async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: "OPENAI_API_KEY is not configured."
+      });
+    }
+
+    const { prompt } = req.body || {};
+
+    if (typeof prompt !== "string" || !prompt.trim()) {
+      return res.status(400).json({
+        ok: false,
+        error: "A valid video prompt is required."
+      });
+    }
+
+    const response = await fetch(
+      "https://api.openai.com/v1/videos",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "sora-2",
+          prompt: prompt.trim(),
+          size: "720x1280",
+          seconds: "10"
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    console.log("VIRA VIDEO RESPONSE:", data);
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        ok: false,
+        error: data?.error?.message || "Erreur de génération vidéo."
+      });
+    }
+
+    return res.json({
+      ok: true,
+      video: data
+    });
+
+  } catch (error) {
+    console.error("VIRA VIDEO ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error?.message || "Erreur interne du serveur."
+    });
+  }  
+});
+
 app.listen(port, () => {
   console.log(
     `VIRA backend running on port ${port}`
