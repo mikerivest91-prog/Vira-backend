@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIRA — Création vidéo IA</title>
+
+  <title>VIRA – Création vidéo IA</title>
 
   <style>
     * {
@@ -120,14 +121,12 @@
 
       <textarea
         id="prompt"
-        placeholder="Exemple : Une ville futuriste sous la pluie, vue cinématographique..."
+        placeholder="Exemple : Une ville futuriste sous la pluie..."
       ></textarea>
 
-<button id="generate" type="button">
-    ✨ Générer
-</button>
-
-      
+      <button id="generate" type="button">
+        ✨ Générer
+      </button>
 
       <div id="status"></div>
 
@@ -137,75 +136,99 @@
 
   </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
 
-  const button = document.getElementById("generate");
-  const promptInput = document.getElementById("prompt");
-  const status = document.getElementById("status");
-  const result = document.getElementById("result");
+      const button = document.getElementById("generate");
+      const promptInput = document.getElementById("prompt");
+      const status = document.getElementById("status");
+      const result = document.getElementById("result");
 
-  button.addEventListener("click", async function () {
+      button.addEventListener("click", async function () {
 
-    const prompt = promptInput.value.trim();
+        const prompt = promptInput.value.trim();
 
-    if (!prompt) {
-      status.textContent = "⚠️ Écris une idée avant de générer.";
-      return;
-    }
+        if (!prompt) {
+          status.textContent = "⚠️ Écris une idée avant de générer.";
+          return;
+        }
 
-    button.disabled = true;
-    status.textContent = "⏳ Génération en cours...";
-    result.innerHTML = "";
+        button.disabled = true;
+        status.textContent = "⏳ Génération en cours...";
+        result.innerHTML = "";
 
-    try {
+        try {
 
-      const response = await fetch("/api/images/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          prompt: prompt,
-          size: "1024x1536",
-          quality: "low"
-        })
+          const response = await fetch("/api/images/generate", {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              prompt: prompt,
+              size: "1024x1536",
+              quality: "low"
+            })
+          });
+
+          const data = await response.json();
+
+          console.log("VIRA RESPONSE:", data);
+
+          if (!response.ok) {
+            throw new Error(
+              data.error ||
+              data.message ||
+              "Erreur de génération."
+            );
+          }
+
+          /*
+           * Le backend peut renvoyer l'image sous
+           * plusieurs formes. On accepte toutes les formes.
+           */
+          const imageUrl =
+            data.image?.url ||
+            data.image ||
+            data.url ||
+            data.imageUrl;
+
+          if (!imageUrl) {
+            console.error("Réponse reçue mais aucune image :", data);
+
+            throw new Error(
+              "Aucune image reçue."
+            );
+          }
+
+          status.textContent = "✅ Image générée !";
+
+          result.innerHTML = `
+            <img
+              src="${imageUrl}"
+              alt="Image générée"
+              style="width:100%;border-radius:16px;margin-top:10px;"
+            >
+          `;
+
+        } catch (error) {
+
+          console.error("VIRA ERROR:", error);
+
+          status.textContent = "❌ " + error.message;
+
+        } finally {
+
+          button.disabled = false;
+
+        }
+
       });
 
-      const data = await response.json();
+    });
+      </script>
 
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Erreur de génération.");
-      }
-
-      const imageUrl = data.image?.url || data.url;
-
-      if (!imageUrl) {
-        throw new Error("Aucune image reçue.");
-      }
-
-      status.textContent = "✅ Image générée !";
-
-      result.innerHTML = `
-        <img
-          src="${imageUrl}"
-          alt="Image générée"
-          style="width:100%;border-radius:16px;margin-top:20px;"
-        >
-      `;
-
-    } catch (error) {
-
-      console.error(error);
-      status.textContent = "❌ " + error.message;
-
-    } finally {
-
-      button.disabled = false;
-
-    }
-
-  });
-
-});
-</script>
+  </body>
+</html>
