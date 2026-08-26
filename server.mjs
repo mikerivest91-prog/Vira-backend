@@ -60,22 +60,7 @@ Réponds en français.`
       })
     });
 
-  const data = await response.json();
 
-const scenario =
-  data?.output_text ||
-  data?.output?.[0]?.content?.[0]?.text ||
-  data?.output?.[0]?.content?.find(x => x.text)?.text ||
-  data?.output?.find(x => x.content)?.content?.find(x => x.text)?.text ||
-  "";
-
-console.log("VIRA SCENARIO DATA:", JSON.stringify(data, null, 2));
-console.log("VIRA SCENARIO TEXT:", scenario);
-    if (!response.ok) {
-      console.error("OPENAI SCENARIO ERROR:", JSON.stringify(data));
-
-      return res.status(response.status).json({
-        ok: false,
         error: data?.error?.message || "Erreur lors de la création du scénario."
       });
     }
