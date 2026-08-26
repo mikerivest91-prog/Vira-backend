@@ -255,57 +255,100 @@ const scenario = data?.output_text || "";
         );
       }
 
-      for (let i = 0; i < scenes.length; i++) {
+      const continuityPrompt = `
+VISUAL CONTINUITY RULES:
 
-        status.textContent =
-          `🎬 Génération de la scène ${i + 1}/${scenes.length}...`;
+Create all images as frames from the SAME cinematic story.
 
-        const response = await fetch(
-          "/api/images/generate",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              prompt: scenes[i],
-              size: "1024x1536",
-              quality: "low"
-            })
-          }
-        );
+Keep these elements CONSISTENT in every scene:
+- same main character
+- same face and identity
+- same hairstyle
+- same age
+- same body proportions
+- same clothing and accessories
+- same environment and world
+- same cinematic style
+- same realistic visual quality
+- same color grading
+- same lighting style
 
-        const data = await response.json();
+The main character must look like the SAME PERSON in every scene.
+Do not randomly change the character, clothing, age, face or hairstyle.
 
-        if (!response.ok) {
-          throw new Error(
-            data?.error?.message ||
-            data?.error ||
-            "Erreur de génération d'image."
-          );
-        }
+Each image must visually continue the previous scene.
 
-        const imageUrl =
-          data?.url ||
-          data?.image?.url ||
-          data?.data?.[0]?.url;
+Use a cinematic realistic film-still look.
+Vertical 9:16 composition.
+Highly detailed.
+Natural realistic lighting.
+Professional cinematography.
+`;
 
-        if (!imageUrl) {
-          throw new Error(
-            `Aucune image reçue pour la scène ${i + 1}.`
-          );
-        }
+for (let i = 0; i < scenes.length; i++) {
 
-        const img = document.createElement("img");
+  status.textContent =
+    `🎬 Génération de la scène ${i + 1}/${scenes.length}...`;
 
-      img.src = imageUrl;
-        img.alt = `Scène ${i + 1}`;
-        img.style.width = "100%";
-        img.style.borderRadius = "15px";
-        img.style.marginTop = "15px";
+  const scenePrompt = `
+${continuityPrompt}
 
-        result.appendChild(img);
-      }
+STORY CONTEXT:
+${scenario}
+
+CURRENT SCENE ${i + 1}:
+${scenes[i]}
+
+Create this scene as part of the same continuous movie.
+Maintain perfect visual continuity with the other scenes.
+`;
+
+  const response = await fetch(
+    "/api/images/generate",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        prompt: scenePrompt,
+        size: "1024x1536",
+        quality: "low"
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error?.message ||
+      data?.error ||
+      `Erreur de génération de l'image ${i + 1}.`
+    );
+  }
+
+  const imageUrl =
+    data?.url ||
+    data?.image?.url ||
+    data?.data?.[0]?.url;
+
+  if (!imageUrl) {
+    throw new Error(
+      `Aucune image reçue pour la scène ${i + 1}.`
+    );
+  }
+
+  const img = document.createElement("img");
+
+  img.src = imageUrl;
+  img.alt = `Scène ${i + 1}`;
+  img.style.width = "100%";
+  img.style.borderRadius = "15px";
+  img.style.marginTop = "15px";
+
+  result.appendChild(img);
+}
 
       status.textContent = "✅ Images générées !";
 
