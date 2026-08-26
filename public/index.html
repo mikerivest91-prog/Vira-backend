@@ -142,30 +142,35 @@
       <div id="status"></div>
 
       <div id="result"></div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-    </div>
+  const button = document.getElementById("generate");
+  const promptInput = document.getElementById("prompt");
+  const status = document.getElementById("status");
+  const result = document.getElementById("result");
 
-  </div>
+  const scenarioButton = document.getElementById("scenario");
+  const scenarioStatus = document.getElementById("scenarioStatus");
+  const scenarioResult = document.getElementById("scenarioResult");
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-      const button = document.getElementById("generate");
-      const promptInput = document.getElementById("prompt");
-      const status = document.getElementById("status");
-      const result = document.getElementById("result");
+  const videoButton = document.getElementById("video");
+  const videoStatus = document.getElementById("videoStatus");
+  const videoResult = document.getElementById("videoResult");
 
 
-const scenarioButton = document.getElementById("scenario");
-const scenarioStatus = document.getElementById("scenarioStatus");
-const scenarioResult = document.getElementById("scenarioResult");
-      const videoButton = document.getElementById("video");
-scenarioButton.addEventListener("click", async function () {
+  /* =========================
+     CRÉER LE SCÉNARIO
+  ========================= */
+
+  scenarioButton.addEventListener("click", async function () {
+
     const idea = promptInput.value.trim();
 
     if (!idea) {
-        scenarioStatus.textContent = "⚠️ Écris une idée avant de créer le scénario.";
-        return;
+      scenarioStatus.textContent =
+        "⚠️ Écris une idée avant de créer le scénario.";
+      return;
     }
 
     scenarioButton.disabled = true;
@@ -173,104 +178,240 @@ scenarioButton.addEventListener("click", async function () {
     scenarioResult.textContent = "";
 
     try {
-        const response = await fetch("/api/scenario/generate", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                idea: idea
-            })
-        });
 
-        const data = await response.json();
+      const response = await fetch("/api/scenario/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          idea: idea
+        })
+      });
 
-        if (!response.ok) {
-            throw new Error(data.error || "Erreur de création du scénario.");
-        }
+      const data = await response.json();
 
-        scenarioStatus.textContent = "✅ Scénario créé !";
-        scenarioResult.textContent = data.scenario || data.output_text || "Scénario reçu.";
+      if (!response.ok) {
+        throw new Error(
+          data?.error?.message ||
+          data?.error ||
+          "Erreur lors de la création du scénario."
+        );
+      }
+
+      const scenario =
+        data?.scenario ||
+        data?.output_text ||
+        data?.text ||
+        "";
+
+      if (!scenario) {
+        throw new Error("Aucun scénario reçu du serveur.");
+      }
+
+      scenarioStatus.textContent = "✅ Scénario créé !";
+      scenarioResult.textContent = scenario;
 
     } catch (error) {
-        console.error("VIRA SCENARIO ERROR:", error);
-        scenarioStatus.textContent = "❌ " + error.message;
+
+      console.error("VIRA SCENARIO ERROR:", error);
+
+      scenarioStatus.textContent =
+        "❌ " + error.message;
+
     } finally {
-        scenarioButton.disabled = false;
+
+      scenarioButton.disabled = false;
+
     }
-videoButton.addEventListener("click", async function () {
+
+  });
+
+
+  /* =========================
+     GÉNÉRER LES IMAGES
+  ========================= */
+
+  button.addEventListener("click", async function () {
 
     const scenario = scenarioResult.textContent.trim();
 
     if (!scenario || scenario === "Scénario reçu.") {
-        videoStatus.textContent = "⚠️ Crée d'abord un scénario.";
-        return;
+      status.textContent =
+        "⚠️ Crée d'abord un scénario.";
+      return;
+    }
+
+    button.disabled = true;
+    status.textContent = "🎬 Génération des 5 scènes...";
+    result.innerHTML = "";
+
+    try {
+
+      const scenes = scenario
+        .split(/SCÈNE\s*[1-5]\s*:/i)
+        .map(scene => scene.trim())
+        .filter(scene => scene.length > 20)
+        .slice(0, 5);
+
+      if (scenes.length === 0) {
+        throw new Error(
+          "Aucune scène trouvée dans le scénario."
+        );
+      }
+
+      for (let i = 0; i < scenes.length; i++) {
+
+        status.textContent =
+          `🎬 Génération de la scène ${i + 1}/${scenes.length}...`;
+
+        const response = await fetch(
+          "/api/images/generate",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              prompt: scenes[i],
+              size: "1024x1536",
+              quality: "low"
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error?.message ||
+            data?.error ||
+            "Erreur de génération d'image."
+          );
+        }
+
+        const imageUrl =
+          data?.url ||
+          data?.image?.url ||
+          data?.data?.[0]?.url;
+
+        if (!imageUrl) {
+          throw new Error(
+            `Aucune image reçue pour la scène ${i + 1}.`
+          );
+        }
+
+        const img = document.createElement("img");
+
+        img.src = imageUrl;
+        img.alt = `Scène ${i + 1}`;
+        img.style.width = "100%";
+        img.style.borderRadius = "15px";
+        img.style.marginTop = "15px";
+
+        result.appendChild(img);
+      }
+
+      status.textContent = "✅ Images générées !";
+
+    } catch (error) {
+
+      console.error("VIRA IMAGE ERROR:", error);
+
+      status.textContent =
+        "❌ " + error.message;
+
+    } finally {
+
+      button.disabled = false;
+
+    }
+
+  });
+
+
+  /* =========================
+     CRÉER LA VIDÉO
+  ========================= */
+
+  videoButton.addEventListener("click", async function () {
+
+    const scenario = scenarioResult.textContent.trim();
+
+    if (!scenario || scenario === "Scénario reçu.") {
+      videoStatus.textContent =
+        "⚠️ Crée d'abord un scénario.";
+      return;
     }
 
     videoButton.disabled = true;
-    videoStatus.textContent = "🎬 Création de la vidéo...";
+    videoStatus.textContent =
+      "🎥 Création de la vidéo...";
     videoResult.innerHTML = "";
 
     try {
 
-        const response = await fetch("/api/video/generate", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                scenario: scenario,
-                size: "720x1280",
-                seconds: "10"
-            })
-        });
-
-        const data = await response.json();
-
-        console.log("VIRA VIDEO RESPONSE:", data);
-
-        if (!response.ok) {
-            throw new Error(
-                data?.error?.message ||
-                data?.error ||
-                data?.message ||
-                "Erreur lors de la création de la vidéo."
-            );
+      const response = await fetch(
+        "/api/video/generate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            scenario: scenario
+          })
         }
+      );
 
-        const videoUrl =
-            data?.video?.url ||
-            data?.url ||
-            data?.videoUrl ||
-            data?.video_url;
+      const data = await response.json();
 
-        if (!videoUrl) {
-            throw new Error("Aucune vidéo reçue du serveur.");
-        }
+      if (!response.ok) {
+        throw new Error(
+          data?.error?.message ||
+          data?.error ||
+          "Erreur lors de la création de la vidéo."
+        );
+      }
 
-        videoStatus.textContent = "✅ Vidéo créée !";
+      const videoUrl =
+        data?.video?.url ||
+        data?.url ||
+        data?.videoUrl ||
+        data?.video_url;
 
-        videoResult.innerHTML = `
-            <video
-                src="${videoUrl}"
-                controls
-                playsinline
-                style="width:100%;border-radius:16px;margin-top:15px;">
-            </video>
-        `;
+      if (!videoUrl) {
+        throw new Error(
+          "Aucune vidéo reçue du serveur."
+        );
+      }
+
+      videoStatus.textContent =
+        "✅ Vidéo créée !";
+
+      videoResult.innerHTML = `
+        <video
+          src="${videoUrl}"
+          controls
+          playsinline
+          style="width:100%;border-radius:16px;margin-top:15px;">
+        </video>
+      `;
 
     } catch (error) {
 
-        console.error("VIRA VIDEO ERROR:", error);
+      console.error("VIRA VIDEO ERROR:", error);
 
-        videoStatus.textContent = "❌ " + error.message;
+      videoStatus.textContent =
+        "❌ " + error.message;
 
     } finally {
 
-        videoButton.disabled = false;
+      videoButton.disabled = false;
 
     }
 
+  });
+
 });
-});
-</script>    
+          </script>
