@@ -345,7 +345,7 @@ app.post("/api/video/generate", async (req, res) => {
           model: "sora-2",
           prompt: prompt.trim(),
           size: "720x1280",
-          seconds: "10"
+          seconds: "8"
         })
       }
     );
