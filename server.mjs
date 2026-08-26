@@ -163,16 +163,16 @@ app.post('/api/images/generate', async (req, res) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-image-2',
-          prompt: prompt.trim(),
-          size,
-          quality
-        })
-      }
-    );
+'Authorization': `Bearer ${API_KEY}`
+},
+body: JSON.stringify({
+  model: 'gpt-image-2',
+  prompt: prompt.trim(),
+  size,
+  quality,
+  n: 1
+})  }
+);
 
     const data = await response.json();
 
