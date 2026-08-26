@@ -73,9 +73,15 @@ if (!response.ok) {
 
 const scenario =
   data?.output_text ||
-  data?.output?.[0]?.content?.[0]?.text ||
-  data?.output?.[0]?.content?.find(x => x.text)?.text ||
+  data?.output?.find(x => x.type === "message")
+    ?.content?.find(x => x.type === "output_text")
+    ?.text ||
+  data?.output?.[0]?.content?.find(x => typeof x.text === "string")
+    ?.text ||
   "";
+
+console.log("VIRA SCENARIO DATA:", JSON.stringify(data, null, 2));
+console.log("VIRA SCENARIO TEXT:", scenario);
 
 if (!scenario) {
   return res.status(500).json({
