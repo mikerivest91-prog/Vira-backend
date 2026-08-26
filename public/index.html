@@ -354,7 +354,7 @@ const scenario = data?.output_text || "";
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            scenario: scenario
+          prompt: scenario
           })
         }
       );
