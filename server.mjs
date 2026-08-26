@@ -19,7 +19,72 @@ app.get("/api/health", (_req, res) => {
     openai: Boolean(API_KEY)
   });
 });
+app.post("/api/scenario/generate", async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: "OPENAI_API_KEY is not configured."
+      });
+    }
 
+    const { idea } = req.body || {};
+
+    if (typeof idea !== "string" || !idea.trim()) {
+      return res.status(400).json({
+        ok: false,
+        error: "Une idée est requise."
+      });
+    }
+
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-5.6-luna",
+        input: `Crée un scénario court et captivant à partir de cette idée :
+
+${idea.trim()}
+
+Structure le scénario en 5 scènes.
+Pour chaque scène indique :
+- la scène
+- l'action
+- le lieu
+- l'ambiance
+
+Réponds en français.`
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("OPENAI SCENARIO ERROR:", JSON.stringify(data));
+
+      return res.status(response.status).json({
+        ok: false,
+        error: data?.error?.message || "Erreur lors de la création du scénario."
+      });
+    }
+
+    return res.json({
+      ok: true,
+      scenario: data.output_text
+    });
+
+  } catch (error) {
+    console.error("VIRA SCENARIO ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error?.message || "Erreur serveur."
+    });
+  }
+});
 app.post("/api/images/generate", async (req, res) => {
   try {
     if (!API_KEY) {
