@@ -178,7 +178,7 @@ app.post("/api/images/generate", async (req, res) => {
         error: "OpenAI returned no image."
       });
     }
-
+const imageUrl = `data:image/png;base64,${image}`;
  console.log("VIRA IMAGE CREATED");
 
 return res.json({
