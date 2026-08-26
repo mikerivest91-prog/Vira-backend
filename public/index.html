@@ -200,67 +200,93 @@ scenarioButton.addEventListener("click", async function () {
 });
 button.addEventListener("click", async function () {
 
-        const prompt = promptInput.value.trim();
+    const scenario = scenarioResult.textContent.trim();
 
-        if (!prompt) {
-          status.textContent = "⚠️ Écris une idée avant de générer.";
-          return;
+    if (!scenario || scenario === "Scénario reçu.") {
+        status.textContent = "⚠️ Crée d'abord un scénario.";
+        return;
+    }
+
+    button.disabled = true;
+    status.textContent = "🎬 Génération des 5 scènes...";
+    result.innerHTML = "";
+
+    try {
+
+        const scenes = scenario
+            .split(/SCÈNE\s*[1-5]\s*:/i)
+            .map(scene => scene.trim())
+            .filter(scene => scene.length > 20)
+            .slice(0, 5);
+
+        if (scenes.length === 0) {
+            throw new Error("Aucune scène trouvée dans le scénario.");
         }
 
-        button.disabled = true;
-        status.textContent = "⏳ Génération en cours...";
-        result.innerHTML = "";
+        for (let i = 0; i < scenes.length; i++) {
 
-        try {
+            status.textContent =
+                `🎬 Génération de la scène ${i + 1}/${scenes.length}...`;
 
-          const response = await fetch("/api/images/generate", {
-            method: "POST",
+            const response = await fetch("/api/images/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    prompt: scenes[i],
+                    size: "1024x1536",
+                    quality: "low"
+                })
+            });
 
-            headers: {
-              "Content-Type": "application/json"
-            },
+            const data = await response.json();
 
-            body: JSON.stringify({
-              prompt: prompt,
-              size: "1024x1536",
-              quality: "low"
-            })
-          });
+            if (!response.ok) {
+                throw new Error(
+                    data.error?.message ||
+                    data.error ||
+                    "Erreur de génération."
+                );
+            }
 
-          const data = await response.json();
+            const imageUrl =
+                data.image?.url ||
+                data.image ||
+                data.url ||
+                data.imageUrl;
 
-          console.log("VIRA RESPONSE:", data);
+            if (!imageUrl) {
+                throw new Error("Aucune image reçue.");
+            }
 
-          if (!response.ok) {
-            throw new Error(
-              data.error ||
-              data.message ||
-              "Erreur de génération."
-            );
-          }
+            result.innerHTML += `
+                <div style="margin-top:20px;">
+                    <h3>🎬 Scène ${i + 1}</h3>
+                    <img
+                        src="${imageUrl}"
+                        alt="Scène ${i + 1}"
+                        style="width:100%;border-radius:16px;"
+                    >
+                </div>
+            `;
+        }
 
-          /*
-           * Le backend peut renvoyer l'image sous
-           * plusieurs formes. On accepte toutes les formes.
-           */
-          const imageUrl =
-            data.image?.url ||
-            data.image ||
-            data.url ||
-            data.imageUrl;
+        status.textContent = "✅ 5 scènes générées !";
 
-          if (!imageUrl) {
-            console.error("Réponse reçue mais aucune image :", data);
+    } catch (error) {
 
-            throw new Error(
-              "Aucune image reçue."
-            );
-          }
+        console.error("VIRA ERROR:", error);
+        status.textContent = "❌ " + error.message;
 
-          status.textContent = "✅ Image générée !";
+    } finally {
 
-          result.innerHTML = `
-            <img
+        button.disabled = false;
+
+    }
+
+});
+            
               src="${imageUrl}"
               alt="Image générée"
               style="width:100%;border-radius:16px;margin-top:10px;"
