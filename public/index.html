@@ -198,118 +198,79 @@ scenarioButton.addEventListener("click", async function () {
     } finally {
         scenarioButton.disabled = false;
     }
-});
-button.addEventListener("click", async function () {
+videoButton.addEventListener("click", async function () {
 
     const scenario = scenarioResult.textContent.trim();
 
     if (!scenario || scenario === "Scénario reçu.") {
-        status.textContent = "⚠️ Crée d'abord un scénario.";
+        videoStatus.textContent = "⚠️ Crée d'abord un scénario.";
         return;
     }
 
-    button.disabled = true;
-    status.textContent = "🎬 Génération des 5 scènes...";
-    result.innerHTML = "";
+    videoButton.disabled = true;
+    videoStatus.textContent = "🎬 Création de la vidéo...";
+    videoResult.innerHTML = "";
 
     try {
 
-        const scenes = scenario
-            .split(/SCÈNE\s*[1-5]\s*:/i)
-            .map(scene => scene.trim())
-            .filter(scene => scene.length > 20)
-            .slice(0, 5);
+        const response = await fetch("/api/video/generate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                scenario: scenario,
+                size: "720x1280",
+                seconds: "10"
+            })
+        });
 
-        if (scenes.length === 0) {
-            throw new Error("Aucune scène trouvée dans le scénario.");
+        const data = await response.json();
+
+        console.log("VIRA VIDEO RESPONSE:", data);
+
+        if (!response.ok) {
+            throw new Error(
+                data?.error?.message ||
+                data?.error ||
+                data?.message ||
+                "Erreur lors de la création de la vidéo."
+            );
         }
 
-        for (let i = 0; i < scenes.length; i++) {
+        const videoUrl =
+            data?.video?.url ||
+            data?.url ||
+            data?.videoUrl ||
+            data?.video_url;
 
-            status.textContent =
-                `🎬 Génération de la scène ${i + 1}/${scenes.length}...`;
-
-            const response = await fetch("/api/images/generate", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    prompt: scenes[i],
-                    size: "1024x1536",
-                    quality: "low"
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.error?.message ||
-                    data.error ||
-                    "Erreur de génération."
-                );
-            }
-
-            const imageUrl =
-                data.image?.url ||
-                data.image ||
-                data.url ||
-                data.imageUrl;
-
-            if (!imageUrl) {
-                throw new Error("Aucune image reçue.");
-            }
-
-            result.innerHTML += `
-                <div style="margin-top:20px;">
-                    <h3>🎬 Scène ${i + 1}</h3>
-                    <img
-                        src="${imageUrl}"
-                        alt="Scène ${i + 1}"
-                        style="width:100%;border-radius:16px;"
-                    >
-                </div>
-            `;
+        if (!videoUrl) {
+            throw new Error("Aucune vidéo reçue du serveur.");
         }
 
-        status.textContent = "✅ 5 scènes générées !";
+        videoStatus.textContent = "✅ Vidéo créée !";
+
+        videoResult.innerHTML = `
+            <video
+                src="${videoUrl}"
+                controls
+                playsinline
+                style="width:100%;border-radius:16px;margin-top:15px;">
+            </video>
+        `;
 
     } catch (error) {
 
-        console.error("VIRA ERROR:", error);
-        status.textContent = "❌ " + error.message;
+        console.error("VIRA VIDEO ERROR:", error);
+
+        videoStatus.textContent = "❌ " + error.message;
 
     } finally {
 
-        button.disabled = false;
+        videoButton.disabled = false;
 
     }
 
 });
-            
-              src="${imageUrl}"
-              alt="Image générée"
-              style="width:100%;border-radius:16px;margin-top:10px;"
-            >
-          `;
-
-        } catch (error) {
-
-          console.error("VIRA ERROR:", error);
-
-          status.textContent = "❌ " + error.message;
-
-        } finally {
-
-          button.disabled = false;
-
-        }
-
-      });
-
-    });
-      </script>
-
-  </body>
-</html>
+});
+    
