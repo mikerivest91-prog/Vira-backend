@@ -61,7 +61,10 @@ Réponds en français.`
     });
 
     const data = await response.json();
-
+const scenario =
+  data?.output_text ||
+  data?.output?.[0]?.content?.[0]?.text ||
+  "";
     if (!response.ok) {
       console.error("OPENAI SCENARIO ERROR:", JSON.stringify(data));
 
