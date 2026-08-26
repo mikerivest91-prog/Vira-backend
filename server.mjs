@@ -504,7 +504,8 @@ app.get("/api/video/:id/content", async (req, res) => {
         error?.message ||
         "Impossible de récupérer la vidéo."
     });
-  });
+  }
+});
 app.post("/api/voice/generate", async (req, res) => {
   try {
     if (!API_KEY) {
