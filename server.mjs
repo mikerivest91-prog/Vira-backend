@@ -117,7 +117,122 @@ app.post("/api/images/generate", async (req, res) => {
     });
   }
 });
+// ===============================
+// VIRA - GENERATION DE SCENARIO
+// ===============================
 
+app.post("/api/scenario/generate", async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: "OPENAI_API_KEY is not configured on Render."
+      });
+    }
+
+    const { idea } = req.body || {};
+
+    if (typeof idea !== "string" || !idea.trim()) {
+      return res.status(400).json({
+        ok: false,
+        error: "Une idée est requise."
+      });
+    }
+
+    console.log("VIRA SCENARIO REQUEST:", idea.trim());
+
+    const response = await fetch(
+      "https://api.openai.com/v1/responses",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-5.6-luna",
+          input: `
+Tu es le scénariste de VIRA, une application de création vidéo avec intelligence artificielle.
+
+À partir de cette idée :
+"${idea.trim()}"
+
+Crée un scénario court et visuel destiné à une vidéo verticale.
+
+Réponds exactement avec cette structure :
+
+TITRE:
+[un titre accrocheur]
+
+SCÈNE 1:
+[description visuelle]
+
+SCÈNE 2:
+[description visuelle]
+
+SCÈNE 3:
+[description visuelle]
+
+SCÈNE 4:
+[description visuelle]
+
+SCÈNE 5:
+[description visuelle]
+
+NARRATION:
+[texte court de narration]
+
+STYLE:
+[style visuel recommandé]
+
+Le scénario doit être dynamique, facile à transformer en images et en vidéo.
+          `.trim()
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    console.log("OPENAI SCENARIO STATUS:", response.status);
+
+    if (!response.ok) {
+      console.error("OPENAI SCENARIO ERROR:", JSON.stringify(data));
+
+      return res.status(response.status).json({
+        ok: false,
+        error:
+          data?.error?.message ||
+          "La génération du scénario a échoué."
+      });
+    }
+
+    const scenario = data?.output_text;
+
+    if (!scenario) {
+      return res.status(502).json({
+        ok: false,
+        error: "OpenAI n'a retourné aucun scénario."
+      });
+    }
+
+    console.log("VIRA SCENARIO RECEIVED: YES");
+
+    return res.json({
+      ok: true,
+      scenario
+    });
+
+  } catch (error) {
+    console.error("VIRA SCENARIO SERVER ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error:
+        error?.message ||
+        "Erreur interne du serveur."
+    });
+  }
+});
 app.listen(port, () => {
   console.log(
     `VIRA backend running on port ${port}`
