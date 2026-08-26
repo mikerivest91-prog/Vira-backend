@@ -71,11 +71,11 @@ Réponds en français.`
       });
     }
 
-    return res.json({
-      ok: true,
-      scenario: data.output_text
-    });
-
+return res.json({
+  ok: true,
+  scenario: scenario,
+  output_text: scenario
+});
   } catch (error) {
     console.error("VIRA SCENARIO ERROR:", error);
 
