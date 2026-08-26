@@ -506,3 +506,6 @@ app.get("/api/video/:id/content", async (req, res) => {
     });
   }
 });
+app.listen(port, () => {
+  console.log(`VIRA backend running on port ${port}`);
+});
