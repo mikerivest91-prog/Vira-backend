@@ -199,12 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
       }
 
-      const scenario =
-        data?.scenario ||
-        data?.output_text ||
-        data?.text ||
-        "";
-
+const scenario = data?.output_text || "";
       if (!scenario) {
         throw new Error("Aucun scénario reçu du serveur.");
       }
