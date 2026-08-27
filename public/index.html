@@ -460,7 +460,37 @@ const progressTimer = setInterval(() => {
 if (!videoId) {
   throw new Error("Aucun ID vidéo reçu du serveur.");
 }
+let currentVideoStatus = data?.video?.status || data?.status || "queued";
+let currentVideoProgress = data?.video?.progress ?? data?.progress ?? 0;
 
+while (currentVideoStatus !== "completed") {
+
+  if (currentVideoStatus === "failed") {
+    throw new Error("La génération de la vidéo a échoué.");
+  }
+
+  videoStatus.textContent =
+    `🎥 Création de la vidéo... ${currentVideoProgress}%`;
+
+  await new Promise(resolve => setTimeout(resolve, 5000));
+
+  const statusResponse = await fetch(
+    `/api/video/${encodeURIComponent(videoId)}/status`
+  );
+
+  const statusData = await statusResponse.json();
+
+  if (!statusResponse.ok) {
+    throw new Error(
+      statusData?.error ||
+      "Impossible de vérifier le statut de la vidéo."
+    );
+  }
+
+  currentVideoStatus = statusData?.video?.status;
+  currentVideoProgress =
+    statusData?.video?.progress ?? currentVideoProgress;
+}
 const videoUrl = `/api/video/${encodeURIComponent(videoId)}/content`;
 localStorage.setItem("viraVideoUrl", videoUrl);
       videoStatus.textContent =
