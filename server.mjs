@@ -1,7 +1,11 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-
+import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import ffmpegPath from "ffmpeg-static";
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
@@ -10,7 +14,63 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.static("public"));
 
 const API_KEY = process.env.OPENAI_API_KEY;
+async function mergeVideoAndAudio(videoBuffer, audioBuffer) {
+  const tempDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "vira-")
+  );
 
+  const videoPath = path.join(tempDir, "video.mp4");
+  const audioPath = path.join(tempDir, "audio.mp3");
+  const outputPath = path.join(tempDir, "final.mp4");
+
+  try {
+    await fs.writeFile(videoPath, videoBuffer);
+    await fs.writeFile(audioPath, audioBuffer);
+
+    await new Promise((resolve, reject) => {
+      const ffmpeg = spawn(ffmpegPath, [
+        "-y",
+        "-i", videoPath,
+        "-i", audioPath,
+        "-map", "0:v:0",
+        "-map", "1:a:0",
+        "-c:v", "copy",
+        "-c:a", "aac",
+        "-shortest",
+        "-movflags", "+faststart",
+        outputPath
+      ]);
+
+      let errorOutput = "";
+
+      ffmpeg.stderr.on("data", (data) => {
+        errorOutput += data.toString();
+      });
+
+      ffmpeg.on("error", reject);
+
+      ffmpeg.on("close", (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(
+            new Error(
+              `FFmpeg a échoué (${code}): ${errorOutput}`
+            )
+          );
+        }
+      });
+    });
+
+    return await fs.readFile(outputPath);
+
+  } finally {
+    await fs.rm(tempDir, {
+      recursive: true,
+      force: true
+    });
+  }
+}
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
