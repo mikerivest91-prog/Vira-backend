@@ -130,6 +130,9 @@
 <div id="scenarioStatus"></div>
 
 <div id="scenarioResult"></div>
+     <button id="validateScenario" type="button" disabled>
+  ✅ Valider le scénario
+     </button> 
       <button id="generate" type="button">
         ✨ Générer
       </button>
@@ -153,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const scenarioButton = document.getElementById("scenario");
   const scenarioStatus = document.getElementById("scenarioStatus");
   const scenarioResult = document.getElementById("scenarioResult");
-
+const validateScenario = document.getElementById("validateScenario");
   const videoButton = document.getElementById("video");
   const videoStatus = document.getElementById("videoStatus");
   const videoResult = document.getElementById("videoResult");
@@ -206,7 +209,7 @@ const scenario = data?.output_text || "";
 
       scenarioStatus.textContent = "✅ Scénario créé !";
       scenarioResult.textContent = scenario;
-
+validateScenario.disabled = false;
     } catch (error) {
 
       console.error("VIRA SCENARIO ERROR:", error);
