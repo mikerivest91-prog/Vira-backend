@@ -465,7 +465,7 @@ const progressTimer = setInterval(() => {
         throw new Error(
           "Aucune vidéo reçue du serveur."
         );
-      }
+      
 localStorage.setItem("viraVideoUrl", videoUrl);
       videoStatus.textContent =
         "✅ Vidéo créée !";
@@ -581,6 +581,7 @@ videoResult.appendChild(voiceButton);
 clearInterval(progressTimer);
       videoButton.disabled = false;    }
   });  
+  localStorage.setItem("viraVideoUrl", "https://www.w3schools.com/html/mov_bbb.mp4");
 const savedVideoUrl = localStorage.getItem("viraVideoUrl");
 
 if (savedVideoUrl) {
