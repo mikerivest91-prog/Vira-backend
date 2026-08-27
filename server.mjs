@@ -309,7 +309,7 @@ app.post("/api/video/generate", async (req, res) => {
 
     const { prompt } = req.body || {};
 
-if (typeof prompt !== "string" || !prompt.trim()) {
+    if (typeof prompt !== "string" || !prompt.trim()) {
       return res.status(400).json({
         ok: false,
         error: "A valid video prompt is required."
@@ -318,7 +318,6 @@ if (typeof prompt !== "string" || !prompt.trim()) {
 
     console.log("VIRA VIDEO REQUEST:", prompt.trim());
 
-    // 1. Créer le job vidéo
     const response = await fetch(
       "https://api.openai.com/v1/videos",
       {
@@ -338,97 +337,39 @@ if (typeof prompt !== "string" || !prompt.trim()) {
 
     const data = await response.json();
 
-    console.log("VIRA VIDEO CREATED:", data);
-
     if (!response.ok) {
       return res.status(response.status).json({
         ok: false,
-        error: data?.error?.message || "Erreur lors de la création de la vidéo."
+        error:
+          data?.error?.message ||
+          "Erreur lors de la création de la vidéo."
       });
     }
 
     if (!data?.id) {
-      return res.status(500).json({
+      return res.status(502).json({
         ok: false,
-        error: "Aucun identifiant vidéo reçu du serveur OpenAI."
+        error: "Aucun identifiant vidéo reçu."
       });
     }
 
-    // 2. Attendre que la vidéo soit terminée
-    let video = data;
+    return res.json({
+      ok: true,
+      id: data.id,
+      status: data.status || "queued"
+    });
 
-    for (let attempt = 0; attempt < 60; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, 5000));
-
-      const statusResponse = await fetch(
-        `https://api.openai.com/v1/videos/${data.id}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${API_KEY}`
-          }
-        }
-      );
-
-      video = await statusResponse.json();
-console.log("VIRA VIDEO RAW STATUS:", JSON.stringify(video));
-      console.log(
-        "VIRA VIDEO STATUS:",
-        video.status,
-        video.progress
-      );
-
-      if (!statusResponse.ok) {
-        return res.status(statusResponse.status).json({
-          ok: false,
-          error:
-            video?.error?.message ||
-            "Impossible de récupérer le statut de la vidéo."
-        });
-      }
-
-      if (video.status === "completed") {
-        break;
-      }
-
-      if (video.status === "failed") {
-        return res.status(500).json({
-          ok: false,
-          error:
-            video?.error?.message ||
-            "La génération de la vidéo a échoué."
-        });
-      }
-    }
-
-    if (video.status !== "completed") {
-      return res.status(504).json({
-        ok: false,
-        error: "La génération de la vidéo prend trop de temps."
-      });
-    }
-
-    console.log("VIRA VIDEO COMPLETED:", video.id);
-
-const videoUrl = `/api/video/${encodeURIComponent(video.id)}/content`;
-
-return res.json({
-  ok: true,
-  video: {
-    id: video.id,
-    url: videoUrl,
-    status: video.status
-  }
-});
   } catch (error) {
     console.error("VIRA VIDEO ERROR:", error);
 
     return res.status(500).json({
       ok: false,
-      error: error?.message || "Erreur interne du serveur."
+      error:
+        error?.message ||
+        "Erreur interne du serveur."
     });
   }
 });
-
 // ================================
 // GÉNÉRER LA VOIX
 // ================================
