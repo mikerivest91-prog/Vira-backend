@@ -158,6 +158,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const scenarioStatus = document.getElementById("scenarioStatus");
   const scenarioResult = document.getElementById("scenarioResult");
 const validateScenario = document.getElementById("validateScenario");
+  // Restaurer le dernier scénario après actualisation
+const savedScenario = localStorage.getItem("viraScenario");
+
+if (savedScenario) {
+  scenarioResult.textContent = savedScenario;
+  scenarioStatus.textContent = "✅ Scénario restauré.";
+  validateScenario.disabled = false;
+}
   const videoButton = document.getElementById("video");
   const videoStatus = document.getElementById("videoStatus");
   const videoResult = document.getElementById("videoResult");
@@ -211,7 +219,7 @@ const scenario = data?.output_text || "";
       scenarioStatus.textContent = "✅ Scénario créé !";
       scenarioResult.textContent = scenario;
 validateScenario.disabled = false;
-    } catch (error) {
+    localStorage.setItem("viraScenario", scenario);
 
       console.error("VIRA SCENARIO ERROR:", error);
 
