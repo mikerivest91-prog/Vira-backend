@@ -569,8 +569,9 @@ if (!scenario || scenario === "Scénario reçu.") {
 
 const audioBlob = await response.blob();
 const audioUrl = URL.createObjectURL(audioBlob);
-
+videoResult.querySelectorAll(".vira-voice").forEach(el => el.remove());
 const audioPlayer = document.createElement("audio");
+  audioPlayer.className = "vira-voice";
 audioPlayer.src = audioUrl;
 audioPlayer.controls = true;
 audioPlayer.style.width = "100%";
@@ -579,6 +580,7 @@ audioPlayer.style.marginTop = "15px";
 videoResult.appendChild(audioPlayer);
 
 const downloadVoiceButton = document.createElement("a");
+downloadVoiceButton.className = "vira-voice";
 downloadVoiceButton.href = audioUrl;
 downloadVoiceButton.download = "VIRA-voix.mp3";
 downloadVoiceButton.textContent = "⬇️ Télécharger la voix";
