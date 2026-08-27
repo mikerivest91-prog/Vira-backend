@@ -525,52 +525,37 @@ if (!scenario || scenario === "Scénario reçu.") {
       })
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(
-        data?.error || "Impossible de générer la voix."
-      );
-    }
+  const errorText = await response.text();
+  throw new Error(errorText || "Impossible de générer la voix.");
+}
 
-    const finalVideoUrl =
-      data?.video?.url ||
-      data?.url ||
-      data?.videoUrl;
+const audioBlob = await response.blob();
+const audioUrl = URL.createObjectURL(audioBlob);
 
-    if (!finalVideoUrl) {
-      throw new Error(
-        "Aucune vidéo finale reçue du serveur."
-      );
-    }
+const audioPlayer = document.createElement("audio");
+audioPlayer.src = audioUrl;
+audioPlayer.controls = true;
+audioPlayer.style.width = "100%";
+audioPlayer.style.marginTop = "15px";
 
-    videoResult.innerHTML = "";
+videoResult.appendChild(audioPlayer);
 
-    const finalVideo = document.createElement("video");
-    finalVideo.src = finalVideoUrl;
-    finalVideo.controls = true;
-    finalVideo.playsInline = true;
-    finalVideo.style.width = "100%";
-    finalVideo.style.borderRadius = "16px";
-    finalVideo.style.marginTop = "15px";
+const downloadVoiceButton = document.createElement("a");
+downloadVoiceButton.href = audioUrl;
+downloadVoiceButton.download = "VIRA-voix.mp3";
+downloadVoiceButton.textContent = "⬇️ Télécharger la voix";
+downloadVoiceButton.style.display = "block";
+downloadVoiceButton.style.marginTop = "15px";
+downloadVoiceButton.style.padding = "15px";
+downloadVoiceButton.style.borderRadius = "15px";
+downloadVoiceButton.style.textAlign = "center";
+downloadVoiceButton.style.textDecoration = "none";
 
-    videoResult.appendChild(finalVideo);
+videoResult.appendChild(downloadVoiceButton);
 
-    const downloadButton = document.createElement("a");
-    downloadButton.href = finalVideoUrl;
-    downloadButton.download = "VIRA-video-avec-voix.mp4";
-    downloadButton.textContent = "⬇️ Télécharger la vidéo finale";
-    downloadButton.style.display = "block";
-    downloadButton.style.marginTop = "15px";
-    downloadButton.style.padding = "15px";
-    downloadButton.style.borderRadius = "15px";
-    downloadButton.style.textAlign = "center";
-    downloadButton.style.textDecoration = "none";
-
-    videoResult.appendChild(downloadButton);
-
-    voiceButton.textContent = "✅ Voix intégrée à la vidéo";
-
+voiceButton.disabled = false;
+voiceButton.textContent = "✅ Voix générée";
   } catch (error) {
     console.error("VIRA VOICE ERROR:", error);
 
