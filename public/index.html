@@ -464,6 +464,58 @@ downloadButton.style.textDecoration = "none";
 downloadButton.style.fontWeight = "bold";
 
 videoResult.appendChild(downloadButton);
+      const voiceButton = document.createElement("button");
+voiceButton.type = "button";
+voiceButton.textContent = "🎙️ Générer la voix";
+voiceButton.style.display = "block";
+voiceButton.style.width = "100%";
+voiceButton.style.marginTop = "15px";
+voiceButton.style.padding = "15px";
+voiceButton.style.borderRadius = "15px";
+voiceButton.style.border = "none";
+voiceButton.style.cursor = "pointer";
+
+voiceButton.onclick = async () => {
+  try {
+    voiceButton.disabled = true;
+    voiceButton.textContent = "🎙️ Génération de la voix...";
+
+    const response = await fetch("/api/voice/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        text: scenario
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error("Impossible de générer la voix.");
+    }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    const audio = document.createElement("audio");
+    audio.src = audioUrl;
+    audio.controls = true;
+    audio.style.width = "100%";
+    audio.style.marginTop = "15px";
+
+    videoResult.appendChild(audio);
+
+    voiceButton.textContent = "✅ Voix générée";
+
+  } catch (error) {
+    console.error("VIRA VOICE ERROR:", error);
+    voiceButton.disabled = false;
+    voiceButton.textContent = "🎙️ Générer la voix";
+    alert("Erreur lors de la génération de la voix.");
+  }
+};
+
+videoResult.appendChild(voiceButton);
     } catch (error) {
 
       console.error("VIRA VIDEO ERROR:", error);
