@@ -229,7 +229,16 @@ validateScenario.disabled = false;
 // =========================
 
 validateScenario.addEventListener("click", function () {
-    alert("LE BOUTON FONCTIONNE");
+    const scenario = scenarioResult.textContent.trim();
+
+    if (!scenario) {
+        scenarioStatus.textContent = "⚠️ Aucun scénario à valider.";
+        return;
+    }
+
+    scenarioStatus.textContent = "✅ Scénario validé !";
+    validateScenario.textContent = "✅ Scénario validé";
+    validateScenario.disabled = true;
 });
   /* =========================
      GÉNÉRER LES IMAGES
