@@ -485,10 +485,62 @@ console.log("VIRA VIDEO RAW STATUS:", JSON.stringify(video));
     }
 
     console.log("VIRA VIDEO COMPLETED:", video.id);
+// 3. Générer la voix et l'intégrer à la vidéo
+const videoContentResponse = await fetch(
+  `https://api.openai.com/v1/videos/${video.id}/content`,
+  {
+    headers: {
+      "Authorization": `Bearer ${API_KEY}`
+    }
+  }
+);
 
-    // 3. URL interne VIRA pour lire la vidéo
-    const videoUrl =
-      `/api/video/${encodeURIComponent(video.id)}/content`;
+if (!videoContentResponse.ok) {
+  throw new Error("Impossible de récupérer la vidéo générée.");
+}
+
+const videoBuffer = Buffer.from(
+  await videoContentResponse.arrayBuffer()
+);
+
+const voiceResponse = await fetch(
+  "https://api.openai.com/v1/audio/speech",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini-tts",
+      voice: "alloy",
+      input: prompt.trim(),
+      response_format: "mp3"
+    })
+  }
+);
+
+if (!voiceResponse.ok) {
+  const voiceError = await voiceResponse.text();
+  throw new Error(`Erreur voix : ${voiceError}`);
+}
+
+const audioBuffer = Buffer.from(
+  await voiceResponse.arrayBuffer()
+);
+
+const finalVideoBuffer = await mergeVideoAndAudio(
+  videoBuffer,
+  audioBuffer
+);
+
+const outputFileName = `vira-${video.id}.mp4`;
+const outputFilePath = path.join("public", outputFileName);
+
+await fs.writeFile(outputFilePath, finalVideoBuffer);
+
+const videoUrl = `/${outputFileName}`;
+    
 
     return res.json({
       ok: true,
