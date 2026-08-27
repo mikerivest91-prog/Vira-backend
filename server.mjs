@@ -348,7 +348,7 @@ if (typeof prompt !== "string" || !prompt.trim()) {
           model: "sora-2",
           prompt: prompt.trim(),
           size: "720x1280",
-          seconds: "10"
+          seconds: "8"
         })
       }
     );
