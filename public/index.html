@@ -160,7 +160,11 @@ document.addEventListener("DOMContentLoaded", function () {
 const validateScenario = document.getElementById("validateScenario");
   // Restaurer le dernier scénario après actualisation
 const savedScenario = localStorage.getItem("viraScenario");
+const savedIdea = localStorage.getItem("viraIdea");
 
+if (savedIdea) {
+  promptInput.value = savedIdea;
+}
 if (savedScenario) {
   scenarioResult.textContent = savedScenario;
   scenarioStatus.textContent = "✅ Scénario restauré.";
@@ -178,7 +182,7 @@ if (savedScenario) {
   scenarioButton.addEventListener("click", async function () {
 
     const idea = promptInput.value.trim();
-
+localStorage.setItem("viraIdea", idea);
     if (!idea) {
       scenarioStatus.textContent =
         "⚠️ Écris une idée avant de créer le scénario.";
