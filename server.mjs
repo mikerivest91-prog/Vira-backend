@@ -419,6 +419,45 @@ app.get("/api/video/:id/status", async (req, res) => {
     });
   }
 });
+app.get("/api/video/:id/content", async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: "OPENAI_API_KEY is not configured."
+      });
+    }
+
+    const videoId = req.params.id;
+
+    const response = await fetch(
+      `https://api.openai.com/v1/videos/${encodeURIComponent(videoId)}/content`,
+      {
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return res.status(response.status).send(errorText);
+    }
+
+    res.setHeader("Content-Type", "video/mp4");
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return res.send(buffer);
+
+  } catch (error) {
+    console.error("VIRA VIDEO CONTENT ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error?.message || "Impossible de récupérer la vidéo."
+    });
+  }
+});
 // ================================
 // GÉNÉRER LA VOIX
 // ================================
