@@ -699,75 +699,7 @@ app.get("/api/video/:id/content", async (req, res) => {
       error:
         error?.message ||
         "Impossible de récupérer la vidéo."
-    });
-  }
-});
-app.post("/api/voice/generate", async (req, res) => {
-  try {
-    if (!API_KEY) {
-      return res.status(503).json({
-        ok: false,
-        error: "OPENAI_API_KEY is not configured."
-      });
-    }
 
-    const { text } = req.body || {};
-
-    if (typeof text !== "string" || !text.trim()) {
-      return res.status(400).json({
-        ok: false,
-        error: "Un texte de narration est requis."
-      });
-    }
-
-    const response = await fetch(
-      "https://api.openai.com/v1/audio/speech",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini-tts",
-          voice: "alloy",
-          input: text.trim(),
-          response_format: "mp3"
-        })
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-
-      return res.status(response.status).json({
-        ok: false,
-        error:
-          error?.error?.message ||
-          "Erreur lors de la génération de la voix."
-      });
-    }
-
-    const audioBuffer = Buffer.from(
-      await response.arrayBuffer()
-    );
-
-    res.setHeader("Content-Type", "audio/mpeg");
-    res.setHeader(
-      "Content-Length",
-      audioBuffer.length
-    );
-
-    res.send(audioBuffer);
-
-  } catch (error) {
-    console.error("VIRA VOICE ERROR:", error);
-
-    return res.status(500).json({
-      ok: false,
-      error:
-        error?.message ||
-        "Erreur interne du serveur."
     });
   }
 });
