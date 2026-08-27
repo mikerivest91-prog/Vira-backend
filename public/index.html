@@ -262,10 +262,10 @@ validateScenario.addEventListener("click", function () {
     try {
 
       const scenes = scenario
-        .split(/SCÈNE\s*[1-5]\s*:/i)
-        .map(scene => scene.trim())
-        .filter(scene => scene.length > 20)
-        .slice(0, 3);
+  .split(/(?=##\s*Scène\s*[1-5])/i)
+  .map(scene => scene.trim())
+  .filter(scene => scene.length > 20)
+  .slice(0, 5);
 
       if (scenes.length === 0) {
         throw new Error(
