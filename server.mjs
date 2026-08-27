@@ -265,7 +265,13 @@ Le scénario doit être dynamique, facile à transformer en images et en vidéo.
       });
     }
 
-    const scenario = data?.output_text;
+const scenario =
+  data?.output_text ||
+  data?.output
+    ?.flatMap(item => item?.content || [])
+    ?.find(item => item?.type === "output_text")
+    ?.text ||
+  "";
 
     if (!scenario) {
       return res.status(502).json({
