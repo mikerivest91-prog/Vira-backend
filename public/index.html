@@ -537,9 +537,14 @@ const narrationMatch = scenario.match(
   /NARRATION:\s*([\s\S]*?)(?=STYLE:|$)/i
 );
 
-const narration = narrationMatch
+const fullNarration = narrationMatch
   ? narrationMatch[1].trim()
   : scenario;
+
+const narration = fullNarration
+  .split(/\s+/)
+  .slice(0, 18)
+  .join(" ");
 if (!scenario || scenario === "Scénario reçu.") {
     alert("⚠️ Crée d'abord un scénario.");
     return;
