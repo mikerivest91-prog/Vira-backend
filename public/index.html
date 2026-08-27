@@ -215,7 +215,7 @@ localStorage.setItem("viraIdea", idea);
         );
       }
 
-const scenario = data?.output_text || "";
+const scenario = data?.scenario || data?.output_text || "";
       if (!scenario) {
         throw new Error("Aucun scénario reçu du serveur.");
       }
