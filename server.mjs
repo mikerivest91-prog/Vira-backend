@@ -109,12 +109,15 @@ app.post("/api/scenario/generate", async (req, res) => {
 
 ${idea.trim()}
 
-Structure le scénario en 3 scènes.
+Structure le scénario en 5 scènes.
 Pour chaque scène indique :
 - la scène
 - l'action
 - le lieu
 - l'ambiance
+
+Les 5 scènes doivent former une histoire complète avec un début, une montée en puissance, un moment fort et une conclusion.
+Réponds en français.
 
 Réponds en français.`
       })
