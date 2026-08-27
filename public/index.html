@@ -491,7 +491,12 @@ voiceButton.style.border = "none";
 voiceButton.style.cursor = "pointer";
 
 voiceButton.onclick = async () => {
-  try {
+  const scenario = scenarioResult.textContent.trim();
+
+if (!scenario || scenario === "Scénario reçu.") {
+    alert("⚠️ Crée d'abord un scénario.");
+    return;
+}
     voiceButton.disabled = true;
     voiceButton.textContent = "🎙️ Génération de la voix...";
 
