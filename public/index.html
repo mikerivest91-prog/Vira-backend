@@ -221,6 +221,7 @@ const scenario = data?.output_text || "";
       }
 
       scenarioStatus.textContent = "✅ Scénario créé !";
+scenarioResult.textContent = scenario;
       validateScenario.disabled = false;
 localStorage.setItem("viraScenario", scenario);
 
