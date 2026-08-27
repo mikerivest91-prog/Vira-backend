@@ -455,17 +455,13 @@ const progressTimer = setInterval(() => {
         );
       }
 
-      const videoUrl =
-        data?.video?.url ||
-        data?.url ||
-        data?.videoUrl ||
-        data?.video_url;
-      
-      if (!videoUrl) {
-        throw new Error(
-          "Aucune vidéo reçue du serveur."
-        );
-      }
+      const videoId = data?.id || data?.video?.id;
+
+if (!videoId) {
+  throw new Error("Aucun ID vidéo reçu du serveur.");
+}
+
+const videoUrl = `/api/video/${encodeURIComponent(videoId)}/content`;
 localStorage.setItem("viraVideoUrl", videoUrl);
       videoStatus.textContent =
         "✅ Vidéo créée !";
