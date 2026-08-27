@@ -465,7 +465,7 @@ const progressTimer = setInterval(() => {
         throw new Error(
           "Aucune vidéo reçue du serveur."
         );
-      
+      }
 localStorage.setItem("viraVideoUrl", videoUrl);
       videoStatus.textContent =
         "✅ Vidéo créée !";
