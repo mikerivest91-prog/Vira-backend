@@ -533,7 +533,13 @@ voiceButton.style.cursor = "pointer";
 voiceButton.onclick = async () => {
 try {
 const scenario = scenarioResult.textContent.trim();
+const narrationMatch = scenario.match(
+  /NARRATION:\s*([\s\S]*?)(?=STYLE:|$)/i
+);
 
+const narration = narrationMatch
+  ? narrationMatch[1].trim()
+  : scenario;
 if (!scenario || scenario === "Scénario reçu.") {
     alert("⚠️ Crée d'abord un scénario.");
     return;
@@ -547,7 +553,7 @@ if (!scenario || scenario === "Scénario reçu.") {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        text: scenario
+        text: narration
       })
     });
 
