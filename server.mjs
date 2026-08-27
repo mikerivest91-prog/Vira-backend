@@ -49,7 +49,7 @@ app.post("/api/scenario/generate", async (req, res) => {
 
 ${idea.trim()}
 
-Structure le scénario en 5 scènes.
+Structure le scénario en 3 scènes.
 Pour chaque scène indique :
 - la scène
 - l'action
