@@ -460,13 +460,13 @@ const progressTimer = setInterval(() => {
         data?.url ||
         data?.videoUrl ||
         data?.video_url;
-
+      
       if (!videoUrl) {
         throw new Error(
           "Aucune vidéo reçue du serveur."
         );
       }
-
+localStorage.setItem("viraVideoUrl", videoUrl);
       videoStatus.textContent =
         "✅ Vidéo créée !";
 
