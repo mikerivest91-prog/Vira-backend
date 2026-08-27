@@ -446,7 +446,21 @@ const progressTimer = setInterval(() => {
           style="width:100%;border-radius:16px;margin-top:15px;">
         </video>
       `;
+const downloadButton = document.createElement("a");
+downloadButton.href = videoUrl;
+downloadButton.download = "VIRA-video.mp4";
+downloadButton.textContent = "⬇️ Télécharger la vidéo";
+downloadButton.style.display = "block";
+downloadButton.style.marginTop = "15px";
+downloadButton.style.padding = "15px";
+downloadButton.style.background = "#7c3aed";
+downloadButton.style.color = "white";
+downloadButton.style.textAlign = "center";
+downloadButton.style.borderRadius = "15px";
+downloadButton.style.textDecoration = "none";
+downloadButton.style.fontWeight = "bold";
 
+videoResult.appendChild(downloadButton);
     } catch (error) {
 
       console.error("VIRA VIDEO ERROR:", error);
