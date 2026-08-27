@@ -449,7 +449,88 @@ console.log("VIRA VIDEO RAW STATUS:", JSON.stringify(video));
   }
 });
 
+// ================================
+// GÉNÉRER LA VOIX
+// ================================
+app.post("/api/voice/generate", async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: "OPENAI_API_KEY is not configured."
+      });
+    }
 
+    const { text } = req.body || {};
+
+    if (typeof text !== "string" || !text.trim()) {
+      return res.status(400).json({
+        ok: false,
+        error: "Un texte est requis pour générer la voix."
+      });
+    }
+
+    if (text.trim().length > 4096) {
+      return res.status(400).json({
+        ok: false,
+        error: "Le texte est trop long pour une seule génération de voix."
+      });
+    }
+
+    console.log("VIRA VOICE REQUEST:", text.trim());
+
+    const response = await fetch(
+      "https://api.openai.com/v1/audio/speech",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini-tts",
+          voice: "cedar",
+          input: text.trim(),
+          response_format: "mp3"
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
+      return res.status(response.status).json({
+        ok: false,
+        error:
+          errorData?.error?.message ||
+          "Erreur lors de la génération de la voix."
+      });
+    }
+
+    const audioBuffer = Buffer.from(
+      await response.arrayBuffer()
+    );
+
+    console.log(
+      "VIRA VOICE CREATED:",
+      audioBuffer.length,
+      "bytes"
+    );
+
+    res.set("Content-Type", "audio/mpeg");
+    res.set("Content-Disposition", 'inline; filename="VIRA-voice.mp3"');
+
+    return res.send(audioBuffer);
+
+  } catch (error) {
+    console.error("VIRA VOICE ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error?.message || "Erreur interne de génération de voix."
+    });
+  }
+});
 // Proxy sécurisé pour récupérer le fichier vidéo OpenAI
 app.get("/api/video/:id/content", async (req, res) => {
   try {
