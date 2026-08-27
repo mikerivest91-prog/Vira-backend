@@ -221,20 +221,21 @@ const scenario = data?.output_text || "";
       }
 
       scenarioStatus.textContent = "✅ Scénario créé !";
-      scenarioResult.textContent = scenario;
-validateScenario.disabled = false;
-    localStorage.setItem("viraScenario", scenario);
+      validateScenario.disabled = false;
+localStorage.setItem("viraScenario", scenario);
 
-      console.error("VIRA SCENARIO ERROR:", error);
+} catch (error) {
 
-      scenarioStatus.textContent =
-        "❌ " + error.message;
+console.error("VIRA SCENARIO ERROR:", error);
 
-    } finally {
+scenarioStatus.textContent =
+"❌ " + error.message;
 
-      scenarioButton.disabled = false;
+} finally {
 
-    }
+scenarioButton.disabled = false;
+
+}
 
   });
 // =========================
