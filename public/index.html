@@ -580,10 +580,27 @@ videoResult.appendChild(voiceButton);
     } finally {
 clearInterval(progressTimer);
       videoButton.disabled = false;    }
-  });
+  });  
+const savedVideoUrl = localStorage.getItem("viraVideoUrl");
+
+if (savedVideoUrl) {
+  const savedVideo = document.createElement("video");
+  savedVideo.src = savedVideoUrl;
+  savedVideo.controls = true;
+  savedVideo.playsInline = true;
+  savedVideo.style.width = "100%";
+  savedVideo.style.borderRadius = "16px";
+  savedVideo.style.marginTop = "15px";
+
+  videoResult.appendChild(savedVideo);
+  videoStatus.textContent = "✅ Dernière vidéo restaurée.";
+}
+}
+
 });
 </script>
 </body>
 </html>
+
 
 
