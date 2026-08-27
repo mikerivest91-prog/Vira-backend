@@ -224,7 +224,22 @@ validateScenario.disabled = false;
     }
 
   });
+// =========================
+// VALIDER LE SCÉNARIO
+// =========================
 
+validateScenario.addEventListener("click", function () {
+    const scenario = scenarioResult.textContent.trim();
+
+    if (!scenario) {
+        scenarioStatus.textContent = "⚠️ Aucun scénario à valider.";
+        return;
+    }
+
+    scenarioStatus.textContent = "✅ Scénario validé !";
+    validateScenario.textContent = "✅ Scénario validé";
+    validateScenario.disabled = true;
+});
 
   /* =========================
      GÉNÉRER LES IMAGES
