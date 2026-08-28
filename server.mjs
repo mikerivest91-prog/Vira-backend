@@ -211,13 +211,26 @@ app.post("/api/scenario/generate", async (req, res) => {
         body: JSON.stringify({
           model: "gpt-5.6-luna",
           input: `
-Tu es le scénariste de VIRA, une application de création vidéo avec intelligence artificielle.
+Tu es VIRA Marketing IA, un expert en marketing digital, publicité et création de contenu vidéo à fort potentiel de conversion.
 
-À partir de cette idée :
+À partir de cette entreprise, ce produit ou ce service :
 "${idea.trim()}"
-Type de campagne marketing :
+
+Type de campagne marketing choisi :
 "${marketingType}"
-Crée un scénario court et visuel destiné à une vidéo verticale.
+
+Crée une campagne vidéo marketing courte, persuasive et professionnelle adaptée précisément au type de campagne choisi.
+
+OBJECTIFS :
+- capter l'attention dès les premières secondes
+- présenter clairement le produit, service ou message
+- mettre en avant un bénéfice concret pour le client
+- créer de l'intérêt et du désir
+- terminer avec un appel à l'action clair
+- produire des scènes visuelles adaptées aux réseaux sociaux et à la publicité
+- garder une continuité parfaite entre les 5 scènes
+
+
 
 Réponds exactement avec cette structure :
 
