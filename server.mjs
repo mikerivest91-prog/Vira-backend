@@ -485,8 +485,13 @@ app.post("/api/voice/generate", async (req, res) => {
         error: "Le texte est trop long pour une seule génération de voix."
       });
     }
-
-    console.log("VIRA VOICE REQUEST:", text.trim());
+const shortText = text
+  .trim()
+  .split(/\s+/)
+  .slice(0, 18)
+  .join(" ");
+    
+   console.log("VIRA VOICE REQUEST:", shortText);
 
     const response = await fetch(
       "https://api.openai.com/v1/audio/speech",
@@ -499,7 +504,7 @@ app.post("/api/voice/generate", async (req, res) => {
         body: JSON.stringify({
           model: "gpt-4o-mini-tts",
           voice: "cedar",
-          input: text.trim(),
+          input: shortText,
           response_format: "mp3"
         })
       }
@@ -540,63 +545,7 @@ app.post("/api/voice/generate", async (req, res) => {
     });
   }
 });
-// Proxy sécurisé pour récupérer le fichier vidéo OpenAI
-app.get("/api/video/:id/content", async (req, res) => {
-  try {
-    if (!API_KEY) {
-      return res.status(503).json({
-        error: "OPENAI_API_KEY is not configured."
-      });
-    }
 
-    const videoId = req.params.id;
-
-    const response = await fetch(
-      `https://api.openai.com/v1/videos/${encodeURIComponent(videoId)}/content`,
-      {
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-
-      console.error(
-        "VIRA VIDEO CONTENT ERROR:",
-        errorText
-      );
-
-      return res.status(response.status).send(errorText);
-    }
-
-    const buffer = Buffer.from(
-      await response.arrayBuffer()
-    );
-
-    res.setHeader("Content-Type", "video/mp4");
-    res.setHeader(
-      "Content-Length",
-      buffer.length
-    );
-
-    res.send(buffer);
-
-  } catch (error) {
-    console.error(
-      "VIRA VIDEO CONTENT ERROR:",
-      error
-    );
-
-    res.status(500).json({
-      error:
-        error?.message ||
-        "Impossible de récupérer la vidéo."
-
-    });
-  }
-});
 app.listen(port, () => {
   console.log(`VIRA backend running on port ${port}`);
 });
