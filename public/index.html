@@ -218,8 +218,15 @@ marketingChoices.forEach((choice) => {
     localStorage.setItem(
       "viraMarketingType",
       selectedMarketingType
-    );
+      );
+      localStorage.removeItem("viraScenario");
+localStorage.removeItem("viraVideoId");
+localStorage.removeItem("viraVideoUrl");
 
+scenarioResult.textContent = "";
+scenarioStatus.textContent = "";
+videoResult.innerHTML = "";
+videoStatus.textContent = "";
   });
 });
 
