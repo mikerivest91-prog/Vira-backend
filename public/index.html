@@ -168,10 +168,12 @@
 <button id="testVoice" type="button" style="display:none;">
   🎙 Tester la voix
 </button>
- <button id="generate" type="button">
+<button id="generate" type="button" 
+  style="display:none;">
   ✨ Générer
 </button>     
-<button id="video" type="button">
+<button id="video" type="button" 
+  style="display:none;">
   🎥 Créer la vidéo
 </button>
 
@@ -354,6 +356,7 @@ validateScenario.addEventListener("click", function () {
     scenarioStatus.textContent = "✅ Scénario validé !";
     validateScenario.textContent = "✅ Scénario validé";
     validateScenario.disabled = true;
+  button.style.display = "block";
 });
   testVoiceButton.addEventListener("click", async function () {
   const scenario = scenarioResult.textContent.trim();
@@ -533,7 +536,7 @@ Maintain perfect visual continuity with the other scenes.
 }
 
       status.textContent = "✅ Images générées !";
-
+videoButton.style.display = "block";
     } catch (error) {
 
       console.error("VIRA IMAGE ERROR:", error);
