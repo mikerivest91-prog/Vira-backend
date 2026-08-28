@@ -335,22 +335,27 @@ videoButton.style.display = "none";
 
 function renderMarketingScenario(scenario) {
   scenarioResult.dataset.rawScenario = scenario;
-
+const cleanScenario = scenario
+  .replace(/\*\*/g, "")
+  .replace(/^#+\s*/gm, "")
+  .replace(/\s+:/g, ":")
+  .replace(/SCENE/gi, "SCÈNE")
+  .trim();
   const title =
-    scenario.match(/TITRE:\s*([\s\S]*?)(?=SCÈNE 1:|$)/i)?.[1]?.trim() || "";
+    cleanScenario.match((/TITRE:\s*([\s\S]*?)(?=SCÈNE 1:|$)/i)?.[1]?.trim() || "";
 
   const narration =
-    scenario.match(
+    cleanScenario.match(
       /NARRATION:\s*([\s\S]*?)(?=APPEL À L'ACTION:|STYLE:|$)/i
     )?.[1]?.trim() || "";
 
   const cta =
-    scenario.match(
+    cleanScenario.match(
       /APPEL À L'ACTION:\s*([\s\S]*?)(?=STYLE:|$)/i
     )?.[1]?.trim() || "";
 
   const style =
-    scenario.match(/STYLE:\s*([\s\S]*?)$/i)?.[1]?.trim() || "";
+    cleanScenario.match(/STYLE:\s*([\s\S]*?)$/i)?.[1]?.trim() || "";
 
   const scenes = [];
 
@@ -361,7 +366,7 @@ function renderMarketingScenario(scenario) {
       "i"
     );
 
-    scenes.push(scenario.match(regex)?.[1]?.trim() || "");
+    scenes.push(cleanScenario.match(regex)?.[1]?.trim() || "");
   }
 
   scenarioResult.innerHTML = `
