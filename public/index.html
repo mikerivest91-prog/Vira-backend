@@ -585,7 +585,16 @@ videoStatus.textContent = "✅ Vidéo restaurée.";
   ========================= */
 
   scenarioButton.addEventListener("click", async function () {
+const activeMarketingChoice =
+  document.querySelector(".marketing-choice.active");
 
+if (!activeMarketingChoice) {
+  scenarioStatus.textContent =
+    "⚠️ Choisis d’abord ce que tu veux promouvoir.";
+  return;
+}
+
+selectedMarketingType = activeMarketingChoice.textContent.trim();
    const businessName = document.getElementById("businessName").value.trim();
 const marketingGoal = document.getElementById("marketingGoal").value.trim();
 const targetAudience = document.getElementById("targetAudience").value.trim();
