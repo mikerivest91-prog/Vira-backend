@@ -190,7 +190,17 @@ app.post("/api/scenario/generate", async (req, res) => {
     }
 
     const { idea, marketingType = "Campagne marketing générale" } = req.body || {};
+const allowedMarketingTypes = [
+  "🛍️ Vendre un produit",
+  "💼 Promouvoir un service",
+  "📱 Réseaux sociaux",
+  "📢 Créer une publicité",
+  "Campagne marketing générale"
+];
 
+const safeMarketingType = allowedMarketingTypes.includes(marketingType)
+? marketingType
+  : "Campagne marketing générale";
     if (typeof idea !== "string" || !idea.trim()) {
       return res.status(400).json({
         ok: false,
@@ -217,7 +227,7 @@ Tu es VIRA Marketing IA, un expert en marketing digital, publicité et création
 "${idea.trim()}"
 
 Type de campagne marketing choisi :
-"${marketingType}"
+"${safeMarketingType}"
 
 Crée une campagne vidéo marketing courte, persuasive et professionnelle adaptée précisément au type de campagne choisi.
 
@@ -312,12 +322,16 @@ const scenario =
       });
     }
 
-    console.log("VIRA SCENARIO RECEIVED: YES");
+    console.log(
+  "VIRA SCENARIO RECEIVED:",
+  safeMarketingType
+);
 
-    return res.json({
-      ok: true,
-      scenario
-    });
+return res.json({
+  ok: true,
+  scenario,
+  marketingType: safeMarketingType
+});
 
   } catch (error) {
     console.error("VIRA SCENARIO SERVER ERROR:", error);
