@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>VIRA – Création vidéo IA</title>
+<title>VIRA Marketing IA</title>
 
   <style>
     * {
@@ -101,6 +101,31 @@
       max-width: 100%;
       border-radius: 15px;
     }
+    .marketing-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 15px 0 5px;
+}
+
+.marketing-choice {
+  margin-top: 0;
+  padding: 14px 10px;
+  background: #20202b;
+  border: 1px solid #353548;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.marketing-choice:hover {
+  background: #2b2b3a;
+  border-color: #8b5cf6;
+}
+  .marketing-choice.active {
+  background: #7c3aed;
+  border-color: #a78bfa;
+  color: white;
+  }  
   </style>
 </head>
 
@@ -110,24 +135,29 @@
 
     <div class="logo">VIRA</div>
 
-    <div class="subtitle">
-      Crée tes contenus avec l'intelligence artificielle
-    </div>
+<div class="subtitle">
+  Marketing IA
+</div>
 
     <div class="card">
 
       <label for="prompt">
-        Décris ton idée
-      </label>
+  🚀 Que veux-tu promouvoir ?
+</label>
+<div class="marketing-options">
+  <button type="button" class="marketing-choice">🛍️ Vendre un produit</button>
+  <button type="button" class="marketing-choice">💼 Promouvoir un service</button>
+  <button type="button" class="marketing-choice">📱 Réseaux sociaux</button>
+  <button type="button" class="marketing-choice">📢 Créer une publicité</button>
+</div>
+<textarea
+  id="prompt"
+  placeholder="Exemple : Ma boutique de vêtements, mon restaurant, mon produit, mon service..."
+></textarea>
 
-      <textarea
-        id="prompt"
-        placeholder="Exemple : Une ville futuriste sous la pluie..."
-      ></textarea>
 <button id="scenario" type="button">
-  🎬 Créer le scénario
+  🚀 Créer une campagne Marketing IA
 </button>
-
 <div id="scenarioStatus"></div>
 
 <div id="scenarioResult"></div>
@@ -163,6 +193,36 @@ document.addEventListener("DOMContentLoaded", function () {
   const scenarioResult = document.getElementById("scenarioResult");
 const validateScenario = document.getElementById("validateScenario");
   const testVoiceButton = document.getElementById("testVoice");
+  const marketingChoices = document.querySelectorAll(".marketing-choice");
+let selectedMarketingType =
+  localStorage.getItem("viraMarketingType") || "";
+
+marketingChoices.forEach((choice) => {
+
+  const choiceText = choice.textContent.trim();
+
+  if (selectedMarketingType === choiceText) {
+    choice.classList.add("active");
+  }
+
+  choice.addEventListener("click", () => {
+
+    marketingChoices.forEach((button) => {
+      button.classList.remove("active");
+    });
+
+    choice.classList.add("active");
+
+    selectedMarketingType = choiceText;
+
+    localStorage.setItem(
+      "viraMarketingType",
+      selectedMarketingType
+    );
+
+  });
+});
+
   //// ===============================
 // SAUVEGARDE / RESTAURATION VIRA
 // ===============================
@@ -232,8 +292,9 @@ localStorage.setItem("viraIdea", idea);
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          idea: idea
-        })
+  idea: idea,
+  marketingType: selectedMarketingType
+})
       });
 
       const data = await response.json();
