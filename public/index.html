@@ -155,7 +155,30 @@
   margin: 0;
   line-height: 1.5;
 }
-  </style>
+.campaign-details {
+  display: grid;
+  gap: 10px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.campaign-details input,
+.campaign-details select {
+  width: 100%;
+  padding: 14px;
+  background: #121218;
+  border: 1px solid #353548;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.campaign-details input:focus,
+.campaign-details select:focus {
+  outline: none;
+  border-color: #8b5cf6;
+}  </style>
 </head>
 
 <body>
@@ -183,7 +206,25 @@
   id="prompt"
   placeholder="Exemple : Ma boutique de vêtements, mon restaurant, mon produit, mon service..."
 ></textarea>
+<div class="campaign-details">
+  <input id="businessName" type="text"
+    placeholder="Nom de l'entreprise ou du produit">
 
+  <input id="marketingGoal" type="text"
+    placeholder="Objectif : vendre, obtenir des clients, visibilité...">
+
+  <input id="targetAudience" type="text"
+    placeholder="Public cible : ex. femmes 25-40 ans">
+
+  <select id="platform">
+    <option value="">Choisir une plateforme</option>
+    <option value="Instagram">Instagram</option>
+    <option value="Facebook">Facebook</option>
+    <option value="TikTok">TikTok</option>
+    <option value="YouTube">YouTube</option>
+    <option value="LinkedIn">LinkedIn</option>
+  </select>
+</div>
 <button id="scenario" type="button">
   🚀 Créer une campagne Marketing IA
 </button>
