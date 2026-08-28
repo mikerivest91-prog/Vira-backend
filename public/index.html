@@ -169,7 +169,11 @@ const validateScenario = document.getElementById("validateScenario");
 
 const savedScenario = localStorage.getItem("viraScenario") || "";
 const savedIdea = localStorage.getItem("viraIdea") || "";
-const savedVideoId = localStorage.getItem("viraVideoId") || "";
+const rawSavedVideoId = localStorage.getItem("viraVideoId") || "";
+const savedVideoId =
+  rawSavedVideoId === "undefined" || rawSavedVideoId === "null"
+    ? ""
+    : rawSavedVideoId;
 const savedVideoUrl = localStorage.getItem("viraVideoUrl") || "";
 
 const videoButton = document.getElementById("video");
@@ -533,10 +537,13 @@ const progressTimer = setInterval(() => {
       }
 
       const videoId = data?.id || data?.video?.id;
-localStorage.setItem("viraVideoId", videoId);
+
 if (!videoId) {
+  localStorage.removeItem("viraVideoId");
   throw new Error("Aucun ID vidéo reçu du serveur.");
 }
+
+localStorage.setItem("viraVideoId", videoId);
 let currentVideoStatus = data?.video?.status || data?.status || "queued";
 let currentVideoProgress = data?.video?.progress ?? data?.progress ?? 0;
 
