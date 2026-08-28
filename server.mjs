@@ -588,8 +588,13 @@ app.post("/api/video/merge", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini-tts",
-          voice: "alloy",
-          input: text
+voice: "cedar",
+input: text
+  .trim()
+  .split(/\s+/)
+  .slice(0, 18)
+  .join(" "),
+response_format: "mp3"
         })
       }
     );
