@@ -241,7 +241,16 @@ ADAPTE LA STRATÉGIE AU TYPE CHOISI :
 - Réseaux sociaux : privilégier un hook très fort, un rythme rapide, du contenu engageant et partageable, puis terminer par un appel à suivre, commenter ou partager.
 
 - Créer une publicité : créer une publicité orientée conversion avec hook, problème, solution, bénéfice, preuve ou élément de confiance et appel à l'action.
-
+RÈGLES MARKETING :
+- La SCÈNE 1 doit contenir un hook puissant qui arrête le défilement.
+- La SCÈNE 2 doit montrer clairement le problème ou le besoin du client.
+- La SCÈNE 3 doit présenter le produit ou service comme solution.
+- La SCÈNE 4 doit montrer le bénéfice ou le résultat concret.
+- La SCÈNE 5 doit terminer avec un appel à l'action clair et convaincant.
+- Évite les phrases génériques et les promesses exagérées.
+- Chaque scène doit être visuellement différente mais conserver la même identité de marque.
+- La narration doit être courte, naturelle et persuasive.
+- Le contenu doit être conçu pour une vidéo verticale 9:16.
 TITRE:
 [un titre accrocheur]
 
