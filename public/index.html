@@ -224,6 +224,7 @@
     <option value="YouTube">YouTube</option>
     <option value="LinkedIn">LinkedIn</option>
   </select>
+  <div id="platformTip" style="display:none;"></div>
 </div>
       <script>
 document.addEventListener("click", function (e) {
@@ -292,6 +293,26 @@ if (choiceText.includes("publicité")) {
   document.getElementById("targetAudience").placeholder =
     "Audience publicitaire ciblée";
 }
+});
+        const platformSelect = document.getElementById("platform");
+const platformTip = document.getElementById("platformTip");
+
+platformSelect.addEventListener("change", function () {
+  const tips = {
+    TikTok: "🎵 TikTok : vidéo courte, hook immédiat et contenu dynamique.",
+    Instagram: "📸 Instagram : contenu visuel, Reels et engagement.",
+    Facebook: "👥 Facebook : offre claire, confiance et conversion.",
+    YouTube: "▶️ YouTube : rétention, narration et appel à l'action.",
+    LinkedIn: "💼 LinkedIn : contenu professionnel, crédibilité et B2B."
+  };
+
+  if (tips[this.value]) {
+    platformTip.textContent = tips[this.value];
+    platformTip.style.display = "block";
+  } else {
+    platformTip.textContent = "";
+    platformTip.style.display = "none";
+  }
 });
       </script>
 <button id="scenario" type="button">
