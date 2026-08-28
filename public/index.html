@@ -161,7 +161,8 @@
 <div id="scenarioStatus"></div>
 
 <div id="scenarioResult"></div>
-<button id="validateScenario" type="button" disabled>
+<button id="validateScenario" type="button" 
+  disabled style="display:none;">
   ✅ Valider le scénario
 </button>
 
@@ -325,6 +326,7 @@ const scenario = data?.scenario || data?.output_text || "";
       scenarioStatus.textContent = "✅ Scénario créé !";
 scenarioResult.textContent = scenario;
       validateScenario.disabled = false;
+      validateScenario.style.display = "block";
 localStorage.setItem("viraScenario", scenario);
 
 } catch (error) {
