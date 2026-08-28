@@ -225,6 +225,30 @@
     <option value="LinkedIn">LinkedIn</option>
   </select>
 </div>
+      <script>
+document.addEventListener("click", function (e) {
+  const choice = e.target.closest(".marketing-choice");
+  if (!choice) return;
+
+  document.querySelectorAll(".marketing-choice").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  choice.classList.add("active");
+
+  document.getElementById("prompt").value = "";
+  document.getElementById("businessName").value = "";
+  document.getElementById("marketingGoal").value = "";
+  document.getElementById("targetAudience").value = "";
+  document.getElementById("platform").value = "";
+
+  localStorage.removeItem("viraIdea");
+  localStorage.removeItem("viraBusinessName");
+  localStorage.removeItem("viraMarketingGoal");
+  localStorage.removeItem("viraTargetAudience");
+  localStorage.removeItem("viraPlatform");
+});
+      </script>
 <button id="scenario" type="button">
   🚀 Créer une campagne Marketing IA
 </button>
