@@ -625,6 +625,44 @@ if (!scenario || scenario === "Scénario reçu.") {
 
 const audioBlob = await response.blob();
 const audioUrl = URL.createObjectURL(audioBlob);
+  const savedVideoId = localStorage.getItem("viraVideoId");
+
+if (savedVideoId) {
+  const mergeResponse = await fetch("/api/video/merge", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      videoId: savedVideoId,
+      text: narration
+    })
+  });
+
+  if (!mergeResponse.ok) {
+    throw new Error(await mergeResponse.text());
+  }
+
+  const finalBlob = await mergeResponse.blob();
+  const finalUrl = URL.createObjectURL(finalBlob);
+
+  const finalVideo = document.createElement("video");
+  finalVideo.src = finalUrl;
+  finalVideo.controls = true;
+  finalVideo.style.width = "100%";
+  finalVideo.style.marginTop = "15px";
+
+  videoResult.appendChild(finalVideo);
+
+  const finalDownload = document.createElement("a");
+  finalDownload.href = finalUrl;
+  finalDownload.download = "VIRA-final.mp4";
+  finalDownload.textContent = "⬇️ Télécharger la vidéo finale";
+  finalDownload.style.display = "block";
+  finalDownload.style.marginTop = "15px";
+
+  videoResult.appendChild(finalDownload);
+}}
 
 let voiceResult = document.getElementById("voiceResult");
 
