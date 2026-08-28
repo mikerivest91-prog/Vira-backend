@@ -189,7 +189,6 @@ app.post("/api/scenario/generate", async (req, res) => {
       });
     }
 
-    const { idea, marketingType = "Campagne marketing générale" } = req.body || {};
 const allowedMarketingTypes = [
   "🛍️ Vendre un produit",
   "💼 Promouvoir un service",
@@ -198,8 +197,16 @@ const allowedMarketingTypes = [
   "Campagne marketing générale"
 ];
 
+const {
+  idea,
+  marketingType = "Campagne marketing générale",
+  businessName = "",
+  marketingGoal = "",
+  targetAudience = "",
+  platform = ""
+} = req.body;
 const safeMarketingType = allowedMarketingTypes.includes(marketingType)
-? marketingType
+  ? marketingType
   : "Campagne marketing générale";
     if (typeof idea !== "string" || !idea.trim()) {
       return res.status(400).json({
@@ -228,7 +235,11 @@ Tu es VIRA Marketing IA, un expert en marketing digital, publicité et création
 
 Type de campagne marketing choisi :
 "${safeMarketingType}"
-
+INFORMATIONS MARKETING :
+Nom de l'entreprise ou du produit : "${businessName || "Non précisé"}"
+Objectif marketing : "${marketingGoal || "Non précisé"}"
+Public cible : "${targetAudience || "Non précisé"}"
+Plateforme : "${platform || "Non précisée"}"
 Crée une campagne vidéo marketing courte, persuasive et professionnelle adaptée précisément au type de campagne choisi.
 
 OBJECTIFS :
