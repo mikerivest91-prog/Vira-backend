@@ -186,9 +186,10 @@ if (savedScenario) {
   validateScenario.disabled = false;
 }
 
-if (savedVideoId) {
-  const restoredVideoUrl =
-    `/api/video/${encodeURIComponent(savedVideoId)}/content`;
+if (savedVideoId || savedVideoUrl) {
+  const restoredVideoUrl = savedVideoId
+    ? `/api/video/${encodeURIComponent(savedVideoId)}/content`
+    : savedVideoUrl;
 
   videoResult.innerHTML = `
     <video
