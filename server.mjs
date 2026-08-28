@@ -271,7 +271,8 @@ SCÈNE 5:
 
 NARRATION:
 [texte court de narration]
-
+APPEL À L'ACTION:
+[un appel à l'action court, clair et adapté au type de campagne]
 STYLE:
 [style visuel recommandé]
 
