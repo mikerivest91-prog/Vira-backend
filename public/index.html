@@ -258,6 +258,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const button = document.getElementById("generate");
   const promptInput = document.getElementById("prompt");
+  const businessNameInput = document.getElementById("businessName");
+const marketingGoalInput = document.getElementById("marketingGoal");
+const targetAudienceInput = document.getElementById("targetAudience");
+const platformInput = document.getElementById("platform");
   const status = document.getElementById("status");
   const result = document.getElementById("result");
 
@@ -297,10 +301,10 @@ localStorage.removeItem("viraVideoId");
 localStorage.removeItem("viraVideoUrl");
 localStorage.removeItem("viraIdea");
 promptInput.value = "";
-    document.getElementById("businessName").value = "";
-document.getElementById("marketingGoal").value = "";
-document.getElementById("targetAudience").value = "";
-document.getElementById("platform").value = "";
+    businessNameInput.value = "";
+marketingGoalInput.value = "";
+targetAudienceInput.value = "";
+platformInput.value = "";
 
 localStorage.removeItem("viraBusinessName");
 localStorage.removeItem("viraMarketingGoal");
