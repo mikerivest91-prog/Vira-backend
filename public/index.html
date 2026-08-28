@@ -162,6 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const scenarioStatus = document.getElementById("scenarioStatus");
   const scenarioResult = document.getElementById("scenarioResult");
 const validateScenario = document.getElementById("validateScenario");
+  const testVoiceButton = document.getElementById("testVoice");
   // Restaurer le dernier scénario après actualisation
 const savedScenario = localStorage.getItem("viraScenario");
 const savedIdea = localStorage.getItem("viraIdea");
@@ -258,6 +259,56 @@ validateScenario.addEventListener("click", function () {
     scenarioStatus.textContent = "✅ Scénario validé !";
     validateScenario.textContent = "✅ Scénario validé";
     validateScenario.disabled = true;
+});
+  testVoiceButton.addEventListener("click", async function () {
+  const scenario = scenarioResult.textContent.trim();
+
+  if (!scenario) {
+    alert("⚠️ Crée d'abord un scénario.");
+    return;
+  }
+
+  const narrationMatch = scenario.match(
+    /NARRATION:\s*([\s\S]*?)(?=STYLE:|$)/i
+  );
+
+  const text = (narrationMatch ? narrationMatch[1] : scenario)
+    .trim()
+    .split(/\s+/)
+    .slice(0, 18)
+    .join(" ");
+
+  testVoiceButton.disabled = true;
+  testVoiceButton.textContent = "🎙 Génération...";
+
+  try {
+    const response = await fetch("/api/voice/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    const audio = new Audio(audioUrl);
+    audio.controls = true;
+
+    testVoiceButton.insertAdjacentElement("afterend", audio);
+    audio.play();
+
+    testVoiceButton.textContent = "✅ Voix générée";
+  } catch (error) {
+    console.error(error);
+    alert("Erreur génération voix");
+    testVoiceButton.textContent = "🎙 Tester la voix";
+  } finally {
+    testVoiceButton.disabled = false;
+  }
 });
   /* =========================
      GÉNÉRER LES IMAGES
