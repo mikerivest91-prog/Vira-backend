@@ -442,6 +442,11 @@ const marketingGoal = document.getElementById("marketingGoal").value.trim();
 const targetAudience = document.getElementById("targetAudience").value.trim();
 const platform = document.getElementById("platform").value; 
     const idea = promptInput.value.trim();
+    if (!businessName || !marketingGoal || !targetAudience || !platform) {
+  scenarioStatus.textContent =
+    "⚠️ Remplis le nom, l’objectif, le public cible et la plateforme.";
+  return;
+    }
 localStorage.setItem("viraIdea", idea);
     if (!idea) {
       scenarioStatus.textContent =
