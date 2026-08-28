@@ -232,7 +232,15 @@ OBJECTIFS :
 
 
 
-Réponds exactement avec cette structure :
+ADAPTE LA STRATÉGIE AU TYPE CHOISI :
+
+- Vendre un produit : mettre le produit au centre, montrer son principal bénéfice, créer du désir et terminer par un appel à l'achat.
+
+- Promouvoir un service : présenter le problème du client, montrer comment le service le résout, mettre en valeur le résultat obtenu et terminer par un appel à prendre contact.
+
+- Réseaux sociaux : privilégier un hook très fort, un rythme rapide, du contenu engageant et partageable, puis terminer par un appel à suivre, commenter ou partager.
+
+- Créer une publicité : créer une publicité orientée conversion avec hook, problème, solution, bénéfice, preuve ou élément de confiance et appel à l'action.
 
 TITRE:
 [un titre accrocheur]
