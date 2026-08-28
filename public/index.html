@@ -166,7 +166,8 @@ const validateScenario = document.getElementById("validateScenario");
   // Restaurer le dernier scénario après actualisation
 const savedScenario = localStorage.getItem("viraScenario");
 const savedIdea = localStorage.getItem("viraIdea");
-
+const savedVideoId = localStorage.getItem("viraVideoId");
+const savedVideoUrl = localStorage.getItem("viraVideoUrl");
 if (savedIdea) {
   promptInput.value = savedIdea;
 }
@@ -178,7 +179,18 @@ if (savedScenario) {
   const videoButton = document.getElementById("video");
   const videoStatus = document.getElementById("videoStatus");
   const videoResult = document.getElementById("videoResult");
+if (savedVideoId && savedVideoUrl) {
+  videoResult.innerHTML = `
+    <video
+      src="${savedVideoUrl}"
+      controls
+      playsinline
+      style="width:100%;border-radius:16px;margin-top:15px;"
+    </video>
+  `;
 
+  videoStatus.textContent = "✅ Vidéo restaurée !";
+}
 
   /* =========================
      CRÉER LE SCÉNARIO
