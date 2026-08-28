@@ -246,7 +246,73 @@ videoButton.style.display = "none";
   //// ===============================
 // SAUVEGARDE / RESTAURATION VIRA
 // ===============================
+  function getRawScenario() {
+  return (
+    scenarioResult.dataset.rawScenario ||
+    scenarioResult.textContent ||
+    ""
+  ).trim();
+}
 
+function renderMarketingScenario(scenario) {
+  scenarioResult.dataset.rawScenario = scenario;
+
+  const title =
+    scenario.match(/TITRE:\s*([\s\S]*?)(?=SCÈNE 1:|$)/i)?.[1]?.trim() || "";
+
+  const narration =
+    scenario.match(
+      /NARRATION:\s*([\s\S]*?)(?=APPEL À L'ACTION:|STYLE:|$)/i
+    )?.[1]?.trim() || "";
+
+  const cta =
+    scenario.match(
+      /APPEL À L'ACTION:\s*([\s\S]*?)(?=STYLE:|$)/i
+    )?.[1]?.trim() || "";
+
+  const style =
+    scenario.match(/STYLE:\s*([\s\S]*?)$/i)?.[1]?.trim() || "";
+
+  const scenes = [];
+
+  for (let i = 1; i <= 5; i++) {
+    const next = i < 5 ? `SCÈNE ${i + 1}:` : "NARRATION:";
+    const regex = new RegExp(
+      `SCÈNE ${i}:\\s*([\\s\\S]*?)(?=${next}|$)`,
+      "i"
+    );
+
+    scenes.push(scenario.match(regex)?.[1]?.trim() || "");
+  }
+
+  scenarioResult.innerHTML = `
+  <div class="campaign-result">
+    <h2>🚀 ${title || "Campagne Marketing IA"}</h2>
+
+    ${scenes.map((scene, i) => `
+      <div class="campaign-section">
+        <strong>🎬 Scène ${i + 1}</strong>
+        <p>${scene}</p>
+      </div>
+    `).join("")}
+
+    <div class="campaign-section">
+      <strong>🎙 Narration</strong>
+      <p>${narration}</p>
+    </div>
+
+    <div class="campaign-section">
+      <strong>🎯 Appel à l'action</strong>
+      <p>${cta}</p>
+    </div>
+
+    <div class="campaign-section">
+      <strong>🎨 Style</strong>
+      <p>${style}</p>
+    </div>
+  </div>
+`;
+}
 const savedScenario = localStorage.getItem("viraScenario") || "";
 const savedIdea = localStorage.getItem("viraIdea") || "";
 const rawSavedVideoId = localStorage.getItem("viraVideoId") || "";
@@ -265,7 +331,7 @@ if (savedIdea) {
 }
 
 if (savedScenario) {
-  scenarioResult.textContent = savedScenario;
+renderMarketingScenario(savedScenario);
   scenarioStatus.textContent = "✅ Scénario restauré.";
   validateScenario.disabled = false;
 }
@@ -333,7 +399,7 @@ const scenario = data?.scenario || data?.output_text || "";
       }
 
       scenarioStatus.textContent = "✅ Scénario créé !";
-scenarioResult.textContent = scenario;
+renderMarketingScenario(scenario);
       validateScenario.disabled = false;
       validateScenario.style.display = "block";
 localStorage.setItem("viraScenario", scenario);
@@ -357,7 +423,7 @@ scenarioButton.disabled = false;
 // =========================
 
 validateScenario.addEventListener("click", function () {
-    const scenario = scenarioResult.textContent.trim();
+    const scenario = getRawScenario();
 
     if (!scenario) {
         scenarioStatus.textContent = "⚠️ Aucun scénario à valider.";
@@ -370,8 +436,7 @@ validateScenario.addEventListener("click", function () {
   button.style.display = "block";
 });
   testVoiceButton.addEventListener("click", async function () {
-  const scenario = scenarioResult.textContent.trim();
-
+const scenario = getRawScenario();
   if (!scenario) {
     alert("⚠️ Crée d'abord un scénario.");
     return;
@@ -425,8 +490,7 @@ validateScenario.addEventListener("click", function () {
 
   button.addEventListener("click", async function () {
 
-    const scenario = scenarioResult.textContent.trim();
-
+    const scenario = getRawScenario();
     if (!scenario || scenario === "Scénario reçu.") {
       status.textContent =
         "⚠️ Crée d'abord un scénario.";
@@ -570,7 +634,7 @@ videoButton.style.display = "block";
 
   videoButton.addEventListener("click", async function () {
 
-    const scenario = scenarioResult.textContent.trim();
+const scenario = getRawScenario();
 
     if (!scenario || scenario === "Scénario reçu.") {
       videoStatus.textContent =
@@ -700,7 +764,7 @@ voiceButton.style.cursor = "pointer";
 
 voiceButton.onclick = async () => {
 try {
-const scenario = scenarioResult.textContent.trim();
+const scenario = getRawScenario();
 const narrationMatch = scenario.match(
   /NARRATION:\s*([\s\S]*?)(?=STYLE:|$)/i
 );
@@ -709,10 +773,7 @@ const fullNarration = narrationMatch
   ? narrationMatch[1].trim()
   : scenario;
 
-const narration = fullNarration
-  .split(/\s+/)
-  .slice(0, 18)
-  .join(" ");
+const narration = fullNarration;
 if (!scenario || scenario === "Scénario reçu.") {
     alert("⚠️ Crée d'abord un scénario.");
     return;
