@@ -165,7 +165,7 @@
   ✅ Valider le scénario
 </button>
 
-<button id="testVoice" type="button">
+<button id="testVoice" type="button" style="display:none;">
   🎙 Tester la voix
 </button>
  <button id="generate" type="button">
@@ -222,7 +222,8 @@ marketingChoices.forEach((choice) => {
       localStorage.removeItem("viraScenario");
 localStorage.removeItem("viraVideoId");
 localStorage.removeItem("viraVideoUrl");
-
+localStorage.removeItem("viraIdea");
+promptInput.value = "";
 scenarioResult.textContent = "";
 scenarioStatus.textContent = "";
 videoResult.innerHTML = "";
