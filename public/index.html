@@ -630,97 +630,58 @@ if (!scenario || scenario === "Scénario reçu.") {
     voiceButton.disabled = true;
     voiceButton.textContent = "🎙️ Génération de la voix...";
 
-    const response = await fetch("/api/voice/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        text: narration
-      })
-    });
+    const savedVideoId = localStorage.getItem("viraVideoId");
 
-    if (!response.ok) {
-  const errorText = await response.text();
-  throw new Error(errorText || "Impossible de générer la voix.");
+if (!savedVideoId) {
+  throw new Error("Aucune vidéo sauvegardée.");
 }
 
-const audioBlob = await response.blob();
-const audioUrl = URL.createObjectURL(audioBlob);
-  const savedVideoId = localStorage.getItem("viraVideoId");
+const mergeResponse = await fetch("/api/video/merge", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    videoId: savedVideoId,
+    text: narration
+  })
+});
 
-if (savedVideoId) {
-  const mergeResponse = await fetch("/api/video/merge", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      videoId: savedVideoId,
-      text: narration
-    })
-  });
-
-  if (!mergeResponse.ok) {
-    throw new Error(await mergeResponse.text());
-  }
-
-  const finalBlob = await mergeResponse.blob();
-  const finalUrl = URL.createObjectURL(finalBlob);
-
-  const finalVideo = document.createElement("video");
-  finalVideo.src = finalUrl;
-  finalVideo.controls = true;
-  finalVideo.style.width = "100%";
-  finalVideo.style.marginTop = "15px";
-
-  videoResult.appendChild(finalVideo);
-
-  const finalDownload = document.createElement("a");
-  finalDownload.href = finalUrl;
-  finalDownload.download = "VIRA-final.mp4";
-  finalDownload.textContent = "⬇️ Télécharger la vidéo finale";
-  finalDownload.style.display = "block";
-  finalDownload.style.marginTop = "15px";
-
-  videoResult.appendChild(finalDownload);
-}}
-
-let voiceResult = document.getElementById("voiceResult");
-
-if (!voiceResult) {
-  voiceResult = document.createElement("div");
-  voiceResult.id = "voiceResult";
-  videoResult.appendChild(voiceResult);
+if (!mergeResponse.ok) {
+  throw new Error(await mergeResponse.text());
 }
 
-voiceResult.innerHTML = "";
+const finalBlob = await mergeResponse.blob();
+const finalUrl = URL.createObjectURL(finalBlob);
 
-const audioPlayer = document.createElement("audio");
-audioPlayer.src = audioUrl;
-audioPlayer.controls = true;
-audioPlayer.style.width = "100%";
-audioPlayer.style.marginTop = "15px";
+// Supprime un ancien résultat final s'il existe
+document.getElementById("finalVideoResult")?.remove();
 
-voiceResult.appendChild(audioPlayer);
+const finalResult = document.createElement("div");
+finalResult.id = "finalVideoResult";
 
-const downloadVoiceButton = document.createElement("a");
-downloadVoiceButton.href = audioUrl;
-downloadVoiceButton.download = "VIRA-voix.mp3";
-downloadVoiceButton.textContent = "⬇️ Télécharger la voix";
-downloadVoiceButton.style.display = "block";
-downloadVoiceButton.style.marginTop = "15px";
-downloadVoiceButton.style.padding = "15px";
-downloadVoiceButton.style.borderRadius = "15px";
-downloadVoiceButton.style.textAlign = "center";
-downloadVoiceButton.style.textDecoration = "none";
+const finalVideo = document.createElement("video");
+finalVideo.src = finalUrl;
+finalVideo.controls = true;
+finalVideo.playsInline = true;
+finalVideo.style.width = "100%";
+finalVideo.style.marginTop = "15px";
 
-voiceResult.appendChild(downloadVoiceButton);
+finalResult.appendChild(finalVideo);
 
+const finalDownload = document.createElement("a");
+finalDownload.href = finalUrl;
+finalDownload.download = "VIRA-final.mp4";
+finalDownload.textContent = "⬇️ Télécharger la vidéo finale";
+finalDownload.style.display = "block";
+finalDownload.style.marginTop = "15px";
 
+finalResult.appendChild(finalDownload);
+videoResult.appendChild(finalResult);
 
 voiceButton.disabled = false;
-voiceButton.textContent = "✅ Voix générée";
+voiceButton.textContent = "✅ Vidéo + voix prête";
+
   } catch (error) {
     console.error("VIRA VOICE ERROR:", error);
 
