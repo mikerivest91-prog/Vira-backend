@@ -297,6 +297,15 @@ localStorage.removeItem("viraVideoId");
 localStorage.removeItem("viraVideoUrl");
 localStorage.removeItem("viraIdea");
 promptInput.value = "";
+    document.getElementById("businessName").value = "";
+document.getElementById("marketingGoal").value = "";
+document.getElementById("targetAudience").value = "";
+document.getElementById("platform").value = "";
+
+localStorage.removeItem("viraBusinessName");
+localStorage.removeItem("viraMarketingGoal");
+localStorage.removeItem("viraTargetAudience");
+localStorage.removeItem("viraPlatform");
     if (choiceText.includes("produit")) {
   promptInput.placeholder = "Exemple : Mes chaussures, ma boutique de vêtements, mon nouveau produit...";
 } else if (choiceText.includes("service")) {
