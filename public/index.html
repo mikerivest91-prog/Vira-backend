@@ -256,6 +256,15 @@ localStorage.removeItem("viraVideoId");
 localStorage.removeItem("viraVideoUrl");
 localStorage.removeItem("viraIdea");
 promptInput.value = "";
+    if (choiceText.includes("produit")) {
+  promptInput.placeholder = "Exemple : Mes chaussures, ma boutique de vêtements, mon nouveau produit...";
+} else if (choiceText.includes("service")) {
+  promptInput.placeholder = "Exemple : Mon service de nettoyage, mon salon de coiffure, mon entreprise...";
+} else if (choiceText.includes("Réseaux")) {
+  promptInput.placeholder = "Exemple : Créer du contenu pour Instagram, TikTok, Facebook...";
+} else if (choiceText.includes("publicité")) {
+  promptInput.placeholder = "Exemple : Une publicité pour attirer de nouveaux clients...";
+    }
 scenarioResult.textContent = "";
 scenarioStatus.textContent = "";
 videoResult.innerHTML = "";
