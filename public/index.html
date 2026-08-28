@@ -192,7 +192,16 @@ if (savedVideoId || savedVideoUrl) {
     : savedVideoUrl;
 
   videoResult.innerHTML = `
+  <video
+    src="${restoredVideoUrl}"
+    controls
+    playsinline
+    style="width:100%;border-radius:16px;margin-top:15px;">
+  </video>
+`;
 
+videoStatus.textContent = "✅ Vidéo restaurée.";
+}
   /* =========================
      CRÉER LE SCÉNARIO
   ========================= */
