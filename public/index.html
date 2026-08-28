@@ -437,6 +437,10 @@ videoStatus.textContent = "✅ Vidéo restaurée.";
 
   scenarioButton.addEventListener("click", async function () {
 
+   const businessName = document.getElementById("businessName").value.trim();
+const marketingGoal = document.getElementById("marketingGoal").value.trim();
+const targetAudience = document.getElementById("targetAudience").value.trim();
+const platform = document.getElementById("platform").value; 
     const idea = promptInput.value.trim();
 localStorage.setItem("viraIdea", idea);
     if (!idea) {
@@ -458,7 +462,11 @@ localStorage.setItem("viraIdea", idea);
         },
         body: JSON.stringify({
   idea: idea,
-  marketingType: selectedMarketingType
+  marketingType: selectedMarketingType,
+  businessName: businessName,
+  marketingGoal: marketingGoal,
+  targetAudience: targetAudience,
+  platform: platform
 })
       });
 
