@@ -247,6 +247,51 @@ document.addEventListener("click", function (e) {
   localStorage.removeItem("viraMarketingGoal");
   localStorage.removeItem("viraTargetAudience");
   localStorage.removeItem("viraPlatform");
+  const choiceText = choice.textContent.trim();
+
+if (choiceText.includes("produit")) {
+  document.getElementById("prompt").placeholder =
+    "Exemple : Je veux vendre mes chaussures de sport...";
+  document.getElementById("businessName").placeholder =
+    "Nom du produit ou de la marque";
+  document.getElementById("marketingGoal").placeholder =
+    "Objectif : ventes, conversions, lancement...";
+  document.getElementById("targetAudience").placeholder =
+    "Public cible : ex. hommes 18-35 ans";
+}
+
+if (choiceText.includes("service")) {
+  document.getElementById("prompt").placeholder =
+    "Exemple : Faire connaître mon service de nettoyage...";
+  document.getElementById("businessName").placeholder =
+    "Nom de l'entreprise ou du service";
+  document.getElementById("marketingGoal").placeholder =
+    "Objectif : obtenir des clients, réservations...";
+  document.getElementById("targetAudience").placeholder =
+    "Public cible : ex. propriétaires 25-55 ans";
+}
+
+if (choiceText.includes("Réseaux")) {
+  document.getElementById("prompt").placeholder =
+    "Exemple : Créer du contenu pour développer ma marque...";
+  document.getElementById("businessName").placeholder =
+    "Nom de la marque ou du compte";
+  document.getElementById("marketingGoal").placeholder =
+    "Objectif : abonnés, engagement, visibilité...";
+  document.getElementById("targetAudience").placeholder =
+    "Audience cible";
+}
+
+if (choiceText.includes("publicité")) {
+  document.getElementById("prompt").placeholder =
+    "Exemple : Créer une publicité pour attirer de nouveaux clients...";
+  document.getElementById("businessName").placeholder =
+    "Nom de l'entreprise, produit ou service";
+  document.getElementById("marketingGoal").placeholder =
+    "Objectif publicitaire : ventes, leads, réservations...";
+  document.getElementById("targetAudience").placeholder =
+    "Audience publicitaire ciblée";
+}
 });
       </script>
 <button id="scenario" type="button">
