@@ -568,21 +568,28 @@ if (!scenario || scenario === "Scénario reçu.") {
 }
 
 const audioBlob = await response.blob();
+const audioBlob = await response.blob();
 const audioUrl = URL.createObjectURL(audioBlob);
-videoResult
-  .querySelectorAll('audio, .vira-voice, a[download="VIRA-voix.mp3"]')
-  .forEach(el => el.remove());
+
+let voiceResult = document.getElementById("voiceResult");
+
+if (!voiceResult) {
+  voiceResult = document.createElement("div");
+  voiceResult.id = "voiceResult";
+  videoResult.appendChild(voiceResult);
+}
+
+voiceResult.innerHTML = "";
+
 const audioPlayer = document.createElement("audio");
-  audioPlayer.className = "vira-voice";
 audioPlayer.src = audioUrl;
 audioPlayer.controls = true;
 audioPlayer.style.width = "100%";
 audioPlayer.style.marginTop = "15px";
 
-videoResult.appendChild(audioPlayer);
+voiceResult.appendChild(audioPlayer);
 
 const downloadVoiceButton = document.createElement("a");
-downloadVoiceButton.className = "vira-voice";
 downloadVoiceButton.href = audioUrl;
 downloadVoiceButton.download = "VIRA-voix.mp3";
 downloadVoiceButton.textContent = "⬇️ Télécharger la voix";
@@ -593,7 +600,9 @@ downloadVoiceButton.style.borderRadius = "15px";
 downloadVoiceButton.style.textAlign = "center";
 downloadVoiceButton.style.textDecoration = "none";
 
-videoResult.appendChild(downloadVoiceButton);
+voiceResult.appendChild(downloadVoiceButton);
+
+
 
 voiceButton.disabled = false;
 voiceButton.textContent = "✅ Voix générée";
