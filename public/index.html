@@ -378,21 +378,25 @@ const cleanScenario = scenario
   .replace(/\s+:/g, ":")
   .replace(/SCENE/gi, "SCÈNE")
   .trim();
-  const title =
-    cleanScenario.match((/TITRE:\s*([\s\S]*?)(?=SCÈNE 1:|$)/i)?.[1]?.trim() || "";
+const extractSection = (name, nextNames) => {
+  const escapedNext = nextNames.join("|");
+  const regex = new RegExp(
+    `${name}:\\s*([\\s\\S]*?)(?=${escapedNext}:|$)`,
+    "i"
+  );
+  return cleanScenario.match(regex)?.[1]?.trim() || "";
+};
 
-  const narration =
-    cleanScenario.match(
-      /NARRATION:\s*([\s\S]*?)(?=APPEL À L'ACTION:|STYLE:|$)/i
-    )?.[1]?.trim() || "";
-
-  const cta =
-    cleanScenario.match(
-      /APPEL À L'ACTION:\s*([\s\S]*?)(?=STYLE:|$)/i
-    )?.[1]?.trim() || "";
-
-  const style =
-    cleanScenario.match(/STYLE:\s*([\s\S]*?)$/i)?.[1]?.trim() || "";
+const title = extractSection("TITRE", ["OBJECTIF"]);
+const objective = extractSection("OBJECTIF", ["PUBLIC CIBLE"]);
+const target = extractSection("PUBLIC CIBLE", ["ACCROCHE"]);
+const hook = extractSection("ACCROCHE", ["TEXTE PUBLICATION"]);
+const publication = extractSection("TEXTE PUBLICATION", ["HASHTAGS"]);
+const hashtags = extractSection("HASHTAGS", ["SCÈNE 1"]);
+const narration = extractSection("NARRATION", ["APPEL À L'ACTION"]);
+const cta = extractSection("APPEL À L'ACTION", ["PROMPT VISUEL"]);
+const visualPrompt = extractSection("PROMPT VISUEL", ["STYLE"]);
+const style = extractSection("STYLE", []);
 
   const scenes = [];
 
@@ -402,33 +406,63 @@ const cleanScenario = scenario
       `SCÈNE ${i}:\\s*([\\s\\S]*?)(?=${next}|$)`,
       "i"
     );
+scenarioResult.innerHTML = `
+<div class="campaign-result">
+  <h2>🚀 ${title || "Campagne Marketing IA"}</h2>
 
-    scenes.push(cleanScenario.match(regex)?.[1]?.trim() || "");
-  }
+  <div class="campaign-section">
+    <strong>🎯 Objectif</strong>
+    <p>${objective}</p>
+  </div>
 
-  scenarioResult.innerHTML = `
-  <div class="campaign-result">
-    <h2>🚀 ${title || "Campagne Marketing IA"}</h2>
+  <div class="campaign-section">
+    <strong>👥 Public cible</strong>
+    <p>${target}</p>
+  </div>
 
-    ${scenes.map((scene, i) => `
-      <div class="campaign-section">
-        <strong>🎬 Scène ${i + 1}</strong>
-        <p>${scene}</p>
-      </div>
-    `).join("")}
+  <div class="campaign-section">
+    <strong>🪝 Accroche</strong>
+    <p>${hook}</p>
+  </div>
 
+  <div class="campaign-section">
+    <strong>✍️ Texte de publication</strong>
+    <p>${publication}</p>
+  </div>
+
+  <div class="campaign-section">
+    <strong>#️⃣ Hashtags</strong>
+    <p>${hashtags}</p>
+  </div>
+
+  ${scenes.map((scene, i) => `
     <div class="campaign-section">
-      <strong>🎙 Narration</strong>
-      <p>${narration}</p>
+      <strong>🎬 Scène ${i + 1}</strong>
+      <p>${scene}</p>
     </div>
+  `).join("")}
 
-    <div class="campaign-section">
-      <strong>🎯 Appel à l'action</strong>
-      <p>${cta}</p>
-    </div>
+  <div class="campaign-section">
+    <strong>🎙️ Narration</strong>
+    <p>${narration}</p>
+  </div>
 
-    <div class="campaign-section">
-      <strong>🎨 Style</strong>
+  <div class="campaign-section">
+    <strong>🎯 Appel à l'action</strong>
+    <p>${cta}</p>
+  </div>
+
+  <div class="campaign-section">
+    <strong>🖼️ Prompt visuel</strong>
+    <p>${visualPrompt}</p>
+  </div>
+
+  <div class="campaign-section">
+    <strong>🎨 Style</strong>
+    <p>${style}</p>
+  </div>
+</div>
+`;
       <p>${style}</p>
     </div>
   </div>
