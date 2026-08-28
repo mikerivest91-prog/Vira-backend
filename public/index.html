@@ -163,33 +163,43 @@ document.addEventListener("DOMContentLoaded", function () {
   const scenarioResult = document.getElementById("scenarioResult");
 const validateScenario = document.getElementById("validateScenario");
   const testVoiceButton = document.getElementById("testVoice");
-  // Restaurer le dernier scénario après actualisation
-const savedScenario = localStorage.getItem("viraScenario");
-const savedIdea = localStorage.getItem("viraIdea");
-const savedVideoId = localStorage.getItem("viraVideoId");
-const savedVideoUrl = localStorage.getItem("viraVideoUrl");
+  //// ===============================
+// SAUVEGARDE / RESTAURATION VIRA
+// ===============================
+
+const savedScenario = localStorage.getItem("viraScenario") || "";
+const savedIdea = localStorage.getItem("viraIdea") || "";
+const savedVideoId = localStorage.getItem("viraVideoId") || "";
+const savedVideoUrl = localStorage.getItem("viraVideoUrl") || "";
+
+const videoButton = document.getElementById("video");
+const videoStatus = document.getElementById("videoStatus");
+const videoResult = document.getElementById("videoResult");
+
 if (savedIdea) {
   promptInput.value = savedIdea;
 }
+
 if (savedScenario) {
   scenarioResult.textContent = savedScenario;
   scenarioStatus.textContent = "✅ Scénario restauré.";
   validateScenario.disabled = false;
 }
-  const videoButton = document.getElementById("video");
-  const videoStatus = document.getElementById("videoStatus");
-  const videoResult = document.getElementById("videoResult");
-if (savedVideoId && savedVideoUrl) {
+
+if (savedVideoId) {
+  const restoredVideoUrl =
+    `/api/video/${encodeURIComponent(savedVideoId)}/content`;
+
   videoResult.innerHTML = `
     <video
-      src="${savedVideoUrl}"
+      src="${restoredVideoUrl}"
       controls
       playsinline
-      style="width:100%;border-radius:16px;margin-top:15px;"
+      style="width:100%;border-radius:16px;margin-top:15px;">
     </video>
   `;
 
-  videoStatus.textContent = "✅ Vidéo restaurée !";
+  videoStatus.textContent = "✅ Vidéo restaurée.";
 }
 
   /* =========================
