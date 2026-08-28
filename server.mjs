@@ -545,7 +545,86 @@ const shortText = text
     });
   }
 });
+// ==============================
+// FUSIONNER VIDÉO + VOIX
+// ==============================
+app.post("/api/video/merge", async (req, res) => {
+  try {
+    const { videoId, text } = req.body || {};
 
+    if (!videoId || !text) {
+      return res.status(400).json({
+        ok: false,
+        error: "videoId et text sont requis."
+      });
+    }
+
+    // Récupérer la vidéo
+    const videoResponse = await fetch(
+      `https://api.openai.com/v1/videos/${videoId}/content`,
+      {
+        headers: {
+          Authorization: `Bearer ${API_KEY}`
+        }
+      }
+    );
+
+    if (!videoResponse.ok) {
+      throw new Error("Impossible de récupérer la vidéo.");
+    }
+
+    const videoBuffer = Buffer.from(
+      await videoResponse.arrayBuffer()
+    );
+
+    // Générer la voix
+    const voiceResponse = await fetch(
+      "https://api.openai.com/v1/audio/speech",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini-tts",
+          voice: "alloy",
+          input: text
+        })
+      }
+    );
+
+    if (!voiceResponse.ok) {
+      throw new Error("Impossible de générer la voix.");
+    }
+
+    const audioBuffer = Buffer.from(
+      await voiceResponse.arrayBuffer()
+    );
+
+    // Fusion vidéo + voix
+    const finalVideo = await mergeVideoAndAudio(
+      videoBuffer,
+      audioBuffer
+    );
+
+    res.set("Content-Type", "video/mp4");
+    res.set(
+  "Content-Disposition",
+  'inline; filename="VIRA-final.mp4"'
+);
+
+return res.send(finalVideo);
+
+} catch (error) {
+  console.error("VIRA MERGE ERROR:", error);
+
+  return res.status(500).json({
+    ok: false,
+    error: error.message
+  });
+}
+});
 app.listen(port, () => {
   console.log(`VIRA backend running on port ${port}`);
 });
