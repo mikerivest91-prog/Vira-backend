@@ -189,7 +189,7 @@ app.post("/api/scenario/generate", async (req, res) => {
       });
     }
 
-    const { idea } = req.body || {};
+    const { idea, marketingType = "Campagne marketing générale" } = req.body || {};
 
     if (typeof idea !== "string" || !idea.trim()) {
       return res.status(400).json({
@@ -215,7 +215,8 @@ Tu es le scénariste de VIRA, une application de création vidéo avec intellige
 
 À partir de cette idée :
 "${idea.trim()}"
-
+Type de campagne marketing :
+"${marketingType}"
 Crée un scénario court et visuel destiné à une vidéo verticale.
 
 Réponds exactement avec cette structure :
