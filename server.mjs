@@ -579,18 +579,24 @@ app.post("/api/video/generate", async (req, res) => {
     }
 
     const { prompt, images = [] } = req.body || {};
-if (!Array.isArray(images)) {
-  return res.status(400).json({
-    ok: false,
-    error: "Images invalides."
-  });
-}
     if (typeof prompt !== "string" || !prompt.trim()) {
       return res.status(400).json({
         ok: false,
         error: "A valid video prompt is required."
       });
     }
+    const scenes = prompt
+  .split(/SC[ÈE]NE\s*[1-5]\s*:/i)
+  .slice(1, 6)
+  .map(scene => scene.trim())
+  .filter(Boolean);
+if (!Array.isArray(images)) {
+  return res.status(400).json({
+    ok: false,
+    error: "Images invalides."
+  });
+}
+    
 
     console.log("VIRA VIDEO REQUEST:", prompt.trim());
 
