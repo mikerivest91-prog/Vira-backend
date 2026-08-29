@@ -47,11 +47,12 @@ letter-spacing: 1.5px;
     }
 
     .card {
-      background: #15151d;
-      border: 1px solid #292936;
-      border-radius: 20px;
-      padding: 22px;
-    }
+  background: linear-gradient(145deg, #171821, #11121a);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+}
 
     label {
       display: block;
@@ -88,7 +89,20 @@ letter-spacing: 1.5px;
       font-weight: bold;
       cursor: pointer;
     }
+#scenario {
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #6d28d9 100%);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.32);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
 
+#scenario:active {
+  transform: scale(0.98);
+}
     button:disabled {
       opacity: 0.6;
     }
@@ -124,29 +138,49 @@ letter-spacing: 1.5px;
     }
     .marketing-options {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 15px 0 5px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 18px;
 }
 
 .marketing-choice {
-  margin-top: 0;
-  padding: 14px 10px;
-  background: #20202b;
-  border: 1px solid #353548;
-  border-radius: 12px;
-  font-size: 14px;
+  width: 100%;
+  min-height: 92px;
+  margin: 0;
+  padding: 16px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  border-radius: 20px;
+  border: 1px solid #2c3040;
+  background: linear-gradient(145deg, #171a24, #11131b);
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+  transition: transform .18s ease, border-color .18s ease,
+              background .18s ease, box-shadow .18s ease;
 }
 
 .marketing-choice:hover {
-  background: #2b2b3a;
-  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  border-color: rgba(139,92,246,.55);
+  box-shadow: 0 10px 24px rgba(0,0,0,.24);
 }
-  .marketing-choice.active {
-  background: #7c3aed;
-  border-color: #a78bfa;
-  color: white;
-  }  
+
+.marketing-choice.active {
+  border-color: #8b5cf6;
+  background: linear-gradient(
+    135deg,
+    rgba(124,58,237,.95),
+    rgba(79,70,229,.92)
+  );
+  box-shadow:
+    0 12px 28px rgba(124,58,237,.28),
+    inset 0 1px 0 rgba(255,255,255,.16);
+}
     .campaign-result {
   margin-top: 20px;
   text-align: left;
@@ -228,20 +262,22 @@ letter-spacing: 1.5px;
 .campaign-details input,
 .campaign-details select {
   width: 100%;
-  padding: 14px;
-  background: #121218;
-  border: 1px solid #353548;
-  border-radius: 12px;
-  color: white;
+  padding: 16px;
+  background: rgba(10, 11, 18, 0.9);
+  border: 1px solid #303345;
+  border-radius: 16px;
+  color: #f8fafc;
   font-size: 15px;
   box-sizing: border-box;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
-
 .campaign-details input:focus,
 .campaign-details select:focus {
   outline: none;
   border-color: #8b5cf6;
-}  </style>
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.14);
+}
+  </style>
 </head>
 
 <body>
