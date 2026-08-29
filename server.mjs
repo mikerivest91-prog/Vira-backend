@@ -578,8 +578,13 @@ app.post("/api/video/generate", async (req, res) => {
       });
     }
 
-    const { prompt } = req.body || {};
-
+    const { prompt, images = [] } = req.body || {};
+if (!Array.isArray(images)) {
+  return res.status(400).json({
+    ok: false,
+    error: "Images invalides."
+  });
+}
     if (typeof prompt !== "string" || !prompt.trim()) {
       return res.status(400).json({
         ok: false,
