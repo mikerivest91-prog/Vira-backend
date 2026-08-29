@@ -460,12 +460,17 @@ const cleanScenario = scenario
   .replace(/\s+:/g, ":")
   .replace(/SCENE/gi, "SCÈNE")
   .trim();
-const extractSection = (name, nextNames) => {
+const extractSection = (name, nextNames = []) => {
   const escapedNext = nextNames.join("|");
+  const endPattern = escapedNext
+    ? `(?:${escapedNext})\\s*:?`
+    : `$`;
+
   const regex = new RegExp(
-    `${name}:\\s*([\\s\\S]*?)(?=${escapedNext}:|$)`,
+    `${name}\\s*:?\\s*([\\s\\S]*?)(?=${endPattern}|$)`,
     "i"
   );
+
   return cleanScenario.match(regex)?.[1]?.trim() || "";
 };
 
