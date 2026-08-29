@@ -658,48 +658,26 @@ for (const imageUrl of images) {
   const preparedImage = await prepareVerticalImage(imageUrl);
   preparedImages.push(preparedImage);
 }
+    const videoClips = [];
+
+for (let i = 0; i < 5; i++) {
+  const clip = await generateVideoClip(
+    scenes[i],
+    preparedImages[i]
+  );
+
+  videoClips.push(clip);
+}
     console.log("VIRA VIDEO REQUEST:", prompt.trim());
 
-    const response = await fetch(
-      "https://api.openai.com/v1/videos",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "sora-2",
-          prompt: prompt.trim(),
-size: "720x1280",
-          seconds: "8"
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({
-        ok: false,
-        error:
-          data?.error?.message ||
-          "Erreur lors de la création de la vidéo."
-      });
-    }
-
-    if (!data?.id) {
-      return res.status(502).json({
-        ok: false,
-        error: "Aucun identifiant vidéo reçu."
-      });
-    }
-
     return res.json({
-      ok: true,
-      id: data.id,
-      status: data.status || "queued"
-    });
+  ok: true,
+  status: "prepared",
+  clips: videoClips.map((clip, index) => ({
+    scene: index + 1,
+    ready: true
+  }))
+});
 
   } catch (error) {
     console.error("VIRA VIDEO ERROR:", error);
