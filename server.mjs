@@ -57,6 +57,12 @@ const API_KEY = process.env.OPENAI_API_KEY;
     });
   }
   }
+async function generateVideoClip(scene, imageBuffer) {
+  return {
+    scene,
+    imageBuffer
+  };
+}
 async function mergeVideoAndAudio(videoBuffer, audioBuffer) {
   const tempDir = await fs.mkdtemp(
     path.join(os.tmpdir(), "vira-")
@@ -645,6 +651,12 @@ if (scenes.length !== 5 || images.length !== 5) {
     ok: false,
     error: "VIRA a besoin de 5 scènes et 5 images pour créer la vidéo."
   });
+}
+    const preparedImages = [];
+
+for (const imageUrl of images) {
+  const preparedImage = await prepareVerticalImage(imageUrl);
+  preparedImages.push(preparedImage);
 }
     console.log("VIRA VIDEO REQUEST:", prompt.trim());
 
