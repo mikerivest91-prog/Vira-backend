@@ -1159,7 +1159,7 @@ hookText.style.lineHeight = "1.15";
 hookText.style.marginBottom = "10px";
 
 const ctaText = document.createElement("div");
-ctaText.textContent = cta;
+ctaText.textContent = i === scenes.length - 1 ? cta : "";
 ctaText.style.fontSize = "14px";
 ctaText.style.fontWeight = "700";
 
