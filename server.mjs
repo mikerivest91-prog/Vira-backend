@@ -12,8 +12,51 @@ const port = Number(process.env.PORT || 10000);
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static("public"));
-
 const API_KEY = process.env.OPENAI_API_KEY;
+
+  async function prepareVerticalImage(imageUrl) {
+  const tempDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "vira-image-")
+  );
+
+  const inputPath = path.join(tempDir, "input-image");
+  const outputPath = path.join(tempDir, "vertical.png");
+
+  try {
+    const response = await fetch(imageUrl);
+
+    if (!response.ok) {
+      throw new Error("Impossible de télécharger l'image.");
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    await fs.writeFile(inputPath, buffer);
+
+    await new Promise((resolve, reject) => {
+      const ffmpeg = spawn(ffmpegPath, [
+        "-y",
+        "-i", inputPath,
+        "-vf",
+        "scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280",
+        outputPath
+      ]);
+
+      ffmpeg.on("close", code => {
+        if (code === 0) resolve();
+        else reject(new Error("Erreur lors du redimensionnement de l'image."));
+      });
+
+      ffmpeg.on("error", reject);
+    });
+
+    return await fs.readFile(outputPath);
+  } finally {
+    await fs.rm(tempDir, {
+      recursive: true,
+      force: true
+    });
+  }
+  }
 async function mergeVideoAndAudio(videoBuffer, audioBuffer) {
   const tempDir = await fs.mkdtemp(
     path.join(os.tmpdir(), "vira-")
@@ -616,7 +659,7 @@ if (scenes.length !== 5 || images.length !== 5) {
         body: JSON.stringify({
           model: "sora-2",
           prompt: prompt.trim(),
-          size: "720x1280",
+size: "720x1280",
           seconds: "8"
         })
       }
