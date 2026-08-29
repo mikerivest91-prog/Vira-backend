@@ -272,6 +272,7 @@ RÈGLES MARKETING :
 - Chaque scène doit être visuellement différente mais conserver la même identité de marque.
 - La narration doit être courte, naturelle et persuasive.
 - Le contenu doit être conçu pour une vidéo verticale 9:16.
+IMPORTANT : Toutes les sections demandées doivent contenir du texte. Ne laisse aucune section vide.
 FORMAT DE SORTIE OBLIGATOIRE.
 Respecte exactement tous les titres ci-dessous, dans cet ordre.
 Ne supprime aucune section.
@@ -316,8 +317,7 @@ APPEL À L'ACTION:
 [appel à l'action clair]
 
 PROMPT VISUEL:
-[prompt visuel détaillé pour générer les visuels de la campagne]
-
+[OBLIGATOIRE — écris un prompt visuel détaillé et complet pour générer les images des 5 scènes. Décris les sujets, le décor, l'éclairage, l'angle de caméra, les couleurs, l'ambiance, le style visuel et le format vertical 9:16. Cette section ne doit jamais être vide.]
 STYLE:
 [style visuel, format, rythme, ambiance, couleurs et montage]
 
