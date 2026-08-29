@@ -1020,6 +1020,8 @@ const scenario = getRawScenario();
         "⚠️ Crée d'abord un scénario.";
       return;
     }
+    const hook = (scenario.match(/ACCROCHE\s*:?\s*([\s\S]*?)(?=\n(?:TEXTE(?: DE)? PUBLICATION|HASHTAGS|SC[ÈE]NE\s*1)\s*:|$)/i)?.[1] || "").trim();
+const cta = (scenario.match(/APPEL À L['’]ACTION\s*:?\s*([\s\S]*?)(?=\n(?:PROMPT VISUEL|STYLE)\s*:|$)/i)?.[1] || "").trim();
 
     button.disabled = true;
     status.textContent = "🎬 Génération des 5 scènes...";
@@ -1123,15 +1125,44 @@ Maintain perfect visual continuity with the other scenes.
     );
   }
 
-  const img = document.createElement("img");
+  const card = document.createElement("div");
+card.style.position = "relative";
+card.style.marginTop = "15px";
+card.style.borderRadius = "15px";
+card.style.overflow = "hidden";
 
-  img.src = imageUrl;
-  img.alt = `Scène ${i + 1}`;
-  img.style.width = "100%";
-  img.style.borderRadius = "15px";
-  img.style.marginTop = "15px";
+const img = document.createElement("img");
+img.src = imageUrl;
+img.alt = `Scène ${i + 1}`;
+img.style.width = "100%";
+img.style.display = "block";
 
-  result.appendChild(img);
+const overlay = document.createElement("div");
+overlay.style.position = "absolute";
+overlay.style.left = "0";
+overlay.style.right = "0";
+overlay.style.bottom = "0";
+overlay.style.padding = "24px 18px";
+overlay.style.background = "linear-gradient(transparent, rgba(0,0,0,0.88))";
+overlay.style.color = "white";
+
+const hookText = document.createElement("div");
+hookText.textContent = hook;
+hookText.style.fontSize = "22px";
+hookText.style.fontWeight = "800";
+hookText.style.lineHeight = "1.15";
+hookText.style.marginBottom = "10px";
+
+const ctaText = document.createElement("div");
+ctaText.textContent = cta;
+ctaText.style.fontSize = "14px";
+ctaText.style.fontWeight = "700";
+
+overlay.appendChild(hookText);
+overlay.appendChild(ctaText);
+card.appendChild(img);
+card.appendChild(overlay);
+result.appendChild(card);
 }
 
       status.textContent = "✅ Images générées !";
