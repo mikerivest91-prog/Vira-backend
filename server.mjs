@@ -114,7 +114,7 @@ app.post("/api/images/generate", async (req, res) => {
         },
         body: JSON.stringify({
           model: "gpt-image-2",
-          prompt: prompt.trim(),
+          prompt: `${prompt.trim()}\n\nIMPORTANT: Generate a clean professional image with absolutely no text, words, letters, captions, subtitles, slogans, logos, watermarks or typography anywhere in the image.`,
           size,
           quality
         })
