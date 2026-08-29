@@ -407,6 +407,7 @@ Hook visuel immédiat. Elle doit arrêter le défilement dans les premières sec
 - conserver les mêmes personnages, produit, marque et identité visuelle lorsqu'ils apparaissent;
 - décrire précisément l'action, le décor, le cadrage et les éléments importants;
 - être réalisable par une IA de génération d'images ou de vidéos.
+- ne jamais intégrer de texte, slogan, sous-titre, CTA, logo ou typographie directement dans l'image; VIRA ajoutera ces éléments séparément;
 
 NARRATION
 
