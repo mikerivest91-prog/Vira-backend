@@ -343,6 +343,22 @@ platformSelect.addEventListener("change", function () {
       <div id="status"></div>
 
       <div id="result"></div>
+      <script>
+window.addEventListener("error", function(e) {
+  alert(
+    "ERREUR JS : " + e.message +
+    "\nLigne : " + e.lineno +
+    "\nColonne : " + e.colno
+  );
+});
+
+window.addEventListener("unhandledrejection", function(e) {
+  alert(
+    "ERREUR PROMESSE : " +
+    (e.reason?.message || e.reason)
+  );
+});
+      </script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
