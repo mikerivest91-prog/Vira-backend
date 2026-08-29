@@ -396,19 +396,12 @@ La vidéo comporte exactement 5 scènes.
 SCÈNE 1 :
 Hook visuel immédiat. Elle doit arrêter le défilement dans les premières secondes.
 
-SCÈNE 2 :
-Montre le problème, le besoin, la frustration ou le désir du client cible.
-
-SCÈNE 3 :
-Présente clairement le produit, le service ou la solution.
-
-SCÈNE 4 :
-Montre le bénéfice, le résultat ou la transformation obtenue.
-
-SCÈNE 5 :
-Termine avec une conclusion visuelle forte et un appel à l'action.
-
-Chaque scène doit :
+-  représenter UNE SEULE composition visuelle principale;
+- ne jamais créer de collage, mosaïque, split-screen ou image divisée en plusieurs panneaux;
+- ne jamais regrouper plusieurs plans ou plusieurs moments dans une même image;
+- montrer un seul moment précis de la scène;
+- utiliser un cadrage photographique unique, comme une vraie image publicitaire;
+- conserver une continuité visuelle stricte des personnages, vêtements, produit, véhicule, couleurs et identité de marque entre les 5 scènes;
 - être visuellement différente;
 - rester cohérente avec les autres scènes;
 - conserver les mêmes personnages, produit, marque et identité visuelle lorsqu'ils apparaissent;
