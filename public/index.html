@@ -583,7 +583,7 @@ const targetAudienceInput = document.getElementById("targetAudience");
 const platformInput = document.getElementById("platform");
   const status = document.getElementById("status");
   const result = document.getElementById("result");
-
+let generatedImages = [];
   const scenarioButton = document.getElementById("scenario");
   const scenarioStatus = document.getElementById("scenarioStatus");
   const scenarioResult = document.getElementById("scenarioResult");
@@ -1026,7 +1026,7 @@ const cta = (scenario.match(/APPEL À L['’]ACTION\s*:?\s*([\s\S]*?)(?=\n(?:PRO
     button.disabled = true;
     status.textContent = "🎬 Génération des 5 scènes...";
     result.innerHTML = "";
-
+const generatedImages = [];
     try {
 
       const scenes = scenario
@@ -1129,7 +1129,7 @@ Maintain perfect visual continuity with the other scenes.
       `Aucune image reçue pour la scène ${i + 1}.`
     );
   }
-
+generatedImages.push(imageUrl);
   const card = document.createElement("div");
 card.style.position = "relative";
 card.style.marginTop = "15px";
