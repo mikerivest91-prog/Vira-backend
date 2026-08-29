@@ -597,7 +597,12 @@ if (!Array.isArray(images)) {
   });
 }
     
-
+if (scenes.length !== 5 || images.length !== 5) {
+  return res.status(400).json({
+    ok: false,
+    error: "VIRA a besoin de 5 scènes et 5 images pour créer la vidéo."
+  });
+}
     console.log("VIRA VIDEO REQUEST:", prompt.trim());
 
     const response = await fetch(
