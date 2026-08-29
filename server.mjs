@@ -272,6 +272,7 @@ RÈGLES MARKETING :
 - Chaque scène doit être visuellement différente mais conserver la même identité de marque.
 - La narration doit être courte, naturelle et persuasive.
 - Le contenu doit être conçu pour une vidéo verticale 9:16.
+- Ne jamais écrire le format vidéo (9:16, 16:9, vertical ou horizontal) dans la description des SCÈNES. Le format vidéo doit apparaître uniquement dans la section STYLE.
 IMPORTANT : Toutes les sections demandées doivent contenir du texte. Ne laisse aucune section vide.
 FORMAT DE SORTIE OBLIGATOIRE.
 Respecte exactement tous les titres ci-dessous, dans cet ordre.
