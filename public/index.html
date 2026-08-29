@@ -472,6 +472,12 @@ const style = extractSection("STYLE", []);
       `SCÈNE ${i}:\\s*([\\s\\S]*?)(?=${next}|$)`,
       "i"
     );
+    const match = cleanScenario.match(regex);
+
+if (match?.[1]?.trim()) {
+  scenes.push(match[1].trim());
+}
+  }
 scenarioResult.innerHTML = `
 <div class="campaign-result">
   <h2>🚀 ${title || "Campagne Marketing IA"}</h2>
