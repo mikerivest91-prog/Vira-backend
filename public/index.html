@@ -480,19 +480,19 @@ const cta = extractSection("APPEL À L'ACTION", ["PROMPT VISUEL"]);
 const visualPrompt = extractSection("PROMPT VISUEL", ["STYLE"]);
 const style = extractSection("STYLE", []);
 
-  const scenes = [];
+const scenes = [];
 
-  for (let i = 1; i <= 5; i++) {
-    const next = i < 5 ? `SCÈNE ${i + 1}:` : "NARRATION:";
-    const regex = new RegExp(
-      `SCÈNE ${i}:\\s*([\\s\\S]*?)(?=${next}|$)`,
-      "i"
-    );
-    const match = cleanScenario.match(regex);
+for (let i = 1; i <= 5; i++) {
+  const regex = new RegExp(
+    `SCÈNE ${i}:?\\s*([\\s\\S]*?)(?=SCÈNE ${i + 1}:?|NARRATION:?|APPEL À L['’]ACTION:?|PROMPT VISUEL:?|STYLE:?|$)`,
+    "i"
+  );
 
-if (match?.[1]?.trim()) {
-  scenes.push(match[1].trim());
-}
+  const match = cleanScenario.match(regex);
+
+  if (match?.[1]?.trim()) {
+    scenes.push(match[1].trim());
+  }
   }
 scenarioResult.innerHTML = `
 <div class="campaign-result">
