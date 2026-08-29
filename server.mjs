@@ -624,13 +624,6 @@ return res.json({
 });
 app.post("/api/video/generate", async (req, res) => {
   try {
-    if (!API_KEY) {
-      return res.status(503).json({
-        ok: false,
-        error: "OPENAI_API_KEY is not configured."
-      });
-    }
-
     const { prompt, images = [] } = req.body || {};
     if (typeof prompt !== "string" || !prompt.trim()) {
       return res.status(400).json({
