@@ -285,6 +285,63 @@ letter-spacing: 1.5px;
   border-color: #8b5cf6;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.14);
 }
+    /* Sections repliables de la campagne */
+.campaign-collapsible {
+  padding: 0;
+  overflow: hidden;
+}
+
+.campaign-collapsible summary {
+  padding: 18px;
+  cursor: pointer;
+  list-style: none;
+  color: #a78bfa;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.campaign-collapsible summary::-webkit-details-marker {
+  display: none;
+}
+
+.campaign-collapsible summary::after {
+  content: "＋";
+  font-size: 22px;
+  color: #8b5cf6;
+  transition: transform 0.2s ease;
+}
+
+.campaign-collapsible[open] summary::after {
+  content: "−";
+}
+
+.collapsible-content {
+  padding: 0 18px 18px;
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+}
+
+.collapsible-content p {
+  padding-top: 16px;
+}
+
+.scene-item {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.scene-item:last-child {
+  border-bottom: none;
+}
+
+.scene-item strong {
+  color: #c4b5fd;
+  margin-bottom: 8px;
+}
   </style>
 </head>
 
@@ -659,32 +716,45 @@ scenarioResult.innerHTML = `
     <p>${hashtags}</p>
   </div>
 
-  ${scenes.map((scene, i) => `
-    <div class="campaign-section">
-      <strong>🎬 Scène ${i + 1}</strong>
-      <p>${scene}</p>
-    </div>
-  `).join("")}
+  <details class="campaign-section campaign-collapsible">
+  <summary>🎬 Scènes (${scenes.length})</summary>
 
-  <div class="campaign-section">
-    <strong>🎙️ Narration</strong>
+  <div class="collapsible-content">
+    ${scenes.map((scene, i) => `
+      <div class="scene-item">
+        <strong>Scène ${i + 1}</strong>
+        <p>${scene}</p>
+      </div>
+    `).join("")}
+  </div>
+</details>
+
+<details class="campaign-section campaign-collapsible">
+  <summary>🎙️ Narration</summary>
+  <div class="collapsible-content">
     <p>${narration}</p>
   </div>
+</details>
 
-  <div class="campaign-section">
-    <strong>🎯 Appel à l'action</strong>
-    <p>${cta}</p>
-  </div>
+<div class="campaign-section">
+  <strong>🎯 Appel à l'action</strong>
+  <p>${cta}</p>
+</div>
 
-  <div class="campaign-section">
-    <strong>🖼️ Prompt visuel</strong>
+<details class="campaign-section campaign-collapsible">
+  <summary>🖼️ Prompt visuel</summary>
+  <div class="collapsible-content">
     <p>${visualPrompt}</p>
   </div>
+</details>
 
-  <div class="campaign-section">
-    <strong>🎨 Style</strong>
+<details class="campaign-section campaign-collapsible">
+  <summary>🎨 Style</summary>
+  <div class="collapsible-content">
     <p>${style}</p>
   </div>
+</details>
+    
 </div>
 `;
 
