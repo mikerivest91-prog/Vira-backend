@@ -87,10 +87,21 @@
     }
 
     #status {
-      margin-top: 18px;
-      text-align: center;
-      color: #aaa;
-    }
+  margin-top: 18px;
+  padding: 14px 16px;
+
+  text-align: center;
+
+  color: #c4b5fd;
+  font-size: 14px;
+  font-weight: 700;
+
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 14px;
+
+  line-height: 1.4;
+}
 
     #result {
       margin-top: 25px;
@@ -703,7 +714,7 @@ localStorage.setItem("viraIdea", idea);
     }
 
     scenarioButton.disabled = true;
-    scenarioStatus.textContent = "⏳ Création du scénario...";
+    scenarioStatus.textContent = "✨ VIRA construit votre campagne marketing...";
     scenarioResult.textContent = "";
 
     try {
@@ -738,7 +749,7 @@ const scenario = data?.scenario || data?.output_text || "";
         throw new Error("Aucun scénario reçu du serveur.");
       }
 
-      scenarioStatus.textContent = "✅ Scénario créé !";
+scenarioStatus.textContent = "✅ Votre campagne marketing est prête !";
 renderMarketingScenario(scenario);
       validateScenario.disabled = false;
       validateScenario.style.display = "block";
