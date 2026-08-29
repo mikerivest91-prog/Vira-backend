@@ -529,10 +529,7 @@ scenarioResult.innerHTML = `
   </div>
 </div>
 `;
-      <p>${style}</p>
-    </div>
-  </div>
-`;
+
 }
 const savedScenario = localStorage.getItem("viraScenario") || "";
   const savedBusinessName = localStorage.getItem("viraBusinessName") || "";
@@ -569,7 +566,7 @@ if (savedVideoId || savedVideoUrl) {
     ? `/api/video/${encodeURIComponent(savedVideoId)}/content`
     : savedVideoUrl;
 
-  videoResult.innerHTML = `
+videoResult.innerHTML = `
   <video
     src="${restoredVideoUrl}"
     controls
