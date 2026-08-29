@@ -272,30 +272,54 @@ RÈGLES MARKETING :
 - Chaque scène doit être visuellement différente mais conserver la même identité de marque.
 - La narration doit être courte, naturelle et persuasive.
 - Le contenu doit être conçu pour une vidéo verticale 9:16.
+FORMAT DE SORTIE OBLIGATOIRE.
+Respecte exactement tous les titres ci-dessous, dans cet ordre.
+Ne supprime aucune section.
+
 TITRE:
-[un titre accrocheur]
+[un titre marketing accrocheur]
+
+OBJECTIF:
+[objectif précis de la campagne]
+
+PUBLIC CIBLE:
+[public cible précis]
+
+ACCROCHE:
+[une accroche courte et puissante]
+
+TEXTE PUBLICATION:
+[texte prêt à publier sur la plateforme choisie]
+
+HASHTAGS:
+[8 à 12 hashtags pertinents]
 
 SCÈNE 1:
-[description visuelle]
+[description visuelle détaillée]
 
 SCÈNE 2:
-[description visuelle]
+[description visuelle détaillée]
 
 SCÈNE 3:
-[description visuelle]
+[description visuelle détaillée]
 
 SCÈNE 4:
-[description visuelle]
+[description visuelle détaillée]
 
 SCÈNE 5:
-[description visuelle]
+[description visuelle détaillée]
 
 NARRATION:
-[texte court de narration]
+[narration complète correspondant aux 5 scènes]
+
 APPEL À L'ACTION:
-[un appel à l'action court, clair et adapté au type de campagne]
+[appel à l'action clair]
+
+PROMPT VISUEL:
+[prompt visuel détaillé pour générer les visuels de la campagne]
+
 STYLE:
-[style visuel recommandé]
+[style visuel, format, rythme, ambiance, couleurs et montage]
 
 Le scénario doit être dynamique, facile à transformer en images et en vidéo.
           `.trim()
