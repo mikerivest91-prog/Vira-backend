@@ -460,15 +460,39 @@ const cleanScenario = scenario
   .replace(/\s+:/g, ":")
   .replace(/SCENE/gi, "SCÈNE")
   .trim();
-const extractSection = (name, nextNames = []) => {
-  const escapedNext = nextNames.join("|");
-  const endPattern = escapedNext
-    ? `(?:${escapedNext})\\s*:?`
-    : `$`;
+const sectionHeaders = [
+  "TITRE",
+  "OBJECTIF",
+  "PUBLIC CIBLE",
+  "ACCROCHE",
+  "TEXTE PUBLICATION",
+  "HASHTAGS",
+  "SCÈNE 1",
+  "SCÈNE 2",
+  "SCÈNE 3",
+  "SCÈNE 4",
+  "SCÈNE 5",
+  "NARRATION",
+  "APPEL À L'ACTION",
+  "APPEL À L’ACTION",
+  "PROMPT VISUEL",
+  "STYLE"
+];
+
+const escapeRegex = (text) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const extractSection = (name) => {
+  const start = escapeRegex(name).replace(/'/g, "['’]");
+  const nextHeaders = sectionHeaders
+    .filter((header) => header !== name)
+    .map((header) =>
+      escapeRegex(header).replace(/'/g, "['’]")
+     ) 
+    .join("|");
 
   const regex = new RegExp(
-    `${name}\\s*:?\\s*([\\s\\S]*?)(?=${endPattern}|$)`,
-    "i"
+    `${start}\\s*:?\\s*([\\s\\S]*?)(?=\\s+(?:${nextHeaders})\\s*:?|$)`
   );
 
   return cleanScenario.match(regex)?.[1]?.trim() || "";
