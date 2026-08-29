@@ -1135,7 +1135,18 @@ card.style.position = "relative";
 card.style.marginTop = "15px";
 card.style.borderRadius = "15px";
 card.style.overflow = "hidden";
-
+const sceneBadge = document.createElement("div");
+sceneBadge.textContent = `SCÈNE ${i + 1}`;
+sceneBadge.style.position = "absolute";
+sceneBadge.style.top = "14px";
+sceneBadge.style.left = "14px";
+sceneBadge.style.zIndex = "2";
+sceneBadge.style.padding = "6px 10px";
+sceneBadge.style.borderRadius = "999px";
+sceneBadge.style.background = "rgba(15, 10, 35, 0.78)";
+sceneBadge.style.color = "white";
+sceneBadge.style.fontSize = "12px";
+sceneBadge.style.fontWeight = "800";
 const img = document.createElement("img");
 img.src = imageUrl;
 img.alt = `Scène ${i + 1}`;
@@ -1165,6 +1176,7 @@ ctaText.style.fontWeight = "700";
 
 overlay.appendChild(hookText);
 overlay.appendChild(ctaText);
+  card.appendChild(sceneBadge);
 card.appendChild(img);
 card.appendChild(overlay);
 result.appendChild(card);
