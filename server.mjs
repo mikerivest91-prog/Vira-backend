@@ -58,6 +58,10 @@ const API_KEY = process.env.OPENAI_API_KEY;
   }
   }
 async function generateVideoClip(scene, imageBuffer) {
+  if (!scene || !Buffer.isBuffer(imageBuffer)) {
+    throw new Error("Scène ou image vidéo invalide.");
+  }
+
   return {
     scene,
     imageBuffer
