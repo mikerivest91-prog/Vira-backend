@@ -1252,6 +1252,13 @@ videoResult.innerHTML = `
     🎬 Les 5 scènes et leurs images sont prêtes pour le moteur vidéo.
   </div>
 `;
+      if (submittedClips.length > 0) {
+  videoResult.innerHTML += `
+    <div style="margin-top:12px;">
+      ⏳ Génération Runway en attente...
+    </div>
+  `;
+      }
 const voiceButton = document.createElement("button");
 voiceButton.type = "button";
 voiceButton.textContent = "🎙️ Générer la voix";
