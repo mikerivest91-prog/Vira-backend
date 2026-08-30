@@ -16,7 +16,9 @@ app.use(express.static("public"));
 const API_KEY = process.env.OPENAI_API_KEY;
 const VIDEO_PROVIDER = process.env.VIDEO_PROVIDER || "disabled";
 const RUNWAY_API_KEY = process.env.RUNWAYML_API_SECRET;
+    const runway = RUNWAY_API_KEY ? new RunwayML() : null;
   async function prepareVerticalImage(imageUrl) {
+
   const tempDir = await fs.mkdtemp(
     path.join(os.tmpdir(), "vira-image-")
   );
