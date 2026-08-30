@@ -1220,11 +1220,19 @@ const preparedClips = Array.isArray(data?.clips)
   ? data.clips
   : [];
 
-if (data?.status !== "prepared") {
+const clipStatuses = preparedClips.map(
+  clip => clip?.status
+);
+
+const submittedClips = preparedClips.filter(
+  clip => clip?.status === "submitted"
+);
+
+if (!["prepared", "ready", "submitted"].includes(data?.status)) {
   throw new Error(
-    "La préparation de la vidéo n'a pas été confirmée."
+    "État vidéo inattendu."
   );
-}
+  }
 
 videoStatus.textContent =
   `✅ ${preparedClips.length}/5 scènes vidéo préparées`;
