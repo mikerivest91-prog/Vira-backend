@@ -1180,14 +1180,14 @@ const scenario = getRawScenario();
 let progress = 0;
 
 videoStatus.textContent =
-  "🎥 Création de la vidéo... 0 %";
+"🎬 Préparation de la vidéo... 0 %";
 
 const progressTimer = setInterval(() => {
   if (progress < 99) {
     progress += progress < 80 ? 5 : 1;
 
     videoStatus.textContent =
-      `🎥 Création de la vidéo... ${progress} %`;
+      `🎬 Préparation de la vidéo... ${progress} %`;;
   }
 }, 5000);
     try {
