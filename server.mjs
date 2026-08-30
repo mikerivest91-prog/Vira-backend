@@ -739,7 +739,42 @@ clips: videoClips.map((clip, index) => ({
   }
 });
 
+app.get("/api/video/:taskId/status", async (req, res) => {
+  try {
+    if (!runway) {
+      return res.status(503).json({
+        ok: false,
+        error: "Runway n'est pas configuré."
+      });
+    }
 
+    const { taskId } = req.params;
+
+    if (!taskId) {
+      return res.status(400).json({
+        ok: false,
+        error: "Task ID manquant."
+      });
+    }
+
+    const task = await runway.tasks.retrieve(taskId);
+
+    return res.json({
+      ok: true,
+      taskId: task.id,
+      status: task.status
+    });
+  } catch (error) {
+    console.error("VIRA RUNWAY STATUS ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error:
+        error?.message ||
+        "Impossible de vérifier la vidéo."
+    });
+  }
+});
 // ================================
 // GÉNÉRER LA VOIX
 // ================================
