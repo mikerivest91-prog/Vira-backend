@@ -1345,7 +1345,7 @@ if (allSucceeded) {
 
   const finalVideoBlob =
     await assembleResponse.blob();
-
+window.viraFinalVideoBlob = finalVideoBlob;
   const finalVideoUrl =
     URL.createObjectURL(finalVideoBlob);
 
