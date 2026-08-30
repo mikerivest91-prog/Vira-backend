@@ -95,7 +95,7 @@ if (VIDEO_PROVIDER === "runway") {
     status: "ready"
   };
 }
-}
+
   throw new Error(
     `Moteur vidéo non configuré : ${VIDEO_PROVIDER}`
   );
