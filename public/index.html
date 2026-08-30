@@ -1234,8 +1234,13 @@ if (!["prepared", "ready", "submitted"].includes(data?.status)) {
   );
   }
 
-videoStatus.textContent =
-  `✅ ${preparedClips.length}/5 scènes vidéo préparées`;
+if (submittedClips.length > 0) {
+  videoStatus.textContent =
+    `🚀 ${submittedClips.length}/5 scènes envoyées à Runway`;
+} else {
+  videoStatus.textContent =
+    `✅ ${preparedClips.length}/5 scènes vidéo préparées`;
+}
 
 videoResult.innerHTML = `
   <div style="
