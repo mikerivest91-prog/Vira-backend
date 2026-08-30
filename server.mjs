@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static("public"));
 const API_KEY = process.env.OPENAI_API_KEY;
-
+const VIDEO_PROVIDER = process.env.VIDEO_PROVIDER || "disabled";
   async function prepareVerticalImage(imageUrl) {
   const tempDir = await fs.mkdtemp(
     path.join(os.tmpdir(), "vira-image-")
