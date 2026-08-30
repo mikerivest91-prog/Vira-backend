@@ -76,13 +76,25 @@ if (VIDEO_PROVIDER === "runway") {
   if (!RUNWAY_API_KEY) {
     throw new Error("Clé API Runway manquante.");
   }
-const imageDataUrl = `data:image/png;base64,${imageBuffer.toString("base64")}`;
+
+  const imageDataUrl =
+    `data:image/png;base64,${imageBuffer.toString("base64")}`;
+
+  const request = {
+    model: "gen4.5",
+    promptImage: imageDataUrl,
+    promptText: scene,
+    ratio: "720:1280",
+    duration: 5
+  };
+
   return {
     scene,
-    imageDataUrl,
+    request,
     provider: "runway",
     status: "ready"
   };
+}
 }
   throw new Error(
     `Moteur vidéo non configuré : ${VIDEO_PROVIDER}`
