@@ -678,6 +678,7 @@ for (let i = 0; i < 5; i++) {
     return res.json({
   ok: true,
   status: "prepared",
+      provider: VIDEO_PROVIDER,
   clips: videoClips.map((clip, index) => ({
     scene: index + 1,
     ready: true
