@@ -814,46 +814,7 @@ const savedMarketingGoal = localStorage.getItem("viraMarketingGoal") || "";
 const savedTargetAudience = localStorage.getItem("viraTargetAudience") || "";
 const savedPlatform = localStorage.getItem("viraPlatform") || "";
 const savedIdea = localStorage.getItem("viraIdea") || "";
-const rawSavedVideoId = localStorage.getItem("viraVideoId") || "";
-const savedVideoId =
-  rawSavedVideoId === "undefined" || rawSavedVideoId === "null"
-    ? ""
-    : rawSavedVideoId;
-const savedVideoUrl = localStorage.getItem("viraVideoUrl") || "";
 
-const videoButton = document.getElementById("video");
-const videoStatus = document.getElementById("videoStatus");
-const videoResult = document.getElementById("videoResult");
-
-if (savedIdea) {
-  promptInput.value = savedIdea;
-}
-document.getElementById("businessName").value = savedBusinessName;
-document.getElementById("marketingGoal").value = savedMarketingGoal;
-document.getElementById("targetAudience").value = savedTargetAudience;
-document.getElementById("platform").value = savedPlatform;
-if (savedScenario) {
-renderMarketingScenario(savedScenario);
-  scenarioStatus.textContent = "✅ Scénario restauré.";
-  validateScenario.disabled = false;
-}
-
-if (savedVideoId || savedVideoUrl) {
-  const restoredVideoUrl = savedVideoId
-    ? `/api/video/${encodeURIComponent(savedVideoId)}/content`
-    : savedVideoUrl;
-
-videoResult.innerHTML = `
-  <video
-    src="${restoredVideoUrl}"
-    controls
-    playsinline
-    style="width:100%;border-radius:16px;margin-top:15px;">
-  </video>
-`;
-
-videoStatus.textContent = "✅ Vidéo restaurée.";
-}
   /* =========================
      CRÉER LE SCÉNARIO
   ========================= */
