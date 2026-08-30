@@ -75,7 +75,7 @@ async function generateVideoClip(scene, imageBuffer) {
     };
   }
 if (VIDEO_PROVIDER === "runway") {
-  if (!RUNWAY_API_KEY) {
+if (!runway) {
     throw new Error("Clé API Runway manquante.");
   }
 
