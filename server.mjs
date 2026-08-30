@@ -704,10 +704,11 @@ for (let i = 0; i < 5; i++) {
   ok: true,
   status: "prepared",
       provider: VIDEO_PROVIDER,
-  clips: videoClips.map((clip, index) => ({
-    scene: index + 1,
-    ready: true
-  }))
+clips: videoClips.map((clip, index) => ({
+  scene: index + 1,
+  provider: clip.provider,
+  status: clip.status
+}))
 });
 
   } catch (error) {
