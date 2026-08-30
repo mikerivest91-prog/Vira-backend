@@ -1307,7 +1307,62 @@ if (runwayResults) {
   }
     videoStatus.textContent =
       `⏳ ${finished}/${submittedClips.length} vidéos Runway terminées`;
+const allSucceeded =
+  statuses.length === 5 &&
+  statuses.every(
+    item =>
+      item?.status === "SUCCEEDED" &&
+      Array.isArray(item?.output) &&
+      item.output.length > 0
+  );
 
+if (allSucceeded) {
+  const videoUrls = statuses.map(
+    item => item.output[0]
+  );
+
+  videoStatus.textContent =
+    "🎬 Assemblage de la vidéo finale...";
+
+  const assembleResponse = await fetch(
+    "/api/video/assemble",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        videoUrls
+      })
+    }
+  );
+
+  if (!assembleResponse.ok) {
+    throw new Error(
+      "Impossible d'assembler la vidéo finale."
+    );
+  }
+
+  const finalVideoBlob =
+    await assembleResponse.blob();
+
+  const finalVideoUrl =
+    URL.createObjectURL(finalVideoBlob);
+
+  runwayResults.innerHTML = `
+    <video
+      controls
+      playsinline
+      style="width:100%;border-radius:12px;"
+      src="${finalVideoUrl}"
+    ></video>
+  `;
+
+  videoStatus.textContent =
+    "✅ Vidéo finale prête";
+
+  return;
+  }
     const allFinished = statuses.every(
       item =>
         item?.status === "SUCCEEDED" ||
