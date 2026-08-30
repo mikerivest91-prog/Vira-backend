@@ -1254,7 +1254,7 @@ videoResult.innerHTML = `
 `;
       if (submittedClips.length > 0) {
   videoResult.innerHTML += `
-    <div style="margin-top:12px;">
+  <div id="runwayResults" style="margin-top:12px;">
       ⏳ Génération Runway en attente...
     </div>
   `;
@@ -1273,7 +1273,38 @@ videoResult.innerHTML = `
     const finished = statuses.filter(
       item => item?.status === "SUCCEEDED"
     ).length;
+const runwayResults =
+  document.getElementById("runwayResults");
 
+if (runwayResults) {
+  const completedVideos = statuses
+    .filter(
+      item =>
+        item?.status === "SUCCEEDED" &&
+        Array.isArray(item?.output) &&
+        item.output.length > 0
+    )
+    .map(
+      (item, index) => `
+        <div style="margin-top:12px;">
+          <div style="margin-bottom:6px;">
+            🎬 Scène ${index + 1}
+          </div>
+          <video
+            controls
+            playsinline
+            style="width:100%;border-radius:12px;"
+            src="${item.output[0]}"
+          ></video>
+        </div>
+      `
+    )
+    .join("");
+
+  if (completedVideos) {
+    runwayResults.innerHTML = completedVideos;
+  }
+  }
     videoStatus.textContent =
       `⏳ ${finished}/${submittedClips.length} vidéos Runway terminées`;
 
