@@ -90,12 +90,25 @@ if (!runway) {
     duration: 5
   };
 
+  const runMode = process.env.RUNWAY_EXECUTION || "prepare";
+
+if (runMode !== "generate") {
   return {
     scene,
     request,
     provider: "runway",
     status: "ready"
   };
+}
+
+const task = await runway.imageToVideo.create(request);
+
+return {
+  scene,
+  provider: "runway",
+  status: "submitted",
+  taskId: task.id
+};
 }
 
   throw new Error(
