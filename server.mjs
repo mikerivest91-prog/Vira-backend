@@ -687,55 +687,7 @@ for (let i = 0; i < 5; i++) {
     });
   }
 });
-app.get("/api/video/:id/status", async (req, res) => {
-  try {
-    if (!API_KEY) {
-      return res.status(503).json({
-        ok: false,
-        error: "OPENAI_API_KEY is not configured."
-      });
-    }
 
-    const videoId = req.params.id;
-
-    const response = await fetch(
-      `https://api.openai.com/v1/videos/${encodeURIComponent(videoId)}`,
-      {
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`
-        }
-      }
-    );
-
-    const video = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({
-        ok: false,
-        error:
-          video?.error?.message ||
-          "Impossible de récupérer le statut de la vidéo."
-      });
-    }
-
-    return res.json({
-      ok: true,
-      video: {
-        id: video.id,
-        status: video.status,
-        progress: video.progress ?? 0
-      }
-    });
-
-  } catch (error) {
-    console.error("VIRA VIDEO STATUS ERROR:", error);
-
-    return res.status(500).json({
-      ok: false,
-      error: error?.message || "Erreur interne du serveur."
-    });
-  }
-});
 app.get("/api/video/:id/content", async (req, res) => {
   try {
     if (!API_KEY) {
