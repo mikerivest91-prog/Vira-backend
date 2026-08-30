@@ -62,10 +62,18 @@ async function generateVideoClip(scene, imageBuffer) {
     throw new Error("Scène ou image vidéo invalide.");
   }
 
-  return {
-    scene,
-    imageBuffer
-  };
+  if (VIDEO_PROVIDER === "disabled") {
+    return {
+      scene,
+      imageBuffer,
+      provider: "disabled",
+      status: "prepared"
+    };
+  }
+
+  throw new Error(
+    `Moteur vidéo non configuré : ${VIDEO_PROVIDER}`
+  );
 }
 async function mergeVideoAndAudio(videoBuffer, audioBuffer) {
   const tempDir = await fs.mkdtemp(
