@@ -798,3 +798,6 @@ const shortText = text
     });
   }
 });
+app.listen(port, "0.0.0.0", () => {
+  console.log(`VIRA backend running on port ${port}`);
+});
