@@ -722,7 +722,8 @@ for (let i = 0; i < 5; i++) {
 clips: videoClips.map((clip, index) => ({
   scene: index + 1,
   provider: clip.provider,
-  status: clip.status
+  status: clip.status,
+    taskId: clip.taskId || null
 }))
 });
 
