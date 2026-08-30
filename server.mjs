@@ -759,11 +759,12 @@ app.get("/api/video/:taskId/status", async (req, res) => {
 
     const task = await runway.tasks.retrieve(taskId);
 
-    return res.json({
-      ok: true,
-      taskId: task.id,
-      status: task.status
-    });
+return res.json({
+  ok: true,
+  taskId: task.id,
+  status: task.status,
+  output: Array.isArray(task.output) ? task.output : []
+});
   } catch (error) {
     console.error("VIRA RUNWAY STATUS ERROR:", error);
 
