@@ -71,7 +71,18 @@ async function generateVideoClip(scene, imageBuffer) {
       status: "prepared"
     };
   }
+if (VIDEO_PROVIDER === "runway") {
+  if (!RUNWAY_API_KEY) {
+    throw new Error("Clé API Runway manquante.");
+  }
 
+  return {
+    scene,
+    imageBuffer,
+    provider: "runway",
+    status: "ready"
+  };
+}
   throw new Error(
     `Moteur vidéo non configuré : ${VIDEO_PROVIDER}`
   );
