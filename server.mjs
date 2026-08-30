@@ -172,6 +172,94 @@ async function mergeVideoAndAudio(videoBuffer, audioBuffer) {
     });
   }
 }
+async function concatenateVideoClips(videoUrls) {
+  if (!Array.isArray(videoUrls) || videoUrls.length === 0) {
+    throw new Error("Aucun clip vidéo à assembler.");
+  }
+
+  const tempDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "vira-clips-")
+  );
+
+  try {
+    const clipPaths = [];
+
+    for (let i = 0; i < videoUrls.length; i++) {
+      const response = await fetch(videoUrls[i]);
+
+      if (!response.ok) {
+        throw new Error(`Impossible de télécharger le clip ${i + 1}.`);
+      }
+
+      const buffer = Buffer.from(
+        await response.arrayBuffer()
+      );
+
+      const clipPath = path.join(
+        tempDir,
+        `clip-${i + 1}.mp4`
+      );
+
+      await fs.writeFile(clipPath, buffer);
+      clipPaths.push(clipPath);
+    }
+
+    const listPath = path.join(
+      tempDir,
+      "clips.txt"
+    );
+
+    const listContent = clipPaths
+      .map(filePath => `file '${filePath}'`)
+      .join("\n");
+
+    await fs.writeFile(listPath, listContent);
+
+    const outputPath = path.join(
+      tempDir,
+      "combined.mp4"
+    );
+
+    await new Promise((resolve, reject) => {
+      const ffmpeg = spawn(ffmpegPath, [
+        "-y",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", listPath,
+        "-c", "copy",
+        "-movflags", "+faststart",
+        outputPath
+      ]);
+
+      let errorOutput = "";
+
+      ffmpeg.stderr.on("data", data => {
+        errorOutput += data.toString();
+      });
+
+      ffmpeg.on("error", reject);
+
+      ffmpeg.on("close", code => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(
+            new Error(
+              `FFmpeg concat a échoué (${code}): ${errorOutput}`
+            )
+          );
+        }
+      });
+    });
+
+    return await fs.readFile(outputPath);
+  } finally {
+    await fs.rm(tempDir, {
+      recursive: true,
+      force: true
+    });
+  }
+}
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
