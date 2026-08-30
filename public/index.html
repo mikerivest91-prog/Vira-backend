@@ -1258,6 +1258,41 @@ videoResult.innerHTML = `
       ⏳ Génération Runway en attente...
     </div>
   `;
+      const pollRunway = async () => {
+  try {
+    const statuses = await Promise.all(
+      submittedClips.map(async clip => {
+        const response = await fetch(
+          `/api/video/${encodeURIComponent(clip.taskId)}/status`
+        );
+
+        return await response.json();
+      })
+    );
+
+    const finished = statuses.filter(
+      item => item?.status === "SUCCEEDED"
+    ).length;
+
+    videoStatus.textContent =
+      `⏳ ${finished}/${submittedClips.length} vidéos Runway terminées`;
+
+    const allFinished = statuses.every(
+      item =>
+        item?.status === "SUCCEEDED" ||
+        item?.status === "FAILED" ||
+        item?.status === "CANCELED"
+    );
+
+    if (!allFinished) {
+      setTimeout(pollRunway, 5000);
+    }
+  } catch (error) {
+    console.error("RUNWAY POLL ERROR:", error);
+  }
+};
+
+pollRunway();
       }
 const voiceButton = document.createElement("button");
 voiceButton.type = "button";
