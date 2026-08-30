@@ -260,6 +260,37 @@ async function concatenateVideoClips(videoUrls) {
     });
   }
 }
+app.post("/api/video/assemble", async (req, res) => {
+  try {
+    const { videoUrls = [] } = req.body || {};
+
+    if (!Array.isArray(videoUrls) || videoUrls.length !== 5) {
+      return res.status(400).json({
+        ok: false,
+        error: "VIRA a besoin de 5 clips vidéo."
+      });
+    }
+
+    const finalVideo = await concatenateVideoClips(videoUrls);
+
+    res.setHeader("Content-Type", "video/mp4");
+    res.setHeader(
+      "Content-Disposition",
+      'inline; filename="vira-final.mp4"'
+    );
+
+    return res.send(finalVideo);
+  } catch (error) {
+    console.error("VIRA VIDEO ASSEMBLY ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error:
+        error?.message ||
+        "Impossible d'assembler la vidéo."
+    });
+  }
+});
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
