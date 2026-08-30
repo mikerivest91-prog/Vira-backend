@@ -75,10 +75,10 @@ if (VIDEO_PROVIDER === "runway") {
   if (!RUNWAY_API_KEY) {
     throw new Error("Clé API Runway manquante.");
   }
-
+const imageDataUrl = `data:image/png;base64,${imageBuffer.toString("base64")}`;
   return {
     scene,
-    imageBuffer,
+    imageDataUrl,
     provider: "runway",
     status: "ready"
   };
