@@ -335,8 +335,34 @@ letter-spacing: 1.5px;
   background: #a855f7;
   box-shadow: 0 0 12px rgba(168, 85, 247, 0.55);
 } 
-.campaign-result h2 {
+.result-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.result-icon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: #c084fc;
+  font-size: 15px;
+  font-weight: 900;
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.18),
+    rgba(99, 102, 241, 0.08)
+  );
+  border: 1px solid rgba(168, 85, 247, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 14px rgba(168, 85, 247, 0.12);
+}
+.campaign-result h2 {
   margin: 0 0 20px;
   font-size: 26px;
   font-weight: 900;
@@ -349,7 +375,7 @@ letter-spacing: 1.5px;
     #c4b5fd 55%,
     #60a5fa
   );
-.
+
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1802,27 +1828,27 @@ scenarioResult.innerHTML = `
 
   <h2>${title || "Campagne Marketing"}</h2>
   <div class="campaign-section">
-    <strong>🎯 Objectif</strong>
+<strong class="result-label"><span class="result-icon">◎</span>Objectif</strong>
     <p>${objective}</p>
   </div>
 
   <div class="campaign-section">
-    <strong>👥 Public cible</strong>
+ <strong class="result-label"><span class="result-icon">◇</span>Public cible</strong>
     <p>${target}</p>
   </div>
 
   <div class="campaign-section">
-    <strong>🪝 Accroche</strong>
+<strong class="result-label"><span class="result-icon">✦</span>Accroche</strong>
     <p>${hook}</p>
   </div>
 
   <div class="campaign-section">
-    <strong>✍️ Texte de publication</strong>
+    <strong class="result-label"><span class="result-icon">▤</span>Texte de publication</strong>
     <p>${publication}</p>
   </div>
 
   <div class="campaign-section">
-    <strong>#️⃣ Hashtags</strong>
+    <strong class="result-label"><span class="result-icon">#</span>Hashtags</strong>
     <p>${hashtags}</p>
   </div>
 
