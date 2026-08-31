@@ -911,10 +911,108 @@ letter-spacing: 1.5px;
   font-size: 20px;
   line-height: 1.3;
 }    
+    /* Sidebar VIRA - cachée sur mobile */
+.desktop-sidebar {
+  display: none;
+}
+
+/* Version ordinateur */
+@media (min-width: 900px) {
+
+  .app-shell {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    min-height: 100vh;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 28px 18px;
+    border-right: 1px solid rgba(148, 163, 184, 0.12);
+    background: rgba(5, 5, 8, 0.96);
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 34px;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sidebar-link {
+    width: 100%;
+    margin: 0;
+    padding: 13px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: #9ca3af;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  .sidebar-link:hover {
+    background: rgba(139, 92, 246, 0.08);
+    color: #ffffff;
+  }
+
+  .sidebar-link.active {
+    color: #ffffff;
+    border-color: rgba(139, 92, 246, 0.25);
+    background: rgba(124, 58, 237, 0.16);
+  }
+
+  .app-shell > .container {
+    width: 100%;
+    max-width: 1100px;
+    padding: 32px 40px 80px;
+  }
+
+  .vira-topbar .vira-brand {
+    display: none;
+  }
+
+  .vira-topbar {
+    justify-content: flex-end;
+  }
+}
 </style>
 
 <body>
 <div class="app-shell">
+  <aside class="desktop-sidebar">
+  <div class="sidebar-logo">
+    <div class="vira-mark">V</div>
+    <div>
+      <div class="logo">VIRA</div>
+      <div class="subtitle">MARKETING</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button type="button" class="sidebar-link active">⌂ Accueil</button>
+    <button type="button" class="sidebar-link">▣ Campagnes</button>
+    <button type="button" class="sidebar-link">◇ Modèles</button>
+    <button type="button" class="sidebar-link">▤ Mes contenus</button>
+    <button type="button" class="sidebar-link">◫ Statistiques</button>
+    <button type="button" class="sidebar-link">⚡ Crédits</button>
+    <button type="button" class="sidebar-link">⚙ Paramètres</button>
+  </nav>
+  </aside>
   <div class="container">
 
 <div class="vira-topbar">
