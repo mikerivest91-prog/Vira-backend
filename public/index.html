@@ -438,6 +438,51 @@ letter-spacing: 1.5px;
 #video:active {
   transform: scale(0.98);
 }
+    
+ .campaign-details {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field-group label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #d8d8e5;
+}
+
+.field-group input,
+.field-group select {
+  width: 100%;
+  height: 52px;
+  padding: 0 15px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 13px;
+  background: rgba(8, 8, 14, 0.92);
+  color: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease;
+}
+
+.field-group input:focus,
+.field-group select:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.10);
+}
+
+.field-group input::placeholder {
+  color: #6f7180;
+}   
 </style> 
   
 </head>
@@ -477,24 +522,48 @@ letter-spacing: 1.5px;
   placeholder="Exemple : Ma boutique de vêtements, mon restaurant, mon produit, mon service..."
 ></textarea>
 <div class="campaign-details">
-  <input id="businessName" type="text"
-    placeholder="Nom de l'entreprise ou du produit">
 
-  <input id="marketingGoal" type="text"
-    placeholder="Objectif : vendre, obtenir des clients, visibilité...">
+  <div class="field-group">
+    <label for="businessName">Nom du produit / service</label>
+    <input
+      id="businessName"
+      type="text"
+      placeholder="Ex: VIRA, Agence Marketing, Boutique..."
+    >
+  </div>
 
-  <input id="targetAudience" type="text"
-    placeholder="Public cible : ex. femmes 25-40 ans">
+  <div class="field-group">
+    <label for="marketingGoal">Objectif principal</label>
+    <input
+      id="marketingGoal"
+      type="text"
+      placeholder="Ex: Générer plus de ventes"
+    >
+  </div>
 
-  <select id="platform">
-    <option value="">Choisir une plateforme</option>
-    <option value="Instagram">Instagram</option>
-    <option value="Facebook">Facebook</option>
-    <option value="TikTok">TikTok</option>
-    <option value="YouTube">YouTube</option>
-    <option value="LinkedIn">LinkedIn</option>
-  </select>
+  <div class="field-group">
+    <label for="targetAudience">Audience cible</label>
+    <input
+      id="targetAudience"
+      type="text"
+      placeholder="Ex: Entrepreneurs, PME, E-commerçants..."
+    >
+  </div>
+
+  <div class="field-group">
+    <label for="platform">Plateforme principale</label>
+    <select id="platform">
+      <option value="">Choisir une plateforme</option>
+      <option value="Instagram">Instagram</option>
+      <option value="Facebook">Facebook</option>
+      <option value="TikTok">TikTok</option>
+      <option value="YouTube">YouTube</option>
+      <option value="LinkedIn">LinkedIn</option>
+    </select>
+  </div>
+
   <div id="platformTip" style="display:none;"></div>
+
 </div>
       <script>
 document.addEventListener("click", function (e) {
