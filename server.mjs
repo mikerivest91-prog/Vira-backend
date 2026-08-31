@@ -144,7 +144,8 @@ async function mergeVideoAndAudio(videoBuffer, audioBuffer) {
         "-map", "1:a:0",
         "-c:v", "copy",
         "-c:a", "aac",
-        "-shortest",
+        "-af", "apad",
+"-shortest",
         "-movflags", "+faststart",
         outputPath
       ]);
