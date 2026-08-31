@@ -1193,15 +1193,15 @@ letter-spacing: 1.5px;
     >
   </div>
 
-<div class="field-group">
+<div class="field-group tone-field">
   <label for="campaignTone">Ton de la campagne</label>
-
+<div class="tone-premium-icon" id="tonePremiumIcon"></div>
   <select id="campaignTone">
-    <option value="Professionnel">✨ Professionnel</option>
-    <option value="Dynamique">⚡ Dynamique</option>
-    <option value="Amical">😊 Amical</option>
-    <option value="Premium">💎 Premium</option>
-    <option value="Inspirant">🚀 Inspirant</option>
+    <option value="Professionnel">Professionnel</option>
+<option value="Dynamique">Dynamique</option>
+<option value="Amical">Amical</option>
+<option value="Premium">Premium</option>
+<option value="Inspirant">Inspirant</option>
   </select>
 </div>
 
@@ -1333,6 +1333,7 @@ function updateTonePremiumIcon() {
 
 campaignToneSelect.addEventListener("change", updateTonePremiumIcon);
 updateTonePremiumIcon();
+
         const platformSelect = document.getElementById("platform");
 const platformTip = document.getElementById("platformTip");
 
