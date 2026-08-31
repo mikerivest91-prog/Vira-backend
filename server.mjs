@@ -298,6 +298,55 @@ app.post("/api/video/assemble", async (req, res) => {
     });
   }
 });
+app.post(
+  "/api/video/merge",
+  upload.fields([
+    { name: "video", maxCount: 1 },
+    { name: "audio", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      const videoBuffer =
+        req.files?.video?.[0]?.buffer;
+
+      const audioBuffer =
+        req.files?.audio?.[0]?.buffer;
+
+      if (!videoBuffer || !audioBuffer) {
+        return res.status(400).json({
+          ok: false,
+          error: "Vidéo ou audio manquant."
+        });
+      }
+
+      const finalVideo =
+        await mergeVideoAndAudio(
+          videoBuffer,
+          audioBuffer
+        );
+
+      res.setHeader("Content-Type", "video/mp4");
+      res.setHeader(
+        "Content-Disposition",
+        'inline; filename="VIRA-final.mp4"'
+      );
+
+      return res.send(finalVideo);
+    } catch (error) {
+      console.error(
+        "VIRA VIDEO AUDIO MERGE ERROR:",
+        error
+      );
+
+      return res.status(500).json({
+        ok: false,
+        error:
+          error?.message ||
+          "Impossible d'ajouter la voix à la vidéo."
+      });
+    }
+  }
+);
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
