@@ -1853,8 +1853,7 @@ scenarioResult.innerHTML = `
   </div>
 
   <details class="campaign-section campaign-collapsible">
-  <summary>🎬 Scènes (${scenes.length})</summary>
-
+<summary class="result-label"><span class="result-icon">▶</span>Scènes (${scenes.length})</summary>
   <div class="collapsible-content">
     ${scenes.map((scene, i) => `
       <div class="scene-item">
@@ -1866,26 +1865,26 @@ scenarioResult.innerHTML = `
 </details>
 
 <details class="campaign-section campaign-collapsible">
-  <summary>🎙️ Narration</summary>
+  <summary class="result-label"><span class="result-icon">◉</span>Narration</summary>
   <div class="collapsible-content">
     <p>${narration}</p>
   </div>
 </details>
 
 <div class="campaign-section">
-  <strong>🎯 Appel à l'action</strong>
+<strong class="result-label"><span class="result-icon">↗</span>Appel à l'action</strong>
   <p>${cta}</p>
 </div>
 
 <details class="campaign-section campaign-collapsible">
-  <summary>🖼️ Prompt visuel</summary>
+<summary class="result-label"><span class="result-icon">◇</span>Prompt visuel</summary>
   <div class="collapsible-content">
     <p>${visualPrompt}</p>
   </div>
 </details>
 
 <details class="campaign-section campaign-collapsible">
-  <summary>🎨 Style</summary>
+<summary class="result-label"><span class="result-icon">✦</span>Style</summary>
   <div class="collapsible-content">
     <p>${style}</p>
   </div>
