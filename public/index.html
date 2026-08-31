@@ -1224,7 +1224,9 @@ const clipStatuses = preparedClips.map(
 );
 
 const submittedClips = preparedClips.filter(
-  clip => clip?.status === "submitted"
+  clip =>
+    clip?.status === "submitted" &&
+    clip?.taskId
 );
 
 if (!["prepared", "ready", "submitted"].includes(data?.status)) {
