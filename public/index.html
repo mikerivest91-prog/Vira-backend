@@ -185,23 +185,29 @@ letter-spacing: 1.5px;
 
 .marketing-choice {
   width: 100%;
-  min-height: 92px;
+  min-height: 118px;
   margin: 0;
-  padding: 16px 14px;
+  padding: 18px 16px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
-  border-radius: 20px;
-  border: 1px solid #2c3040;
-  background: linear-gradient(145deg, #171a24, #11131b);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background:
+    linear-gradient(145deg, rgba(20, 22, 30, 0.96), rgba(10, 11, 16, 0.98));
   color: #f8fafc;
   font-size: 15px;
   font-weight: 800;
-  line-height: 1.25;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
-  transition: transform .18s ease, border-color .18s ease,
-              background .18s ease, box-shadow .18s ease;
+  line-height: 1.3;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 12px 30px rgba(0,0,0,0.22);
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
 }
 
 .marketing-choice:hover {
@@ -211,15 +217,17 @@ letter-spacing: 1.5px;
 }
 
 .marketing-choice.active {
-  border-color: #8b5cf6;
-  background: linear-gradient(
-    135deg,
-    rgba(124,58,237,.95),
-    rgba(79,70,229,.92)
-  );
+  border-color: rgba(168, 85, 247, 0.95);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(91, 33, 182, 0.92),
+      rgba(79, 70, 229, 0.88)
+    );
   box-shadow:
-    0 12px 28px rgba(124,58,237,.28),
-    inset 0 1px 0 rgba(255,255,255,.16);
+    0 14px 34px rgba(124, 58, 237, 0.30),
+    inset 0 1px 0 rgba(255,255,255,0.14);
+  transform: translateY(-1px);
 }
     .campaign-result {
   margin-top: 20px;
