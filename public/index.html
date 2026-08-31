@@ -530,17 +530,15 @@ letter-spacing: 1.5px;
 }
 
 .section-title span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #9333ea, #2563eb);
+  display: inline;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
   color: #ffffff;
-  font-size: 13px;
-  font-weight: 900;
-  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25);
+  font-size: inherit;
+  font-weight: 800;
+  box-shadow: none;
 }
     .primary-cta {
   width: 100%;
@@ -879,23 +877,6 @@ letter-spacing: 1.5px;
 </div>
 <div class="campaign-details">
 
-  <div class="field-group">
-    <label for="businessName">Nom du produit / service</label>
-    <input
-      id="businessName"
-      type="text"
-      placeholder="Ex: VIRA, Agence Marketing, Boutique..."
-    >
-  </div>
-
-  <div class="field-group">
-    <label for="marketingGoal">Objectif principal</label>
-    <input
-      id="marketingGoal"
-      type="text"
-      placeholder="Ex: Générer plus de ventes"
-    >
-  </div>
 
   <div class="field-group">
     <label for="targetAudience">Audience cible</label>
@@ -905,6 +886,16 @@ letter-spacing: 1.5px;
       placeholder="Ex: Entrepreneurs, PME, E-commerçants..."
     >
   </div>
+  <div class="field-group">
+    <label for="marketingGoal">Objectif principal</label>
+    <input
+      id="marketingGoal"
+      type="text"
+      placeholder="Ex: Générer plus de ventes"
+    >
+  </div>
+
+
 
   <div class="field-group">
     <label for="platform">Plateforme principale</label>
