@@ -28,7 +28,44 @@
       margin: auto;
       padding: 30px 20px;
     }
+    
+.vira-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
 
+.vira-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vira-mark {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #9333ea, #2563eb);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
+  color: white;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.credit-badge {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(15, 15, 23, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
     .logo {
   text-align: center;
   font-size: 36px;
@@ -401,10 +438,19 @@ letter-spacing: 1.5px;
 
   <div class="container">
 
-    <div class="logo">VIRA</div>
+<div class="vira-topbar">
+  <div class="vira-brand">
+    <div class="vira-mark">V</div>
 
-<div class="subtitle">
-  Marketing IA
+    <div>
+      <div class="logo">VIRA</div>
+      <div class="subtitle">MARKETING</div>
+    </div>
+  </div>
+
+  <div class="credit-badge">
+    ⚡ Crédits
+  </div>
 </div>
 
     <div class="card">
