@@ -775,6 +775,41 @@ letter-spacing: 1.5px;
     font-size: 11px;
   }
 }   
+    .campaign-result {
+  display: none;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 16, 23, 0.98),
+    rgba(8, 9, 14, 0.98)
+  );
+   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+  color: #ffffff;
+}
+
+.campaign-result:not(:empty) {
+  display: block;
+}
+
+.campaign-result h2,
+.campaign-result h3,
+.campaign-result h4 {
+  margin-top: 0;
+  color: #ffffff;
+}
+
+.campaign-result p {
+  color: #b7b7c5;
+  line-height: 1.55;
+}
+
+.campaign-result strong {
+  color: #ffffff;
+}
+
 </style>
 
 <body>
@@ -1027,7 +1062,7 @@ platformSelect.addEventListener("change", function () {
 </button>
 <div id="scenarioStatus"></div>
 
-<div id="scenarioResult"></div>
+<div id="scenarioResult" class="campaign-result"></div>
 <button id="validateScenario" type="button" 
   disabled style="display:none;">
  ✅ Valider la campagne
