@@ -721,7 +721,7 @@ letter-spacing: 1.5px;
 .platform-premium-icon {
   position: absolute;
   left: 16px;
-  bottom: 15px;
+  bottom: 16px;
   width: 22px;
   height: 22px;
   display: flex;
@@ -730,6 +730,7 @@ letter-spacing: 1.5px;
   color: #a855f7;
   pointer-events: none;
   z-index: 2;
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.42));
 }
 
 .platform-premium-icon svg {
@@ -1576,9 +1577,16 @@ function updatePlatformPremiumIcon() {
   };
 
   if (!platformSelect.value) {
-    platformPremiumIcon.innerHTML = "";
-    return;
-  }
+  platformPremiumIcon.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M3 12h18"></path>
+      <path d="M12 3a15 15 0 0 1 0 18"></path>
+      <path d="M12 3a15 15 0 0 0 0 18"></path>
+    </svg>
+  `;
+  return;
+}
 
   platformPremiumIcon.innerHTML =
     icons[platformSelect.value] || "";
