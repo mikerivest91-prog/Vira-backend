@@ -623,6 +623,38 @@ letter-spacing: 1.5px;
     max-width: 620px;
   }
     }
+    .welcome-block {
+  margin: 18px 0 24px;
+}
+
+.welcome-block h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.15;
+  color: #ffffff;
+}
+
+.welcome-block p {
+  margin: 0;
+  max-width: 420px;
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.credit-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.credit-badge small {
+  display: block;
+  color: #9ca3af;
+  font-size: 10px;
+  font-weight: 600;
+}
 </style>
 
 <body>
@@ -640,8 +672,14 @@ letter-spacing: 1.5px;
   </div>
 
   <div class="credit-badge">
-    ⚡ Crédits
+    ⚡ <span id="creditCount">—</span>
+    <small>crédits</small>
   </div>
+</div>
+
+<div class="welcome-block">
+  <h1>Salut, <span id="userFirstName">Utilisateur</span> 👋</h1>
+  <p>Crée une campagne marketing complète en quelques secondes.</p>
 </div>
 
     <div class="card">
