@@ -540,20 +540,33 @@ letter-spacing: 1.5px;
   font-weight: 800;
   box-shadow: none;
 }
-    .primary-cta {
+ .primary-cta {
   width: 100%;
-  min-height: 56px;
-  margin-top: 24px;
-  border: none;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #9333ea, #2563eb);
+  min-height: 58px;
+  margin-top: 22px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #7c3aed 0%,
+    #9333ea 48%,
+    #2563eb 100%
+  );
+
   color: #ffffff;
   font-size: 16px;
   font-weight: 800;
-  letter-spacing: 0.2px;
+  letter-spacing: 0;
   cursor: pointer;
-  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.32);
-  transition: transform .18s ease, box-shadow .18s ease;
+
+  box-shadow:
+    0 12px 28px rgba(124, 58, 237, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
 }
 
 .primary-cta:hover {
