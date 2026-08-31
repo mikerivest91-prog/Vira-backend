@@ -543,20 +543,31 @@ letter-spacing: 1.5px;
     0 8px 24px rgba(0,0,0,.18);
 }
 
-.tone-field::after {
-  content: "✦";
+.tone-premium-icon {
   position: absolute;
-  left: 17px;
+  left: 16px;
   bottom: 15px;
-  width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #a855f7;
-  font-size: 22px;
-  font-weight: 700;
   pointer-events: none;
-  filter: drop-shadow(0 0 8px rgba(168,85,247,.45));
+  z-index: 2;
+}
+
+.tone-premium-icon svg {
+  width: 22px !important;
+  height: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .section-title {
   display: flex;
