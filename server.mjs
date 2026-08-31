@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import ffmpegPath from "ffmpeg-static";
 import RunwayML from "@runwayml/sdk";
+import multer from "multer";
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
