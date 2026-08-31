@@ -655,6 +655,115 @@ letter-spacing: 1.5px;
   font-size: 10px;
   font-weight: 600;
 }
+ .marketing-choice {
+  position: relative;
+  min-height: 170px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.choice-icon {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.icon-launch {
+  color: #a855f7;
+  text-shadow: 0 0 18px rgba(168, 85, 247, 0.55);
+}
+
+.icon-brand {
+  color: #38bdf8;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.55);
+}
+
+.icon-leads {
+  color: #4ade80;
+  text-shadow: 0 0 18px rgba(74, 222, 128, 0.55);
+}
+
+.icon-sale {
+  color: #fb923c;
+  text-shadow: 0 0 18px rgba(251, 146, 60, 0.55);
+}
+
+.choice-title {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.choice-description {
+  color: #a1a1aa;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.choice-check {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: #c084fc;
+  color: #1e1233;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.45);
+}
+
+.marketing-choice.active .choice-check {
+  display: flex;
+}
+
+.marketing-choice.active {
+  border-color: #a855f7;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(147, 51, 234, 0.20), transparent 55%),
+    rgba(12, 12, 18, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.30),
+    0 0 26px rgba(124, 58, 237, 0.22);
+}
+
+@media (max-width: 430px) {
+  .marketing-choice {
+    min-height: 165px;
+    padding: 16px 10px;
+  }
+
+  .choice-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 30px;
+  }
+
+  .choice-title {
+    font-size: 15px;
+  }
+
+  .choice-description {
+    font-size: 11px;
+  }
+}   
 </style>
 
 <body>
@@ -689,10 +798,67 @@ letter-spacing: 1.5px;
 </div>
       
 <div class="marketing-options">
-  <button type="button" class="marketing-choice">🛍️ Vendre un produit</button>
-  <button type="button" class="marketing-choice">💼 Promouvoir un service</button>
-  <button type="button" class="marketing-choice">📱 Réseaux sociaux</button>
-  <button type="button" class="marketing-choice">📢 Créer une publicité</button>
+  <button type="button" class="marketing-choice">
+ <div class="choice-icon icon-launch">
+  <svg viewBox="0 0 24 24" width="46" height="46" fill="none"
+       stroke="currentColor" stroke-width="1.8"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 11v2a2 2 0 0 0 2 2h2l4 4V5L7 9H5a2 2 0 0 0-2 2Z"/>
+    <path d="M11 8c3-1 5-2 8-5v18c-3-3-5-4-8-5"/>
+  </svg>
+ </div>
+  <div class="choice-title">Lancement<br>de produit</div>
+  <div class="choice-description">Lancez un nouveau<br>produit ou service</div>
+  <div class="choice-check">✓</div>
+</button>
+
+<button type="button" class="marketing-choice">
+<div class="choice-icon icon-brand">
+  <svg viewBox="0 0 24 24" width="46" height="46" fill="none"
+       stroke="currentColor" stroke-width="1.8"
+       stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="7"/>
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 5V2"/>
+    <path d="M19 12h3"/>
+    <path d="M17 7l3-3"/>
+  </svg>
+</div>
+  <div class="choice-title">Notoriété<br>de marque</div>
+  <div class="choice-description">Accroître la visibilité<br>de votre marque</div>
+  <div class="choice-check">✓</div>
+</button>
+
+<button type="button" class="marketing-choice">
+<div class="choice-icon icon-leads">
+  <svg viewBox="0 0 24 24" width="46" height="46" fill="none"
+       stroke="currentColor" stroke-width="1.8"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 20V13h4v7"/>
+    <path d="M10 20V9h4v11"/>
+    <path d="M16 20V4h4v16"/>
+    <path d="M2 20h20"/>
+  </svg>
+</div>
+  <div class="choice-title">Génération<br>de leads</div>
+  <div class="choice-description">Attirez plus de<br>prospects qualifiés</div>
+  <div class="choice-check">✓</div>
+</button>
+
+<button type="button" class="marketing-choice">
+<div class="choice-icon icon-sale">
+  <svg viewBox="0 0 24 24" width="46" height="46" fill="none"
+       stroke="currentColor" stroke-width="1.8"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 4h2l2 11h10l3-7H6"/>
+    <circle cx="9" cy="19" r="1.5"/>
+    <circle cx="17" cy="19" r="1.5"/>
+  </svg>
+</div>
+  <div class="choice-title">Promo / Vente<br>spéciale</div>
+  <div class="choice-description">Stimulez vos ventes<br>rapidement</div>
+  <div class="choice-check">✓</div>
+</button>
 </div>
       <div class="section-title">
   <span>2.</span>
