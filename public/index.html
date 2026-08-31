@@ -1431,6 +1431,70 @@ if (!voiceResponse.ok) {
 }
 
 const audioBlob = await voiceResponse.blob();
+  if (window.viraFinalVideoBlob) {
+  const formData = new FormData();
+
+  formData.append(
+    "video",
+    window.viraFinalVideoBlob,
+    "VIRA-video.mp4"
+  );
+
+  formData.append(
+    "audio",
+    audioBlob,
+    "VIRA-voice.mp3"
+  );
+
+  const mergeResponse = await fetch(
+    "/api/video/merge",
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+
+  if (!mergeResponse.ok) {
+    throw new Error(
+      "Impossible d'ajouter la voix à la vidéo."
+    );
+  }
+
+  const narratedVideoBlob =
+    await mergeResponse.blob();
+
+  const narratedVideoUrl =
+    URL.createObjectURL(narratedVideoBlob);
+
+  const runwayResults =
+    document.getElementById("runwayResults");
+
+  if (runwayResults) {
+    runwayResults.innerHTML = `
+      <video
+        controls
+        playsinline
+        style="width:100%;border-radius:12px;"
+        src="${narratedVideoUrl}"
+      ></video>
+
+      <a
+        href="${narratedVideoUrl}"
+        download="VIRA-final.mp4"
+        style="
+          display:block;
+          margin-top:12px;
+          text-align:center;
+        "
+      >
+        ⬇️ Télécharger la vidéo finale
+      </a>
+    `;
+  }
+
+  videoStatus.textContent =
+    "✅ Vidéo finale avec narration prête";
+  }
 const audioUrl = URL.createObjectURL(audioBlob);
 
 document.getElementById("voiceResult")?.remove();
