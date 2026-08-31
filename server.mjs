@@ -9,6 +9,12 @@ import ffmpegPath from "ffmpeg-static";
 import RunwayML from "@runwayml/sdk";
 import multer from "multer";
 const app = express();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024
+  }
+});
 const port = Number(process.env.PORT || 10000);
 
 app.use(cors());
