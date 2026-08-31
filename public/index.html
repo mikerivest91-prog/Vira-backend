@@ -542,6 +542,30 @@ letter-spacing: 1.5px;
   font-weight: 900;
   box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25);
 }
+    .primary-cta {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 24px;
+  border: none;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #9333ea, #2563eb);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.32);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.primary-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(124, 58, 237, 0.40);
+}
+
+.primary-cta:active {
+  transform: scale(0.98);
+}
 </style>
 
 <body>
@@ -698,9 +722,7 @@ if (choiceText.includes("Réseaux")) {
 if (choiceText.includes("publicité")) {
   document.getElementById("prompt").placeholder =
     "Exemple : Créer une publicité pour attirer de nouveaux clients...";
-  document.getElementById("businessName").placeholder =
-    "Nom de l'entreprise, produit ou service";
-  document.getElementById("marketingGoal").placeholder =
+
     "Objectif publicitaire : ventes, leads, réservations...";
   document.getElementById("targetAudience").placeholder =
     "Audience publicitaire ciblée";
@@ -727,8 +749,8 @@ platformSelect.addEventListener("change", function () {
   }
 });
       </script>
-<button id="scenario" type="button">
-  🚀 Créer une campagne Marketing IA
+<button id="scenario" type="button" class="primary-cta">
+  ✨ Générer ma campagne
 </button>
 <div id="scenarioStatus"></div>
 
