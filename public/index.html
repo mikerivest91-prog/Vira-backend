@@ -1164,8 +1164,7 @@ videoButton.style.display = "block";
      CRÉER LA VIDÉO
   ========================= */
 const videoButton = document.getElementById("videoButton");
-  videoButton.addEventListener("click", async function () {
-
+videoButton?.addEventListener("click", async function () {
 const scenario = getRawScenario();
 
     if (!scenario || scenario === "Scénario reçu.") {
