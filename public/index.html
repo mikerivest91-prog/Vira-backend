@@ -2134,7 +2134,20 @@ const platform = document.getElementById("platform").value;
     const idea = promptInput.value.trim();
 if (!marketingGoal || !targetAudience || !platform) {
     scenarioStatus.innerHTML = `
-        <div class="vira-premium-alert">
+   <div class="vira-premium-alert" style="
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:14px;
+  padding:16px 18px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#35205a,#1c1230);
+  border:1px solid rgba(192,132,252,.65);
+  box-shadow:0 0 24px rgba(168,85,247,.22),0 10px 30px rgba(0,0,0,.35);
+  text-align:left;
+">
             <div class="vira-alert-icon">✦</div>
             <div>
                 <strong>Quelques détails manquent</strong>
