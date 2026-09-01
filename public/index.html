@@ -2051,25 +2051,44 @@ platformSelect.addEventListener("change", function () {
 <div id="scenarioResult" class="campaign-result campaign-dashboard"></div>
 
 <button id="validateScenario" type="button"
-  disabled style="display:none;">
-  <span class="btn-icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24">
-
-      <path d="M8 12.5l2.5 2.5L16 9"></path>
-    </svg>
-  </span>
-  Valider la campagne
+  disabled
+  style="
+    display:none;
+    width:100% !important;
+    height:64px !important;
+    min-height:64px !important;
+    max-height:64px !important;
+    aspect-ratio:auto !important;
+    padding:0 22px !important;
+    border-radius:18px !important;
+    box-sizing:border-box !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:10px !important;
+    overflow:hidden !important;
+  ">
+  <span aria-hidden="true" style="font-size:20px;line-height:1;">✓</span>
+  <span>Valider la campagne</span>
 </button>
 
-<button id="testVoice" type="button" style="display:none;">
-  <span class="btn-icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24">
-      <rect x="9" y="3" width="6" height="12" rx="3"></rect>
-      <path d="M6 11a6 6 0 0 0 12 0"></path>
-      <path d="M12 17v4"></path>
-    </svg>
-  </span>
-  Tester la narration
+<button id="testVoice" type="button"
+  style="
+    display:none;
+    width:100% !important;
+    height:64px !important;
+    min-height:64px !important;
+    max-height:64px !important;
+    aspect-ratio:auto !important;
+    padding:0 22px !important;
+    border-radius:18px !important;
+    box-sizing:border-box !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:10px !important;
+    overflow:hidden !important;
+  ">
+  <span aria-hidden="true" style="font-size:20px;line-height:1;">◉</span>
+  <span>Tester la narration</span>
 </button>
 
 <button id="generate" type="button"
