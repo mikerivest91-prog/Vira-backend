@@ -2537,7 +2537,7 @@ for (let i = 0; i < scenes.length; i++) {
   status.textContent =
     `🎬 Génération de la scène ${i + 1}/${scenes.length}...`;
 
-  const scenePrompt = `
+const scenePrompt = `
 ${continuityPrompt}
 
 STORY CONTEXT:
@@ -2546,8 +2546,17 @@ ${scenario}
 CURRENT SCENE ${i + 1}:
 ${scenes[i]}
 
-Create this scene as part of the same continuous movie.
-Maintain perfect visual continuity with the other scenes.
+SCENE-SPECIFIC INSTRUCTIONS:
+- Keep the exact same woman established in Scene 1.
+- Preserve her exact face, hair, age, body type, clothing and accessories.
+- Preserve the same office environment and visual identity.
+- Treat this image as the next shot in the same filming session.
+- Only change the pose, camera framing, facial expression and action required by this scene.
+- Do not introduce a different person.
+- Do not redesign the workspace.
+- Do not change wardrobe or hairstyle.
+- Keep the same premium cinematic advertising style.
+- Keep vertical 9:16 composition.
 `;
 
   const response = await fetch(
