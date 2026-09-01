@@ -2111,22 +2111,35 @@ platformSelect.addEventListener("change", function () {
   <span>Tester la narration</span>
 </button>
 
+
 <button id="generate" type="button"
   style="
     display:none;
     width:100%;
-    min-height:88px;
-    padding:16px 20px;
+    min-height:86px;
+    margin-top:18px;
+    padding:16px 18px;
     border-radius:22px;
-    border:1px solid rgba(245,158,11,.65);
-    background:linear-gradient(135deg,#f59e0b,#ea580c);
-    box-shadow:0 10px 34px rgba(234,88,12,.24);
-    color:white;
+    border:1px solid rgba(245,158,11,.62);
+    background:
+      linear-gradient(135deg,#f59e0b 0%,#f97316 55%,#ea580c 100%);
+    box-shadow:
+      0 14px 36px rgba(234,88,12,.24),
+      inset 0 1px 0 rgba(255,255,255,.18);
+    color:#ffffff;
     box-sizing:border-box;
     text-align:left;
+    overflow:hidden;
   ">
-  <div style="display:flex;align-items:center;gap:16px;width:100%;">
-    
+
+  <div style="
+    display:flex;
+    align-items:center;
+    gap:14px;
+    width:100%;
+    min-width:0;
+  ">
+
     <div style="
       width:48px;
       height:48px;
@@ -2135,40 +2148,78 @@ platformSelect.addEventListener("change", function () {
       display:flex;
       align-items:center;
       justify-content:center;
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.24
-      font-size:26px;
-    ">✦</div>
+      background:rgba(255,255,255,.13);
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+      font-size:24px;
+    ">
+      ✦
+    </div>
 
-    <div style="flex:1;">
-      <div style="font-size:18px;font-weight:800;">
+    <div style="
+      flex:1;
+      min-width:0;
+    ">
+      <div style="
+        font-size:17px;
+        font-weight:900;
+        line-height:1.2;
+      ">
         Créer les visuels
       </div>
-      <div style="font-size:14px;opacity:.9;margin-top:4px;">
+
+      <div style="
+        margin-top:4px;
+        font-size:13px;
+        font-weight:600;
+        line-height:1.35;
+        opacity:.88;
+      ">
         Générez 5 visuels professionnels avec l’IA
       </div>
     </div>
 
-    <div style="font-size:30px;opacity:.9;">›</div>
+    <div style="
+      flex:0 0 auto;
+      font-size:28px;
+      font-weight:500;
+      opacity:.9;
+      line-height:1;
+    ">
+      ›
+    </div>
 
   </div>
 </button>
+
+
 <button id="video" type="button"
   style="
     display:none;
     width:100%;
-    min-height:88px;
-    padding:16px 20px;
+    min-height:86px;
+    margin-top:14px;
+    padding:16px 18px;
     border-radius:22px;
-    border:1px solid rgba(168,85,247,.75);
-    background:linear-gradient(135deg,#7c3aed,#4c1d95);
-    box-shadow:0 10px 34px rgba(124,58,237,.28);
-    color:white;
+    border:1px solid rgba(168,85,247,.58);
+    background:
+      linear-gradient(135deg,#6d28d9 0%,#7c3aed 52%,#4c1d95 100%);
+    box-shadow:
+      0 14px 38px rgba(124,58,237,.26),
+      inset 0 1px 0 rgba(255,255,255,.16);
+    color:#ffffff;
     box-sizing:border-box;
     text-align:left;
+    overflow:hidden;
   ">
 
-  <div style="display:flex;align-items:center;gap:16px;width:100%;">
+  <div style="
+    display:flex;
+    align-items:center;
+    gap:14px;
+    width:100%;
+    min-width:0;
+  ">
 
     <div style="
       width:48px;
@@ -2178,23 +2229,49 @@ platformSelect.addEventListener("change", function () {
       display:flex;
       align-items:center;
       justify-content:center;
-      background:rgba(255,255,255,.12);
-      border:1px solid rgba(255,255,255,.22);
-      font-size:25px;
-    ">🎬</div>
+      background:rgba(255,255,255,.11);
+      border:1px solid rgba(255,255,255,.20);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+      font-size:23px;
+    ">
+      🎬
+    </div>
 
-    <div style="flex:1;">
-      <div style="font-size:18px;font-weight:800;">
+    <div style="
+      flex:1;
+      min-width:0;
+    ">
+      <div style="
+        font-size:17px;
+        font-weight:900;
+        line-height:1.2;
+      ">
         Créer la vidéo marketing
       </div>
 
-      <div style="font-size:14px;opacity:.85
+      <div style="
+        margin-top:4px;
+        font-size:13px;
+        font-weight:600;
+        line-height:1.35;
+        opacity:.86;
+      ">
+        Transformez vos visuels en vidéo impactante
+      </div>
+    </div>
 
+    <div style="
+      flex:0 0 auto;
+      font-size:28px;
+      font-weight:500;
+      opacity:.9;
+      line-height:1;
+    ">
+      ›
+    </div>
 
-
-
-
-
+  </div>
+</button>
 <div id="videoStatus"></div>
 <div id="videoResult"></div>
       <div id="status"></div>
