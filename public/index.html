@@ -2730,82 +2730,210 @@ if (FREE_TEST_MODE) {
     `)}`;
   });
 
-  result.innerHTML = generatedImages
-.map((image, index) => `
+result.innerHTML = `
   <div style="
-    margin:16px auto;
-    padding:12px;
-    max-width:380px;
-    border:1px solid rgba(192,132,252,.22);
-    border-radius:24px;
-    background:linear-gradient(145deg,#171225,#100c1c);
-    box-shadow:
-      0 18px 45px rgba(0,0,0,.35),
-      0 0 28px rgba(139,60,240,.08);
+    max-width:950px;
+    margin:18px auto;
   ">
 
     <div style="
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:4px 4px 12px;
+      gap:14px;
+      padding:16px 18px;
+      margin-bottom:16px;
+      border-radius:20px;
+      background:linear-gradient(145deg,#11101d,#0c0b16);
+      border:1px solid rgba(168,85,247,.28);
+      box-shadow:
+        0 15px 35px rgba(0,0,0,.32),
+        inset 0 1px 0 rgba(255,255,255,.04);
     ">
-      <span style="
-        font-size:13px;
-        font-weight:900;
-        color:#c084fc;
-        letter-spacing:1px;
+      <div style="
+        display:flex;
+        align-items:center;
+        gap:12px;
+        min-width:0;
       ">
-        SCÈNE ${index + 1}
-      </span>
+        <div style="
+          width:42px;
+          height:42px;
+          flex:0 0 42px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          border-radius:14px;
+          background:rgba(168,85,247,.12);
+          border:1px solid rgba(192,132,252,.28);
+          color:#c084fc;
+          font-size:21px;
+          box-shadow:0 0 22px rgba(168,85,247,.16);
+        ">
+          ✦
+        </div>
 
-      <span style="
-        padding:5px 9px;
-        border-radius:999px;
-        background:rgba(168,85,247,.12);
-        border:1px solid rgba(192,132,252,.18);
+        <div>
+          <div style="
+            color:#ffffff;
+            font-size:15px;
+            font-weight:800;
+          ">
+            Visuels de campagne
+          </div>
+
+          <div style="
+            color:#9f95b5;
+            font-size:12px;
+            margin-top:3px;
+          ">
+            5 visuels simulés gratuitement
+          </div>
+        </div>
+      </div>
+
+      <div style="
+        padding:7px 11px;
+        border-radius:12px;
+        background:rgba(124,58,237,.13);
+        border:1px solid rgba(192,132,252,.30);
         color:#d8b4fe;
-        font-size:10px;
-        font-weight:800;
+        font-size:12px;
+        font-weight:900;
+        white-space:nowrap;
       ">
-        9:16
-      </span>
+        5/5
+      </div>
     </div>
 
-    <img
-      src="${image}"
-      alt="Visuel test scène ${index + 1}"
-      style="
-        width:100%;
-        height:auto;
-        max-height:480px;
-        display:block;
-        object-fit:cover;
-        border-radius:18px;
-        background:#120d1f;
-        box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
-      "
-    >
-
     <div style="
-      margin-top:10px;
-      padding:12px 14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.045);
-      border:1px solid rgba(255,255,255,.06);
-      color:#f5f3ff;
-      font-size:13px;
-      font-weight:600;
-      line-height:1.45;
-      text-align:left;
+      padding:16px;
+      border-radius:22px;
+      background:linear-gradient(145deg,#11101d,#0b0a14);
+      border:1px solid rgba(168,85,247,.24);
+      box-shadow:
+        0 18px 45px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.035);
     ">
-      ${sceneTexts[index]}
+
+      <div style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        margin-bottom:14px;
+      ">
+        <div>
+          <div style="
+            color:#c084fc;
+            font-size:16px;
+            font-weight:900;
+          ">
+            ✦ Vos 5 scènes
+          </div>
+
+          <div style="
+            color:#817991;
+            font-size:11px;
+            margin-top:3px;
+          ">
+            Aperçu vertical 9:16
+          </div>
+        </div>
+
+        <div style="
+          color:#a78bfa;
+          font-size:20px;
+        ">
+          ›
+        </div>
+      </div>
+
+      <div style="
+        display:flex;
+        gap:12px;
+        overflow-x:auto;
+        padding:2px 2px 10px;
+        scroll-snap-type:x mandatory;
+        -webkit-overflow-scrolling:touch;
+      ">
+
+        ${generatedImages.map((image, index) => `
+          <div style="
+            flex:0 0 145px;
+            scroll-snap-align:start;
+          ">
+
+            <div style="
+              position:relative;
+              overflow:hidden;
+              height:210px;
+              border-radius:16px;
+              background:#120d1f;
+              border:1px solid rgba(192,132,252,.20);
+              box-shadow:0 10px 26px rgba(0,0,0,.30);
+            ">
+
+              <img
+                src="${image}"
+                alt="Scène ${index + 1}"
+                style="
+                  width:100%;
+                  height:100%;
+                  display:block;
+                  object-fit:cover;
+                "
+              >
+
+              <div style="
+                position:absolute;
+                top:8px;
+                left:8px;
+                padding:5px 8px;
+                border-radius:999px;
+                background:rgba(7,5,14,.76);
+                border:1px solid rgba(192,132,252,.24);
+                backdrop-filter:blur(8px);
+                color:#e9d5ff;
+                font-size:10px;
+                font-weight:900;
+              ">
+                SCÈNE ${index + 1}
+              </div>
+
+            </div>
+
+            <div style="
+              padding:9px 4px 0;
+            ">
+              <div style="
+                color:#f5f3ff;
+                font-size:12px;
+                font-weight:800;
+                margin-bottom:4px;
+              ">
+                Scène ${index + 1}
+              </div>
+
+              <div style="
+                color:#8f879f;
+                font-size:10px;
+                line-height:1.35;
+                white-space:nowrap;
+                overflow:hidden;
+                text-overflow:ellipsis;
+              ">
+                ${sceneTexts[index] || "Visuel marketing"}
+              </div>
+            </div>
+
+          </div>
+        `).join("")}
+
+      </div>
     </div>
 
   </div>
-`)
-.join("");
-
+`;
 result.insertAdjacentHTML("beforeend", `
   <div style="
     margin:20px auto 6px;
