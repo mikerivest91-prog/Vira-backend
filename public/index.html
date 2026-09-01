@@ -1724,7 +1724,8 @@ document.addEventListener("click", function (e) {
   choice.classList.add("active");
 
   document.getElementById("prompt").value = "";
-  document.getElementById("businessName").value = "";
+const businessNameReset = document.getElementById("businessName");
+if (businessNameReset) businessNameReset.value = "";
   document.getElementById("marketingGoal").value = "";
   document.getElementById("targetAudience").value = "";
   document.getElementById("platform").value = "";
@@ -1739,8 +1740,11 @@ document.addEventListener("click", function (e) {
 if (choiceText.includes("produit")) {
   document.getElementById("prompt").placeholder =
     "Exemple : Je veux vendre mes chaussures de sport...";
-  document.getElementById("businessName").placeholder =
+  const businessNameField = document.getElementById("businessName");
+if (businessNameField) {
+  businessNameField.placeholder =
     "Nom du produit ou de la marque";
+}
   document.getElementById("marketingGoal").placeholder =
     "Objectif : ventes, conversions, lancement...";
   document.getElementById("targetAudience").placeholder =
@@ -1750,8 +1754,11 @@ if (choiceText.includes("produit")) {
 if (choiceText.includes("service")) {
   document.getElementById("prompt").placeholder =
     "Exemple : Faire connaître mon service de nettoyage...";
-  document.getElementById("businessName").placeholder =
+  const businessNameField2 = document.getElementById("businessName");
+if (businessNameField2) {
+  businessNameField2.placeholder =
     "Nom de l'entreprise ou du service";
+}
   document.getElementById("marketingGoal").placeholder =
     "Objectif : obtenir des clients, réservations...";
   document.getElementById("targetAudience").placeholder =
@@ -1761,8 +1768,11 @@ if (choiceText.includes("service")) {
 if (choiceText.includes("Réseaux")) {
   document.getElementById("prompt").placeholder =
     "Exemple : Créer du contenu pour développer ma marque...";
-  document.getElementById("businessName").placeholder =
+  const businessNameField3 = document.getElementById("businessName");
+if (businessNameField3) {
+  businessNameField3.placeholder =
     "Nom de la marque ou du compte";
+}
   document.getElementById("marketingGoal").placeholder =
     "Objectif : abonnés, engagement, visibilité...";
   document.getElementById("targetAudience").placeholder =
@@ -2062,7 +2072,7 @@ marketingChoices.forEach((choice) => {
 
 localStorage.removeItem("viraIdea");
 promptInput.value = "";
-    businessNameInput.value = "";
+    if (businessNameInput) businessNameInput.value = "";
 marketingGoalInput.value = "";
 targetAudienceInput.value = "";
 platformInput.value = "";
@@ -2089,7 +2099,7 @@ status.textContent = "";
 
 validateScenario.style.display = "none";
 validateScenario.disabled = true;
-validateScenario.textContent = "✅ Valider le scénario";
+validateScenario.textContent = " Valider le scénario";
 
 button.style.display = "none";
 if (videoButton) videoButton.style.display = "none";
