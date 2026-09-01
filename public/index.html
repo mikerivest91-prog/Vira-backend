@@ -2731,19 +2731,53 @@ if (FREE_TEST_MODE) {
   });
 
   result.innerHTML = generatedImages
-    .map((image, index) => `
-      <div style="margin:16px 0;">
-        <img
-          src="${image}"
-          alt="Visuel test scène ${index + 1}"
-          style="width:100%;border-radius:18px;"
-        >
-        <div style="margin-top:8px;">
-          Scène ${index + 1} — ${sceneTexts[index] || ""}
-        </div>
-      </div>
-    `)
-    .join("");
+.map((image, index) => `
+  <div style="
+    margin:18px 0;
+    padding:14px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:22px;
+    background:#171225;
+    box-shadow:0 14px 35px rgba(0,0,0,.28);
+  ">
+    <div style="
+      font-size:14px;
+      font-weight:800;
+      color:#c084fc;
+      margin-bottom:10px;
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    ">
+      Scène ${index + 1}
+    </div>
+
+    <img
+      src="${image}"
+      alt="Visuel test scène ${index + 1}"
+      style="
+        width:100%;
+        display:block;
+        aspect-ratio:9/16;
+        object-fit:cover;
+        border-radius:18px;
+        background:#120d1f;
+      "
+    >
+
+    <div style="
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.05);
+      color:#f4efff;
+      font-size:14px;
+      line-height:1.5;
+    ">
+      ${sceneTexts[index]}
+    </div>
+  </div>
+`)
+.join("");
 videoButton.style.display = "block";
   return;
 }
