@@ -2479,34 +2479,57 @@ if (FREE_TEST_MODE) {
 
   return;
 }
-      const continuityPrompt = `
+const continuityPrompt = `
 VISUAL CONTINUITY RULES:
 
-Create all images as frames from the SAME cinematic story.
+Create all images as frames from the SAME premium cinematic marketing campaign.
 
-Keep these elements CONSISTENT in every scene:
-- same main character
-- same face and identity
-- same hairstyle
-- same age
+MAIN CHARACTER LOCK:
+- same exact woman in every scene
+- same face identity
+- same facial structure
+- same skin tone
+- same eye color
+- same hairstyle and hair color
+- same approximate age
 - same body proportions
-- same clothing and accessories
-- same environment and world
-- same cinematic style
-- same realistic visual quality
-- same color grading
-- same lighting style
+- same clothing
+- same accessories
+- do not redesign or reinterpret the character between scenes
 
-The main character must look like the SAME PERSON in every scene.
-Do not randomly change the character, clothing, age, face or hairstyle.
+ENVIRONMENT LOCK:
+- same office / workspace
+- same furniture and background elements
+- same overall layout
+- same color palette
+- same lighting direction
+- same time of day
 
-Each image must visually continue the previous scene.
+CAMERA & STYLE LOCK:
+- cinematic realistic photography
+- premium commercial advertising look
+- natural realistic lighting
+- consistent color grading
+- consistent lens style
+- professional composition
+- vertical 9:16 format
+- highly detailed
+- realistic skin and materials
 
-Use a cinematic realistic film-still look.
-Vertical 9:16 composition.
-Highly detailed.
-Natural realistic lighting.
-Professional cinematography.
+CONTINUITY REQUIREMENT:
+Each new image must look like the next shot from the SAME filming session.
+The woman must remain immediately recognizable as the same person.
+Only change pose, framing, facial expression, and action when required by the current scene.
+
+Do not randomly change:
+- face
+- hair
+- age
+- clothing
+- body type
+- office design
+- lighting style
+- visual identity
 `;
 
 for (let i = 0; i < scenes.length; i++) {
