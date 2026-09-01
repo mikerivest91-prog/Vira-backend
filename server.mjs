@@ -31,7 +31,7 @@ app.use(
     limit: "25mb"
   })
 );
-
+app.use(express.static("public"));
 // ======================================================
 // OUTILS
 // ======================================================
@@ -100,13 +100,7 @@ function extractScenes(text) {
 // ACCUEIL / TEST SERVEUR
 // ======================================================
 
-app.get("/", (_req, res) => {
-  res.json({
-    ok: true,
-    name: "VIRA Marketing IA",
-    status: "online"
-  });
-});
+
 
 app.get("/api/health", (_req, res) => {
   res.json({
