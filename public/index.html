@@ -2016,14 +2016,15 @@ if (!activeMarketingChoice) {
 }
 
 selectedMarketingType = activeMarketingChoice.textContent.trim();
-   const businessName = document.getElementById("businessName").value.trim();
+ const businessName =
+  document.getElementById("businessName")?.value.trim() || "Non précisé";
 const marketingGoal = document.getElementById("marketingGoal").value.trim();
 const targetAudience = document.getElementById("targetAudience").value.trim();
 const platform = document.getElementById("platform").value; 
     const idea = promptInput.value.trim();
-    if (!businessName || !marketingGoal || !targetAudience || !platform) {
+if (!marketingGoal || !targetAudience || !platform) {
   scenarioStatus.textContent =
-    "⚠️ Remplis le nom, l’objectif, le public cible et la plateforme.";
+"⚠️ Remplis l’objectif, le public cible et choisis une plateforme."
   return;
     }
 localStorage.setItem("viraIdea", idea);
