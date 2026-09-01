@@ -2194,7 +2194,47 @@ const sceneTexts = scenes.map((scene, index) => {
           "Aucune scène trouvée dans le scénario."
         );
       }
+// ===== MODE TEST GRATUIT =====
+const FREE_TEST_MODE = true;
 
+if (FREE_TEST_MODE) {
+  status.textContent = "🧪 Mode test : 5 visuels simulés gratuitement";
+
+  generatedImages = scenes.map((scene, index) => {
+    const label = `Scène ${index + 1}`;
+
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080">
+        <rect width="100%" height="100%" fill="#151022"/>
+        <text x="50%" y="46%" text-anchor="middle"
+              fill="#a855f7" font-size="64" font-family="Arial">
+          ${label}
+        </text>
+        <text x="50%" y="55%" text-anchor="middle"
+              fill="white" font-size="34" font-family="Arial">
+          VISUEL TEST VIRA
+        </text>
+      </svg>
+    `)}`;
+  });
+
+  result.innerHTML = generatedImages
+    .map((image, index) => `
+      <div style="margin:16px 0;">
+        <img
+          src="${image}"
+          alt="Visuel test scène ${index + 1}"
+          style="width:100%;border-radius:18px;"
+        >
+        <div style="margin-top:8px;">
+          Scène ${index + 1} — ${sceneTexts[index] || ""}
+        </div>
+      </div>
+    `)
+    .join("");
+
+  return;
+}
       const continuityPrompt = `
 VISUAL CONTINUITY RULES:
 
