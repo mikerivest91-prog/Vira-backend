@@ -2732,23 +2732,45 @@ if (FREE_TEST_MODE) {
 
   result.innerHTML = generatedImages
 .map((image, index) => `
+.map((image, index) => `
   <div style="
-    margin:18px 0;
-    padding:14px;
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:22px;
-    background:#171225;
-    box-shadow:0 14px 35px rgba(0,0,0,.28);
+    margin:16px auto;
+    padding:12px;
+    max-width:380px;
+    border:1px solid rgba(192,132,252,.22);
+    border-radius:24px;
+    background:linear-gradient(145deg,#171225,#100c1c);
+    box-shadow:
+      0 18px 45px rgba(0,0,0,.35),
+      0 0 28px rgba(139,60,240,.08);
   ">
+
     <div style="
-      font-size:14px;
-      font-weight:800;
-      color:#c084fc;
-      margin-bottom:10px;
-      text-transform:uppercase;
-      letter-spacing:.6px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:4px 4px 12px;
     ">
-      Scène ${index + 1}
+      <span style="
+        font-size:13px;
+        font-weight:900;
+        color:#c084fc;
+        letter-spacing:1px;
+      ">
+        SCÈNE ${index + 1}
+      </span>
+
+      <span style="
+        padding:5px 9px;
+        border-radius:999px;
+        background:rgba(168,85,247,.12);
+        border:1px solid rgba(192,132,252,.18);
+        color:#d8b4fe;
+        font-size:10px;
+        font-weight:800;
+      ">
+        9:16
+      </span>
     </div>
 
     <img
@@ -2756,25 +2778,31 @@ if (FREE_TEST_MODE) {
       alt="Visuel test scène ${index + 1}"
       style="
         width:100%;
+        height:auto;
+        max-height:480px;
         display:block;
-        aspect-ratio:9/16;
         object-fit:cover;
         border-radius:18px;
         background:#120d1f;
+        box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
       "
     >
 
     <div style="
-      margin-top:12px;
+      margin-top:10px;
       padding:12px 14px;
-      border-radius:14px;
-      background:rgba(255,255,255,.05);
-      color:#f4efff;
-      font-size:14px;
-      line-height:1.5;
+      border-radius:16px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.06);
+      color:#f5f3ff;
+      font-size:13px;
+      font-weight:600;
+      line-height:1.45;
+      text-align:left;
     ">
       ${sceneTexts[index]}
     </div>
+
   </div>
 `)
 .join("");
