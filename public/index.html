@@ -2050,25 +2050,45 @@ platformSelect.addEventListener("change", function () {
 
 <div id="scenarioResult" class="campaign-result campaign-dashboard"></div>
 
-<button id="validateScenario" type="button"
-  disabled
+<button id="validateScenario" type="button" disabled
   style="
     display:none;
-    width:100% !important;
-    height:64px !important;
-    min-height:64px !important;
-    max-height:64px !important;
-    aspect-ratio:auto !important;
-    padding:0 22px !important;
-    border-radius:18px !important;
-    box-sizing:border-box !important;
-    align-items:center !important;
-    justify-content:center !important;
-    gap:10px !important;
-    overflow:hidden !important;
+    width:100%;
+    min-height:82px;
+    padding:16px 20px;
+    border-radius:22px;
+    border:1px solid rgba(34,197,94,.75);
+    background:linear-gradient(135deg,rgba(5,110,55,.88),rgba(3,65,45,.92));
+    box-shadow:0 8px 30px rgba(34,197,94,.18);
+    color:white;
+    box-sizing:border-box;
+    text-align:left;
   ">
-  <span aria-hidden="true" style="font-size:20px;line-height:1;">✓</span>
-  <span>Valider la campagne</span>
+  <div style="display:flex;align-items:center;gap:16px;width:100%;">
+    <div style="
+      width:48px;
+      height:48px;
+      flex:0 0 48px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(16,185,129,.18);
+      border:1px solid #10b981;
+      font-size:26px;
+    ">✓</div>
+
+    <div style="flex:1;">
+      <div style="font-size:18px;font-weight:800;">
+        Scénario validé
+      </div>
+      <div style="font-size:14px;opacity:.78;margin-top:4px;">
+        Votre scénario est prêt à être transformé en visuels.
+      </div>
+    </div>
+
+    <div style="font-size:30px;opacity:.75;">›</div>
+  </div>
 </button>
 
 <button id="testVoice" type="button"
@@ -2094,42 +2114,81 @@ platformSelect.addEventListener("change", function () {
 <button id="generate" type="button"
   style="
     display:none;
-    width:100% !important;
-    height:64px !important;
-    min-height:64px !important;
-    max-height:64px !important;
-    aspect-ratio:auto !important;
-    padding:0 22px !important;
-    border-radius:18px !important;
-    box-sizing:border-box !important;
-    align-items:center !important;
-    justify-content:center !important;
-    gap:10px !important;
-    overflow:hidden !important;
+    width:100%;
+    min-height:88px;
+    padding:16px 20px;
+    border-radius:22px;
+    border:1px solid rgba(245,158,11,.65);
+    background:linear-gradient(135deg,#f59e0b,#ea580c);
+    box-shadow:0 10px 34px rgba(234,88,12,.24);
+    color:white;
+    box-sizing:border-box;
+    text-align:left;
   ">
-  <span aria-hidden="true" style="font-size:22px;line-height:1;">✦</span>
-  <span>Créer les visuels</span>
-</button>
+  <div style="display:flex;align-items:center;gap:16px;width:100%;">
+    
+    <div style="
+      width:48px;
+      height:48px;
+      flex:0 0 48px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.24
+      font-size:26px;
+    ">✦</div>
 
+    <div style="flex:1;">
+      <div style="font-size:18px;font-weight:800;">
+        Créer les visuels
+      </div>
+      <div style="font-size:14px;opacity:.9;margin-top:4px;">
+        Générez 5 visuels professionnels avec l’IA
+      </div>
+    </div>
+
+    <div style="font-size:30px;opacity:.9;">›</div>
+
+  </div>
+</button>
 <button id="video" type="button"
   style="
     display:none;
-    width:100% !important;
-    height:64px !important;
-    min-height:64px !important;
-    max-height:64px !important;
-    aspect-ratio:auto !important;
-    padding:0 22px !important;
-    border-radius:18px !important;
-    box-sizing:border-box !important;
-    align-items:center !important;
-    justify-content:center !important;
-    gap:10px !important;
-    overflow:hidden !important;
+    width:100%;
+    min-height:88px;
+    padding:16px 20px;
+    border-radius:22px;
+    border:1px solid rgba(168,85,247,.75);
+    background:linear-gradient(135deg,#7c3aed,#4c1d95);
+    box-shadow:0 10px 34px rgba(124,58,237,.28);
+    color:white;
+    box-sizing:border-box;
+    text-align:left;
   ">
-  <span aria-hidden="true" style="font-size:20px;line-height:1;">▶</span>
-  <span>Créer la vidéo marketing</span>
-</button>
+
+  <div style="display:flex;align-items:center;gap:16px;width:100%;">
+
+    <div style="
+      width:48px;
+      height:48px;
+      flex:0 0 48px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.22);
+      font-size:25px;
+    ">🎬</div>
+
+    <div style="flex:1;">
+      <div style="font-size:18px;font-weight:800;">
+        Créer la vidéo marketing
+      </div>
+
+      <div style="font-size:14px;opacity:.85
 
 
 
