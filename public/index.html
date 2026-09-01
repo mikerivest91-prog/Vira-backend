@@ -2272,11 +2272,79 @@ platformSelect.addEventListener("change", function () {
 
   </div>
 </button>
-<div id="videoStatus"></div>
-<div id="videoResult"></div>
-      <div id="status"></div>
+<!-- ===== VIRA PREMIUM RESULTS ===== -->
 
-      <div id="result"></div>
+<div id="videoStatusBar" style="
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:14px;
+  padding:13px 16px;
+  border-radius:18px;
+  background:linear-gradient(145deg,#11101c,#0b0a13);
+  border:1px solid rgba(168,85,247,.28);
+  box-shadow:0 10px 28px rgba(0,0,0,.24);
+">
+  <div style="
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  ">
+    <span style="
+      color:#c084fc;
+      font-size:18px;
+    ">⚗</span>
+
+    <div id="videoStatus" style="
+      color:#ddd6e9;
+      font-size:13px;
+      font-weight:600;
+      line-height:1.35;
+    "></div>
+  </div>
+
+  <span style="
+    flex:0 0 auto;
+    padding:6px 10px;
+    border-radius:10px;
+    color:#d8b4fe;
+    font-size:11px;
+    font-weight:900;
+    background:rgba(124,58,237,.13);
+    border:1px solid rgba(192,132,252,.35);
+  ">
+    ACTIF
+  </span>
+</div>
+
+
+<div id="videoResult" style="
+  width:100%;
+  box-sizing:border-box;
+"></div>
+
+
+<div id="visualStatusBar" style="
+  width:100%;
+  box-sizing:border-box;
+  margin-top:14px;
+">
+  <div id="status"></div>
+</div>
+
+
+<div id="result" style="
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+"></div>
+
+
       <script>
 window.addEventListener("error", function(e) {
   alert(
