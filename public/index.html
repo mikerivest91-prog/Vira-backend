@@ -2035,7 +2035,27 @@ localStorage.setItem("viraIdea", idea);
     }
 
     scenarioButton.disabled = true;
-    scenarioStatus.textContent = "✨ VIRA construit votre campagne marketing...";
+    scenarioStatus.innerHTML = `
+  <div class="vira-premium-loader">
+    <div class="vira-loader-icon">✦</div>
+
+    <div class="vira-loader-content">
+      <div class="vira-loader-title">
+        VIRA prépare votre campagne
+      </div>
+
+      <div class="vira-loader-subtitle">
+        Analyse de votre offre, de votre audience et de votre plateforme…
+      </div>
+    </div>
+
+    <div class="vira-loader-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+`;
     scenarioStatus.classList.add("loading");
     scenarioResult.textContent = "";
 
