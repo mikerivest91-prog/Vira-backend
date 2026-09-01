@@ -2677,7 +2677,31 @@ const scenario = getRawScenario();
         "⚠️ Crée d'abord un scénario.";
       return;
     }
+const FREE_VIDEO_TEST_MODE = true;
 
+if (FREE_VIDEO_TEST_MODE) {
+  videoStatus.textContent = "🧪 Mode test vidéo : simulation sans crédits.";
+
+  videoResult.innerHTML = `
+    <div style="
+      margin-top:16px;
+      padding:24px;
+      border-radius:18px;
+      background:linear-gradient(135deg,#2f1d4d,#171020);
+      border:1px solid rgba(192,132,252,.45);
+      text-align:center;
+      color:white;
+    ">
+      <div style="font-size:32px;margin-bottom:10px;">🎬</div>
+      <strong style="font-size:18px;">Vidéo test VIRA prête</strong>
+      <div style="margin-top:8px;opacity:.75;">
+        Simulation terminée — aucun crédit vidéo utilisé.
+      </div>
+    </div>
+  `;
+
+  return;
+}
     videoButton.disabled = true;
     videoResult.innerHTML = "";
 
