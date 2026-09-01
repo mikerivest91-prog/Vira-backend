@@ -2315,7 +2315,7 @@ const scenario = data?.scenario || data?.output_text || "";
         throw new Error("Aucun scénario reçu du serveur.");
       }
 
-scenarioStatus.textContent = "✅ Votre campagne marketing est prête !";
+
 renderMarketingScenario(scenario);
       validateScenario.disabled = false;
       validateScenario.style.display = "block";
