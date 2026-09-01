@@ -1307,6 +1307,48 @@ letter-spacing: 1.5px;
     opacity: 1;
   }
 }
+  .vira-premium-alert {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.16),
+    rgba(76, 29, 149, 0.10)
+  );
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 0 0 22px rgba(139, 92, 246, 0.12);
+}
+
+.vira-alert-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.18);
+  color: #c084fc;
+  font-size: 22px;
+}
+
+.vira-premium-alert strong {
+  display: block;
+  color: #ffffff;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.vira-premium-alert span {
+  display: block;
+  color: #b8b5c7;
+  font-size: 13px;
+  line-height: 1.45;
+}
 </style>
 
 <body>
@@ -2023,10 +2065,17 @@ const targetAudience = document.getElementById("targetAudience").value.trim();
 const platform = document.getElementById("platform").value; 
     const idea = promptInput.value.trim();
 if (!marketingGoal || !targetAudience || !platform) {
-  scenarioStatus.textContent =
-"⚠️ Remplis l’objectif, le public cible et choisis une plateforme."
-  return;
-    }
+    scenarioStatus.innerHTML = `
+        <div class="vira-premium-alert">
+            <div class="vira-alert-icon">✦</div>
+            <div>
+                <strong>Quelques détails manquent</strong>
+                <span>Complétez votre audience, votre objectif et votre plateforme pour continuer.</span>
+            </div>
+        </div>
+    `;
+    return;
+}
 localStorage.setItem("viraIdea", idea);
     if (!idea) {
       scenarioStatus.textContent =
