@@ -2585,7 +2585,32 @@ if (selectedMarketingType === choiceText) {
     recommendation =
       "→ Concentrez votre campagne sur la conversion pour transformer davantage de visiteurs en clients.";
   }
+const brainOpportunity =
+  document.getElementById("brainOpportunity");
 
+let opportunityText =
+  "✦ VIRA analyse votre entreprise pour identifier vos meilleures opportunités de croissance.";
+
+if (selectedTitle.includes("Lancement")) {
+  opportunityText =
+    "✦ Opportunité : créer un lancement fort pour attirer rapidement l’attention autour de votre produit.";
+} else if (selectedTitle.includes("Notoriété")) {
+  opportunityText =
+    "✦ Opportunité : augmenter votre visibilité et toucher une audience plus large.";
+} else if (selectedTitle.toLowerCase().includes("lead")) {
+  opportunityText =
+    "✦ Opportunité : convertir davantage de visiteurs en prospects qualifiés.";
+} else if (
+  selectedTitle.includes("Vente") ||
+  selectedTitle.includes("Conversion")
+) {
+  opportunityText =
+    "✦ Opportunité : stimuler les ventes avec une offre claire et une campagne orientée conversion.";
+}
+
+if (brainOpportunity) {
+  brainOpportunity.textContent = opportunityText;
+  }
   if (brainRecommendedAction) {
     brainRecommendedAction.textContent = recommendation;
   }
