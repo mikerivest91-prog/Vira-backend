@@ -1724,7 +1724,7 @@ background: linear-gradient(135deg,#c084fc,#8b5cf6);
       flex:0 0 auto;
     ">
       <div style="text-align:center;">
-        <div style="
+        <div id="growthScoreNumber" style="
           font-size:23px;
           font-weight:900;
           color:#ffffff;
@@ -2596,7 +2596,27 @@ const selectedTitle =
     ?.textContent
     .replace(/\s+/g, " ")
     .trim() || choiceText;
+const growthScoreNumber =
+  document.getElementById("growthScoreNumber");
 
+let growthScore = 72;
+
+if (selectedTitle.includes("Lancement")) {
+  growthScore = 78;
+} else if (selectedTitle.includes("Notoriété")) {
+  growthScore = 74;
+} else if (selectedTitle.toLowerCase().includes("lead")) {
+  growthScore = 82;
+} else if (
+  selectedTitle.includes("Vente") ||
+  selectedTitle.includes("Conversion")
+) {
+  growthScore = 86;
+}
+
+if (growthScoreNumber) {
+  growthScoreNumber.textContent = growthScore;
+  }
 let recommendation =
   "→ Créez une campagne adaptée à votre objectif principal.";
 
