@@ -1,2156 +1,2876 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIRA Marketing IA</title>
-
-<style>
-:root{
-  color-scheme:dark;
-  --bg:#050507;
-  --panel:#0d0b14;
-  --panel2:#09080f;
-  --line:rgba(168,85,247,.24);
-  --purple:#a855f7;
-  --purple2:#7c3aed;
-  --blue:#38bdf8;
-  --text:#f8fafc;
-  --muted:#a1a1aa;
-  --green:#22c55e;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-html,
-body{
-  margin:0;
-  width:100%;
-  max-width:100%;
-  overflow-x:hidden;
-}
-
-body{
-  font-family:Arial,sans-serif;
-  background:
-    radial-gradient(circle at 20% 0%,rgba(124,58,237,.12),transparent 30%),
-    radial-gradient(circle at 85% 10%,rgba(37,99,235,.08),transparent 28%),
-    var(--bg);
-  color:var(--text);
-  min-height:100vh;
-}
-
-.app-shell{
-  width:100%;
-  min-height:100vh;
-}
-
-.desktop-sidebar{
-  display:none;
-}
-
-.container{
-  width:100%;
-  max-width:720px;
-  margin:0 auto;
-  padding:24px 16px 72px;
-  min-width:0;
-}
-
-.vira-topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:22px;
-}
-
-.vira-brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.vira-mark{
-  width:42px;
-  height:42px;
-  border-radius:13px;
-  display:grid;
-  place-items:center;
-  font-weight:900;
-  font-size:22px;
-  background:linear-gradient(135deg,#9333ea,#2563eb);
-  box-shadow:0 8px 24px rgba(124,58,237,.35);
-}
-
-.brand-copy .logo{
-  font-size:20px;
-  font-weight:900;
-  letter-spacing:1.5px;
-}
-
-.brand-copy .subtitle{
-  font-size:10px;
-  letter-spacing:2px;
-  color:#9ca3af;
-  margin-top:2px;
-}
-
-.credit-badge{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  padding:10px 12px;
-  border:1px solid rgba(139,92,246,.35);
-  background:rgba(15,15,23,.85);
-  border-radius:12px;
-  font-size:13px;
-  font-weight:800;
-  white-space:nowrap;
-}
-
-.credit-badge small{
-  font-size:10px;
-  color:#9ca3af;
-}
-
-.welcome-block{
-  margin:10px 0 18px;
-}
-
-.welcome-block h1{
-  margin:0 0 6px;
-  font-size:27px;
-  line-height:1.12;
-}
-
-.welcome-block p{
-  margin:0;
-  color:#9ca3af;
-  font-size:14px;
-  line-height:1.5;
-}
-
-.panel,
-.brain-growth-card,
-.brain-card{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  border-radius:22px;
-  border:1px solid var(--line);
-  background:
-    radial-gradient(circle at top right,rgba(139,92,246,.14),transparent 38%),
-    linear-gradient(145deg,var(--panel),#07070b);
-  box-shadow:
-    0 16px 36px rgba(0,0,0,.28),
-    inset 0 1px 0 rgba(255,255,255,.04);
-  padding:18px;
-  margin-top:14px;
-  overflow:hidden;
-}
-
-.growth-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  min-width:0;
-}
-
-.growth-copy{
-  flex:1;
-  min-width:0;
-}
-
-.eyebrow{
-  font-size:11px;
-  color:#a78bfa;
-  font-weight:900;
-  letter-spacing:1.4px;
-}
-
-.growth-title{
-  font-size:21px;
-  font-weight:900;
-  margin-top:5px;
-}
-
-.muted{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.45;
-  margin-top:6px;
-}
-
-.score-ring{
-  --score-deg:259deg;
-  width:82px;
-  height:82px;
-  flex:0 0 82px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:
-    radial-gradient(circle at center,#0b0b11 58%,transparent 60%),
-    conic-gradient(
-      var(--purple) 0deg var(--score-deg),
-      rgba(255,255,255,.08) var(--score-deg) 360deg
-    );
-  box-shadow:0 0 28px rgba(168,85,247,.28);
-}
-
-.score-ring strong{
-  display:block;
-  text-align:center;
-  font-size:23px;
-  line-height:1;
-}
-
-.score-ring small{
-  display:block;
-  text-align:center;
-  font-size:10px;
-  color:#a1a1aa;
-  margin-top:4px;
-}
-
-.section-title{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:26px 0 8px;
-  font-size:18px;
-  font-weight:900;
-}
-
-.section-sub{
-  margin:0 0 16px;
-  color:#9ca3af;
-  font-size:13px;
-  line-height:1.5;
-}
-
-.marketing-options{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-  width:100%;
-  min-width:0;
-}
-
-.marketing-choice{
-  position:relative;
-  width:100%;
-  min-width:0;
-  min-height:132px;
-  margin:0;
-  padding:16px;
-  border-radius:18px;
-  border:1px solid rgba(148,163,184,.18);
-  background:linear-gradient(145deg,#0d0b14,#08070c);
-  color:#fff;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  justify-content:center;
-  text-align:left;
-  gap:7px;
-  cursor:pointer;
-}
-
-.marketing-choice.active{
-  border-color:#a855f7;
-  background:
-    radial-gradient(circle at 80% 10%,rgba(168,85,247,.18),transparent 55%),
-    linear-gradient(145deg,#15101f,#0a080f);
-  box-shadow:0 12px 32px rgba(124,58,237,.18);
-}
-
-.choice-icon{
-  font-size:26px;
-  line-height:1;
-  color:#c084fc;
-}
-
-.choice-title{
-  font-size:15px;
-  font-weight:900;
-}
-
-.choice-description{
-  font-size:12px;
-  color:#a1a1aa;
-  line-height:1.45;
-}
-
-.choice-check{
-  display:none;
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:25px;
-  height:25px;
-  border-radius:50%;
-  place-items:center;
-  background:linear-gradient(135deg,#c084fc,#8b5cf6);
-  font-size:13px;
-  font-weight:900;
-}
-
-.marketing-choice.active .choice-check{
-  display:grid;
-}
-
-.campaign-details{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:14px;
-  margin-top:14px;
-}
-
-.field-group{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-  min-width:0;
-}
-
-.field-group label{
-  font-size:13px;
-  font-weight:800;
-  color:#ddd6fe;
-}
-
-.field-group input,
-.field-group select,
-.description-field textarea{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  border:1px solid rgba(168,85,247,.28);
-  border-radius:16px;
-  background:linear-gradient(145deg,#0d0b14,#08070c);
-  color:#f8fafc;
-  outline:none;
-  font:inherit;
-}
-
-.field-group input,
-.field-group select{
-  height:48px;
-  padding:0 14px;
-}
-
-.description-field{
-  position:relative;
-  min-width:0;
-}
-
-.description-field textarea{
-  min-height:120px;
-  resize:vertical;
-  padding:14px 14px 32px;
-  line-height:1.5;
-}
-
-.char-count{
-  position:absolute;
-  right:12px;
-  bottom:9px;
-  font-size:11px;
-  color:#8b8d98;
-}
-
-.primary-cta,
-button.action{
-  width:100%;
-  max-width:100%;
-  min-height:60px;
-  margin-top:16px;
-  padding:14px 16px;
-  border:0;
-  border-radius:17px;
-  color:white;
-  font-size:15px;
-  font-weight:900;
-  cursor:pointer;
-  background:linear-gradient(135deg,#7c3aed,#9333ea 48%,#2563eb);
-  box-shadow:0 12px 28px rgba(124,58,237,.25);
-}
-
-button:disabled{
-  opacity:.58;
-  cursor:not-allowed;
-}
-
-.brain-card h3{
-  margin:4px 0 8px;
-  font-size:17px;
-}
-
-.brain-output{
-  margin-top:12px;
-  padding:13px 14px;
-  border-radius:14px;
-  background:rgba(139,92,246,.07);
-  border:1px solid rgba(139,92,246,.12);
-  color:#d4d4d8;
-  font-size:13px;
-  line-height:1.55;
-  overflow-wrap:anywhere;
-}
-
-@media(min-width:560px){
-  .marketing-options{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .campaign-details{
-    grid-template-columns:1fr 1fr;
-  }
-}
-
-@media(min-width:900px){
-  .app-shell{
-    display:grid;
-    grid-template-columns:235px minmax(0,1fr);
-    max-width:1440px;
-    margin:0 auto;
-  }
-
-  .desktop-sidebar{
-    display:flex;
-    flex-direction:column;
-    position:sticky;
-    top:0;
-    height:100vh;
-    padding:26px 18px;
-    border-right:1px solid rgba(148,163,184,.12);
-    background:rgba(5,5,8,.96);
-  }
-
-  .container{
-    max-width:1020px;
-    padding:32px 38px 80px;
-  }
-}
-  /* =========================================
-   VIRA PREMIUM UI OVERRIDE
-   À COLLER JUSTE AVANT </style>
-========================================= */
-
-:root{
-  --vira-bg:#05050a;
-  --vira-card:#0b0912;
-  --vira-card-2:#0f0b18;
-  --vira-line:rgba(168,85,247,.24);
-  --vira-line-soft:rgba(255,255,255,.08);
-  --vira-purple:#b347ff;
-  --vira-purple-2:#7c3aed;
-  --vira-blue:#4f8cff;
-  --vira-green:#4ade80;
-  --vira-text:#f8f8ff;
-  --vira-muted:#a5a3b3;
-  --vira-glow:0 0 30px rgba(168,85,247,.18);
-}
-
-body{
-  background:
-    radial-gradient(circle at 18% 0%,rgba(124,58,237,.18),transparent 26%),
-    radial-gradient(circle at 82% 8%,rgba(59,130,246,.10),transparent 24%),
-    linear-gradient(180deg,#05050a 0%,#070611 45%,#05050a 100%);
-  color:var(--vira-text);
-}
-
-.container{
-  max-width:1120px;
-  padding:20px 18px 72px;
-}
-
-.vira-topbar{
-  margin-bottom:28px;
-}
-
-.vira-brand{
-  gap:12px;
-}
-
-.vira-mark{
-  width:48px;
-  height:48px;
-  border-radius:14px;
-  font-size:26px;
-  background:
-    linear-gradient(135deg,#b347ff 0%,#7c3aed 50%,#3b82f6 100%);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.06),
-    0 8px 26px rgba(124,58,237,.35),
-    0 0 24px rgba(179,71,255,.18);
-}
-
-.brand-copy .logo{
-  font-size:24px;
-  letter-spacing:4px;
-  font-weight:900;
-}
-
-.brand-copy .subtitle{
-  font-size:10px;
-  letter-spacing:3px;
-  color:#aaa6bd;
-}
-
-.credit-badge{
-  border:1px solid rgba(168,85,247,.28);
-  background:
-    linear-gradient(180deg,rgba(16,12,26,.95),rgba(8,7,14,.95));
-  border-radius:14px;
-  min-height:44px;
-  padding:0 16px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.03),
-    0 8px 22px rgba(0,0,0,.22);
-}
-
-.welcome-block{
-  margin:10px 0 22px;
-}
-
-.welcome-block h1{
-  font-size:30px;
-  margin-bottom:7px;
-}
-
-.welcome-block p{
-  font-size:14px;
-  color:var(--vira-muted);
-}
-
-.brain-growth-card,
-.panel,
-.brain-card{
-  border:1px solid rgba(168,85,247,.24);
-  background:
-    linear-gradient(180deg,rgba(14,10,23,.96),rgba(7,6,12,.98));
-  border-radius:18px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.03),
-    0 14px 40px rgba(0,0,0,.22);
-}
-
-.brain-growth-card{
-  padding:22px 24px;
-}
-
-.growth-title{
-  font-size:22px;
-}
-
-.eyebrow{
-  color:#c77dff;
-  letter-spacing:1.6px;
-}
-
-.score-ring{
-  width:92px;
-  height:92px;
-  flex-basis:92px;
-  box-shadow:
-    0 0 28px rgba(179,71,255,.26),
-    inset 0 0 0 1px rgba(255,255,255,.03);
-}
-
-.score-ring strong{
-  font-size:28px;
-}
-
-.section-title{
-  font-size:19px;
-  margin-top:28px;
-  margin-bottom:6px;
-}
-
-.section-sub{
-  font-size:13px;
-  color:var(--vira-muted);
-  margin-bottom:14px;
-}
-
-.marketing-options{
-  gap:14px;
-}
-
-.marketing-choice{
-  min-height:138px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  background:
-    linear-gradient(180deg,rgba(12,10,20,.98),rgba(7,6,12,.98));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.02);
-  transition:
-    transform .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease,
-    background .18s ease;
-}
-
-.marketing-choice:hover{
-  transform:translateY(-1px);
-  border-color:rgba(179,71,255,.42);
-}
-
-.marketing-choice.active{
-  border-color:#b347ff;
-  background:
-    radial-gradient(circle at 50% 20%,rgba(179,71,255,.14),transparent 55%),
-    linear-gradient(180deg,#120d1d,#090711);
-  box-shadow:
-    0 0 0 1px rgba(179,71,255,.25),
-    0 0 24px rgba(179,71,255,.18);
-}
-
-.choice-icon{
-  width:44px;
-  height:44px;
-  display:grid;
-  place-items:center;
-  border-radius:12px;
-  font-size:24px;
-  background:
-    radial-gradient(circle at 40% 30%,rgba(179,71,255,.22),rgba(124,58,237,.08));
-  box-shadow:
-    0 0 18px rgba(168,85,247,.12);
-}
-
-.choice-title{
-  font-size:15px;
-}
-
-.choice-description{
-  color:#aaa7b7;
-}
-
-.choice-check{
-  width:26px;
-  height:26px;
-  top:10px;
-  right:10px;
-  box-shadow:0 0 16px rgba(179,71,255,.32);
-}
-
-.panel{
-  padding:18px;
-}
-
-.field-group{
-  position:relative;
-}
-
-.field-group label{
-  color:#d8d2e8;
-  font-size:12px;
-  letter-spacing:.2px;
-}
-
-.field-group input,
-.field-group select,
-.description-field textarea{
-  background:
-    linear-gradient(180deg,#0d0b15,#09070f);
-  border:1px solid rgba(168,85,247,.20);
-  border-radius:14px;
-  color:#fff;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.02);
-}
-
-.field-group input:focus,
-.field-group select:focus,
-.description-field textarea:focus{
-  border-color:rgba(179,71,255,.70);
-  box-shadow:
-    0 0 0 3px rgba(179,71,255,.08),
-    0 0 18px rgba(179,71,255,.08);
-}
-
-.primary-cta,
-button.action{
-  border-radius:14px;
-  min-height:58px;
-  background:
-    linear-gradient(90deg,#8b2cf5 0%,#9f36ff 48%,#7327ff 100%);
-  box-shadow:
-    0 12px 28px rgba(124,58,237,.28),
-    0 0 22px rgba(179,71,255,.16),
-    inset 0 1px 0 rgba(255,255,255,.14);
-  letter-spacing:.1px;
-}
-
-.primary-cta:hover,
-button.action:hover{
-  filter:brightness(1.05);
-}
-
-.brain-card{
-  padding:18px;
-}
-
-.brain-card h3{
-  font-size:16px;
-  margin-bottom:10px;
-}
-
-.brain-output{
-  border:1px solid rgba(168,85,247,.16);
-  background:
-    linear-gradient(180deg,rgba(16,12,26,.88),rgba(9,7,15,.88));
-  border-radius:14px;
-  color:#d8d5e2;
-}
-
-#brainOpportunity{
-  border-color:rgba(74,222,128,.35);
-  box-shadow:
-    inset 0 0 0 1px rgba(74,222,128,.03),
-    0 0 18px rgba(74,222,128,.06);
-}
-
-#brainRecommendedAction{
-  border-color:rgba(79,140,255,.38);
-  box-shadow:
-    inset 0 0 0 1px rgba(79,140,255,.03),
-    0 0 18px rgba(79,140,255,.08);
-}
-
-#scenario{
-  border:1px solid rgba(168,85,247,.24) !important;
-  background:#09070f !important;
-  border-radius:14px !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.02);
-}
-
-#scenario:focus{
-  outline:none;
-  border-color:#b347ff !important;
-  box-shadow:
-    0 0 0 3px rgba(179,71,255,.08);
-}
-
-/* Desktop premium */
-@media(min-width:760px){
-
-  .container{
-    padding-top:24px;
-  }
-
-  .marketing-options{
-    grid-template-columns:repeat(4,1fr);
-  }
-
-  .campaign-details{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .brain-growth-card{
-    padding:24px 28px;
-  }
-}
-
-/* Mobile premium */
-@media(max-width:759px){
-
-  .container{
-    padding:18px 16px 60px;
-  }
-
-  .vira-topbar{
-    align-items:flex-start;
-  }
-
-  .brand-copy .logo{
-    font-size:21px;
-    letter-spacing:3px;
-  }
-
-  .welcome-block h1{
-    font-size:28px;
-  }
-
-  .brain-growth-card{
-    padding:20px;
-  }
-
-  .growth-row{
-    align-items:center;
-  }
-
-  .score-ring{
-    width:86px;
-    height:86px;
-    flex-basis:86px;
-  }
-
-  .marketing-options{
-    grid-template-columns:1fr;
-  }
-
-  .marketing-choice{
-    min-height:126px;
-  }
-
-  .panel,
-  .brain-card{
-    padding:16px;
-  }
-  }
-</style>
-</head>
-
-<body>
-
-<div class="app-shell">
-
-  <aside class="desktop-sidebar">
-    <div class="sidebar-logo">
-      <div class="vira-mark">V</div>
-      <div class="brand-copy">
-        <div class="logo">VIRA</div>
-        <div class="subtitle">MARKETING</div>
-      </div>
-    </div>
-  </aside>
-
-  <main class="container">
-
-    <div class="vira-topbar">
-
-      <div class="vira-brand">
-        <div class="vira-mark">V</div>
-
-        <div class="brand-copy">
-          <div class="logo">VIRA</div>
-          <div class="subtitle">MARKETING IA</div>
-        </div>
-      </div>
-
-      <div class="credit-badge">
-        ✦ 100
-        <small>CRÉDITS</small>
-      </div>
-
-    </div>
-
-    <section class="welcome-block">
-      <h1>Bonjour 👋</h1>
-      <p>Transforme ton idée en campagne marketing avec VIRA Brain.</p>
-    </section>
-
-    <section class="brain-growth-card">
-
-      <div class="growth-row">
-
-        <div class="growth-copy">
-          <div class="eyebrow">VIRA BRAIN</div>
-          <div class="growth-title">Growth Score</div>
-          <div class="muted">
-            Potentiel actuel de ta campagne marketing.
-          </div>
-        </div>
-
-        <div class="score-ring">
-          <div>
-            <strong id="growthScoreNumber">72</strong>
-            <small>/100</small>
-          </div>
-        </div>
-
-      </div>
-
-    </section>
-
-    <div class="section-title">
-      🎯 Objectif marketing
-    </div>
-
-    <p class="section-sub">
-      Choisis ce que tu veux accomplir avec ta campagne.
-    </p>
-
-    <section class="marketing-options">
-
-      <button type="button" class="marketing-choice">
-        <div class="choice-check">✓</div>
-        <div class="choice-icon">🚀</div>
-        <div class="choice-title">Lancement de produit</div>
-        <div class="choice-description">
-          Présenter et lancer un nouveau produit.
-        </div>
-      </button>
-
-      <button type="button" class="marketing-choice">
-        <div class="choice-check">✓</div>
-        <div class="choice-icon">📣</div>
-        <div class="choice-title">Notoriété de marque</div>
-        <div class="choice-description">
-          Faire connaître ton entreprise à plus de personnes.
-        </div>
-      </button>
-
-      <button type="button" class="marketing-choice">
-        <div class="choice-check">✓</div>
-        <div class="choice-icon">🎯</div>
-        <div class="choice-title">Génération de leads</div>
-        <div class="choice-description">
-          Attirer des clients potentiels.
-        </div>
-      </button>
-
-      <button type="button" class="marketing-choice">
-        <div class="choice-check">✓</div>
-        <div class="choice-icon">💰</div>
-        <div class="choice-title">Promotion / vente</div>
-        <div class="choice-description">
-          Créer une campagne orientée conversion et ventes.
-        </div>
-      </button>
-
-    </section>
-        <!-- INFORMATIONS CAMPAGNE -->
-
-    <div class="section-title">
-      ✨ Informations de campagne
-    </div>
-
-    <p class="section-sub">
-      Donne quelques informations à VIRA pour construire ta campagne.
-    </p>
-
-    <section class="panel">
-
-      <div class="field-group">
-        <label for="prompt">Décris ton idée</label>
-
-        <div class="description-field">
-          <textarea
-            id="prompt"
-            maxlength="500"
-            placeholder="Exemple : Je lance un nouveau produit et je veux créer une campagne vidéo pour les réseaux sociaux."
-          ></textarea>
-
-          <div class="char-count">
-            <span id="promptCount">0</span>/500
-          </div>
-        </div>
-      </div>
-
-
-      <div class="campaign-details">
-
-        <div class="field-group">
-          <label for="targetAudience">
-            Audience cible
-          </label>
-
-          <input
-            id="targetAudience"
-            type="text"
-            placeholder="Ex : Entrepreneurs 25-45 ans"
-          >
-        </div>
-
-
-        <div class="field-group">
-          <label for="marketingGoal">
-            Résultat recherché
-          </label>
-
-          <input
-            id="marketingGoal"
-            type="text"
-            placeholder="Ex : Augmenter les ventes"
-          >
-        </div>
-
-
-        <div class="field-group">
-          <label for="campaignTone">
-            Ton de la campagne
-          </label>
-
-          <select id="campaignTone">
-            <option value="">Choisir un ton</option>
-            <option value="professionnel">Professionnel</option>
-            <option value="dynamique">Dynamique</option>
-            <option value="premium">Premium</option>
-            <option value="inspirant">Inspirant</option>
-            <option value="humoristique">Humoristique</option>
-            <option value="direct">Direct</option>
-          </select>
-
-          <div id="tonePremiumIcon"></div>
-        </div>
-
-
-        <div class="field-group">
-          <label for="platform">
-            Plateforme
-          </label>
-
-          <select id="platform">
-            <option value="">Choisir une plateforme</option>
-            <option value="Instagram">Instagram</option>
-            <option value="Facebook">Facebook</option>
-            <option value="TikTok">TikTok</option>
-            <option value="YouTube">YouTube</option>
-            <option value="LinkedIn">LinkedIn</option>
-          </select>
-
-          <div id="platformPremiumIcon"></div>
-        </div>
-
-      </div>
-
-
-      <div
-        id="platformTip"
-        class="brain-output"
-        style="display:none;"
-      ></div>
-
-
-      <button
-        id="brainAnalyzeBtn"
-        class="primary-cta"
-        type="button"
-      >
-        ✦ Analyser avec VIRA Brain
-      </button>
-
-    </section>
-
-
-    <!-- VIRA BRAIN -->
-
-    <div class="section-title">
-      🧠 VIRA Brain
-    </div>
-
-    <p class="section-sub">
-      VIRA analyse ta campagne et détecte les meilleures opportunités.
-    </p>
-
-
-    <section class="brain-card">
-
-      <div class="eyebrow">
-        OPPORTUNITÉS
-      </div>
-
-      <h3>
-        Opportunités détectées
-      </h3>
-
-      <div
-        id="brainOpportunity"
-        class="brain-output"
-      >
-        ✦ VIRA analyse ton entreprise, ton audience et ton objectif pour détecter les meilleures opportunités.
-      </div>
-
-    </section>
-
-
-    <section class="brain-card">
-
-      <div class="eyebrow">
-        ACTION RECOMMANDÉE
-      </div>
-
-      <h3>
-        Prochaine action
-      </h3>
-
-      <div
-        id="brainRecommendedAction"
-        class="brain-output"
-      >
-        Complète les informations de ta campagne puis lance l'analyse VIRA Brain.
-      </div>
-
-    </section>
-
-
-    <!-- CRÉATION CAMPAGNE -->
-
-    <div class="section-title">
-      ⚡ Création IA
-    </div>
-
-    <p class="section-sub">
-      Génère ensuite le contenu de ta campagne avec VIRA.
-    </p>
-
-
-    <section class="panel">
-
-      <button
-        id="generate"
-        class="action"
-        type="button"
-      >
-        ✨ Créer le scénario
-      </button>
-
-
-      <div
-        id="status"
-        class="brain-output"
-        style="display:none;"
-      ></div>
-
-
-      <div
-        id="result"
-        class="brain-output"
-        style="display:none;"
-      ></div>
-
-
-      <div
-        id="scenarioStatus"
-        class="brain-output"
-        style="display:none;"
-      ></div>
-
-
-      <div
-        id="scenarioResult"
-        class="brain-output"
-        style="display:none;"
-      ></div>
-
-
-      <textarea
-        id="scenario"
-        style="
-          width:100%;
-          min-height:180px;
-          margin-top:16px;
-          padding:14px;
-          border-radius:16px;
-          border:1px solid rgba(168,85,247,.28);
-          background:#09080f;
-          color:white;
-          resize:vertical;
-          font:inherit;
-          line-height:1.5;
-        "
-        placeholder="Ton scénario apparaîtra ici..."
-      ></textarea>
-
-
-      <button
-        id="validateScenario"
-        class="action"
-        type="button"
-      >
-        ✓ Valider le scénario
-      </button>
-
-
-      <button
-        id="testVoice"
-        class="action"
-        type="button"
-      >
-        🎙 Tester la voix
-      </button>
-
-
-      <div
-        id="runwayResults"
-        class="brain-output"
-        style="display:none;"
-      ></div>
-
-
-      <button
-        id="video"
-        class="action"
-        type="button"
-      >
-        🎬 Créer la vidéo
-      </button>
-
-    </section>
-        <!-- FIN CONTENU PRINCIPAL -->
-
-  </main>
-</div>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  /* ==========================================
-     ÉLÉMENTS VIRA
-  ========================================== */
-
-  const promptInput =
-    document.getElementById("prompt");
-
-  const promptCount =
-    document.getElementById("promptCount");
-
-  const targetAudience =
-    document.getElementById("targetAudience");
-
-  const marketingGoal =
-    document.getElementById("marketingGoal");
-
-  const campaignTone =
-    document.getElementById("campaignTone");
-
-  const platform =
-    document.getElementById("platform");
-
-  const platformTip =
-    document.getElementById("platformTip");
-
-  const brainAnalyzeBtn =
-    document.getElementById("brainAnalyzeBtn");
-
-  const brainOpportunity =
-    document.getElementById("brainOpportunity");
-
-  const brainRecommendedAction =
-    document.getElementById("brainRecommendedAction");
-
-  const growthScoreNumber =
-    document.getElementById("growthScoreNumber");
-
-  const generateButton =
-    document.getElementById("generate");
-
-  const status =
-    document.getElementById("status");
-
-  const result =
-    document.getElementById("result");
-
-  const scenario =
-    document.getElementById("scenario");
-
-  const scenarioStatus =
-    document.getElementById("scenarioStatus");
-
-  const scenarioResult =
-    document.getElementById("scenarioResult");
-
-  const validateScenario =
-    document.getElementById("validateScenario");
-
-  const testVoice =
-    document.getElementById("testVoice");
-
-  const videoButton =
-    document.getElementById("video");
-
-  const runwayResults =
-    document.getElementById("runwayResults");
-
-  const marketingChoices =
-    document.querySelectorAll(".marketing-choice");
-
-  let selectedMarketingType =
-    localStorage.getItem("viraMarketingType") || "";
-
-  let scenarioValidated = false;
-
-
-  /* ==========================================
-     COMPTEUR DESCRIPTION
-  ========================================== */
-
-  if (promptInput && promptCount) {
-
-    promptCount.textContent =
-      promptInput.value.length;
-
-    promptInput.addEventListener(
-      "input",
-      function () {
-
-        promptCount.textContent =
-          promptInput.value.length;
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07070b" />
+  <title>VIRA Marketing IA</title>
+  <style>
+    :root {
+      --bg: #050507;
+      --panel: #0d0b14;
+      --panel-2: #0a0910;
+      --panel-3: #11101a;
+      --text: #f8f7ff;
+      --muted: #9d98aa;
+      --muted-2: #777183;
+      --line: rgba(168, 85, 247, 0.22);
+      --line-strong: rgba(192, 132, 252, 0.48);
+      --purple: #a855f7;
+      --purple-2: #7c3aed;
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --orange: #f59e0b;
+      --pink: #ec4899;
+      --danger: #fb7185;
+      --radius-xl: 24px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+      --shadow: 0 20px 55px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% -8%, rgba(124, 58, 237, 0.18), transparent 34%),
+        radial-gradient(circle at 90% 5%, rgba(37, 99, 235, 0.10), transparent 28%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app-shell { min-height: 100vh; }
+
+    .desktop-sidebar {
+      display: none;
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 250px;
+      padding: 28px 18px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      background: rgba(7, 7, 11, 0.88);
+      backdrop-filter: blur(18px);
+      z-index: 20;
+    }
+
+    .sidebar-logo, .vira-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .vira-mark {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: #fff;
+      font-size: 23px;
+      font-weight: 950;
+      background: linear-gradient(135deg, #9333ea, #2563eb);
+      box-shadow: 0 10px 28px rgba(124, 58, 237, 0.32);
+    }
+
+    .logo {
+      font-size: 27px;
+      font-weight: 950;
+      letter-spacing: 1.7px;
+      line-height: 1;
+      background: linear-gradient(135deg, #fff 10%, #c4b5fd 56%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: #888395;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+    }
+
+    .sidebar-nav {
+      display: grid;
+      gap: 8px;
+      margin-top: 34px;
+    }
+
+    .sidebar-link {
+      width: 100%;
+      margin: 0;
+      padding: 12px 14px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      color: #aaa4b6;
+      background: transparent;
+      text-align: left;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .sidebar-link.active {
+      color: #fff;
+      border-color: rgba(168,85,247,.22);
+      background: rgba(124,58,237,.12);
+    }
+
+    .main {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 22px 16px 80px;
+    }
+
+    .vira-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .credit-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 0 0 auto;
+      padding: 9px 11px;
+      border-radius: 13px;
+      border: 1px solid rgba(139,92,246,.30);
+      background: rgba(14, 13, 21, 0.84);
+      color: #f5f3ff;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .credit-badge small {
+      color: #858091;
+      font-size: 9px;
+      font-weight: 650;
+    }
+
+    .welcome-block { margin: 8px 0 20px; }
+
+    .welcome-block h1 {
+      margin: 0;
+      font-size: clamp(26px, 7vw, 36px);
+      line-height: 1.08;
+      letter-spacing: -.7px;
+      font-weight: 950;
+    }
+
+    .welcome-block p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .glass-card {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at top right, rgba(139,92,246,.12), transparent 38%),
+        linear-gradient(145deg, rgba(14,12,21,.97), rgba(8,8,12,.98));
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.035);
+    }
+
+    .brain-card { padding: 18px; }
+
+    .brain-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .eyebrow {
+      color: #b78afc;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .brain-title {
+      margin-top: 5px;
+      font-size: 21px;
+      font-weight: 950;
+      letter-spacing: -.35px;
+    }
+
+    .brain-subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .score-ring {
+      --score-deg: 259deg;
+      width: 78px;
+      height: 78px;
+      flex: 0 0 78px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, #0b0a10 57%, transparent 59%),
+        conic-gradient(#a855f7 0deg var(--score-deg), rgba(255,255,255,.08) var(--score-deg) 360deg);
+      box-shadow: 0 0 26px rgba(168,85,247,.22);
+    }
+
+    .score-ring strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .score-ring small {
+      display: block;
+      margin-top: 3px;
+      color: #8c8795;
+      font-size: 9px;
+      text-align: center;
+    }
+
+    .brain-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .brain-insight {
+      padding: 12px 13px;
+      border-radius: 15px;
+      border: 1px solid rgba(168,85,247,.12);
+      background: rgba(139,92,246,.055);
+      color: #d6d1df;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .brain-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .brain-actions span {
+      color: #aaa4b6;
+      font-size: 11px;
+    }
+
+    .brain-btn {
+      width: auto;
+      margin: 0;
+      padding: 8px 11px;
+      border: 1px solid rgba(192,132,252,.26);
+      border-radius: 999px;
+      color: #d8b4fe;
+      background: rgba(139,92,246,.09);
+      font-size: 11px;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .workspace-card {
+      margin-top: 16px;
+      padding: 18px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 5px 0 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .section-title .number {
+      display: grid;
+      place-items: center;
+      width: 27px;
+      height: 27px;
+      border-radius: 9px;
+      border: 1px solid rgba(168,85,247,.28);
+      background: rgba(124,58,237,.10);
+      color: #c4b5fd;
+      font-size: 12px;
+    }
+
+    .section-help {
+      margin: -5px 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .marketing-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+
+    .marketing-choice {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      min-height: 154px;
+      margin: 0;
+      padding: 14px 10px 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: 1px solid rgba(148,163,184,.15);
+      border-radius: 19px;
+      background: linear-gradient(145deg,#0d0b14,#08070c);
+      color: #fff;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+      transition: transform .17s ease, border-color .17s ease, box-shadow .17s ease;
+    }
+
+    .marketing-choice:active {
+      transform: scale(.985);
+    }
+
+    .marketing-choice.active {
+      border-color: rgba(192,132,252,.88);
+      background:
+        radial-gradient(circle at 50% 13%, rgba(168,85,247,.20), transparent 56%),
+        linear-gradient(145deg,#15101f,#0a080f);
+      box-shadow:
+        0 0 0 1px rgba(168,85,247,.12),
+        0 12px 30px rgba(124,58,237,.16);
+    }
+
+    .choice-icon {
+      width: 50px;
+      height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(168,85,247,.055);
+      border: 1px solid rgba(168,85,247,.14);
+    }
+
+    .choice-icon svg {
+      width: 36px;
+      height: 36px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .launch { color: #b36aff; }
+    .brand { color: #38bdf8; }
+    .leads { color: #4ade80; }
+    .sale { color: #fb923c; }
+
+    .choice-title {
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.16;
+    }
+
+    .choice-description {
+      color: #918b9a;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .choice-check {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 23px;
+      height: 23px;
+      place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg,#c084fc,#7c3aed);
+      font-size: 12px;
+      font-weight: 950;
+      box-shadow: 0 0 14px rgba(168,85,247,.30);
+    }
+
+    .marketing-choice.active .choice-check {
+      display: grid;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field-group {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field-group label {
+      color: #ded9e8;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field-group input,
+    .field-group textarea,
+    .field-group select {
+      width: 100%;
+      border: 1px solid rgba(168,85,247,.25);
+      border-radius: 17px;
+      outline: none;
+      color: #f8fafc;
+      background: linear-gradient(145deg,#0d0b14,#08070c);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+      transition: border-color .17s ease, box-shadow .17s ease;
+    }
+
+    .field-group input,
+    .field-group select {
+      height: 49px;
+      padding: 0 14px;
+    }
+
+    .field-group textarea {
+      min-height: 122px;
+      resize: vertical;
+      padding: 14px 14px 31px;
+      line-height: 1.5;
+    }
+
+    .field-group input::placeholder,
+    .field-group textarea::placeholder {
+      color: #6e6878;
+    }
+
+    .field-group input:focus,
+    .field-group textarea:focus,
+    .field-group select:focus {
+      border-color: rgba(168,85,247,.86);
+      box-shadow: 0 0 0 3px rgba(139,92,246,.10);
+    }
+
+    select {
+      color-scheme: dark;
+    }
+
+    .char-count {
+      position: absolute;
+      right: 12px;
+      bottom: 9px;
+      color: #736d7e;
+      font-size: 10px;
+    }
+
+    .field-icon {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      width: 21px;
+      height: 21px;
+      color: #a855f7;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .field-icon svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .with-icon select {
+      padding-left: 45px;
+    }
+
+    .platform-tip {
+      display: none;
+      margin-top: -2px;
+      padding: 10px 12px;
+      border: 1px solid rgba(168,85,247,.18);
+      border-radius: 14px;
+      background: rgba(124,58,237,.055);
+      color: #aaa4b6;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .primary-cta,
+    .action-card {
+      width: 100%;
+      border: 0;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .primary-cta {
+      min-height: 61px;
+      margin-top: 17px;
+      padding: 0 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 1px solid rgba(192,132,252,.44);
+      border-radius: 18px;
+      background: linear-gradient(135deg,#7c3aed 0%,#9333ea 48%,#2563eb 100%);
+      box-shadow:
+        0 13px 30px rgba(124,58,237,.26),
+        inset 0 1px 0 rgba(255,255,255,.13);
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .primary-cta:active,
+    .action-card:active {
+      transform: scale(.988);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .status-box:empty {
+      display: none;
+    }
+
+    .status-box {
+      margin-top: 12px;
+      padding: 13px 14px;
+      border: 1px solid rgba(168,85,247,.18);
+      border-radius: 15px;
+      background: rgba(124,58,237,.055);
+      color: #c9c3d4;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .status-box.error {
+      border-color: rgba(251,113,133,.28);
+      background: rgba(251,113,133,.06);
+      color: #fecdd3;
+    }
+
+    .status-box.success {
+      border-color: rgba(34,197,94,.26);
+      background: rgba(34,197,94,.055);
+      color: #bbf7d0;
+    }
+
+    .loader {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .loader-star {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #d8b4fe;
+      background: rgba(168,85,247,.13);
+      border: 1px solid rgba(192,132,252,.25);
+      animation: pulse 1.35s ease-in-out infinite;
+    }
+
+    .loader-dots {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .loader-dots i {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #c084fc;
+      animation: dot 1.1s infinite ease-in-out;
+    }
+
+    .loader-dots i:nth-child(2) {
+      animation-delay: .13s;
+    }
+
+    .loader-dots i:nth-child(3) {
+      animation-delay: .26s;
+    }
+
+    @keyframes pulse {
+      50% {
+        transform: scale(1.06);
+        box-shadow: 0 0 18px rgba(168,85,247,.25);
       }
-    );
-  }
-
-
-  /* ==========================================
-     SCORE VIRA
-  ========================================== */
-
-  function updateGrowthScore() {
-
-    let score = 60;
-
-    if (selectedMarketingType) {
-      score += 10;
     }
 
-    if (
-      promptInput &&
-      promptInput.value.trim().length >= 20
-    ) {
-      score += 8;
+    @keyframes dot {
+      0%,80%,100% {
+        opacity:.3;
+        transform: translateY(0);
+      }
+
+      40% {
+        opacity:1;
+        transform: translateY(-3px);
+      }
     }
 
-    if (
-      targetAudience &&
-      targetAudience.value.trim()
-    ) {
-      score += 6;
+    .campaign-result:empty {
+      display: none;
     }
 
-    if (
-      marketingGoal &&
-      marketingGoal.value.trim()
-    ) {
-      score += 6;
+    .campaign-result {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid rgba(168,85,247,.20);
+      border-radius: 20px;
+      background: linear-gradient(145deg,rgba(17,15,27,.98),rgba(8,8,13,.98));
+      box-shadow: 0 16px 40px rgba(0,0,0,.28);
     }
 
-    if (
-      campaignTone &&
-      campaignTone.value
-    ) {
-      score += 4;
+    .result-ready {
+      margin-bottom: 14px;
+      padding: 12px 13px;
+      border-radius: 14px;
+      border: 1px solid rgba(34,197,94,.18);
+      background: rgba(34,197,94,.055);
     }
 
-    if (
-      platform &&
-      platform.value
-    ) {
-      score += 6;
+    .result-ready strong {
+      display:block;
+      font-size: 13px;
     }
 
-    score =
-      Math.min(score, 100);
-
-    if (growthScoreNumber) {
-      growthScoreNumber.textContent =
-        score;
+    .result-ready span {
+      display:block;
+      margin-top:3px;
+      color:#9e98a9;
+      font-size:11px;
     }
 
-    const scoreRing =
-      document.querySelector(".score-ring");
+    .campaign-result h2 {
+      margin: 0 0 13px;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: -.4px;
+      background: linear-gradient(135deg,#fff,#c4b5fd 56%,#60a5fa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
 
-    if (scoreRing) {
+    .campaign-section {
+      margin-top: 9px;
+      padding: 13px;
+      border-radius: 14px;
+      border: 1px solid rgba(168,85,247,.11);
+      background: rgba(255,255,255,.022);
+    }
 
-      const degrees =
-        score * 3.6;
+    .campaign-section strong,
+    .campaign-section summary {
+      color:#f7f5ff;
+      font-size:12px;
+      font-weight:900;
+    }
 
-      scoreRing.style.setProperty(
-        "--score-deg",
-        degrees + "deg"
+    .campaign-section p {
+      margin:7px 0 0;
+      color:#c7c2d0;
+      font-size:12px;
+      line-height:1.55;
+      white-space:pre-line;
+    }
+
+    details summary {
+      cursor:pointer;
+      list-style:none;
+    }
+
+    details summary::-webkit-details-marker {
+      display:none;
+    }
+
+    details summary::after {
+      content:"＋";
+      float:right;
+      color:#a855f7;
+    }
+
+    details[open] summary::after {
+      content:"−";
+    }
+
+    .scene-item {
+      padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .scene-item:last-child {
+      border-bottom:0;
+    }
+
+    .workflow-actions {
+      display:grid;
+      gap:10px;
+      margin-top:13px;
+    }
+
+    .action-card {
+      min-height: 70px;
+      margin:0;
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-radius:17px;
+      text-align:left;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.10),
+        0 10px 25px rgba(0,0,0,.18);
+    }
+
+    .action-card .action-icon {
+      width:40px;
+      height:40px;
+      flex:0 0 40px;
+      display:grid;
+      place-items:center;
+      border-radius:13px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.15);
+      font-size:19px;
+    }
+
+    .action-card .action-copy {
+      flex:1;
+      min-width:0;
+    }
+
+    .action-card .action-copy strong {
+      display:block;
+      font-size:14px;
+    }
+
+    .action-card .action-copy span {
+      display:block;
+      margin-top:3px;
+      color:rgba(255,255,255,.72);
+      font-size:11px;
+      line-height:1.3;
+    }
+
+    .action-card .chev {
+      font-size:25px;
+      opacity:.75;
+    }
+
+    .validate {
+      background:linear-gradient(135deg,rgba(5,110,55,.92),rgba(3,65,45,.95));
+      border:1px solid rgba(34,197,94,.50);
+    }
+
+    .voice {
+      background:linear-gradient(135deg,rgba(2,132,199,.86),rgba(37,99,235,.84));
+      border:1px solid rgba(56,189,248,.42);
+    }
+
+    .visuals {
+      background:linear-gradient(135deg,rgba(245,158,11,.90),rgba(234,88,12,.84));
+      border:1px solid rgba(251,146,60,.40);
+    }
+
+    .video {
+      background:linear-gradient(135deg,rgba(109,40,217,.90),rgba(76,29,149,.90));
+      border:1px solid rgba(192,132,252,.37);
+    }
+
+    .progress-wrap {
+      display:none;
+      margin-top:12px;
+    }
+
+    .progress-meta {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:7px;
+      color:#b8b1c4;
+      font-size:11px;
+    }
+
+    .progress-track {
+      height:8px;
+      overflow:hidden;
+      border-radius:999px;
+      background:#15131d;
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    .progress-fill {
+      width:0%;
+      height:100%;
+      border-radius:inherit;
+      background:linear-gradient(90deg,#7c3aed,#a855f7,#3b82f6);
+      transition:width .3s ease;
+    }
+
+    .visual-results:empty,
+    .video-result:empty {
+      display:none;
+    }
+
+    .results-panel {
+      margin-top: 13px;
+      padding: 14px;
+      border:1px solid rgba(168,85,247,.18);
+      border-radius:19px;
+      background:linear-gradient(145deg,#100e18,#09080e);
+    }
+
+    .results-panel h3 {
+      margin:0;
+      font-size:14px;
+    }
+
+    .results-panel .meta {
+      margin-top:3px;
+      color:#8e8799;
+      font-size:10px;
+    }
+
+    .visual-strip {
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      padding-bottom:7px;
+      overflow-x:auto;
+      overscroll-behavior-inline:contain;
+      scroll-snap-type:x mandatory;
+      scrollbar-width:thin;
+    }
+
+    .visual-card {
+      flex:0 0 142px;
+      width:142px;
+      scroll-snap-align:start;
+    }
+
+    .visual-frame {
+      position:relative;
+      width:100%;
+      aspect-ratio:9/16;
+      overflow:hidden;
+      border-radius:15px;
+      border:1px solid rgba(168,85,247,.18);
+      background:#0a0810;
+    }
+
+    .visual-frame img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .visual-number {
+      position:absolute;
+      top:7px;
+      left:7px;
+      padding:5px 7px;
+      border-radius:9px;
+      background:rgba(5,5,8,.72);
+      border:1px solid rgba(255,255,255,.09);
+      font-size:9px;
+      font-weight:850;
+    }
+
+    .visual-caption {
+      margin-top:7px;
+            <div class="section-title" style="margin-top:24px">
+          <span class="number">2</span>
+          <span>Informations</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="prompt">Description du produit / service</label>
+
+            <textarea
+              id="prompt"
+              maxlength="500"
+              placeholder="Décrivez votre produit, votre service ou votre offre en quelques mots..."
+            ></textarea>
+
+            <div class="char-count">
+              <span id="promptCount">0</span>/500
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid two" style="margin-top:12px">
+          <div class="field-group">
+            <label for="targetAudience">Audience cible</label>
+
+            <input
+              id="targetAudience"
+              type="text"
+              placeholder="Ex : Entrepreneurs, PME, e-commerçants"
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="marketingGoal">Objectif principal</label>
+
+            <input
+              id="marketingGoal"
+              type="text"
+              placeholder="Ex : Générer plus de ventes"
+            />
+          </div>
+
+          <div class="field-group with-icon">
+            <label for="campaignTone">Ton de la campagne</label>
+
+            <div
+              class="field-icon"
+              id="tonePremiumIcon"
+            ></div>
+
+            <select id="campaignTone">
+              <option value="Professionnel">
+                Professionnel
+              </option>
+
+              <option value="Dynamique">
+                Dynamique
+              </option>
+
+              <option value="Amical">
+                Amical
+              </option>
+
+              <option value="Premium">
+                Premium
+              </option>
+
+              <option value="Inspirant">
+                Inspirant
+              </option>
+            </select>
+          </div>
+
+          <div class="field-group with-icon">
+            <label for="platform">
+              Plateforme principale
+            </label>
+
+            <div
+              class="field-icon"
+              id="platformPremiumIcon"
+            ></div>
+
+            <select id="platform">
+              <option value="">
+                Choisir une plateforme
+              </option>
+
+              <option value="Instagram">
+                Instagram
+              </option>
+
+              <option value="Facebook">
+                Facebook
+              </option>
+
+              <option value="TikTok">
+                TikTok
+              </option>
+
+              <option value="YouTube">
+                YouTube
+              </option>
+
+              <option value="LinkedIn">
+                LinkedIn
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div
+          id="platformTip"
+          class="platform-tip"
+        ></div>
+
+        <button
+          id="scenario"
+          class="primary-cta"
+          type="button"
+        >
+          <span>✦</span>
+          <span>Générer ma campagne</span>
+        </button>
+
+        <div class="test-badge">
+          🧪 Visuels et vidéo en mode test gratuit par défaut
+        </div>
+
+        <div
+          id="scenarioStatus"
+          class="status-box"
+          aria-live="polite"
+        ></div>
+
+        <div
+          id="scenarioResult"
+          class="campaign-result"
+        ></div>
+
+        <div class="workflow-actions">
+
+          <button
+            id="validateScenario"
+            class="action-card validate"
+            type="button"
+            style="display:none"
+          >
+            <span class="action-icon">✓</span>
+
+            <span class="action-copy">
+              <strong>
+                Valider le scénario
+              </strong>
+
+              <span>
+                Déverrouille la création des visuels.
+              </span>
+            </span>
+
+            <span class="chev">›</span>
+          </button>
+
+          <button
+            id="testVoice"
+            class="action-card voice"
+            type="button"
+            style="display:none"
+          >
+            <span class="action-icon">◉</span>
+
+            <span class="action-copy">
+              <strong>
+                Tester la narration
+              </strong>
+
+              <span>
+                Génère un court aperçu vocal.
+              </span>
+            </span>
+
+            <span class="chev">›</span>
+          </button>
+
+          <button
+            id="generate"
+            class="action-card visuals"
+            type="button"
+            style="display:none"
+          >
+            <span class="action-icon">✦</span>
+
+            <span class="action-copy">
+              <strong>
+                Créer les visuels
+              </strong>
+
+              <span>
+                Génère les 5 scènes de la campagne.
+              </span>
+            </span>
+
+            <span class="chev">›</span>
+          </button>
+
+          <button
+            id="video"
+            class="action-card video"
+            type="button"
+            style="display:none"
+          >
+            <span class="action-icon">🎬</span>
+
+            <span class="action-copy">
+              <strong>
+                Créer la vidéo marketing
+              </strong>
+
+              <span>
+                Transforme les 5 visuels en vidéo avec narration.
+              </span>
+            </span>
+
+            <span class="chev">›</span>
+          </button>
+
+        </div>
+
+        <div
+          id="progressWrap"
+          class="progress-wrap"
+        >
+          <div class="progress-meta">
+            <span id="progressLabel">
+              Préparation
+            </span>
+
+            <strong id="progressPercent">
+              0%
+            </strong>
+          </div>
+
+          <div class="progress-track">
+            <div
+              id="progressFill"
+              class="progress-fill"
+            ></div>
+          </div>
+        </div>
+
+        <div
+          id="status"
+          class="status-box"
+          aria-live="polite"
+        ></div>
+
+        <div
+          id="result"
+          class="visual-results"
+        ></div>
+
+        <div
+          id="videoStatus"
+          class="status-box"
+          aria-live="polite"
+        ></div>
+
+        <div
+          id="videoResult"
+          class="video-result"
+        ></div>
+
+      </section>
+    </main>
+  </div>
+
+  <nav
+    class="mobile-nav"
+    aria-label="Navigation mobile"
+  >
+    <button
+      type="button"
+      class="active"
+    >
+      <span>⌂</span>
+      Accueil
+    </button>
+
+    <button type="button">
+      <span>▣</span>
+      Campagnes
+    </button>
+
+    <button type="button">
+      <span>▤</span>
+      Contenus
+    </button>
+
+    <button type="button">
+      <span>⚙</span>
+      Réglages
+    </button>
+  </nav>
+
+  <script>
+  (() => {
+    "use strict";
+
+    // ========================================
+    // VIRA PREMIUM
+    // MODE ÉCONOMIE PENDANT LA CONSTRUCTION
+    // ========================================
+
+    const FREE_VISUAL_MODE = true;
+    const FREE_VIDEO_MODE = true;
+
+    const $ = (id) =>
+      document.getElementById(id);
+
+    const els = {
+      prompt: $("prompt"),
+      promptCount: $("promptCount"),
+      audience: $("targetAudience"),
+      goal: $("marketingGoal"),
+      tone: $("campaignTone"),
+      platform: $("platform"),
+      platformTip: $("platformTip"),
+      toneIcon: $("tonePremiumIcon"),
+      platformIcon: $("platformPremiumIcon"),
+      scenarioBtn: $("scenario"),
+      scenarioStatus: $("scenarioStatus"),
+      scenarioResult: $("scenarioResult"),
+      validateBtn: $("validateScenario"),
+      voiceBtn: $("testVoice"),
+      visualBtn: $("generate"),
+      videoBtn: $("video"),
+      status: $("status"),
+      result: $("result"),
+      videoStatus: $("videoStatus"),
+      videoResult: $("videoResult"),
+      progressWrap: $("progressWrap"),
+      progressLabel: $("progressLabel"),
+      progressPercent: $("progressPercent"),
+      progressFill: $("progressFill"),
+      brainBtn: $("brainAnalyzeBtn"),
+      score: $("growthScoreNumber"),
+      scoreCircle: $("growthScoreCircle"),
+      opportunity: $("brainOpportunity"),
+      recommended: $("brainRecommendedAction"),
+      creditCount: $("creditCount")
+    };
+
+    let selectedMarketingType =
+      localStorage.getItem("viraMarketingType") || "";
+
+    let rawScenario =
+      localStorage.getItem("viraScenario") || "";
+
+    let generatedImages = [];
+
+    let finalVideoUrl = "";
+
+    const marketingMeta = {
+
+      "🛍️ Vendre un produit": {
+        score: 78,
+
+        opportunity:
+          "✦ Opportunité : présenter clairement le bénéfice principal du produit et créer un désir d’achat rapide.",
+
+        action:
+          "→ Construisez une campagne produit avec hook, bénéfice concret, preuve et appel à l’achat.",
+
+        prompt:
+          "Ex : Je lance une nouvelle paire de chaussures de sport légère et confortable..."
+      },
+
+      "📱 Réseaux sociaux": {
+        score: 74,
+
+        opportunity:
+          "✦ Opportunité : augmenter la portée et l’engagement grâce à un contenu court et partageable.",
+
+        action:
+          "→ Priorisez une accroche très forte et un contenu facile à commenter, enregistrer ou partager.",
+
+        prompt:
+          "Ex : Je veux développer la visibilité de ma marque sur les réseaux sociaux..."
+      },
+
+      "💼 Promouvoir un service": {
+        score: 82,
+
+        opportunity:
+          "✦ Opportunité : transformer un problème client précis en demande de contact ou réservation.",
+
+        action:
+          "→ Montrez le problème, votre solution, le résultat attendu et terminez par une prise de contact claire.",
+
+        prompt:
+          "Ex : Je veux promouvoir mon service de nettoyage résidentiel auprès de propriétaires..."
+      },
+
+      "📢 Créer une publicité": {
+        score: 86,
+
+        opportunity:
+          "✦ Opportunité : concentrer le message sur une offre claire et une action mesurable.",
+
+        action:
+          "→ Créez une publicité orientée conversion avec hook, solution, bénéfice et appel à l’action.",
+
+        prompt:
+          "Ex : Je veux créer une publicité pour attirer de nouveaux clients vers mon entreprise..."
+      }
+
+    };
+
+    const icons = {
+
+      globe: `
+        <svg viewBox="0 0 24 24">
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+          ></circle>
+
+          <path d="M3 12h18"></path>
+
+          <path
+            d="M12 3a15 15 0 0 1 0 18"
+          ></path>
+
+          <path
+            d="M12 3a15 15 0 0 0 0 18"
+          ></path>
+        </svg>
+      `,
+
+      Instagram: `
+        <svg viewBox="0 0 24 24">
+          <rect
+            x="3"
+            y="3"
+            width="18"
+            height="18"
+            rx="5"
+          ></rect>
+
+          <circle
+            cx="12"
+            cy="12"
+            r="4"
+          ></circle>
+
+          <circle
+            cx="17.5"
+            cy="6.5"
+            r="1"
+          ></circle>
+        </svg>
+      `,
+
+      Facebook: `
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v6h4v-6h3l1-4h-4V9c0-.7.3-1 1-1z"
+          ></path>
+        </svg>
+      `,
+
+      TikTok: `
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M14 4v10a4 4 0 1 1-4-4"
+          ></path>
+
+          <path
+            d="M14 4c1 3 3 4 6 4"
+          ></path>
+        </svg>
+      `,
+
+      YouTube: `
+        <svg viewBox="0 0 24 24">
+          <rect
+            x="3"
+            y="6"
+            width="18"
+            height="12"
+            rx="4"
+          ></rect>
+
+          <path
+            d="m10 9 5 3-5 3z"
+          ></path>
+        </svg>
+      `,
+
+      LinkedIn: `
+        <svg viewBox="0 0 24 24">
+          <rect
+            x="3"
+            y="3"
+            width="18"
+            height="18"
+            rx="2"
+          ></rect>
+
+          <path d="M7 10v7"></path>
+
+          <path d="M7 7h.01"></path>
+
+          <path
+            d="M11 17v-4a3 3 0 0 1 6 0v4"
+          ></path>
+        </svg>
+      `,
+
+      Professionnel: `
+        <svg viewBox="0 0 24 24">
+          <rect
+            x="3"
+            y="7"
+            width="18"
+            height="13"
+            rx="2"
+          ></rect>
+
+          <path
+            d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          ></path>
+
+          <path d="M3 12h18"></path>
+        </svg>
+      `,
+
+      Dynamique: `
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"
+          ></path>
+        </svg>
+      `,
+
+      Amical: `
+        <svg viewBox="0 0 24 24">
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+          ></circle>
+
+          <path
+            d="M8 14s1.5 2 4 2 4-2 4-2"
+          ></path>
+
+          <path
+            d="M9 9h.01M15 9h.01"
+          ></path>
+        </svg>
+      `,
+
+      Premium: `
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M6 3h12l4 6-10 12L2 9l4-6z"
+          ></path>
+
+          <path
+            d="M2 9h20M9 3l3 6 3-6"
+          ></path>
+        </svg>
+      `,
+
+      Inspirant: `
+        <svg viewBox="0 0 24 24">
+          <path
+            d="m12 2 2.8 6.2L21 11l-6.2 2.8L12 20l-2.8-6.2L3 11l6.2-2.8L12 2z"
+          ></path>
+        </svg>
+      `
+    };
+
+    function escapeHtml(value = "") {
+      return String(value).replace(
+        /[&<>'"]/g,
+        (ch) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "'": "&#39;",
+          '"': "&quot;"
+        }[ch])
       );
     }
 
-    return score;
-  }
+    function setStatus(
+      el,
+      message = "",
+      type = ""
+    ) {
+      el.className =
+        "status-box" +
+        (type ? ` ${type}` : "");
 
+      el.innerHTML = message;
+    }
 
-  /* ==========================================
-     OBJECTIF MARKETING
-  ========================================== */
+    function setProgress(
+      percent,
+      label
+    ) {
+      const safe =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            Number(percent) || 0
+          )
+        );
 
-  marketingChoices.forEach(
-    function (choice) {
+      els.progressWrap.style.display =
+        "block";
 
-      const title =
-        choice
-          .querySelector(".choice-title")
-          ?.textContent
-          .trim() || "";
+      els.progressFill.style.width =
+        `${safe}%`;
 
-      if (
-        selectedMarketingType === title
-      ) {
-        choice.classList.add("active");
+      els.progressPercent.textContent =
+        `${Math.round(safe)}%`;
+
+      els.progressLabel.textContent =
+        label || "Préparation";
+    }
+
+    function hideProgress(
+      delay = 700
+    ) {
+      setTimeout(() => {
+        els.progressWrap.style.display =
+          "none";
+      }, delay);
+    }
+
+    function currentChoice() {
+      return document.querySelector(
+        ".marketing-choice.active"
+      );
+    }
+
+    function updateBrain(
+      animated = false
+    ) {
+      const meta =
+        marketingMeta[
+          selectedMarketingType
+        ];
+
+      let score =
+        meta?.score || 60;
+
+      const prompt =
+        els.prompt.value.trim();
+
+      const audience =
+        els.audience.value.trim();
+
+      const goal =
+        els.goal.value.trim();
+
+      const platform =
+        els.platform.value;
+
+      if (prompt.length >= 20) {
+        score += 4;
       }
 
-      choice.addEventListener(
-        "click",
-        function () {
+      if (audience.length >= 5) {
+        score += 4;
+      }
 
-          marketingChoices.forEach(
-            function (button) {
-              button.classList.remove(
-                "active"
-              );
+      if (goal.length >= 5) {
+        score += 4;
+      }
+
+      if (platform) {
+        score += 3;
+      }
+
+      score =
+        Math.min(
+          score,
+          100
+        );
+
+      const render = () => {
+        els.score.textContent =
+          score;
+
+        els.scoreCircle.style.setProperty(
+          "--score-deg",
+          `${score * 3.6}deg`
+        );
+
+        els.opportunity.textContent =
+          meta?.opportunity ||
+          "✦ Choisissez un objectif marketing pour lancer l’analyse.";
+
+        els.recommended.textContent =
+          meta?.action ||
+          "→ VIRA vous proposera l’action prioritaire à réaliser.";
+      };
+
+      if (animated) {
+
+        els.brainBtn.disabled =
+          true;
+
+        els.brainBtn.textContent =
+          "✦ Analyse...";
+
+        setTimeout(() => {
+          render();
+
+          els.brainBtn.disabled =
+            false;
+
+          els.brainBtn.textContent =
+            "✦ Analyse Brain";
+
+        }, 550);
+
+      } else {
+        render();
+      }
+    }
+
+    function updateToneIcon() {
+      els.toneIcon.innerHTML =
+        icons[els.tone.value] ||
+        icons.Professionnel;
+    }
+
+    function updatePlatformIcon() {
+      els.platformIcon.innerHTML =
+        icons[els.platform.value] ||
+        icons.globe;
+    }
+
+    function updatePlatformTip() {
+
+      const tips = {
+
+        TikTok:
+          "TikTok : hook immédiat, rythme rapide et scènes très visuelles.",
+
+        Instagram:
+          "Instagram : visuel fort, format Reel et engagement rapide.",
+
+        Facebook:
+          "Facebook : offre claire, confiance et conversion.",
+
+        YouTube:
+          "YouTube : narration, rétention et appel à l’action.",
+
+        LinkedIn:
+          "LinkedIn : crédibilité, expertise et audience professionnelle."
+      };
+
+      if (tips[els.platform.value]) {
+
+        els.platformTip.textContent =
+          tips[els.platform.value];
+
+        els.platformTip.style.display =
+          "block";
+
+      } else {
+
+        els.platformTip.textContent =
+          "";
+
+        els.platformTip.style.display =
+          "none";
+      }
+    }
+
+    function saveForm() {
+
+      localStorage.setItem(
+        "viraIdea",
+        els.prompt.value
+      );
+
+      localStorage.setItem(
+        "viraMarketingGoal",
+        els.goal.value
+      );
+
+      localStorage.setItem(
+        "viraTargetAudience",
+        els.audience.value
+      );
+
+      localStorage.setItem(
+        "viraPlatform",
+        els.platform.value
+      );
+
+      localStorage.setItem(
+        "viraCampaignTone",
+        els.tone.value
+      );
+
+      if (selectedMarketingType) {
+        localStorage.setItem(
+          "viraMarketingType",
+          selectedMarketingType
+        );
+      }
+    }
+
+    function restoreForm() {
+
+      els.prompt.value =
+        localStorage.getItem(
+          "viraIdea"
+        ) || "";
+
+      els.goal.value =
+        localStorage.getItem(
+          "viraMarketingGoal"
+        ) || "";
+
+      els.audience.value =
+        localStorage.getItem(
+          "viraTargetAudience"
+        ) || "";
+
+      els.platform.value =
+        localStorage.getItem(
+          "viraPlatform"
+        ) || "";
+
+      els.tone.value =
+        localStorage.getItem(
+          "viraCampaignTone"
+        ) || "Professionnel";
+
+      els.promptCount.textContent =
+        els.prompt.value.length;
+
+      document
+        .querySelectorAll(
+          ".marketing-choice"
+        )
+        .forEach((btn) => {
+
+          btn.classList.toggle(
+            "active",
+            btn.dataset.type ===
+              selectedMarketingType
+          );
+
+        });
+
+      if (
+        selectedMarketingType &&
+        marketingMeta[
+          selectedMarketingType
+        ]
+      ) {
+
+        els.prompt.placeholder =
+          marketingMeta[
+            selectedMarketingType
+          ].prompt;
+      }
+
+      updateToneIcon();
+      updatePlatformIcon();
+      updatePlatformTip();
+      updateBrain();
+      }
+          function resetGeneratedFlow() {
+      rawScenario = "";
+      generatedImages = [];
+      finalVideoUrl = "";
+
+      localStorage.removeItem(
+        "viraScenario"
+      );
+
+      els.scenarioResult.innerHTML =
+        "";
+
+      els.result.innerHTML =
+        "";
+
+      els.videoResult.innerHTML =
+        "";
+
+      setStatus(
+        els.scenarioStatus,
+        ""
+      );
+
+      setStatus(
+        els.status,
+        ""
+      );
+
+      setStatus(
+        els.videoStatus,
+        ""
+      );
+
+      els.validateBtn.style.display =
+        "none";
+
+      els.voiceBtn.style.display =
+        "none";
+
+      els.visualBtn.style.display =
+        "none";
+
+      els.videoBtn.style.display =
+        "none";
+    }
+
+    function extractSection(
+      text,
+      heading,
+      allHeadings
+    ) {
+
+      const escaped =
+        heading
+          .replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+          )
+          .replace(
+            /'/g,
+            "['’]"
+          );
+
+      const others =
+        allHeadings
+          .filter(
+            (h) => h !== heading
+          )
+          .map(
+            (h) =>
+              h
+                .replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  "\\$&"
+                )
+                .replace(
+                  /'/g,
+                  "['’]"
+                )
+          )
+          .join("|");
+
+      const re =
+        new RegExp(
+          `${escaped}\\s*:?\\s*([\\s\\S]*?)(?=\\n\\s*(?:${others})\\s*:?|$)`,
+          "i"
+        );
+
+      return (
+        text.match(re)?.[1]?.trim() ||
+        ""
+      );
+    }
+
+    function parseScenario(text) {
+
+      const clean =
+        text
+          .replace(
+            /\*\*/g,
+            ""
+          )
+          .replace(
+            /^#+\s*/gm,
+            ""
+          )
+          .replace(
+            /SCENE/gi,
+            "SCÈNE"
+          )
+          .trim();
+
+      const headers = [
+        "TITRE",
+        "OBJECTIF",
+        "PUBLIC CIBLE",
+        "ACCROCHE",
+        "TEXTE PUBLICATION",
+        "HASHTAGS",
+        "SCÈNE 1",
+        "SCÈNE 2",
+        "SCÈNE 3",
+        "SCÈNE 4",
+        "SCÈNE 5",
+        "NARRATION",
+        "APPEL À L'ACTION",
+        "APPEL À L’ACTION",
+        "PROMPT VISUEL",
+        "STYLE"
+      ];
+
+      const data = {
+        title:
+          extractSection(
+            clean,
+            "TITRE",
+            headers
+          ),
+
+        objective:
+          extractSection(
+            clean,
+            "OBJECTIF",
+            headers
+          ),
+
+        target:
+          extractSection(
+            clean,
+            "PUBLIC CIBLE",
+            headers
+          ),
+
+        hook:
+          extractSection(
+            clean,
+            "ACCROCHE",
+            headers
+          ),
+
+        publication:
+          extractSection(
+            clean,
+            "TEXTE PUBLICATION",
+            headers
+          ),
+
+        hashtags:
+          extractSection(
+            clean,
+            "HASHTAGS",
+            headers
+          ),
+
+        narration:
+          extractSection(
+            clean,
+            "NARRATION",
+            headers
+          ),
+
+        cta:
+          extractSection(
+            clean,
+            "APPEL À L'ACTION",
+            headers
+          ) ||
+          extractSection(
+            clean,
+            "APPEL À L’ACTION",
+            headers
+          ),
+
+        visualPrompt:
+          extractSection(
+            clean,
+            "PROMPT VISUEL",
+            headers
+          ),
+
+        style:
+          extractSection(
+            clean,
+            "STYLE",
+            headers
+          ),
+
+        scenes: []
+      };
+
+      for (
+        let i = 1;
+        i <= 5;
+        i++
+      ) {
+        data.scenes.push(
+          extractSection(
+            clean,
+            `SCÈNE ${i}`,
+            headers
+          )
+        );
+      }
+
+      return data;
+    }
+
+    function renderScenario(text) {
+
+      rawScenario =
+        text.trim();
+
+      localStorage.setItem(
+        "viraScenario",
+        rawScenario
+      );
+
+      const d =
+        parseScenario(
+          rawScenario
+        );
+
+      els.scenarioResult.innerHTML = `
+        <div class="result-ready">
+          <strong>
+            ✅ Votre campagne marketing est prête
+          </strong>
+
+          <span>
+            Stratégie, contenu et 5 scènes générés.
+          </span>
+        </div>
+
+        <h2>
+          ${escapeHtml(
+            d.title ||
+            "Campagne Marketing VIRA"
+          )}
+        </h2>
+
+        <div class="campaign-section">
+          <strong>◎ Objectif</strong>
+
+          <p>
+            ${escapeHtml(
+              d.objective ||
+              els.goal.value
+            )}
+          </p>
+        </div>
+
+        <div class="campaign-section">
+          <strong>◇ Public cible</strong>
+
+          <p>
+            ${escapeHtml(
+              d.target ||
+              els.audience.value
+            )}
+          </p>
+        </div>
+
+        <div class="campaign-section">
+          <strong>✦ Accroche</strong>
+
+          <p>
+            ${escapeHtml(
+              d.hook
+            )}
+          </p>
+        </div>
+
+        <div class="campaign-section">
+          <strong>
+            ▤ Texte de publication
+          </strong>
+
+          <p>
+            ${escapeHtml(
+              d.publication
+            )}
+          </p>
+        </div>
+
+        <div class="campaign-section">
+          <strong># Hashtags</strong>
+
+          <p>
+            ${escapeHtml(
+              d.hashtags
+            )}
+          </p>
+        </div>
+
+        <details class="campaign-section">
+          <summary>
+            ▶ Scènes
+            (${d.scenes.filter(Boolean).length}/5)
+          </summary>
+
+          ${d.scenes
+            .map(
+              (s, i) => `
+                <div class="scene-item">
+                  <strong>
+                    Scène ${i + 1}
+                  </strong>
+
+                  <p>
+                    ${escapeHtml(
+                      s ||
+                      "Scène à compléter"
+                    )}
+                  </p>
+                </div>
+              `
+            )
+            .join("")}
+        </details>
+
+        <details class="campaign-section">
+          <summary>
+            ◉ Narration
+          </summary>
+
+          <p>
+            ${escapeHtml(
+              d.narration
+            )}
+          </p>
+        </details>
+
+        <div class="campaign-section">
+          <strong>
+            ↗ Appel à l’action
+          </strong>
+
+          <p>
+            ${escapeHtml(
+              d.cta
+            )}
+          </p>
+        </div>
+
+        <details class="campaign-section">
+          <summary>
+            ◇ Prompt visuel
+          </summary>
+
+          <p>
+            ${escapeHtml(
+              d.visualPrompt
+            )}
+          </p>
+        </details>
+
+        <details class="campaign-section">
+          <summary>
+            ✦ Style
+          </summary>
+
+          <p>
+            ${escapeHtml(
+              d.style
+            )}
+          </p>
+        </details>
+      `;
+
+      els.validateBtn.style.display =
+        "flex";
+
+      els.voiceBtn.style.display =
+        "flex";
+    }
+
+    function makeTestImage(
+      scene,
+      index
+    ) {
+
+      const sceneLabel =
+        `SCÈNE ${index + 1}`;
+
+      const short =
+        (
+          scene ||
+          "Visuel marketing VIRA"
+        )
+          .replace(
+            /[<>&]/g,
+            ""
+          )
+          .slice(
+            0,
+            46
+          );
+
+      const svg = `
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="720"
+          height="1280"
+          viewBox="0 0 720 1280"
+        >
+          <defs>
+            <linearGradient
+              id="g"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="1"
+            >
+              <stop stop-color="#181126"/>
+              <stop
+                offset="1"
+                stop-color="#08070c"
+              />
+            </linearGradient>
+
+            <radialGradient id="r">
+              <stop
+                stop-color="#7c3aed"
+                stop-opacity=".40"
+              />
+
+              <stop
+                offset="1"
+                stop-color="#7c3aed"
+                stop-opacity="0"
+              />
+            </radialGradient>
+          </defs>
+
+          <rect
+            width="720"
+            height="1280"
+            fill="url(#g)"
+          />
+
+          <circle
+            cx="570"
+            cy="170"
+            r="330"
+            fill="url(#r)"
+          />
+
+          <rect
+            x="55"
+            y="70"
+            width="610"
+            height="1140"
+            rx="48"
+            fill="none"
+            stroke="#a855f7"
+            stroke-opacity=".28"
+            stroke-width="2"
+          />
+
+          <text
+            x="360"
+            y="550"
+            text-anchor="middle"
+            fill="#c084fc"
+            font-family="Arial"
+            font-size="38"
+            font-weight="700"
+          >
+            ${sceneLabel}
+          </text>
+
+          <text
+            x="360"
+            y="625"
+            text-anchor="middle"
+            fill="#ffffff"
+            font-family="Arial"
+            font-size="31"
+            font-weight="700"
+          >
+            VIRA PREMIUM
+          </text>
+
+          <text
+            x="360"
+            y="690"
+            text-anchor="middle"
+            fill="#9d98aa"
+            font-family="Arial"
+            font-size="20"
+          >
+            ${escapeHtml(short)}
+          </text>
+
+          <text
+            x="360"
+            y="1120"
+            text-anchor="middle"
+            fill="#777183"
+            font-family="Arial"
+            font-size="17"
+          >
+            MODE TEST GRATUIT
+          </text>
+        </svg>
+      `;
+
+      return (
+        `data:image/svg+xml;charset=UTF-8,` +
+        encodeURIComponent(svg)
+      );
+    }
+
+    function renderImages(
+      images,
+      scenes,
+      test = false
+    ) {
+
+      els.result.innerHTML = `
+        <div class="results-panel">
+          <h3>
+            ✦ Visuels de campagne
+          </h3>
+
+          <div class="meta">
+            ${images.length}/5 scènes
+            ${
+              test
+                ? "• mode test gratuit"
+                : "• générées par IA"
+            }
+          </div>
+
+          <div class="visual-strip">
+            ${images
+              .map(
+                (src, i) => `
+                  <div class="visual-card">
+                    <div class="visual-frame">
+                      <img
+                        src="${src}"
+                        alt="Visuel scène ${i + 1}"
+                      >
+
+                      <span class="visual-number">
+                        SCÈNE ${i + 1}
+                      </span>
+                    </div>
+
+                    <div class="visual-caption">
+                      ${escapeHtml(
+                        (
+                          scenes[i] ||
+                          ""
+                        ).slice(
+                          0,
+                          80
+                        )
+                      )}
+                    </div>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    async function generateRealImages(
+      scenes,
+      visualPrompt,
+      style
+    ) {
+
+      const images = [];
+
+      for (
+        let i = 0;
+        i < 5;
+        i++
+      ) {
+
+        setProgress(
+          15 + i * 14,
+          `Création du visuel ${i + 1}/5`
+        );
+
+        const prompt = `
+          ${visualPrompt ||
+          "Professional premium marketing visual"}.
+
+          Scene ${i + 1}:
+          ${scenes[i]}.
+
+          Style:
+          ${style ||
+          els.tone.value}.
+
+          Platform:
+          ${els.platform.value}.
+
+          Maintain visual continuity with the other scenes.
+          No text or typography in the image.
+        `;
+
+        const response =
+          await fetch(
+            "/api/images/generate",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify({
+                  prompt,
+                  size:
+                    "1024x1536",
+                  quality:
+                    "low"
+                })
             }
           );
 
-          choice.classList.add("active");
+        const data =
+          await response.json();
 
-          selectedMarketingType =
-            title;
+        if (!response.ok) {
 
-          localStorage.setItem(
-            "viraMarketingType",
-            selectedMarketingType
+          throw new Error(
+            data?.error ||
+            `Erreur visuel ${i + 1}`
           );
-
-          updateGrowthScore();
-
         }
-      );
+
+        const url =
+          data?.url ||
+          data?.image?.url;
+
+        if (!url) {
+
+          throw new Error(
+            `Aucune image reçue pour la scène ${i + 1}.`
+          );
+        }
+
+        images.push(url);
+      }
+
+      return images;
     }
-  );
 
-
-  /* ==========================================
-     MISE À JOUR SCORE EN DIRECT
-  ========================================== */
-
-  [
-    promptInput,
-    targetAudience,
-    marketingGoal
-  ].forEach(function (element) {
-
-    if (!element) return;
-
-    element.addEventListener(
-      "input",
-      updateGrowthScore
-    );
-
-  });
-
-
-  [
-    campaignTone,
-    platform
-  ].forEach(function (element) {
-
-    if (!element) return;
-
-    element.addEventListener(
-      "change",
-      updateGrowthScore
-    );
-
-  });
-
-
-  /* ==========================================
-     CONSEIL PLATEFORME
-  ========================================== */
-
-  if (platform) {
-
-    platform.addEventListener(
-      "change",
-      function () {
-
-        const tips = {
-
-          Instagram:
-            "Instagram : privilégie une vidéo verticale, visuelle et rapide.",
-
-          Facebook:
-            "Facebook : utilise une offre claire et un appel à l'action direct.",
-
-          TikTok:
-            "TikTok : commence avec une accroche très forte dans les premières secondes.",
-
-          YouTube:
-            "YouTube : travaille la narration et la rétention du spectateur.",
-
-          LinkedIn:
-            "LinkedIn : privilégie la crédibilité, l'expertise et une approche professionnelle."
-
-        };
-
-        if (
-          platformTip &&
-          tips[platform.value]
-        ) {
-
-          platformTip.textContent =
-            "✦ " + tips[platform.value];
-
-          platformTip.style.display =
-            "block";
-
-        } else if (platformTip) {
-
-          platformTip.style.display =
-            "none";
-
-        }
-
-      }
-    );
-  }
-
-
-  /* ==========================================
-     ANALYSE VIRA BRAIN
-     AUCUN CRÉDIT IA UTILISÉ ICI
-  ========================================== */
-
-  if (brainAnalyzeBtn) {
-
-    brainAnalyzeBtn.addEventListener(
-      "click",
-      function () {
-
-        const idea =
-          promptInput?.value.trim() || "";
-
-        const audience =
-          targetAudience?.value.trim() || "";
-
-        const goal =
-          marketingGoal?.value.trim() || "";
-
-        if (!selectedMarketingType) {
-
-          brainOpportunity.textContent =
-            "⚠️ Choisis d'abord un objectif marketing.";
-
-          return;
-        }
-
-        if (!idea) {
-
-          brainOpportunity.textContent =
-            "⚠️ Décris ton idée ou ton entreprise avant l'analyse.";
-
-          promptInput?.focus();
-
-          return;
-        }
-
-        const score =
-          updateGrowthScore();
-
-        let opportunity =
-          "VIRA détecte une bonne opportunité de croissance.";
-
-        let action =
-          "Crée maintenant ton scénario marketing.";
-
-        if (
-          selectedMarketingType.includes(
-            "Lancement"
-          )
-        ) {
-
-          opportunity =
-            "✦ Opportunité : créer un lancement fort pour attirer rapidement l'attention autour de ton produit.";
-
-          action =
-            "→ Mets en avant le problème, la solution et les avantages uniques de ton produit.";
-
-        } else if (
-          selectedMarketingType.includes(
-            "Notoriété"
-          )
-        ) {
-
-          opportunity =
-            "✦ Opportunité : augmenter la visibilité de ta marque auprès d'une audience plus large.";
-
-          action =
-            "→ Crée un contenu mémorable qui renforce l'identité et la reconnaissance de ta marque.";
-
-        } else if (
-          selectedMarketingType
-            .toLowerCase()
-            .includes("lead")
-        ) {
-
-          opportunity =
-            "✦ Opportunité : transformer davantage de visiteurs en prospects qualifiés.";
-
-          action =
-            "→ Utilise une offre claire avec un appel à l'action conçu pour obtenir des contacts.";
-
-        } else if (
-          selectedMarketingType.includes(
-            "vente"
-          ) ||
-          selectedMarketingType.includes(
-            "Promotion"
-          )
-        ) {
-
-          opportunity =
-            "✦ Opportunité : augmenter les conversions grâce à une campagne axée sur l'offre.";
-
-          action =
-            "→ Mets en avant la valeur, l'urgence et un appel à l'achat très clair.";
-
-        }
-
-        if (audience) {
-
-          opportunity +=
-            " Audience prioritaire : " +
-            audience +
-            ".";
-
-        }
-
-        if (goal) {
-
-          action +=
-            " Objectif principal : " +
-            goal +
-            ".";
-
-        }
-
-        brainOpportunity.textContent =
-          opportunity;
-
-        brainRecommendedAction.textContent =
-          action;
-
-        brainAnalyzeBtn.textContent =
-          "✓ Analyse terminée — Score " +
-          score +
-          "/100";
-
-        setTimeout(function () {
-
-          brainAnalyzeBtn.textContent =
-            "✦ Analyser avec VIRA Brain";
-
-        }, 2500);
-
-      }
-    );
-  }
-
-
-  /* ==========================================
-     CRÉATION DU SCÉNARIO
-     APPEL AU BACKEND SEULEMENT AU CLIC
-  ========================================== */
-
-  if (generateButton) {
-
-    generateButton.addEventListener(
-      "click",
-      async function () {
-
-        const idea =
-          promptInput?.value.trim() || "";
-
-        if (!idea) {
-
-          status.style.display =
-            "block";
-
-          status.textContent =
-            "⚠️ Écris d'abord ton idée de campagne.";
-
-          promptInput?.focus();
-
-          return;
-        }
-
-        if (!selectedMarketingType) {
-
-          status.style.display =
-            "block";
-
-          status.textContent =
-            "⚠️ Choisis d'abord ton objectif marketing.";
-
-          return;
-        }
-
-        generateButton.disabled =
-          true;
-
-        generateButton.textContent =
-          "✦ VIRA crée le scénario...";
-
-        status.style.display =
-          "block";
-
-        status.textContent =
-          "Analyse de ta campagne en cours...";
-
-        scenario.value = "";
-
-        scenarioStatus.style.display =
-          "none";
-
-        scenarioResult.style.display =
-          "none";
-
-        scenarioValidated =
-          false;
-
-        try {
-
-          const response =
-            await fetch(
-              "/api/scenario/generate",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-
-                  idea:
-                    idea,
-
-                  marketingType:
-                    selectedMarketingType,
-
-                  marketingGoal:
-                    marketingGoal?.value.trim() ||
-                    "",
-
-                  targetAudience:
-                    targetAudience?.value.trim() ||
-                    "",
-
-                  platform:
-                    platform?.value ||
-                    "",
-
-                  tone:
-                    campaignTone?.value ||
-                    ""
-
-                })
-              }
-            );
-
-          let data = {};
-
-          try {
-            data =
-              await response.json();
-          } catch (e) {
-            data = {};
-          }
-
-          if (!response.ok) {
-
-            throw new Error(
-              data?.error?.message ||
-              data?.error ||
-              "Erreur lors de la création du scénario."
-            );
-
-          }
-
-          const generatedScenario =
-            data?.scenario ||
-            data?.output_text ||
-            data?.text ||
-            "";
-
-          if (!generatedScenario) {
-
-            throw new Error(
-              "Aucun scénario reçu du serveur."
-            );
-
-          }
-
-          scenario.value =
-            generatedScenario;
-
-          localStorage.setItem(
-            "viraScenario",
-            generatedScenario
-          );
-
-          status.textContent =
-            "✅ Scénario créé avec succès.";
-
-          scenarioResult.style.display =
-            "block";
-
-          scenarioResult.textContent =
-            "✦ Ton scénario VIRA est prêt. Vérifie-le puis appuie sur « Valider le scénario ».";
-
-        } catch (error) {
-
-          console.error(
-            "VIRA SCENARIO ERROR:",
-            error
-          );
-
-          status.textContent =
-            "❌ " +
-            error.message;
-
-        } finally {
-
-          generateButton.disabled =
-            false;
-
-          generateButton.textContent =
-            "✨ Créer le scénario";
-
-        }
-
-      }
-    );
-  }
-
-
-  /* ==========================================
-     RESTAURER SCÉNARIO LOCAL
-  ========================================== */
-
-  const savedScenario =
-    localStorage.getItem(
-      "viraScenario"
-    );
-
-  if (
-    savedScenario &&
-    scenario &&
-    !scenario.value
-  ) {
-
-    scenario.value =
-      savedScenario;
-
-  }
-
-
-  /* ==========================================
-     VALIDATION SCÉNARIO
-  ========================================== */
-
-  if (validateScenario) {
-
-    validateScenario.addEventListener(
-      "click",
-      function () {
-
-        const text =
-          scenario?.value.trim() || "";
-
-        scenarioStatus.style.display =
-          "block";
-
-        if (!text) {
-
-          scenarioStatus.textContent =
-            "⚠️ Crée d'abord un scénario.";
-
-          return;
-        }
-
-        scenarioValidated =
-          true;
-
-        localStorage.setItem(
-          "viraScenario",
-          text
+    async function waitForRunwayTask(
+      taskId,
+      sceneNumber
+    ) {
+
+      for (
+        let attempt = 0;
+        attempt < 90;
+        attempt++
+      ) {
+
+        await new Promise(
+          (r) =>
+            setTimeout(
+              r,
+              5000
+            )
         );
 
-        scenarioStatus.textContent =
-          "✅ Scénario validé.";
-
-        validateScenario.textContent =
-          "✓ Scénario validé";
-
-      }
-    );
-  }
-
-
-  /* ==========================================
-     TEST DE VOIX
-  ========================================== */
-
-  if (testVoice) {
-
-    testVoice.addEventListener(
-      "click",
-      async function () {
-
-        const text =
-          scenario?.value.trim() || "";
-
-        if (!text) {
-
-          alert(
-            "Crée d'abord un scénario."
+        const r =
+          await fetch(
+            `/api/video/${encodeURIComponent(
+              taskId
+            )}/status`
           );
 
-          return;
+        const d =
+          await r.json();
+
+        if (!r.ok) {
+
+          throw new Error(
+            d?.error ||
+            `Erreur vidéo scène ${sceneNumber}`
+          );
         }
 
-        const voiceText =
-          text
-            .split(/\s+/)
-            .slice(0, 35)
-            .join(" ");
+        const status =
+          String(
+            d.status || ""
+          ).toUpperCase();
 
-        testVoice.disabled =
-          true;
+        if (
+          [
+            "SUCCEEDED",
+            "COMPLETED",
+            "SUCCESS"
+          ].includes(status)
+        ) {
 
-        testVoice.textContent =
-          "🎙 Génération de la voix...";
+          const url =
+            Array.isArray(
+              d.output
+            )
+              ? d.output[0]
+              : null;
 
-        try {
-
-          const response =
-            await fetch(
-              "/api/voice/generate",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-                  text:
-                    voiceText
-                })
-              }
-            );
-
-          if (!response.ok) {
+          if (!url) {
 
             throw new Error(
-              "Erreur génération voix."
+              `Clip ${sceneNumber} terminé sans URL.`
             );
-
           }
+
+          return url;
+        }
+
+        if (
+          [
+            "FAILED",
+            "CANCELED",
+            "CANCELLED"
+          ].includes(status)
+        ) {
+
+          throw new Error(
+            `La scène ${sceneNumber} a échoué.`
+          );
+        }
+
+        setProgress(
+          30 +
+            Math.min(
+              48,
+              attempt * .7
+            ),
+          `Vidéo scène ${sceneNumber}/5 • ${
+            d.status ||
+            "en cours"
+          }`
+        );
+      }
+
+      throw new Error(
+        `La scène ${sceneNumber} prend trop de temps.`
+      );
+    }
+
+    async function createFinalVideo() {
+
+      const d =
+        parseScenario(
+          rawScenario
+        );
+
+      setProgress(
+        8,
+        "Préparation des 5 scènes"
+      );
+
+      const start =
+        await fetch(
+          "/api/video/generate",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                prompt:
+                  rawScenario,
+
+                images:
+                  generatedImages
+              })
+          }
+        );
+
+      const data =
+        await start.json();
+
+      if (!start.ok) {
+
+        throw new Error(
+          data?.error ||
+          "Impossible de lancer la vidéo."
+        );
+      }
+
+      const clips =
+        Array.isArray(
+          data.clips
+        )
+          ? data.clips
+          : [];
+
+      if (
+        clips.length !== 5
+      ) {
+
+        throw new Error(
+          "VIRA n’a pas reçu 5 clips vidéo."
+        );
+      }
+
+      if (
+        clips.some(
+          (c) =>
+            !c.taskId
+        )
+      ) {
+
+        throw new Error(
+          "Les clips sont préparés, mais Runway est encore en mode PREPARE sur le serveur. Active RUNWAY_EXECUTION=generate pour produire la vraie vidéo."
+        );
+      }
+
+      const videoUrls = [];
+
+      for (
+        let i = 0;
+        i < 5;
+        i++
+      ) {
+
+        videoUrls.push(
+          await waitForRunwayTask(
+            clips[i].taskId,
+            i + 1
+          )
+        );
+      }
+
+      setProgress(
+        82,
+        "Assemblage des 5 clips"
+      );
+
+      const assemble =
+        await fetch(
+          "/api/video/assemble",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                videoUrls
+              })
+          }
+        );
+
+      if (!assemble.ok) {
+
+        let msg =
+          "Impossible d’assembler la vidéo.";
+
+        try {
+          const e =
+            await assemble.json();
+
+          msg =
+            e?.error ||
+            msg;
+
+        } catch {}
+
+        throw new Error(msg);
+      }
+
+      let videoBlob =
+        await assemble.blob();
+
+      const narration =
+        d.narration.trim();
+
+      if (narration) {
+
+        setProgress(
+          90,
+          "Ajout de la narration"
+        );
+
+        const voice =
+          await fetch(
+            "/api/voice/generate",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify({
+                  text:
+                    narration
+                })
+            }
+          );
+
+        if (voice.ok) {
 
           const audioBlob =
-            await response.blob();
+            await voice.blob();
 
-          const oldAudio =
-            document.getElementById(
-              "viraVoicePreview"
-            );
+          const fd =
+            new FormData();
 
-          if (oldAudio) {
-            oldAudio.remove();
-          }
-
-          const audio =
-            document.createElement(
-              "audio"
-            );
-
-          audio.id =
-            "viraVoicePreview";
-
-          audio.controls =
-            true;
-
-          audio.style.width =
-            "100%";
-
-          audio.style.marginTop =
-            "14px";
-
-          audio.src =
-            URL.createObjectURL(
-              audioBlob
-            );
-
-          testVoice.insertAdjacentElement(
-            "afterend",
-            audio
+          fd.append(
+            "video",
+            videoBlob,
+            "vira-video.mp4"
           );
 
-          testVoice.textContent =
-            "✓ Voix générée";
-
-          audio.play().catch(
-            function () {}
+          fd.append(
+            "audio",
+            audioBlob,
+            "vira-voice.mp3"
           );
 
-        } catch (error) {
-
-          console.error(error);
-
-          alert(
-            "Erreur lors de la génération de la voix."
-          );
-
-          testVoice.textContent =
-            "🎙 Tester la voix";
-
-        } finally {
-
-          testVoice.disabled =
-            false;
-
-        }
-
-      }
-    );
-  }
-
-
-  /* ==========================================
-     CRÉATION VIDÉO
-  ========================================== */
-
-  if (videoButton) {
-
-    videoButton.addEventListener(
-      "click",
-      async function () {
-
-        const scenarioText =
-          scenario?.value.trim() || "";
-
-        if (!scenarioText) {
-
-          alert(
-            "Crée d'abord un scénario."
-          );
-
-          return;
-        }
-
-        if (!scenarioValidated) {
-
-          scenarioStatus.style.display =
-            "block";
-
-          scenarioStatus.textContent =
-            "⚠️ Valide le scénario avant de créer la vidéo.";
-
-          return;
-        }
-
-        videoButton.disabled =
-          true;
-
-        videoButton.textContent =
-          "🎬 Préparation de la vidéo...";
-
-        runwayResults.style.display =
-          "block";
-
-        runwayResults.textContent =
-          "✦ VIRA prépare la génération vidéo...";
-
-        try {
-
-          const response =
+          const merge =
             await fetch(
-              "/api/video/generate",
+              "/api/video/merge",
               {
                 method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-
-                  prompt:
-                    scenarioText,
-
-                  scenario:
-                    scenarioText,
-
-                  images: []
-
-                })
+                body: fd
               }
             );
 
-          let data = {};
-
-          try {
-            data =
-              await response.json();
-          } catch (e) {
-            data = {};
+          if (merge.ok) {
+            videoBlob =
+              await merge.blob();
           }
-
-          if (!response.ok) {
-
-            throw new Error(
-              data?.error?.message ||
-              data?.error ||
-              "Erreur lors de la préparation vidéo."
-            );
-
-          }
-
-          runwayResults.innerHTML =
-            "✅ Vidéo envoyée au moteur VIRA.<br><br>" +
-            "Statut : " +
-            (
-              data?.status ||
-              "préparation"
-            );
-
-        } catch (error) {
-
-          console.error(
-            "VIRA VIDEO ERROR:",
-            error
-          );
-
-          runwayResults.textContent =
-            "❌ " +
-            error.message;
-
-        } finally {
-
-          videoButton.disabled =
-            false;
-
-          videoButton.textContent =
-            "🎬 Créer la vidéo";
-
         }
+      }
 
+      setProgress(
+        100,
+        "Vidéo terminée"
+      );
+
+      return (
+        URL.createObjectURL(
+          videoBlob
+        )
+      );
+    }
+
+    document
+      .querySelectorAll(
+        ".marketing-choice"
+      )
+      .forEach(
+        (btn) => {
+
+          btn.addEventListener(
+            "click",
+            () => {
+
+              document
+                .querySelectorAll(
+                  ".marketing-choice"
+                )
+                .forEach(
+                  (b) =>
+                    b.classList.remove(
+                      "active"
+                    )
+                );
+
+              btn.classList.add(
+                "active"
+              );
+
+              selectedMarketingType =
+                btn.dataset.type;
+
+              localStorage.setItem(
+                "viraMarketingType",
+                selectedMarketingType
+              );
+
+              els.prompt.placeholder =
+                marketingMeta[
+                  selectedMarketingType
+                ]?.prompt ||
+                els.prompt.placeholder;
+
+              resetGeneratedFlow();
+              saveForm();
+              updateBrain();
+            }
+          );
+        }
+      );
+
+    els.prompt.addEventListener(
+      "input",
+      () => {
+
+        els.promptCount.textContent =
+          els.prompt.value.length;
+
+        saveForm();
+        updateBrain();
       }
     );
-  }
 
+    els.audience.addEventListener(
+      "input",
+      () => {
 
-  /* ==========================================
-     SCORE INITIAL
-  ========================================== */
+        saveForm();
+        updateBrain();
+      }
+    );
 
-  updateGrowthScore();
+    els.goal.addEventListener(
+      "input",
+      () => {
 
-});
-</script>
+        saveForm();
+        updateBrain();
+      }
+    );
 
-
-</body>
-</html>
+    els.tone.addEventListener(
+ 
