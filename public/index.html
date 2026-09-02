@@ -2549,7 +2549,46 @@ const validateScenario = document.getElementById("validateScenario");
   const businessDescriptionInput = document.getElementById("prompt");
 let selectedMarketingType =
   localStorage.getItem("viraMarketingType") || "";
+businessDescriptionInput?.addEventListener("input", () => {
+  const activeChoice =
+    document.querySelector(".marketing-choice.active");
 
+  if (!activeChoice) return;
+
+  const activeTitle =
+    activeChoice.querySelector(".choice-title")
+      ?.textContent
+      .replace(/\s+/g, " ")
+      .trim() || "";
+
+  let score = 72;
+
+  if (activeTitle.includes("Lancement")) {
+    score = 78;
+  } else if (activeTitle.includes("Notoriété")) {
+    score = 74;
+  } else if (activeTitle.toLowerCase().includes("lead")) {
+    score = 82;
+  } else if (
+    activeTitle.includes("Vente") ||
+    activeTitle.includes("Conversion")
+  ) {
+    score = 86;
+  }
+
+  if (businessDescriptionInput.value.trim().length >= 20) {
+    score += 3;
+  }
+
+  score = Math.min(score, 100);
+
+  const growthScoreNumber =
+    document.getElementById("growthScoreNumber");
+
+  if (growthScoreNumber) {
+    growthScoreNumber.textContent = score;
+  }
+});
 marketingChoices.forEach((choice) => {
 
   const choiceText = choice.textContent.trim();
