@@ -1831,7 +1831,7 @@ background: linear-gradient(135deg,#c084fc,#8b5cf6);
     font-size:13px;
     line-height:1.5;
   ">
-    → Créez une campagne adaptée à votre objectif principal.
+<span id="brainRecommendedAction">→ Créez une campagne adaptée à votre objectif principal.</span>
   </div>
 
 </div>
@@ -2555,7 +2555,38 @@ marketingChoices.forEach((choice) => {
     choice.classList.add("active");
 
     selectedMarketingType = choiceText;
+const brainRecommendedAction =
+  document.getElementById("brainRecommendedAction");
 
+const selectedTitle =
+  choice.querySelector(".choice-title")
+    ?.textContent
+    .replace(/\s+/g, " ")
+    .trim() || choiceText;
+
+let recommendation =
+  "→ Créez une campagne adaptée à votre objectif principal.";
+
+if (selectedTitle.includes("Lancement")) {
+  recommendation =
+    "→ Lancez votre produit avec une campagne conçue pour générer rapidement de l’intérêt et des ventes.";
+} else if (selectedTitle.includes("Notoriété")) {
+  recommendation =
+    "→ Augmentez la visibilité de votre marque avec une campagne axée sur la portée et l’engagement.";
+} else if (selectedTitle.includes("Lead")) {
+  recommendation =
+    "→ Attirez de nouveaux prospects avec une campagne optimisée pour générer des leads.";
+} else if (
+  selectedTitle.includes("Vente") ||
+  selectedTitle.includes("Conversion")
+) {
+  recommendation =
+    "→ Concentrez votre campagne sur la conversion pour transformer davantage de visiteurs en clients.";
+}
+
+if (brainRecommendedAction) {
+  brainRecommendedAction.textContent = recommendation;
+  }
     localStorage.setItem(
       "viraMarketingType",
       selectedMarketingType
