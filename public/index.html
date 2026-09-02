@@ -2546,6 +2546,7 @@ let generatedImages = [];
 const validateScenario = document.getElementById("validateScenario");
   const testVoiceButton = document.getElementById("testVoice");
   const marketingChoices = document.querySelectorAll(".marketing-choice");
+  const businessDescriptionInput = document.getElementById("prompt");
 let selectedMarketingType =
   localStorage.getItem("viraMarketingType") || "";
 
@@ -2582,7 +2583,14 @@ if (selectedTitle.includes("Lancement")) {
 ) {
   growthScore = 86;
 }
+const businessDescription =
+  businessDescriptionInput?.value.trim() || "";
 
+if (businessDescription.length >= 20) {
+  growthScore += 3;
+}
+
+growthScore = Math.min(growthScore, 100);
 if (growthScoreNumber) {
   growthScoreNumber.textContent = growthScore;
 }
