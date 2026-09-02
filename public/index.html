@@ -2565,7 +2565,27 @@ if (selectedMarketingType === choiceText) {
       ?.textContent
       .replace(/\s+/g, " ")
       .trim() || choiceText;
+const growthScoreNumber =
+  document.getElementById("growthScoreNumber");
 
+let growthScore = 72;
+
+if (selectedTitle.includes("Lancement")) {
+  growthScore = 78;
+} else if (selectedTitle.includes("Notoriété")) {
+  growthScore = 74;
+} else if (selectedTitle.toLowerCase().includes("lead")) {
+  growthScore = 82;
+} else if (
+  selectedTitle.includes("Vente") ||
+  selectedTitle.includes("Conversion")
+) {
+  growthScore = 86;
+}
+
+if (growthScoreNumber) {
+  growthScoreNumber.textContent = growthScore;
+}
   let recommendation =
     "→ Créez une campagne adaptée à votre objectif principal.";
 
