@@ -4121,10 +4121,25 @@ clearInterval(progressTimer);
 
 if (brainAnalyzeBtn) {
   brainAnalyzeBtn.addEventListener("click", () => {
-    const activeChoice = document.querySelector(".marketing-choice.active");
-    const brainOpportunity = document.getElementById("brainOpportunity");
+
+    const activeChoice =
+      document.querySelector(".marketing-choice.active");
+
+    const prompt =
+      document.getElementById("prompt")?.value.trim() || "";
+
+    const audience =
+      document.getElementById("targetAudience")?.value.trim() || "";
+
+    const goal =
+      document.getElementById("marketingGoal")?.value.trim() || "";
+
+    const brainOpportunity =
+      document.getElementById("brainOpportunity");
+
     const brainRecommendedAction =
       document.getElementById("brainRecommendedAction");
+
     const growthScoreNumber =
       document.getElementById("growthScoreNumber");
 
@@ -4132,46 +4147,64 @@ if (brainAnalyzeBtn) {
     brainAnalyzeBtn.textContent = "✦ Analyse en cours...";
 
     setTimeout(() => {
+
       const selectedTitle =
         activeChoice?.querySelector(".choice-title")
           ?.textContent
           .replace(/\s+/g, " ")
           .trim() || "";
 
-      let score = 72;
-      let opportunity =
-        "✦ Sélectionnez un objectif marketing pour permettre à VIRA Brain d'identifier votre meilleure opportunité.";
+      let score = 60;
 
-      let action =
-        "→ Choisissez votre objectif principal pour obtenir une recommandation personnalisée.";
-
+      // Score selon l'objectif marketing
       if (selectedTitle.includes("Lancement")) {
-        score = 78;
-        opportunity =
-          "✦ Opportunité : créer un lancement fort pour attirer rapidement l’attention autour de votre produit.";
-        action =
-          "→ Lancez votre produit avec une campagne conçue pour générer rapidement de l’intérêt et des ventes.";
+        score += 12;
       } else if (selectedTitle.includes("Notoriété")) {
-        score = 74;
-        opportunity =
-          "✦ Opportunité : augmenter votre visibilité et toucher une audience plus large.";
-        action =
-          "→ Augmentez la visibilité de votre marque avec une campagne axée sur la portée et l’engagement.";
+        score += 10;
       } else if (selectedTitle.toLowerCase().includes("lead")) {
-        score = 82;
-        opportunity =
-          "✦ Opportunité : convertir davantage de visiteurs en prospects qualifiés.";
-        action =
-          "→ Attirez de nouveaux prospects avec une campagne optimisée pour générer des leads.";
+        score += 14;
       } else if (
         selectedTitle.includes("Vente") ||
         selectedTitle.includes("Conversion")
       ) {
-        score = 86;
+        score += 16;
+      }
+
+      // Plus VIRA possède d'informations,
+      // plus son analyse est précise.
+      if (prompt.length >= 20) score += 5;
+      if (audience.length >= 5) score += 5;
+      if (goal.length >= 5) score += 5;
+
+      score = Math.min(score, 100);
+
+      let opportunity;
+
+      if (!prompt) {
         opportunity =
-          "✦ Opportunité : stimuler les ventes avec une offre claire et une campagne orientée conversion.";
+          "✦ Ajoutez une description de votre produit ou service pour permettre à VIRA Brain d'affiner son analyse.";
+      } else if (!audience) {
+        opportunity =
+          "✦ Opportunité : définissez votre audience cible pour améliorer la précision et l'impact de votre campagne.";
+      } else if (!goal) {
+        opportunity =
+          "✦ Opportunité : précisez votre objectif principal afin que VIRA Brain puisse optimiser votre stratégie.";
+      } else {
+        opportunity =
+          `✦ Opportunité : positionner "${prompt.slice(0, 45)}" auprès de ${audience} avec une stratégie centrée sur ${goal}.`;
+      }
+
+      let action;
+
+      if (!audience) {
         action =
-          "→ Concentrez votre campagne sur la conversion pour transformer davantage de visiteurs en clients.";
+          "→ Définissez précisément les personnes que vous souhaitez atteindre.";
+      } else if (!goal) {
+        action =
+          "→ Définissez un objectif mesurable pour votre campagne.";
+      } else {
+        action =
+          `→ Créez une campagne destinée à ${audience} avec comme priorité : ${goal}.`;
       }
 
       if (growthScoreNumber) {
@@ -4198,9 +4231,10 @@ if (brainAnalyzeBtn) {
 
       brainAnalyzeBtn.disabled = false;
       brainAnalyzeBtn.textContent = "✦ Analyse Brain";
+
     }, 700);
   });
-}
+  }
 </script>
       </div> <!-- fin app-shell -->
 </body>
