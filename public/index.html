@@ -2564,7 +2564,7 @@ if (selectedMarketingType === choiceText) {
   } else if (selectedTitle.includes("Notoriété")) {
     recommendation =
       "→ Augmentez la visibilité de votre marque avec une campagne axée sur la portée et l’engagement.";
-selectedTitle.toLowerCase().includes("lead")
+} else if (selectedTitle.toLowerCase().includes("lead")) {
     recommendation =
       "→ Attirez de nouveaux prospects avec une campagne optimisée pour générer des leads.";
   } else if (
@@ -2606,7 +2606,7 @@ if (selectedTitle.includes("Lancement")) {
 } else if (selectedTitle.includes("Notoriété")) {
   recommendation =
     "→ Augmentez la visibilité de votre marque avec une campagne axée sur la portée et l’engagement.";
-selectedTitle.toLowerCase().includes("lead")
+} else if (selectedTitle.toLowerCase().includes("lead")) {
   recommendation =
     "→ Attirez de nouveaux prospects avec une campagne optimisée pour générer des leads.";
 } else if (
