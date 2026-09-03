@@ -979,6 +979,12 @@ body{background:radial-gradient(circle at 70% -10%,rgba(87,58,198,.13),transpare
     }
 
     function renderScenario(text) {
+      if (!text || !text.trim()) {
+  rawScenario = "";
+  els.scenarioResult.innerHTML = "";
+  els.validateBtn.style.display = "none";
+  return;
+      }
       rawScenario = text.trim();
       localStorage.setItem("viraScenario", rawScenario);
       const d = parseScenario(rawScenario);
