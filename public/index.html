@@ -1305,6 +1305,7 @@ els.voiceBtn.addEventListener("click", async () => {
       els.result.innerHTML = "";
       els.videoResult.innerHTML = "";
       els.videoBtn.style.display = "flex"; els.videoBtn.disabled = true;
+      els.videoBtn.disabled = false;
       setProgress(10,"Préparation des visuels");
       try {
         if (FREE_VISUAL_MODE) {
