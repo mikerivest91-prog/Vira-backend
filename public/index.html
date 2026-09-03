@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#07070b" />
   <title>VIRA</title>
+
   <style>
     :root{--bg:#05050a;--panel:#0d0b16;--panel2:#12101d;--line:rgba(146,74,255,.28);--line2:rgba(190,100,255,.7);--text:#faf8ff;--muted:#a29baa;--purple:#a63bff;--violet:#7c3aed;--blue:#3887ff;--green:#4ade80;--cyan:#38bdf8;--orange:#fb923c;--shadow:0 24px 70px rgba(0,0,0,.38)}
     *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -10%,rgba(113,40,255,.18),transparent 34%),radial-gradient(circle at 90% 12%,rgba(46,93,255,.10),transparent 30%),#05050a;overflow-x:hidden} button,input,textarea,select{font:inherit}
@@ -579,7 +580,30 @@ summary:focus-visible{
 }
 .progress-fill{transition:width .32s ease}
 .pro-plan small{font-size:9px!important;color:#a7b0bf!important;text-align:left!important}
+/* ===== VIRA MOBILE NAV — FINAL FIX ===== */
+@media (max-width:759px){
+  .mobile-nav{
+    position:fixed !important;
+    left:14px !important;
+    right:14px !important;
+    bottom:calc(8px + env(safe-area-inset-bottom)) !important;
+    transform:none !important;
+    width:auto !important;
+    max-width:none !important;
+    min-height:64px !important;
+    padding:6px 8px !important;
+  }
 
+  .main{
+    padding-bottom:calc(105px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .main::after{
+    content:"" !important;
+    display:block !important;
+    height:20px !important;
+  }
+}
   </style>
 </head>
 <body>
