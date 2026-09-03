@@ -1456,12 +1456,12 @@ const steps = [60,65,70,75,80,85,90];
   );
     els.downloadBtn.disabled = false; 
   els.downloadBtn.classList.add("is-ready");
-  setProgress(100, "Prêt à télécharger");
+  
         } else {
           finalVideoUrl = await createFinalVideo();
   els.downloadBtn.disabled = false;
   els.downloadBtn.classList.add("is-ready");
-  setProgress(100, "Prêt à télécharger");
+  
           els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo finale VIRA</span></h3><div class="meta">5 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video><a class="download-link" href="${finalVideoUrl}" download="VIRA-campagne-final.mp4">Télécharger la vidéo finale</a></div>`;
           setStatus(els.videoStatus,"Vidéo finale créée avec succès.","success");
         }
@@ -1473,21 +1473,49 @@ const steps = [60,65,70,75,80,85,90];
         hideProgress(1200);
       }
     });
-els.downloadBtn.addEventListener("click", () => {
-  if (!finalVideoUrl) {
-    return setStatus(
-      els.videoStatus,
-      "Mode Démo VIRA : aucun fichier MP4 réel n’est généré pour le moment.",
-      "warning"
-    );
-  }
+    
+els.downloadBtn.addEventListener("click", async () => {
+  els.downloadBtn.disabled = true;
 
-  const link = document.createElement("a");
-  link.href = finalVideoUrl;
-  link.download = "VIRA-campagne-final.mp4";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  try {
+    setProgress(0, "Préparation du téléchargement");
+
+    const downloadSteps = [
+      [25, "Préparation du fichier"],
+      [50, "Vérification de la vidéo"],
+      [75, "Préparation de l’export"],
+      [100, "Téléchargement prêt"]
+    ];
+
+    for (const [progress, label] of downloadSteps) {
+      await new Promise(resolve => setTimeout(resolve, 350));
+      setProgress(progress, label);
+    }
+
+    if (!finalVideoUrl) {
+      return setStatus(
+        els.videoStatus,
+        "Mode Démo VIRA : préparation terminée — aucun fichier MP4 réel n’est généré.",
+        "warning"
+      );
+    }
+
+    const link = document.createElement("a");
+    link.href = finalVideoUrl;
+    link.download = "VIRA-campagne-final.mp4";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setStatus(
+      els.videoStatus,
+      "Téléchargement prêt.",
+      "success"
+    );
+  } finally {
+    els.downloadBtn.disabled = false;
+    hideProgress(1200);
+  }
 });
     // Navigation visuelle uniquement pour l’instant : elle ne casse jamais le workflow principal.
     [...document.querySelectorAll(".sidebar-link"), ...document.querySelectorAll(".mobile-nav button")].forEach(btn => {
