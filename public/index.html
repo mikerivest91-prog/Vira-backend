@@ -981,7 +981,8 @@ body{background:radial-gradient(circle at 70% -10%,rgba(87,58,198,.13),transpare
       els.validateBtn.style.display = "none";
       els.validateBtn.disabled = false;
       els.voiceBtn.style.display = "flex"; els.voiceBtn.disabled = false; els.voiceBtn.disabled = true;
-      els.visualBtn.style.display = "flex"; els.visualBtn.disabled = false; els.visualBtn.disabled = true;
+      els.visualBtn.style.display = "flex"; els.visualBtn.disabled = false; 
+      els.visualBtn.disabled = true;
       els.videoBtn.style.display = "flex"; els.videoBtn.disabled = false; els.videoBtn.disabled = true;
       els.downloadBtn.disabled = true;
       els.downloadBtn.classList.remove("is-ready");
@@ -1509,7 +1510,10 @@ els.downloadBtn.addEventListener("click", () => {
     if (rawScenario && isValidScenarioText(rawScenario)) {
       renderScenario(rawScenario);
       els.voiceBtn.disabled = false;
+      els.visualBtn.disabled = false;
     } else {
+      
+    
       rawScenario = "";
       localStorage.removeItem("viraScenario");
       els.validateBtn.hidden = true;
