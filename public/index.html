@@ -1215,24 +1215,85 @@ body{background:radial-gradient(circle at 70% -10%,rgba(87,58,198,.13),transpare
       );
     });
 
-    els.voiceBtn.addEventListener("click", async () => {
-      if (!rawScenario) return;
-      const narration = parseScenario(rawScenario).narration || rawScenario;
-      const shortText = narration.trim().split(/\s+/).slice(0,18).join(" ");
-      els.voiceBtn.disabled = true;
-      setStatus(els.status,"Génération de l’aperçu voix…","loading");
-      try {
-        const response = await fetch("/api/voice/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:shortText})});
-        if (!response.ok) throw new Error("Impossible de générer la voix.");
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.play();
-        setStatus(els.status,"Aperçu voix généré.","success");
-      } catch (error) {
-        setStatus(els.status,escapeHtml(error.message),"error");
-      } finally { els.voiceBtn.disabled = false; }
-    });
+els.voiceBtn.addEventListener("click", async () => {
+  if (!rawScenario) {
+    return setStatus(
+      els.status,
+      "Créez et validez d’abord un scénario.",
+      "warning"
+    );
+  }
+
+  const narration =
+    parseScenario(rawScenario).narration || rawScenario;
+
+  els.voiceBtn.disabled = true;
+
+  setStatus(
+    els.status,
+    "Préparation de Voix & Audio — Mode Démo VIRA…",
+    "loading"
+  );
+
+  try {
+    await new Promise(resolve => setTimeout(resolve, 700));
+
+    if ("speechSynthesis" in window) {
+      speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(
+        narration.trim().slice(0, 900)
+      );
+
+      const voices = speechSynthesis.getVoices();
+
+      const frenchVoice =
+        voices.find(voice =>
+          voice.lang &&
+          voice.lang.toLowerCase().startsWith("fr")
+        ) || voices[0];
+
+      if (frenchVoice) {
+        utterance.voice = frenchVoice;
+        utterance.lang = frenchVoice.lang;
+      } else {
+        utterance.lang = "fr-CA";
+      }
+
+      utterance.rate = 0.95;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      speechSynthesis.speak(utterance);
+    }
+
+    setStatus(
+      els.status,
+      "Voix & Audio prêts — Mode Démo VIRA. Aucun crédit utilisé.",
+      "success"
+    );
+
+    els.voiceBtn.querySelector("strong").textContent =
+      "Voix prête";
+
+    const voiceSubText =
+      els.voiceBtn.querySelector(".action-copy span");
+
+    if (voiceSubText) {
+      voiceSubText.textContent =
+        "Narration préparée • Mode Démo VIRA";
+    }
+
+  } catch (error) {
+    setStatus(
+      els.status,
+      "Impossible de préparer l’aperçu audio.",
+      "error"
+    );
+  } finally {
+    els.voiceBtn.disabled = false;
+  }
+});
 
     els.visualBtn.addEventListener("click", async () => {
       if (!rawScenario) return setStatus(els.status,"Créez et validez d’abord un scénario.","warning");
