@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,1077 +6,3703 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#07070b" />
   <title>VIRA</title>
+
   <style>
-    :root{--bg:#05050a;--panel:#0d0b16;--panel2:#12101d;--line:rgba(146,74,255,.28);--line2:rgba(190,100,255,.7);--text:#faf8ff;--muted:#a29baa;--purple:#a63bff;--violet:#7c3aed;--blue:#3887ff;--green:#4ade80;--cyan:#38bdf8;--orange:#fb923c;--shadow:0 24px 70px rgba(0,0,0,.38)}
-    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -10%,rgba(113,40,255,.18),transparent 34%),radial-gradient(circle at 90% 12%,rgba(46,93,255,.10),transparent 30%),#05050a;overflow-x:hidden} button,input,textarea,select{font:inherit}
-    .app-shell{min-height:100vh}.desktop-sidebar{display:none}.main{width:min(1440px,100%);margin:auto;padding:24px 18px 110px}.vira-topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:28px}.vira-brand{display:flex;align-items:center;gap:13px}.vira-mark{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:27px;font-weight:950;background:linear-gradient(145deg,#8f2bff,#3464ff);box-shadow:0 12px 28px rgba(124,58,237,.35)}.logo{font-size:29px;font-weight:950;letter-spacing:.11em}.subtitle{margin-top:3px;color:#9b93a8;font-size:10px;font-weight:850;letter-spacing:.23em}.credit-badge{padding:11px 18px;border-radius:17px;border:1px solid rgba(155,88,255,.35);background:rgba(10,9,16,.72);font-weight:900;white-space:nowrap}.credit-badge small{margin-left:5px;color:#8f8899;font-size:10px}.welcome-block{margin-bottom:24px}.welcome-block h1{margin:0;font-size:clamp(31px,5vw,50px);letter-spacing:-.04em;line-height:1.04}.welcome-block p{margin:9px 0 0;color:#a8a1b0;font-size:14px}.glass-card{border:1px solid var(--line);background:linear-gradient(145deg,rgba(18,14,30,.98),rgba(8,7,13,.99));box-shadow:inset 0 1px 0 rgba(255,255,255,.025),var(--shadow);border-radius:23px}.stage{padding:18px;margin-top:16px}.stage-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}.stage-icon,.number{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(126,38,255,.28),rgba(68,27,122,.28));border:1px solid rgba(169,77,255,.25);color:#c466ff;font-size:20px;font-weight:900;box-shadow:0 0 22px rgba(168,66,255,.12)}.number{width:35px;height:35px;font-size:15px}.stage-title{font-size:18px;font-weight:950}.stage-help{margin:3px 0 0;color:#a39cac;font-size:12px}.marketing-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.marketing-choice{position:relative;min-height:155px;padding:14px 9px;border:1px solid rgba(149,139,170,.18);border-radius:18px;background:linear-gradient(145deg,#0c0a13,#07070b);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;cursor:pointer}.marketing-choice.active{border-color:#d266ff;box-shadow:0 0 0 1px rgba(188,83,255,.22),0 0 28px rgba(161,54,255,.18);background:radial-gradient(circle at 40% 22%,rgba(132,42,255,.2),transparent 55%),#0d0b15}.choice-icon{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;background:rgba(126,39,220,.10);border:1px solid rgba(168,85,247,.12)}.choice-icon svg{width:37px;height:37px;fill:none;stroke:currentColor;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}.launch{color:#c44eff}.brand{color:#38a9ff}.leads{color:#cb43ff}.sale{color:#ff8c3f}.choice-title{font-size:14px;font-weight:950;line-height:1.12}.choice-description{color:#928b9b;font-size:10px;line-height:1.35}.choice-check{display:none;position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;place-items:center;background:linear-gradient(145deg,#c959ff,#843cff);font-weight:950}.marketing-choice.active .choice-check{display:grid}
-    .form-grid{display:grid;gap:12px}.form-grid.two{margin-top:12px}.field-group{position:relative;display:flex;flex-direction:column;gap:6px}.field-group label{font-size:11px;color:#dcd7e2;font-weight:800;margin-left:2px}.field-group input,.field-group textarea,.field-group select{width:100%;border:1px solid rgba(136,74,207,.34);border-radius:15px;background:#0a0910;color:#fff;outline:none}.field-group input,.field-group select{height:58px;padding:0 15px}.field-group textarea{min-height:108px;padding:16px 15px 28px;resize:vertical}.field-group input:focus,.field-group textarea:focus,.field-group select:focus{border-color:#a944f8;box-shadow:0 0 0 3px rgba(169,68,248,.09)}.char-count{position:absolute;right:12px;bottom:9px;color:#857e8d;font-size:9px}.field-icon{position:absolute;left:14px;bottom:18px;width:22px;height:22px;color:#c34cff;pointer-events:none}.field-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}.with-icon select{padding-left:46px}.platform-tip{display:none;margin-top:9px;padding:10px 12px;border-radius:12px;background:rgba(108,44,182,.08);border:1px solid rgba(150,68,232,.18);color:#a79fad;font-size:10px}
-    .primary-cta{width:100%;min-height:72px;border:0;border-radius:17px;color:white;background:linear-gradient(100deg,#7d1cff,#a528ff 52%,#335cff);font-weight:950;font-size:17px;box-shadow:0 15px 35px rgba(119,43,255,.28);cursor:pointer}.brain-run{margin-top:14px}.brain-run small{display:block;margin-top:3px;font-size:11px;font-weight:500;color:#eadcff}.test-badge{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;border:1px solid rgba(56,189,248,.16);color:#a5e5ff;background:rgba(56,189,248,.05);font-size:9px;font-weight:800}
-    .brain-layout{display:grid;gap:12px;margin-top:16px}.score-panel,.brain-message,.insight-box{padding:18px;border-radius:17px;border:1px solid rgba(151,82,219,.22);background:linear-gradient(145deg,#0e0c17,#09080d)}.score-panel{display:flex;align-items:center;justify-content:space-between;gap:15px}.eyebrow{color:#c95aff;font-size:11px;font-weight:950;letter-spacing:.13em}.score-big{margin-top:6px;font-size:58px;line-height:.88;font-weight:950;letter-spacing:-.05em}.score-big span{font-size:26px;color:#b948ff;font-weight:500}.score-note{margin-top:10px;color:#5df28c;font-size:10px;font-weight:850}.score-ring{--score-deg:216deg;width:118px;height:118px;flex:0 0 118px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#0b0910 55%,transparent 57%),conic-gradient(#b63cff 0 var(--score-deg),#2d2540 var(--score-deg) 360deg);box-shadow:0 0 34px rgba(175,60,255,.22)}.score-ring strong{font-size:30px}.score-ring small{display:block;text-align:center;color:#91899b;font-size:10px}.brain-message{font-size:13px;line-height:1.55;color:#e4ddea;display:flex;gap:12px}.spark{color:#c955ff;font-size:22px}.brain-insights{display:grid;gap:12px}.insight-box{font-size:12px;line-height:1.55}.insight-box.opportunity{border-color:rgba(74,222,128,.48);box-shadow:0 0 24px rgba(74,222,128,.08)}.insight-box.action{border-color:rgba(59,130,246,.58);box-shadow:0 0 26px rgba(59,130,246,.10)}.insight-title{display:flex;align-items:center;gap:8px;font-weight:950;margin-bottom:10px}.insight-title.green{color:#dfffea}.insight-title.blue{color:#e7f0ff}.brain-insight{color:#d8d1de}.brain-actions{display:none}
-    .workflow-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:15px}.action-card{min-height:78px;padding:12px;border-radius:15px;border:1px solid rgba(133,89,188,.22);background:linear-gradient(145deg,#100c1b,#09080f);color:white;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer}.action-card:disabled{opacity:.42;cursor:not-allowed}.action-icon{width:43px;height:43px;flex:0 0 43px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:rgba(127,39,217,.14);border:1px solid rgba(169,74,255,.16)}.action-copy{min-width:0}.action-copy strong{display:block;font-size:12px}.action-copy span{display:block;margin-top:4px;color:#afa6b5;font-size:9px;line-height:1.35}.chev{display:none}.validate{display:none}.scenario-step .action-icon{color:#d74dff}.visuals .action-icon{color:#53e49c}.voice .action-icon{color:#cb55ff}.video .action-icon{color:#55c7ff}.download-step .action-icon{color:#72f2bd}.download-step{opacity:.42}
-    .status-box:empty,.campaign-result:empty,.visual-results:empty,.video-result:empty{display:none}.status-box{margin-top:12px;padding:13px;border-radius:14px;border:1px solid rgba(154,82,225,.20);background:rgba(87,42,137,.08);font-size:11px;color:#cdc5d3}.status-box.error{border-color:rgba(251,113,133,.35);color:#ffd1d7}.status-box.success{border-color:rgba(74,222,128,.30);color:#c8ffd9}.campaign-result,.results-panel{margin-top:14px;padding:15px;border-radius:17px;border:1px solid rgba(155,82,225,.20);background:#0b0911}.campaign-result h2{margin:0 0 11px;font-size:20px}.campaign-section{margin-top:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05)}.campaign-section p{margin:6px 0 0;color:#c6bdcd;font-size:11px;line-height:1.5;white-space:pre-line}.campaign-section strong,.campaign-section summary{font-size:11px}.scene-item{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}details summary{cursor:pointer}.result-ready{padding:11px;border-radius:12px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.16);font-size:11px;margin-bottom:12px}.progress-wrap{display:none;margin-top:12px}.progress-meta{display:flex;justify-content:space-between;font-size:10px;color:#a39aaa;margin-bottom:6px}.progress-track{height:7px;border-radius:999px;background:#191522;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#7c3aed,#b832ff,#3b82f6)}.visual-strip{display:flex;gap:10px;overflow-x:auto;margin-top:10px}.visual-card{flex:0 0 145px}.visual-frame{position:relative;aspect-ratio:9/16;border-radius:13px;overflow:hidden}.visual-frame img{width:100%;height:100%;object-fit:cover}.visual-number{position:absolute;top:6px;left:6px;padding:4px 6px;border-radius:7px;background:rgba(0,0,0,.65);font-size:8px}.visual-caption{margin-top:6px;color:#9f96a7;font-size:9px}.video-player{width:100%;margin-top:10px;border-radius:14px}.download-link{display:flex;margin-top:10px;min-height:48px;align-items:center;justify-content:center;border-radius:13px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);color:#d9ffe8;text-decoration:none;font-size:11px;font-weight:900}
-    .mobile-nav{position:fixed;z-index:30;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(92vw,520px);display:grid;grid-template-columns:repeat(4,1fr);padding:8px;border-radius:20px;background:rgba(8,7,13,.9);border:1px solid rgba(150,78,228,.2);backdrop-filter:blur(18px);box-shadow:0 15px 40px rgba(0,0,0,.45)}.mobile-nav button{border:0;background:transparent;color:#837b8e;font-size:9px;font-weight:800;padding:7px 2px}.mobile-nav span{display:block;font-size:16px;margin-bottom:3px}.mobile-nav .active{color:#d8a8ff}
-    @media(min-width:760px){.main{padding:34px 42px 70px}.stage{padding:24px}.marketing-options{grid-template-columns:repeat(4,1fr)}.form-grid.two{grid-template-columns:repeat(2,1fr)}.brain-layout{grid-template-columns:1fr 1fr}.brain-insights{grid-template-columns:1fr 1fr;grid-column:1/-1}.workflow-actions{grid-template-columns:repeat(5,1fr)}.action-card{min-height:105px;flex-direction:column;align-items:flex-start;justify-content:center}.action-copy strong{font-size:12px}.mobile-nav{display:none}}
-    @media(min-width:1100px){.main{padding-left:60px;padding-right:60px}.welcome-block{margin-bottom:30px}.stage{padding:26px}.marketing-choice{min-height:175px}.brain-layout{grid-template-columns:1.05fr .95fr}.score-panel{padding:28px}.score-big{font-size:72px}}
-  
+    :root{
+      --bg:#05050a;
+      --panel:#0d0b16;
+      --panel2:#12101d;
+      --line:rgba(146,74,255,.28);
+      --line2:rgba(190,100,255,.7);
+      --text:#faf8ff;
+      --muted:#a29baa;
+      --purple:#a63bff;
+      --violet:#7c3aed;
+      --blue:#3887ff;
+      --green:#4ade80;
+      --cyan:#38bdf8;
+      --orange:#fb923c;
+      --shadow:0 24px 70px rgba(0,0,0,.38);
+    }
 
-    /* ===== VIRA PREMIUM — MOBILE FINAL REFINEMENT ===== */
+    *{
+      box-sizing:border-box;
+    }
+
+    html{
+      scroll-behavior:smooth;
+      max-width:100%;
+      overflow-x:hidden;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      max-width:100%;
+      overflow-x:hidden;
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,
+      BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 18% -10%,
+        rgba(113,40,255,.18),transparent 34%),
+        radial-gradient(circle at 90% 12%,
+        rgba(46,93,255,.10),transparent 30%),
+        #05050a;
+    }
+
+    button,input,textarea,select{
+      font:inherit;
+    }
+
+    .app-shell{
+      min-height:100vh;
+    }
+
+    .desktop-sidebar{
+      display:none;
+    }
+
+    .main{
+      width:min(1440px,100%);
+      margin:auto;
+      padding:24px 18px 110px;
+      min-width:0;
+      max-width:100%;
+    }
+
+    .vira-topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      margin-bottom:28px;
+    }
+
+    .vira-brand{
+      display:flex;
+      align-items:center;
+      gap:13px;
+    }
+
+    .vira-mark{
+      width:48px;
+      height:48px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      font-size:27px;
+      font-weight:950;
+      background:linear-gradient(145deg,#8f2bff,#3464ff);
+      box-shadow:0 12px 28px rgba(124,58,237,.35);
+    }
+
+    .logo{
+      font-size:29px;
+      font-weight:950;
+      letter-spacing:.11em;
+    }
+
+    .subtitle{
+      margin-top:3px;
+      color:#9b93a8;
+      font-size:10px;
+      font-weight:850;
+      letter-spacing:.23em;
+    }
+
+    .credit-badge{
+      padding:11px 18px;
+      border-radius:17px;
+      border:1px solid rgba(155,88,255,.35);
+      background:rgba(10,9,16,.72);
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .credit-badge small{
+      margin-left:5px;
+      color:#8f8899;
+      font-size:10px;
+    }
+
+    .welcome-block{
+      margin-bottom:24px;
+    }
+
+    .welcome-block h1{
+      margin:0;
+      font-size:clamp(31px,5vw,50px);
+      letter-spacing:-.04em;
+      line-height:1.04;
+    }
+
+    .welcome-block p{
+      margin:9px 0 0;
+      color:#a8a1b0;
+      font-size:14px;
+    }
+
+    .glass-card{
+      min-width:0;
+      max-width:100%;
+      border:1px solid rgba(157,92,241,.25);
+      background:
+        radial-gradient(circle at 100% 0%,
+        rgba(98,51,218,.06),transparent 34%),
+        linear-gradient(
+          145deg,
+          rgba(18,14,30,.99),
+          rgba(7,7,12,.995)
+        );
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.035),
+        0 22px 60px rgba(0,0,0,.34);
+      border-radius:23px;
+    }
+
+    .stage{
+      padding:18px;
+      margin-top:16px;
+      min-width:0;
+      max-width:100%;
+    }
+
+    .stage-head{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:8px;
+    }
+
+    .stage-icon,
+    .number{
+      width:42px;
+      height:42px;
+      border-radius:13px;
+      display:grid;
+      place-items:center;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(139,53,255,.23),
+          rgba(49,83,221,.11)
+        );
+      border:1px solid rgba(176,91,255,.27);
+      color:#c466ff;
+      font-size:20px;
+      font-weight:900;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.05),
+        0 0 20px rgba(151,61,255,.11);
+    }
+
+    .number{
+      width:35px;
+      height:35px;
+      font-size:15px;
+    }
+
+    .stage-title{
+      font-size:18px;
+      font-weight:950;
+    }
+
+    .stage-help{
+      margin:3px 0 0;
+      color:#a39cac;
+      font-size:12px;
+    }
+
+    .marketing-options{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:16px;
+    }
+
+    .marketing-choice{
+      position:relative;
+      min-height:155px;
+      padding:14px 9px;
+      border:1px solid rgba(146,105,188,.20);
+      border-radius:18px;
+      background:
+        radial-gradient(circle at 50% 0%,
+        rgba(115,54,210,.06),transparent 48%),
+        linear-gradient(145deg,#0d0a14,#07070b);
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      text-align:center;
+      cursor:pointer;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025),
+        0 12px 28px rgba(0,0,0,.14);
+    }
+
+    .marketing-choice.active{
+      border-color:rgba(210,102,255,.70);
+      background:
+        radial-gradient(circle at 40% 18%,
+        rgba(147,48,255,.19),transparent 56%),
+        linear-gradient(145deg,#100c19,#08070d);
+      box-shadow:
+        0 0 0 1px rgba(188,83,255,.16),
+        0 0 30px rgba(161,54,255,.16),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .choice-icon{
+      width:56px;
+      height:56px;
+      border-radius:15px;
+      display:grid;
+      place-items:center;
+      background:rgba(126,39,220,.10);
+      border:1px solid rgba(168,85,247,.12);
+    }
+
+    .choice-icon svg{
+      width:37px;
+      height:37px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:2.7;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .launch{color:#c44eff;}
+    .brand{color:#38a9ff;}
+    .leads{color:#cb43ff;}
+    .sale{color:#ff8c3f;}
+
+    .choice-title{
+      font-size:14px;
+      font-weight:950;
+      line-height:1.12;
+    }
+
+    .choice-description{
+      color:#928b9b;
+      font-size:10px;
+      line-height:1.35;
+    }
+
+    .choice-check{
+      display:none;
+      position:absolute;
+      right:10px;
+      top:10px;
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      place-items:center;
+      background:linear-gradient(145deg,#c959ff,#843cff);
+      font-weight:950;
+    }
+
+    .marketing-choice.active .choice-check{
+      display:grid;
+    }
+       .form-grid{
+      display:grid;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .field-group{
+      min-width:0;
+    }
+
+    .field-group label{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      margin-bottom:7px;
+      color:#e8e2ed;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    textarea,
+    input,
+    select{
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      border:1px solid rgba(151,91,221,.22);
+      outline:none;
+      border-radius:14px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(15,12,23,.98),
+          rgba(8,8,13,.98)
+        );
+      color:#f8f5fb;
+      padding:13px 14px;
+      transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+    }
+
+    textarea{
+      min-height:108px;
+      resize:vertical;
+      line-height:1.5;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus{
+      border-color:rgba(182,77,255,.72);
+      box-shadow:
+        0 0 0 3px rgba(148,53,255,.08),
+        0 0 24px rgba(148,53,255,.08);
+    }
+
+    select option{
+      background:#0d0b14;
+      color:white;
+    }
+
+    .field-meta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:6px;
+      color:#777080;
+      font-size:9px;
+    }
+
+    .premium-select-wrap{
+      position:relative;
+      min-width:0;
+    }
+
+    .premium-select-wrap select{
+      padding-right:45px;
+      appearance:none;
+    }
+
+    .select-arrow{
+      position:absolute;
+      pointer-events:none;
+      right:15px;
+      top:50%;
+      width:8px;
+      height:8px;
+      border-right:2px solid #9b82b8;
+      border-bottom:2px solid #9b82b8;
+      transform:translateY(-70%) rotate(45deg);
+    }
+
+    .primary-cta{
+      width:100%;
+      min-height:61px;
+      margin-top:16px;
+      border:0;
+      border-radius:17px;
+      color:white;
+      cursor:pointer;
+      font-weight:950;
+      background:
+        radial-gradient(circle at 15% 0%,
+        rgba(255,255,255,.18),transparent 32%),
+        linear-gradient(105deg,#a62cff,#6c3dff 52%,#3978ff);
+      box-shadow:
+        0 16px 34px rgba(110,55,255,.28),
+        inset 0 1px 0 rgba(255,255,255,.22);
+      transition:
+        transform .18s ease,
+        filter .18s ease,
+        box-shadow .18s ease;
+    }
+
+    .primary-cta:active{
+      transform:scale(.985);
+    }
+
+    .primary-cta small{
+      display:block;
+      margin-top:4px;
+      color:rgba(255,255,255,.74);
+      font-size:9px;
+      font-weight:700;
+    }
+
+    .brain-layout{
+      display:grid;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .score-panel,
+    .brain-message,
+    .insight-box{
+      min-width:0;
+      padding:18px;
+      border-radius:18px;
+      border:1px solid rgba(151,82,219,.22);
+      background:
+        radial-gradient(circle at 100% 0%,
+        rgba(112,55,223,.07),transparent 40%),
+        linear-gradient(145deg,#0e0c17,#09080d);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025);
+    }
+
+    .score-panel{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+    }
+
+    .eyebrow{
+      color:#ca62ff;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.14em;
+    }
+
+    .score-big{
+      margin-top:7px;
+      font-size:58px;
+      line-height:.88;
+      font-weight:950;
+      letter-spacing:-.055em;
+      white-space:nowrap;
+    }
+
+    .score-big span{
+      font-size:25px;
+      color:#a943ef;
+      font-weight:500;
+    }
+
+    .score-note{
+      margin-top:10px;
+      color:#63e992;
+      font-size:10px;
+      font-weight:850;
+    }
+
+    .score-ring{
+      --score-deg:216deg;
+      width:116px;
+      height:116px;
+      flex:0 0 116px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle,#0b0910 54%,transparent 56%),
+        conic-gradient(
+          #bd45ff 0 var(--score-deg),
+          #2b243b var(--score-deg) 360deg
+        );
+      box-shadow:
+        0 0 34px rgba(175,60,255,.20),
+        inset 0 0 18px rgba(255,255,255,.02);
+    }
+
+    .score-ring strong{
+      font-size:29px;
+    }
+
+    .score-ring small{
+      display:block;
+      text-align:center;
+      color:#91899b;
+      font-size:9px;
+    }
+
+    .brain-message{
+      display:flex;
+      gap:12px;
+      color:#e4ddea;
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .brain-insights{
+      display:grid;
+      gap:12px;
+    }
+
+    .insight-box{
+      font-size:11px;
+      line-height:1.55;
+    }
+
+    .insight-box.opportunity{
+      border-color:rgba(74,222,128,.42);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025),
+        0 0 25px rgba(74,222,128,.07);
+    }
+
+    .insight-box.action{
+      border-color:rgba(59,130,246,.50);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025),
+        0 0 25px rgba(59,130,246,.08);
+    }
+
+    .insight-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:9px;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.03em;
+    }
+
+    .insight-title.green{
+      color:#dfffea;
+    }
+
+    .insight-title.blue{
+      color:#e7f0ff;
+    }
+
+    .brain-insight{
+      color:#d8d1de;
+      overflow-wrap:anywhere;
+    }
+
+    .workflow-actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:15px;
+    }
+
+    .action-card{
+      position:relative;
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      min-height:82px;
+      padding:13px;
+      border-radius:17px;
+      border:1px solid rgba(133,89,188,.22);
+      background:
+        radial-gradient(circle at 0 0,
+        rgba(120,63,220,.07),transparent 45%),
+        linear-gradient(145deg,#100c1b,#09080f);
+      color:white;
+      display:flex;
+      align-items:center;
+      gap:11px;
+      text-align:left;
+      cursor:pointer;
+      overflow:hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.03),
+        0 13px 30px rgba(0,0,0,.16);
+      transition:
+        transform .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease;
+    }
+
+    .action-card:not(:disabled):active{
+      transform:scale(.988);
+    }
+
+    .action-card:disabled{
+      opacity:.38;
+      cursor:not-allowed;
+      filter:saturate(.72);
+    }
+
+    .action-icon{
+      width:43px;
+      height:43px;
+      flex:0 0 43px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(117,67,255,.17),
+          rgba(34,175,255,.075)
+        );
+      border:1px solid rgba(150,108,255,.20);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.05);
+    }
+
+    .action-icon svg{
+      width:21px;
+      height:21px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.75;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      filter:drop-shadow(0 0 5px currentColor);
+    }
+
+    .action-copy{
+      min-width:0;
+      flex:1;
+    }
+
+    .action-copy strong{
+      display:block;
+      font-size:12px;
+      line-height:1.25;
+    }
+
+    .action-copy span{
+      display:block;
+      margin-top:4px;
+      color:#afa6b5;
+      font-size:9px;
+      line-height:1.4;
+    }
+
+    .scenario-step .action-icon{color:#d74dff;}
+    .visuals .action-icon{color:#53e49c;}
+    .voice .action-icon{color:#cb55ff;}
+    .video .action-icon{color:#55c7ff;}
+    .download-step .action-icon{color:#72f2bd;}
+
+    .download-step{
+      opacity:.42;
+    }
+
+    .test-badge{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      width:max-content;
+      max-width:100%;
+      margin:12px auto 0;
+      padding:8px 11px;
+      border-radius:999px;
+      border:1px solid rgba(150,87,222,.18);
+      background:rgba(82,42,124,.07);
+      color:#a89fac;
+      font-size:9px;
+      line-height:1.35;
+    }
+
+    .test-badge svg{
+      width:14px;
+      height:14px;
+      flex:0 0 14px;
+      fill:none;
+      stroke:#b877ff;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .validate{
+      display:none;
+    } 
+        /* ===== BOUTON VALIDATION PREMIUM ===== */
+
+    .vira-validate{
+      position:relative;
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      min-height:72px;
+      margin-top:13px;
+      padding:10px 12px;
+      border-radius:18px;
+      border:1px solid rgba(175,92,255,.38);
+      color:white;
+      background:
+        radial-gradient(
+          circle at 12% 0%,
+          rgba(167,73,255,.18),
+          transparent 38%
+        ),
+        radial-gradient(
+          circle at 100% 100%,
+          rgba(47,105,255,.12),
+          transparent 42%
+        ),
+        linear-gradient(
+          135deg,
+          #100c19 0%,
+          #0c0913 54%,
+          #090a11 100%
+        );
+      box-shadow:
+        0 15px 36px rgba(0,0,0,.30),
+        0 0 26px rgba(139,57,255,.10),
+        inset 0 1px 0 rgba(255,255,255,.07);
+      display:flex;
+      align-items:center;
+      gap:11px;
+      text-align:left;
+      cursor:pointer;
+      overflow:hidden;
+    }
+
+    .vira-validate::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(
+          110deg,
+          transparent 15%,
+          rgba(255,255,255,.045) 48%,
+          transparent 75%
+        );
+    }
+
+    .vira-validate-mark{
+      position:relative;
+      z-index:1;
+      width:42px;
+      height:42px;
+      flex:0 0 42px;
+      border-radius:13px;
+      display:grid;
+      place-items:center;
+      color:#d8a4ff;
+      border:1px solid rgba(187,105,255,.27);
+      background:
+        radial-gradient(
+          circle at 35% 20%,
+          rgba(255,255,255,.10),
+          transparent 55%
+        ),
+        rgba(131,54,222,.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.07),
+        0 0 18px rgba(160,70,255,.10);
+    }
+
+    .vira-validate-mark svg{
+      width:21px;
+      height:21px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .vira-validate .action-copy{
+      position:relative;
+      z-index:1;
+      flex:1;
+      min-width:0;
+    }
+
+    .vira-validate .action-copy strong{
+      color:#faf7ff;
+      font-size:12px;
+      font-weight:950;
+    }
+
+    .vira-validate .action-copy span{
+      color:#a9a0b2;
+      font-size:9px;
+    }
+
+    .vira-validate-arrow{
+      position:relative;
+      z-index:1;
+      width:31px;
+      height:31px;
+      flex:0 0 31px;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      color:#c991ff;
+      border:1px solid rgba(177,101,255,.16);
+      background:rgba(119,50,199,.07);
+    }
+
+    .vira-validate-arrow svg{
+      width:15px;
+      height:15px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    /* État après validation : reste premium */
+
+    .vira-validate:disabled{
+      opacity:1 !important;
+      filter:none !important;
+      cursor:default !important;
+      border-color:rgba(96,255,169,.34) !important;
+      background:
+        radial-gradient(
+          circle at 13% 0%,
+          rgba(66,255,165,.12),
+          transparent 40%
+        ),
+        radial-gradient(
+          circle at 100% 100%,
+          rgba(55,117,255,.08),
+          transparent 42%
+        ),
+        linear-gradient(
+          135deg,
+          #0d1815 0%,
+          #09110f 56%,
+          #090b10 100%
+        ) !important;
+      box-shadow:
+        0 15px 36px rgba(0,0,0,.32),
+        0 0 25px rgba(63,255,161,.08),
+        inset 0 1px 0 rgba(255,255,255,.05) !important;
+    }
+
+    .vira-validate:disabled .vira-validate-mark{
+      color:#72ffad !important;
+      border-color:rgba(114,255,173,.30) !important;
+      background:
+        radial-gradient(
+          circle at 35% 20%,
+          rgba(114,255,173,.13),
+          transparent 55%
+        ),
+        rgba(51,190,116,.09) !important;
+    }
+
+    .vira-validate:disabled .vira-validate-arrow{
+      color:#72ffad !important;
+      border-color:rgba(114,255,173,.18) !important;
+      background:rgba(46,154,98,.08) !important;
+    }
+
+    .vira-validate:disabled .action-copy strong{
+      color:#f3fff8 !important;
+    }
+
+    .vira-validate:disabled .action-copy span{
+      color:#9fb5a9 !important;
+    }
+
+    /* ===== MESSAGES PREMIUM ===== */
+
+    .status-box:empty,
+    .campaign-result:empty,
+    .visual-results:empty,
+    .video-result:empty{
+      display:none;
+    }
+
+    .status-box{
+      margin-top:12px;
+      padding:0;
+      border:0;
+      background:transparent;
+      overflow:hidden;
+    }
+
+    .status-premium{
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      display:flex;
+      align-items:center;
+      gap:11px;
+      padding:13px 14px;
+      border-radius:16px;
+      border:1px solid rgba(157,101,226,.22);
+      background:
+        radial-gradient(
+          circle at 0 0,
+          rgba(137,72,255,.09),
+          transparent 42%
+        ),
+        linear-gradient(
+          145deg,
+          rgba(15,12,24,.98),
+          rgba(8,8,13,.99)
+        );
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.035),
+        0 12px 30px rgba(0,0,0,.18);
+    }
+
+    .status-premium-icon{
+      width:36px;
+      height:36px;
+      flex:0 0 36px;
+      display:grid;
+      place-items:center;
+      border-radius:11px;
+      border:1px solid rgba(167,107,240,.20);
+      background:rgba(126,69,219,.09);
+    }
+
+    .status-premium-icon svg{
+      width:18px;
+      height:18px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.9;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .status-premium-copy{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+
+    .status-premium-copy strong{
+      color:#f6f1fa;
+      font-size:11.5px;
+      line-height:1.3;
+    }
+
+    .status-premium-copy span{
+      color:#a9a1b2;
+      font-size:9.5px;
+      line-height:1.4;
+      overflow-wrap:anywhere;
+    }
+
+    .status-box.success .status-premium{
+      border-color:rgba(74,222,128,.27);
+      background:
+        radial-gradient(
+          circle at 0 0,
+          rgba(74,222,128,.095),
+          transparent 42%
+        ),
+        linear-gradient(145deg,#0d1714,#080c0b);
+    }
+
+    .status-box.success .status-premium-icon{
+      color:#72f0a4;
+      border-color:rgba(74,222,128,.25);
+      background:rgba(74,222,128,.08);
+    }
+
+    .status-box.error .status-premium{
+      border-color:rgba(251,113,133,.27);
+      background:
+        radial-gradient(
+          circle at 0 0,
+          rgba(251,113,133,.085),
+          transparent 42%
+        ),
+        linear-gradient(145deg,#180d12,#0d090b);
+    }
+
+    .status-box.error .status-premium-icon{
+      color:#ff8fa3;
+      border-color:rgba(251,113,133,.25);
+      background:rgba(251,113,133,.08);
+    }
+
+    .status-box.warning .status-premium{
+      border-color:rgba(251,191,36,.25);
+      background:
+        radial-gradient(
+          circle at 0 0,
+          rgba(251,191,36,.08),
+          transparent 42%
+        ),
+        linear-gradient(145deg,#17130b,#0d0b08);
+    }
+
+    .status-box.warning .status-premium-icon{
+      color:#ffd268;
+      border-color:rgba(251,191,36,.23);
+      background:rgba(251,191,36,.07);
+    }
+
+    .status-box.loading .status-premium-icon{
+      color:#b58aff;
+    }
+
+    .status-box.loading .status-premium-icon svg{
+      animation:viraSpin 1.15s linear infinite;
+    }
+
+    @keyframes viraSpin{
+      to{
+        transform:rotate(360deg);
+      }
+    }
+
+    /* ===== RÉSULTAT CAMPAGNE PREMIUM ===== */
+
+    .campaign-result,
+    .results-panel{
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      margin-top:14px;
+      padding:15px;
+      border-radius:19px;
+      border:1px solid rgba(155,82,225,.22);
+      background:
+        radial-gradient(
+          circle at 100% 0%,
+          rgba(116,49,221,.07),
+          transparent 35%
+        ),
+        linear-gradient(145deg,#0c0a13,#08070c);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.03),
+        0 16px 36px rgba(0,0,0,.20);
+      overflow:hidden;
+    }
+
+    .campaign-result h2,
+    .results-panel h3{
+      margin:0 0 12px;
+      font-size:19px;
+    }
+
+    .result-ready{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px;
+      margin-bottom:12px;
+      border-radius:14px;
+      border:1px solid rgba(74,222,128,.20);
+      background:
+        radial-gradient(
+          circle at 0 0,
+          rgba(74,222,128,.09),
+          transparent 45%
+        ),
+        rgba(74,222,128,.035);
+    }
+
+    .result-ready-copy{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+
+    .result-ready-copy strong{
+      color:#eafff0;
+      font-size:11px;
+    }
+
+    .result-ready-copy span{
+      color:#9eb3a5;
+      font-size:9px;
+    }
+
+    .campaign-section{
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      margin-top:8px;
+      padding:12px;
+      border-radius:13px;
+      border:1px solid rgba(255,255,255,.055);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.025),
+          rgba(255,255,255,.012)
+        );
+      overflow:hidden;
+    }
+
+    .campaign-section p{
+      margin:7px 0 0;
+      color:#c6bdcd;
+      font-size:11px;
+      line-height:1.55;
+      white-space:pre-line;
+      overflow-wrap:anywhere;
+    }
+
+    .campaign-section strong,
+    .campaign-section summary{
+      font-size:11px;
+    }
+
+    .campaign-section summary{
+      cursor:pointer;
+      list-style:none;
+    }
+
+    .campaign-section summary::-webkit-details-marker{
+      display:none;
+    }
+
+    .campaign-heading{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+    }
+
+    .campaign-heading-icon{
+      width:25px;
+      height:25px;
+      flex:0 0 25px;
+      display:grid;
+      place-items:center;
+      border-radius:8px;
+      color:#c58bff;
+      border:1px solid rgba(169,93,238,.16);
+      background:rgba(147,68,240,.08);
+    }
+
+    .campaign-heading-icon svg{
+      width:14px;
+      height:14px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.9;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .scene-item{
+      padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .scene-item:last-child{
+      border-bottom:0;
+    }
+
+    .progress-wrap{
+      display:none;
+      margin-top:13px;
+      padding:13px;
+      border-radius:15px;
+      border:1px solid rgba(145,80,225,.18);
+      background:rgba(75,38,120,.055);
+    }
+
+    .progress-meta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+      color:#a39aaa;
+      font-size:10px;
+    }
+
+    .progress-track{
+      height:7px;
+      border-radius:999px;
+      background:#191522;
+      overflow:hidden;
+    }
+
+    .progress-fill{
+      width:0;
+      height:100%;
+      border-radius:999px;
+      background:
+        linear-gradient(
+          90deg,
+          #7c3aed,
+          #b832ff,
+          #3b82f6
+        );
+      box-shadow:0 0 14px rgba(168,63,255,.30);
+    }
+
+    .visual-strip{
+      display:flex;
+      gap:10px;
+      max-width:100%;
+      margin-top:10px;
+      overflow-x:auto;
+      overscroll-behavior-inline:contain;
+    }
+
+    .visual-card{
+      flex:0 0 145px;
+      min-width:0;
+    }
+
+    .visual-frame{
+      position:relative;
+      aspect-ratio:9/16;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid rgba(165,91,239,.18);
+      background:#09080d;
+    }
+
+    .visual-frame img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .visual-number{
+      position:absolute;
+      top:7px;
+      left:7px;
+      padding:5px 7px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(5,5,9,.72);
+      backdrop-filter:blur(10px);
+      font-size:8px;
+      font-weight:900;
+    }
+
+    .visual-caption{
+      margin-top:7px;
+      color:#9f96a7;
+      font-size:9px;
+      line-height:1.4;
+    }
+
+    .video-player{
+      width:100%;
+      max-width:100%;
+      margin-top:11px;
+      border-radius:15px;
+      border:1px solid rgba(157,90,225,.20);
+      background:#000;
+    }
+
+    .download-link{
+      display:flex;
+      min-height:50px;
+      margin-top:11px;
+      align-items:center;
+      justify-content:center;
+      border-radius:14px;
+      border:1px solid rgba(74,222,128,.25);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(74,222,128,.10),
+          rgba(39,130,246,.05)
+        );
+      color:#d9ffe8;
+      text-decoration:none;
+      font-size:11px;
+      font-weight:950;
+      }
+        /* ===== NAVIGATION MOBILE PREMIUM ===== */
+
+    .bottom-nav{
+      position:fixed;
+      z-index:100;
+      left:12px;
+      right:12px;
+      bottom:calc(10px + env(safe-area-inset-bottom));
+      height:64px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      align-items:center;
+      padding:5px;
+      border:1px solid rgba(157,89,230,.22);
+      border-radius:20px;
+      background:rgba(9,7,14,.92);
+      backdrop-filter:blur(22px);
+      -webkit-backdrop-filter:blur(22px);
+      box-shadow:
+        0 18px 45px rgba(0,0,0,.48),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .nav-item{
+      height:52px;
+      border:0;
+      border-radius:15px;
+      background:transparent;
+      color:#706a78;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      font-size:8px;
+      font-weight:850;
+    }
+
+    .nav-item.active{
+      color:#d6a3ff;
+      background:
+        radial-gradient(
+          circle at 50% 0%,
+          rgba(158,62,255,.18),
+          transparent 65%
+        );
+    }
+
+    .nav-icon{
+      width:20px;
+      height:20px;
+    }
+
+    .nav-icon svg{
+      width:100%;
+      height:100%;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .ui-icon{
+      width:20px;
+      height:20px;
+      display:inline-grid;
+      place-items:center;
+      flex:0 0 20px;
+    }
+
+    .ui-icon svg,
+    .stage-svg{
+      width:100%;
+      height:100%;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
     @media (max-width:759px){
-      body{background:radial-gradient(circle at 18% -6%,rgba(111,38,255,.20),transparent 32%),radial-gradient(circle at 100% 12%,rgba(50,91,255,.11),transparent 28%),#05050a}
-      .main{padding:20px 14px calc(132px + env(safe-area-inset-bottom));max-width:680px}
-      .vira-topbar{margin-bottom:24px;gap:10px}.vira-brand{gap:11px}.vira-mark{width:46px;height:46px;border-radius:14px;font-size:25px}.logo{font-size:26px}.subtitle{font-size:9px}.credit-badge{padding:10px 13px;border-radius:16px;font-size:13px}.credit-badge small{font-size:9px}
-      .welcome-block{margin-bottom:20px}.welcome-block h1{font-size:clamp(31px,9vw,42px);line-height:1.05}.welcome-block p{font-size:13px;line-height:1.45;max-width:92%}
-      .glass-card{border-radius:22px}.stage{padding:16px;margin-top:14px;overflow:hidden}.stage-head{gap:10px;margin-bottom:8px;align-items:flex-start}.stage-icon,.number{width:40px;height:40px;flex:0 0 40px;border-radius:12px}.stage-title{font-size:17px;line-height:1.18}.stage-help{font-size:11px;line-height:1.4}
-      .marketing-options{gap:9px;margin-top:14px}.marketing-choice{min-height:146px;padding:12px 8px;border-radius:17px;gap:7px}.choice-icon{width:52px;height:52px}.choice-icon svg{width:34px;height:34px}.choice-title{font-size:13px}.choice-description{display:none}.choice-check{width:27px;height:27px;right:9px;top:9px}
-      .form-grid{gap:11px}.field-group{min-width:0}.field-group label{font-size:11px}.field-group input,.field-group textarea,.field-group select{font-size:15px;max-width:100%;min-width:0}.field-group input,.field-group select{height:54px;padding-left:14px;padding-right:14px}.field-group textarea{min-height:104px;padding:14px 14px 27px}.with-icon select{padding-left:45px}.field-icon{bottom:16px}.char-count{font-size:9px}.platform-tip{font-size:10px}
-      .primary-cta{min-height:64px;font-size:16px;border-radius:17px}.brain-run{margin-top:13px}.brain-run small{font-size:10px}
-      .brain-layout{gap:10px;margin-top:13px}.score-panel,.brain-message,.insight-box{padding:14px;border-radius:16px}.score-panel{gap:12px;min-width:0}.score-panel>div:first-child{min-width:0;flex:1}.eyebrow{font-size:10px}.score-big{font-size:44px;line-height:.92;white-space:nowrap}.score-big span{font-size:21px}.score-note{font-size:9px;line-height:1.3;margin-top:7px}.score-ring{width:96px;height:96px;flex:0 0 96px}.score-ring strong{font-size:27px}.score-ring small{font-size:9px}.brain-message{font-size:11.5px;line-height:1.48;gap:9px}.spark{font-size:19px}.brain-insights{gap:10px}.insight-box{font-size:11px;line-height:1.5}.insight-title{margin-bottom:8px;font-size:11px}.brain-insight{overflow-wrap:anywhere}
-      .workflow-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:13px}.action-card{min-height:90px;padding:11px;border-radius:15px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;overflow:hidden}.action-icon{width:39px;height:39px;flex:0 0 39px;border-radius:11px;font-size:18px}.action-copy{width:100%;min-width:0}.action-copy strong{font-size:11.5px;line-height:1.2}.action-copy span{font-size:8.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.download-step{grid-column:1/-1;min-height:76px;flex-direction:row;align-items:center}.download-step .action-copy span{-webkit-line-clamp:1}.test-badge{max-width:100%;font-size:8.5px;white-space:normal;line-height:1.3}
-      .campaign-result,.results-panel{padding:13px;border-radius:16px}.campaign-result h2{font-size:18px}.campaign-section p{overflow-wrap:anywhere}.visual-card{flex:0 0 126px;width:126px}.video-player{max-height:58vh}
-      .mobile-nav{bottom:max(4px,env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:520px;padding:5px 7px;border-radius:17px;min-height:58px}.mobile-nav button{padding:4px 2px;font-size:8px;line-height:1.15}.mobile-nav span{font-size:14px;margin-bottom:2px}.main{padding-bottom:calc(72px + env(safe-area-inset-bottom));scroll-padding-bottom:76px}.field-group,.stage,.brain-message,.insight-box,.action-card{scroll-margin-bottom:110px}
+      .main{
+        width:100%;
+        max-width:100%;
+        padding:
+          18px
+          14px
+          calc(88px + env(safe-area-inset-bottom));
+        scroll-padding-bottom:88px;
+        overflow-x:hidden;
+      }
+
+      .main::after{
+        content:none !important;
+        display:none !important;
+        height:0 !important;
+      }
+
+      .vira-topbar{
+        margin-bottom:22px;
+      }
+
+      .vira-mark{
+        width:43px;
+        height:43px;
+        border-radius:13px;
+        font-size:24px;
+      }
+
+      .logo{
+        font-size:24px;
+      }
+
+      .credit-badge{
+        padding:9px 12px;
+        border-radius:14px;
+        font-size:12px;
+      }
+
+      .credit-badge small{
+        display:none;
+      }
+
+      .welcome-block h1{
+        font-size:31px;
+      }
+
+      .stage{
+        padding:15px;
+        border-radius:20px;
+      }
+
+      .score-ring{
+        width:102px;
+        height:102px;
+        flex-basis:102px;
+      }
+
+      .score-big{
+        font-size:48px;
+      }
+
+      .campaign-result,
+      .results-panel{
+        padding:12px;
+      }
     }
 
-    @media (max-width:390px){
-      .main{padding-left:11px;padding-right:11px}.stage{padding:14px}.credit-badge{padding:9px 10px}.credit-badge small{display:none}.welcome-block h1{font-size:30px}.marketing-choice{min-height:136px}.choice-icon{width:48px;height:48px}.choice-title{font-size:12px}.score-big{font-size:39px}.score-big span{font-size:18px}.score-ring{width:88px;height:88px;flex-basis:88px}.score-ring strong{font-size:24px}.workflow-actions{gap:8px}.action-card{min-height:86px;padding:10px}.stage-title{font-size:16px}
+    @media (min-width:760px){
+      .app-shell{
+        display:grid;
+        grid-template-columns:225px minmax(0,1fr);
+      }
+
+      .desktop-sidebar{
+        position:sticky;
+        top:0;
+        height:100vh;
+        display:flex;
+        flex-direction:column;
+        padding:25px 17px;
+        border-right:1px solid rgba(143,85,207,.17);
+        background:
+          radial-gradient(
+            circle at 50% 0%,
+            rgba(108,41,213,.09),
+            transparent 30%
+          ),
+          #08070c;
+      }
+
+      .desktop-logo{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:34px;
+        padding:0 6px;
+        font-weight:950;
+        font-size:22px;
+        letter-spacing:.10em;
+      }
+
+      .desktop-logo-mark{
+        width:37px;
+        height:37px;
+        border-radius:11px;
+        display:grid;
+        place-items:center;
+        background:linear-gradient(145deg,#962cff,#346cff);
+        box-shadow:0 10px 24px rgba(123,51,237,.26);
+      }
+
+      .desktop-nav{
+        display:grid;
+        gap:7px;
+      }
+
+      .desktop-nav-item{
+        display:flex;
+        align-items:center;
+        gap:11px;
+        padding:12px;
+        border-radius:13px;
+        color:#817989;
+        font-size:11px;
+        font-weight:850;
+      }
+
+      .desktop-nav-item.active{
+        color:#e0b8ff;
+        border:1px solid rgba(157,76,233,.17);
+        background:rgba(127,51,210,.075);
+      }
+
+      .main{
+        width:min(1120px,100%);
+        padding:36px 32px 55px;
+      }
+
+      .bottom-nav{
+        display:none;
+      }
+
+      .marketing-options{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+      }
+
+      .form-grid.two{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .brain-layout{
+        grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+      }
+
+      .brain-insights{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .workflow-actions{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .vira-validate{
+        max-width:570px;
+      }
     }
-
-  
-    /* ===== VIRA PREMIUM — WELCOME + ICONS + MOBILE NAV SAFE AREA ===== */
-    .premium-welcome{position:relative;padding:10px 0 4px}
-    .welcome-kicker{display:inline-flex;align-items:center;gap:7px;margin-bottom:10px;padding:7px 10px;border:1px solid rgba(190,76,255,.25);border-radius:999px;background:rgba(149,45,255,.08);color:#c991ff;font-size:9px;font-weight:900;letter-spacing:1.35px}
-    .welcome-spark{font-size:13px;color:#df67ff;filter:drop-shadow(0 0 8px rgba(202,67,255,.6))}
-    .premium-welcome h1{letter-spacing:-1.5px}
-    .vira-gradient{background:linear-gradient(110deg,#f1c2ff 0%,#bd4cff 42%,#5572ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 28px rgba(149,64,255,.16)}
-    .premium-welcome p{max-width:590px}
-    .premium-inline-icon{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;margin-right:7px;border-radius:7px;background:linear-gradient(145deg,rgba(170,48,255,.18),rgba(45,116,255,.13));border:1px solid rgba(100,128,255,.22);vertical-align:middle}
-    .premium-inline-icon svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-    .premium-video-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
-    @media(max-width:759px){
-      .mobile-nav{bottom:max(2px,env(safe-area-inset-bottom));min-height:54px;padding:4px 7px;border-radius:16px}
-      .mobile-nav button{padding:3px 2px}
-      .mobile-nav span{font-size:13px;margin-bottom:1px}
-      .main{padding-bottom:calc(155px + env(safe-area-inset-bottom)) !important;scroll-padding-bottom:145px}
-      .main::after{content:"";display:block;height:90px;width:100%;pointer-events:none}
-      .field-group,.stage,.brain-message,.insight-box,.action-card{scroll-margin-bottom:145px}
-      .premium-welcome{padding-top:7px}
-      .welcome-kicker{font-size:8px;margin-bottom:9px}
-    }
-
-  .premium-action-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}.premium-action-icon{filter:drop-shadow(0 0 9px rgba(140,70,255,.18))}
-
-/* ===== VIRA PREMIUM POLISH — visual only ===== */
-.premium-inline-icon{
-  width:22px;height:22px;display:inline-grid;place-items:center;
-  flex:0 0 22px;border-radius:7px;
-  background:linear-gradient(145deg,rgba(120,76,255,.18),rgba(38,198,255,.10));
-  border:1px solid rgba(151,115,255,.24);
-  box-shadow:0 0 16px rgba(124,76,255,.15),inset 0 0 10px rgba(90,196,255,.05);
-  vertical-align:middle;margin-right:5px
-}
-.premium-inline-icon svg{
-  width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.45;
-  stroke-linecap:round;stroke-linejoin:round
-}
-.brain-circuit-icon{color:#9b7cff}
-.insight-title.blue{display:flex;align-items:center;gap:4px}
-
-.action-card .premium-action-icon{
-  position:relative;overflow:hidden;
-  background:linear-gradient(145deg,rgba(115,67,255,.16),rgba(31,184,255,.07));
-  border:1px solid rgba(142,104,255,.18);
-  border-radius:12px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 15px rgba(119,69,255,.10)
-}
-.action-card .premium-action-icon::after{
-  content:"";position:absolute;inset:2px;border-radius:9px;
-  background:radial-gradient(circle at 28% 18%,rgba(255,255,255,.09),transparent 43%);
-  pointer-events:none
-}
-.action-card .premium-action-icon svg{
-  width:21px;height:21px;position:relative;z-index:1;
-  filter:drop-shadow(0 0 5px currentColor)
-}
-.action-card.download-step .premium-action-icon{
-  background:linear-gradient(145deg,rgba(126,70,255,.20),rgba(53,105,255,.10));
-  border-color:rgba(155,111,255,.25)
-}
-
-.premium-test-badge{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  background:linear-gradient(90deg,rgba(100,55,220,.13),rgba(43,113,235,.10),rgba(30,180,194,.08));
-  border:1px solid rgba(132,99,255,.18);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 8px 24px rgba(0,0,0,.10)
-}
-.premium-test-icon{
-  width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px;
-  border-radius:7px;color:#9b7cff;
-  background:rgba(125,77,255,.10);border:1px solid rgba(146,105,255,.18)
-}
-.premium-test-icon svg{
-  width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.65;
-  stroke-linecap:round;stroke-linejoin:round
-}
-
-
-.vira-brain-title{display:flex;align-items:center;gap:8px}
-.vira-brain-logo{
-  width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;
-  border-radius:11px;color:#9d7cff;
-  background:linear-gradient(145deg,rgba(126,73,255,.20),rgba(39,184,255,.09));
-  border:1px solid rgba(153,111,255,.27);
-  box-shadow:0 0 20px rgba(119,71,255,.18),inset 0 1px 0 rgba(255,255,255,.05)
-}
-.vira-brain-logo svg{
-  width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.35;
-  stroke-linecap:round;stroke-linejoin:round;
-  filter:drop-shadow(0 0 5px rgba(156,124,255,.65))
-}
-
-
-/* ===== VIRA MOBILE — COMPACT END SPACING ===== */
-@media (max-width:759px){
-  .main{
-    padding-bottom:calc(74px + env(safe-area-inset-bottom)) !important;
-    scroll-padding-bottom:74px !important;
-  }
-  .main::after{
-    content:none !important;
-    display:none !important;
-    height:0 !important;
-  }
-}
-
-
-/* ===== VIRA SIGNATURE PREMIUM SYSTEM — MOBILE + WEB ===== */
-html,body{max-width:100%;overflow-x:hidden}
-.main,.glass-card,.stage,.workflow-actions,.action-card,.campaign-result,.results-panel{min-width:0;max-width:100%}
-
-/* Surfaces */
-.glass-card{
-  border-color:rgba(157,92,241,.25)!important;
-  background:radial-gradient(circle at 100% 0%,rgba(98,51,218,.06),transparent 34%),linear-gradient(145deg,rgba(18,14,30,.99),rgba(7,7,12,.995))!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 22px 60px rgba(0,0,0,.34)!important
-}
-.stage-icon,.number{
-  background:linear-gradient(145deg,rgba(139,53,255,.23),rgba(49,83,221,.11))!important;
-  border-color:rgba(176,91,255,.27)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 20px rgba(151,61,255,.11)!important
-}
-
-/* Objective cards */
-.marketing-choice{
-  border-color:rgba(146,105,188,.20)!important;
-  background:radial-gradient(circle at 50% 0%,rgba(115,54,210,.06),transparent 48%),linear-gradient(145deg,#0d0a14,#07070b)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 12px 28px rgba(0,0,0,.14)
-}
-.marketing-choice.active{
-  border-color:rgba(210,102,255,.70)!important;
-  background:radial-gradient(circle at 40% 18%,rgba(147,48,255,.19),transparent 56%),linear-gradient(145deg,#100c19,#08070d)!important;
-  box-shadow:0 0 0 1px rgba(188,83,255,.16),0 0 30px rgba(161,54,255,.16),inset 0 1px 0 rgba(255,255,255,.04)!important
-}
-
-/* Inputs */
-.field-group input,.field-group textarea,.field-group select{
-  background:linear-gradient(145deg,#0b0912,#07070c)!important;
-  border-color:rgba(147,83,218,.34)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.02)
-}
-.field-group input:focus,.field-group textarea:focus,.field-group select:focus{
-  border-color:#ad4cff!important;
-  box-shadow:0 0 0 3px rgba(173,76,255,.08),0 0 22px rgba(145,58,255,.10)!important
-}
-
-/* Primary CTA */
-.primary-cta{
-  position:relative;overflow:hidden;
-  border:1px solid rgba(220,160,255,.18)!important;
-  background:linear-gradient(100deg,#7719ef,#a426f2 50%,#3159df)!important;
-  box-shadow:0 15px 36px rgba(113,40,239,.27),inset 0 1px 0 rgba(255,255,255,.17)!important
-}
-
-/* VIRA Brain */
-.score-panel,.brain-message,.insight-box{
-  background:radial-gradient(circle at 100% 0%,rgba(109,58,220,.055),transparent 38%),linear-gradient(145deg,#0e0c17,#08080d)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 12px 28px rgba(0,0,0,.13)
-}
-.score-ring{box-shadow:0 0 38px rgba(175,60,255,.24),inset 0 0 22px rgba(135,51,255,.08)!important}
-
-/* Workflow */
-.action-card{
-  border-color:rgba(146,91,204,.21)!important;
-  background:radial-gradient(circle at 18% 0%,rgba(124,59,214,.075),transparent 48%),linear-gradient(145deg,#100c1b,#08080e)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.028),0 12px 28px rgba(0,0,0,.14)
-}
-.action-card:not(:disabled):active{transform:scale(.985)}
-.action-card:disabled{opacity:.38;filter:saturate(.72)}
-.premium-action-icon{
-  background:linear-gradient(145deg,rgba(117,67,255,.17),rgba(34,175,255,.075))!important;
-  border-color:rgba(150,108,255,.20)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 18px rgba(121,66,255,.11)!important
-}
-
-/* Signature validation CTA */
-.vira-validate{
-  width:100%;min-height:68px;margin-top:14px;padding:11px 14px!important;
-  flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:11px!important;
-  position:relative;overflow:hidden;border-radius:17px!important;
-  border:1px solid rgba(190,110,255,.40)!important;
-  background:radial-gradient(circle at 15% 0%,rgba(190,71,255,.17),transparent 42%),radial-gradient(circle at 95% 100%,rgba(54,101,255,.14),transparent 42%),linear-gradient(135deg,#171020,#09080f)!important;
-  box-shadow:0 14px 34px rgba(0,0,0,.32),0 0 25px rgba(145,57,255,.12),inset 0 1px 0 rgba(255,255,255,.07)!important;
-  opacity:1!important
-}
-.vira-validate .action-copy{flex:1;width:auto!important;min-width:0}
-.vira-validate .action-copy strong{font-size:13px!important;color:#fff}
-.vira-validate .action-copy span{font-size:9px!important;color:#aaa0b4}
-.vira-validate-mark,.vira-validate-arrow{
-  display:grid;place-items:center;flex:0 0 auto;color:#e4b8ff;
-  border:1px solid rgba(202,130,255,.24);
-  background:linear-gradient(145deg,rgba(177,69,255,.19),rgba(58,92,255,.11));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 17px rgba(164,70,255,.12)
-}
-.vira-validate-mark{width:39px;height:39px;border-radius:12px}
-.vira-validate-arrow{width:30px;height:30px;border-radius:10px;color:#a982ff}
-.vira-validate-mark svg,.vira-validate-arrow svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.vira-validate-arrow svg{width:15px;height:15px}
-.vira-validate:disabled{
-  opacity:1!important;border-color:rgba(74,222,128,.28)!important;
-  background:radial-gradient(circle at 15% 0%,rgba(74,222,128,.10),transparent 42%),linear-gradient(135deg,#0d211b,#080f0d)!important
-}
-.vira-validate:disabled .vira-validate-mark{color:#72f1a4;border-color:rgba(74,222,128,.22);background:rgba(74,222,128,.08)}
-.vira-validate:disabled .vira-validate-arrow{display:none}
-
-/* Generated campaign */
-.campaign-result{
-  overflow:hidden;
-  background:radial-gradient(circle at 100% 0%,rgba(99,53,221,.07),transparent 34%),linear-gradient(145deg,#0e0b17,#08070d)!important;
-  border-color:rgba(155,87,229,.23)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 18px 42px rgba(0,0,0,.22)
-}
-.result-ready{
-  display:flex!important;align-items:center;gap:7px;flex-wrap:wrap;
-  background:linear-gradient(135deg,rgba(74,222,128,.07),rgba(60,105,255,.035))!important;
-  border-color:rgba(74,222,128,.17)!important
-}
-.result-ready strong{color:#dcffe9}
-.result-ready span{color:#aaa3b1;font-size:10px}
-.campaign-section{
-  background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.01))!important;
-  border-color:rgba(161,111,218,.10)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)
-}
-.campaign-section strong,.campaign-section summary{color:#f1e9f8;font-weight:900}
-.campaign-section p{color:#bdb5c5!important;overflow-wrap:anywhere;word-break:break-word}
-
-/* Progress, generated media, download */
-.progress-track{background:#15111e!important;border:1px solid rgba(151,93,216,.10)}
-.progress-fill{box-shadow:0 0 15px rgba(174,55,255,.24)}
-.results-panel{
-  background:radial-gradient(circle at 100% 0%,rgba(72,83,226,.06),transparent 36%),linear-gradient(145deg,#0e0b17,#08070d)!important;
-  border-color:rgba(151,83,225,.22)!important
-}
-.visual-frame{border:1px solid rgba(163,99,236,.18);box-shadow:0 12px 26px rgba(0,0,0,.25)}
-.download-link{box-shadow:0 0 20px rgba(74,222,128,.08)}
-
-/* Navigation */
-.mobile-nav{
-  background:linear-gradient(145deg,rgba(13,10,21,.94),rgba(7,7,12,.96))!important;
-  border-color:rgba(158,90,232,.23)!important;
-  box-shadow:0 16px 42px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.035)!important
-}
-.mobile-nav .active{color:#d9adff;text-shadow:0 0 12px rgba(181,83,255,.28)}
-
-/* Responsive safety */
-@media(max-width:759px){
-  .main{width:100%;max-width:680px}
-  .vira-validate{min-height:64px;padding:10px 12px!important}
-  .vira-validate-mark{width:36px;height:36px}
-  .campaign-result,.results-panel{width:100%;max-width:100%;overflow:hidden}
-  .campaign-section,.campaign-section p,.scene-item{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
-}
-@media(min-width:760px){
-  .glass-card{border-radius:25px}
-  .workflow-actions{gap:12px}
-  .action-card{border-radius:17px}
-  .vira-validate{max-width:560px;margin-left:auto;margin-right:auto}
-}
-
-
-/* ===== VIRA PREMIUM RESPONSIVE — MOBILE + WEB ===== */
-html,body{max-width:100%;overflow-x:hidden}
-.main,.glass-card,.stage,.workflow-actions,.action-card,.campaign-result,.results-panel{min-width:0;max-width:100%}
-
-/* Unified premium surfaces */
-.glass-card{
-  border:1px solid rgba(157,92,241,.26)!important;
-  background:
-    radial-gradient(circle at 12% -8%,rgba(131,52,255,.08),transparent 34%),
-    radial-gradient(circle at 100% 0%,rgba(52,77,228,.055),transparent 30%),
-    linear-gradient(145deg,rgba(17,13,28,.99),rgba(6,6,11,.995))!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 22px 60px rgba(0,0,0,.34)!important
-}
-.action-card{
-  position:relative!important;
-  overflow:hidden!important;
-  border:1px solid rgba(145,90,205,.23)!important;
-  background:radial-gradient(circle at 20% 0%,rgba(119,55,214,.08),transparent 44%),linear-gradient(145deg,#100c1a,#08080e)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 12px 28px rgba(0,0,0,.14)!important
-}
-.action-card:disabled{opacity:.5!important;filter:saturate(.78)!important}
-.action-card:disabled::after{
-  content:"VERROUILLÉ";
-  position:absolute;left:12px;right:12px;bottom:10px;height:25px;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:9px;font-size:8px;font-weight:900;letter-spacing:.05em;
-  color:#aaa1c1;background:rgba(74,62,101,.17);
-  border:1px solid rgba(154,125,217,.08)
-}
-.action-card:disabled .action-copy{padding-bottom:28px}
-
-/* Premium validation button */
-.vira-validate{
-  width:100%!important;min-height:74px!important;margin-top:14px!important;
-  padding:12px 15px!important;display:flex;flex-direction:row!important;
-  align-items:center!important;justify-content:flex-start!important;gap:12px!important;
-  position:relative!important;overflow:hidden!important;border-radius:18px!important;
-  border:1px solid rgba(216,123,255,.50)!important;
-  background:
-    radial-gradient(circle at 16% 0%,rgba(221,78,255,.30),transparent 42%),
-    radial-gradient(circle at 90% 100%,rgba(57,79,255,.26),transparent 46%),
-    linear-gradient(110deg,#24102f,#4c18a9 48%,#2447e8)!important;
-  box-shadow:
-    0 16px 38px rgba(106,36,221,.28),
-    0 0 28px rgba(162,56,255,.13),
-    inset 0 1px 0 rgba(255,255,255,.13)!important;
-  opacity:1!important
-}
-.vira-validate::before{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(110deg,transparent 28%,rgba(255,255,255,.08) 49%,transparent 69%);
-  transform:translateX(-115%)
-}
-.vira-validate .action-copy{flex:1;width:auto!important;min-width:0;text-align:left}
-.vira-validate .action-copy strong{font-size:14px!important;color:#fff}
-.vira-validate .action-copy span{font-size:10px!important;color:#d1c7dc}
-.vira-validate-mark,.vira-validate-arrow{
-  display:grid;place-items:center;flex:0 0 auto;
-  border:1px solid rgba(235,188,255,.25);
-  background:rgba(255,255,255,.08);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 0 18px rgba(197,92,255,.14)
-}
-.vira-validate-mark{width:42px;height:42px;border-radius:13px;color:#fff}
-.vira-validate-arrow{width:32px;height:32px;border-radius:10px;color:#d8c8ff}
-.vira-validate-mark svg,.vira-validate-arrow svg{
-  width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;
-  stroke-linecap:round;stroke-linejoin:round
-}
-.vira-validate-arrow svg{width:15px;height:15px}
-.vira-validate:disabled{
-  border-color:rgba(74,222,128,.32)!important;
-  background:radial-gradient(circle at 15% 0%,rgba(74,222,128,.12),transparent 42%),linear-gradient(135deg,#10211c,#08100d)!important;
-  box-shadow:0 14px 32px rgba(0,0,0,.28),0 0 24px rgba(74,222,128,.07),inset 0 1px 0 rgba(255,255,255,.05)!important
-}
-.vira-validate:disabled .vira-validate-mark{color:#75f0a6;border-color:rgba(74,222,128,.24);background:rgba(74,222,128,.09)}
-.vira-validate:disabled .vira-validate-arrow{display:none}
-
-/* Generated campaign width safety */
-.campaign-result{width:100%;overflow:hidden!important}
-.campaign-section,.campaign-section p,.scene-item{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
-.result-ready{display:flex!important;gap:7px;align-items:center;flex-wrap:wrap!important}
-
-/* MOBILE */
-@media(max-width:759px){
-  .main{width:100%!important;max-width:680px!important}
-  .workflow-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
-  .action-card{min-width:0!important}
-  .vira-validate{min-height:68px!important;padding:11px 12px!important}
-  .vira-validate-mark{width:38px;height:38px}
-  .vira-validate .action-copy strong{font-size:13px!important}
-  .vira-validate .action-copy span{font-size:9px!important}
-  .campaign-result,.results-panel{width:100%!important;max-width:100%!important}
-}
-
-/* WEB / DESKTOP */
-@media(min-width:760px){
-  .main{max-width:1180px!important;margin:0 auto!important}
-  .glass-card{border-radius:24px!important}
-  .workflow-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important}
-  .workflow-actions .action-card:last-of-type{grid-column:span 2}
-  .action-card{min-height:156px!important;border-radius:18px!important}
-  .vira-validate{max-width:620px!important;margin:18px auto 0!important}
-  .campaign-result{max-width:980px!important;margin-left:auto!important;margin-right:auto!important}
-}
-/* ÉTAT PREMIUM — SCÉNARIO VALIDÉ */
-
-.vira-validate:disabled{
-  opacity:1!important;
-  filter:none!important;
-  cursor:default!important;
-
-  border:1px solid rgba(99,255,170,.42)!important;
-
-  background:
-    radial-gradient(circle at 15% 0%,
-      rgba(61,255,164,.13),
-      transparent 40%),
-    radial-gradient(circle at 95% 100%,
-      rgba(63,110,255,.10),
-      transparent 42%),
-    linear-gradient(135deg,
-      #0d1816 0%,
-      #09110f 55%,
-      #090b10 100%)!important;
-
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.35),
-    0 0 26px rgba(61,255,164,.10),
-    inset 0 1px 0 rgba(255,255,255,.06)!important;
-}
-
-.vira-validate:disabled::after{
-  display:none!important;
-}
-
-.vira-validate:disabled .vira-validate-mark{
-  color:#72ffad!important;
-  border-color:rgba(114,255,173,.32)!important;
-  background:rgba(51,190,116,.10)!important;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.07),
-    0 0 20px rgba(72,255,158,.12)!important;
-}
-
-.vira-validate:disabled .action-copy{
-  padding-bottom:0!important;
-}
-
-.vira-validate:disabled .action-copy strong{
-  color:#f2fff8!important;
-}
-
-.vira-validate:disabled .action-copy span{
-  color:#9db8aa!important;
-}
-
-.vira-validate:disabled .vira-validate-arrow{
-  display:grid!important;
-  color:#72ffad!important;
-  border-color:rgba(114,255,173,.20)!important;
-background:rgba(46,154,98,.09)!important;
-}
-</style>
+  </style>
 </head>
+
 <body>
   <div class="app-shell">
+
+    <aside class="desktop-sidebar">
+      <div class="desktop-logo">
+        <span class="desktop-logo-mark">V</span>
+        VIRA
+      </div>
+
+      <div class="desktop-nav">
+        <div class="desktop-nav-item active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 11.5 12 4l9 7.5"/>
+              <path d="M5.5 10v9h13v-9"/>
+            </svg>
+          </span>
+          Accueil
+        </div>
+
+        <div class="desktop-nav-item">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <rect x="4" y="4" width="16" height="16" rx="3"/>
+              <path d="M8 9h8M8 13h8M8 17h5"/>
+            </svg>
+          </span>
+          Campagnes
+        </div>
+
+        <div class="desktop-nav-item">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M5 4h14v16H5z"/>
+              <path d="M8 8h8M8 12h8M8 16h5"/>
+            </svg>
+          </span>
+          Bibliothèque
+        </div>
+
+        <div class="desktop-nav-item">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 15 6l-.3-2.6h-4L10.4 6A7 7 0 0 0 9 7.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1A7 7 0 0 0 10.4 18l.3 2.6h4L15 18a7 7 0 0 0 1.5-1.1l2.4 1 2-3.4-2-1.5c.1-.3.1-.7.1-1z"/>
+            </svg>
+          </span>
+          Réglages
+        </div>
+      </div>
+    </aside>
+
     <main class="main">
+
       <header class="vira-topbar">
-        <div class="vira-brand"><div class="vira-mark">V</div><div><div class="logo">VIRA</div><div class="subtitle">CREATIVE STUDIO</div></div></div>
-        <div class="credit-badge">⚡ <span id="creditCount">100</span><small>crédits</small></div>
+        <div class="vira-brand">
+          <div class="vira-mark">V</div>
+          <div>
+            <div class="logo">VIRA</div>
+            <div class="subtitle">MARKETING INTELLIGENCE</div>
+          </div>
+        </div>
+
+        <div class="credit-badge">
+          <span class="ui-icon" style="width:14px;height:14px;color:#d18cff;">
+            <svg viewBox="0 0 24 24">
+              <path d="m13 2-8 12h7l-1 8 8-12h-7z"/>
+            </svg>
+          </span>
+          <span id="creditCount">120</span>
+          <small>CRÉDITS</small>
+        </div>
       </header>
 
-      <section class="welcome-block premium-welcome">
-        <div class="welcome-kicker"><span class="welcome-spark">✦</span> CREATIVE PLATFORM</div>
-        <h1>Bienvenue sur <span class="vira-gradient">VIRA</span></h1>
-        <p>Transformez vos idées en campagnes performantes.</p>
+      <section class="welcome-block">
+        <h1>Créez. Convertissez. Grandissez.</h1>
+        <p>Votre moteur de création marketing propulsé par VIRA.</p>
       </section>
 
-      <section class="glass-card stage">
-        <div class="stage-head"><span class="stage-icon">◉</span><div><div class="stage-title">1. Objectif</div><p class="stage-help">Choisissez votre objectif principal</p></div></div>
-        <div class="marketing-options" id="marketingOptions">
-          <button type="button" class="marketing-choice" data-type="🛍️ Vendre un produit" data-key="launch"><div class="choice-icon launch"><svg viewBox="0 0 64 64"><path d="M12 29v8c0 3 2 5 5 5h7l20 10V14L24 24h-7c-3 0-5 2-5 5Z"/><path d="M24 42l4 12h8l-4-9"/><path d="M49 24c3 2 5 5 5 8s-2 6-5 8"/></svg></div><div class="choice-title">Lancement<br>de produit</div><div class="choice-check">✓</div></button>
-          <button type="button" class="marketing-choice" data-type="📱 Réseaux sociaux" data-key="brand"><div class="choice-icon brand"><svg viewBox="0 0 64 64"><circle cx="29" cy="35" r="19"/><circle cx="29" cy="35" r="11"/><circle cx="29" cy="35" r="3"/><path d="M29 35L47 17"/><path d="M43 13h8v8"/><path d="M47 17l7-7"/></svg></div><div class="choice-title">Notoriété<br>de marque</div><div class="choice-check">✓</div></button>
-          <button type="button" class="marketing-choice" data-type="💼 Promouvoir un service" data-key="leads"><div class="choice-icon leads"><svg viewBox="0 0 64 64"><path d="M10 52h44"/><rect x="14" y="34" width="8" height="18" rx="2"/><rect x="27" y="25" width="8" height="27" rx="2"/><rect x="40" y="15" width="8" height="37" rx="2"/></svg></div><div class="choice-title">Génération<br>de leads</div><div class="choice-check">✓</div></button>
-          <button type="button" class="marketing-choice" data-type="📢 Créer une publicité" data-key="sale"><div class="choice-icon sale"><svg viewBox="0 0 64 64"><path d="M10 14h7l4 27h27l6-18H20"/><circle cx="27" cy="50" r="3"/><circle cx="47" cy="50" r="3"/></svg></div><div class="choice-title">Promo /<br>Vente spéciale</div><div class="choice-check">✓</div></button>
+      <section class="stage glass-card">
+        <div class="stage-head">
+          <div class="number">1</div>
+          <div>
+            <div class="stage-title">Objectif marketing</div>
+            <p class="stage-help">
+              Choisissez le résultat principal de votre campagne.
+            </p>
+          </div>
+        </div>
+
+        <div class="marketing-options">
+
+          <button
+            class="marketing-choice"
+            type="button"
+            data-marketing="🛍️ Vendre un produit"
+          >
+            <span class="choice-check">
+              <svg viewBox="0 0 24 24"
+                   width="14"
+                   height="14"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5">
+                <path d="m6 12 4 4 8-9"/>
+              </svg>
+            </span>
+
+            <span class="choice-icon launch">
+              <svg viewBox="0 0 24 24">
+                <path d="M14 5c3-2 5-2 5-2s0 2-2 5l-5 5-4-4 6-4z"/>
+                <path d="m8 9-3 1-2 3 5 1"/>
+                <path d="m12 13 1 5 3-2 1-3"/>
+                <circle cx="15.5" cy="6.5" r="1"/>
+              </svg>
+            </span>
+
+            <span class="choice-title">Lancement de produit</span>
+            <span class="choice-description">
+              Présentez une offre et stimulez les ventes.
+            </span>
+          </button>
+
+          <button
+            class="marketing-choice"
+            type="button"
+            data-marketing="📱 Réseaux sociaux"
+          >
+            <span class="choice-check">
+              <svg viewBox="0 0 24 24"
+                   width="14"
+                   height="14"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5">
+                <path d="m6 12 4 4 8-9"/>
+              </svg>
+            </span>
+
+            <span class="choice-icon brand">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8"/>
+                <path d="M4 12h16M12 4c2 2.3 3 5 3 8s-1 5.7-3 8c-2-2.3-3-5-3-8s1-5.7 3-8z"/>
+              </svg>
+            </span>
+
+            <span class="choice-title">Notoriété de marque</span>
+            <span class="choice-description">
+              Développez votre visibilité et votre présence.
+            </span>
+          </button>
+
+          <button
+            class="marketing-choice"
+            type="button"
+            data-marketing="💼 Promouvoir un service"
+          >
+            <span class="choice-check">
+              <svg viewBox="0 0 24 24"
+                   width="14"
+                   height="14"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5">
+                <path d="m6 12 4 4 8-9"/>
+              </svg>
+            </span>
+
+            <span class="choice-icon leads">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="3"/>
+                <path d="M6 19c.5-4 2.5-6 6-6s5.5 2 6 6"/>
+                <path d="M18 6h3M19.5 4.5v3"/>
+              </svg>
+            </span>
+
+            <span class="choice-title">Génération de leads</span>
+            <span class="choice-description">
+              Attirez des prospects prêts à passer à l'action.
+            </span>
+          </button>
+
+          <button
+            class="marketing-choice"
+            type="button"
+            data-marketing="📢 Créer une publicité"
+          >
+            <span class="choice-check">
+              <svg viewBox="0 0 24 24"
+                   width="14"
+                   height="14"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5">
+                <path d="m6 12 4 4 8-9"/>
+              </svg>
+            </span>
+
+            <span class="choice-icon sale">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 13V8l11-4v13L4 13z"/>
+                <path d="M15 8c2 0 4 1.5 5 3"/>
+                <path d="M6 13l2 6h4l-2-5"/>
+              </svg>
+            </span>
+
+            <span class="choice-title">Promotion & vente</span>
+            <span class="choice-description">
+              Créez une campagne orientée conversion.
+            </span>
+          </button>
+
         </div>
       </section>
+            <section class="stage glass-card">
+        <div class="stage-head">
+          <div class="number">2</div>
+          <div>
+            <div class="stage-title">Informations</div>
+            <p class="stage-help">
+              Donnez à VIRA les éléments essentiels pour construire votre campagne.
+            </p>
+          </div>
+        </div>
 
-      <section class="glass-card stage">
-        <div class="stage-head"><span class="stage-icon">✎</span><div><div class="stage-title">2. Informations</div><p class="stage-help">Plus vous êtes précis, meilleure sera l’analyse.</p></div></div>
         <div class="form-grid">
-          <div class="field-group"><label for="prompt">Description de votre produit ou service</label><textarea id="prompt" maxlength="500" placeholder="Ex : Une application pour créer des campagnes complètes en quelques secondes."></textarea><div class="char-count"><span id="promptCount">0</span>/500</div></div>
+          <div class="field-group">
+            <label for="idea">Description de votre offre</label>
+            <textarea
+              id="idea"
+              placeholder="Ex. Une application IA qui aide les petites entreprises à créer automatiquement leurs campagnes marketing..."
+            ></textarea>
+            <div class="field-meta">
+              <span>Décrivez clairement votre produit ou service.</span>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <div class="field-group">
+              <label for="targetAudience">Audience cible</label>
+              <input
+                id="targetAudience"
+                type="text"
+                placeholder="Ex. Entrepreneurs"
+              />
+            </div>
+
+            <div class="field-group">
+              <label for="marketingGoal">Objectif</label>
+              <input
+                id="marketingGoal"
+                type="text"
+                placeholder="Ex. Générer plus de ventes"
+              />
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <div class="field-group">
+              <label for="tone">Ton</label>
+              <div class="premium-select-wrap">
+                <select id="tone">
+                  <option value="Professionnel">Professionnel</option>
+                  <option value="Persuasif">Persuasif</option>
+                  <option value="Dynamique">Dynamique</option>
+                  <option value="Inspirant">Inspirant</option>
+                  <option value="Direct">Direct</option>
+                </select>
+                <span class="select-arrow"></span>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="platform">Plateforme</label>
+              <div class="premium-select-wrap">
+                <select id="platform">
+                  <option value="">Choisir une plateforme</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="YouTube">YouTube</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                </select>
+                <span class="select-arrow"></span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="form-grid two">
-          <div class="field-group"><label for="targetAudience">Audience cible</label><input id="targetAudience" type="text" placeholder="PME, entrepreneurs, créateurs, agences." /></div>
-          <div class="field-group"><label for="marketingGoal">Objectif principal</label><input id="marketingGoal" type="text" placeholder="Obtenir plus de clients et augmenter les conversions." /></div>
-          <div class="field-group with-icon"><label for="campaignTone">Ton de la campagne</label><div class="field-icon" id="tonePremiumIcon"></div><select id="campaignTone"><option value="Professionnel">Professionnel</option><option value="Dynamique">Dynamique</option><option value="Amical">Amical</option><option value="Premium">Premium</option><option value="Inspirant">Inspirant</option></select></div>
-          <div class="field-group with-icon"><label for="platform">Plateforme principale</label><div class="field-icon" id="platformPremiumIcon"></div><select id="platform"><option value="">Choisir une plateforme</option><option value="Instagram">Instagram</option><option value="Facebook">Facebook</option><option value="TikTok">TikTok</option><option value="YouTube">YouTube</option><option value="LinkedIn">LinkedIn</option></select></div>
-        </div>
-        <div id="platformTip" class="platform-tip"></div>
-        <button id="brainAnalyzeBtn" class="primary-cta brain-run" type="button">✦ Analyser ma campagne<small>Obtenez votre Growth Score et des recommandations personnalisées</small></button>
+
+        <button id="analyzeBrain" class="primary-cta" type="button">
+          Analyser ma campagne
+          <small>VIRA Brain évalue le potentiel et recommande la meilleure approche.</small>
+        </button>
       </section>
 
-      <section class="glass-card stage">
-        <div class="stage-head"><div><div class="stage-title vira-brain-title"><span class="vira-brain-logo" aria-hidden="true"><svg viewBox="0 0 32 32">
-<path d="M12.3 5.5A5 5 0 0 0 5.7 10a5.2 5.2 0 0 0-1.5 8.8 5.1 5.1 0 0 0 5 7.7c1.2 1.3 3.1 1.7 4.8.9V4.8c-.6-.2-1.2 0-1.7.7Z"/>
-<path d="M19.7 5.5A5 5 0 0 1 26.3 10a5.2 5.2 0 0 1 1.5 8.8 5.1 5.1 0 0 1-5 7.7c-1.2 1.3-3.1 1.7-4.8.9V4.8c.6-.2 1.2 0 1.7.7Z"/>
-<path d="M9 11h5M8 17h6M23 11h-5M24 17h-6M11 22h3M21 22h-3"/>
-<circle cx="8" cy="11" r="1"/><circle cx="7" cy="17" r="1"/><circle cx="10" cy="22" r="1"/>
-<circle cx="24" cy="11" r="1"/><circle cx="25" cy="17" r="1"/><circle cx="22" cy="22" r="1"/>
-</svg></span><span>3. VIRA Brain</span></div><p class="stage-help">Analyse de croissance</p></div></div>
+      <section class="stage glass-card">
+        <div class="stage-head">
+          <div class="stage-icon">
+            <svg class="stage-svg" viewBox="0 0 24 24">
+              <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 3 3 3 0 0 0 2 3v1a3 3 0 0 0 3 3"/>
+              <path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 3 3 3 0 0 1-2 3v1a3 3 0 0 1-3 3"/>
+              <path d="M9 4c0 2 1 3 3 3s3-1 3-3"/>
+              <path d="M9 18c0-2 1-3 3-3s3 1 3 3"/>
+              <path d="M12 7v8"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stage-title">VIRA Brain</div>
+            <p class="stage-help">
+              Analyse stratégique de votre potentiel marketing.
+            </p>
+          </div>
+        </div>
+
         <div class="brain-layout">
-          <div class="score-panel"><div><div class="eyebrow">GROWTH SCORE</div><div class="score-big"><span id="growthScoreNumber">60</span><span>/100</span></div><div class="score-note">Excellent potentiel de croissance</div></div><div class="score-ring" id="growthScoreCircle"><div><strong id="growthScoreMini">60</strong><small>/100</small></div></div></div>
-          <div class="brain-message"><span class="spark">✦</span><div>Votre projet a un fort potentiel sur votre marché. En appliquant les recommandations de VIRA Brain, vous pouvez accélérer l’acquisition de clients et maximiser vos résultats rapidement.</div></div>
-          <div class="brain-insights">
-            <div class="insight-box opportunity"><div class="insight-title green">✦ OPPORTUNITÉS DÉTECTÉES</div><div class="brain-insight" id="brainOpportunity">Choisissez un objectif pour lancer l’analyse.</div></div>
-            <div class="insight-box action"><div class="insight-title blue"><span class="premium-inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 3h8v8"/><path d="M21 3l-9 9"/><path d="M11 5H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-5"/></svg></span>ACTIONS RECOMMANDÉES</div><div class="brain-insight" id="brainRecommendedAction">VIRA vous proposera l’action prioritaire à réaliser.</div></div>
+          <div class="score-panel">
+            <div>
+              <div class="eyebrow">GROWTH SCORE</div>
+              <div class="score-big">
+                <span id="brainScoreValue">--</span><span>/100</span>
+              </div>
+              <div id="brainScoreNote" class="score-note">
+                Analyse en attente
+              </div>
+            </div>
+
+            <div id="brainScoreRing" class="score-ring">
+              <div>
+                <strong id="brainRingValue">--</strong>
+                <small>potentiel</small>
+              </div>
+            </div>
+          </div>
+
+          <div id="brainMessage" class="brain-message">
+            <span class="ui-icon" style="color:#c873ff;">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3v4M12 17v4M4 12h4M16 12h4"/>
+                <path d="m6.5 6.5 2.8 2.8M14.7 14.7l2.8 2.8M17.5 6.5l-2.8 2.8M9.3 14.7l-2.8 2.8"/>
+              </svg>
+            </span>
+            <span>
+              Complétez vos informations puis lancez l’analyse pour obtenir votre score et vos recommandations.
+            </span>
+          </div>
+        </div>
+
+        <div class="brain-insights">
+          <div class="insight-box opportunity">
+            <div class="insight-title green">
+              <span class="ui-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3z"/>
+                  <path d="M9 22h6M9 19h6"/>
+                </svg>
+              </span>
+              Opportunité
+            </div>
+            <div id="brainOpportunity" class="brain-insight">
+              Votre meilleure opportunité apparaîtra ici.
+            </div>
+          </div>
+
+          <div class="insight-box action">
+            <div class="insight-title blue">
+              <span class="ui-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 12h13"/>
+                  <path d="m13 7 5 5-5 5"/>
+                  <path d="M5 5v14"/>
+                </svg>
+              </span>
+              Action recommandée
+            </div>
+            <div id="brainAction" class="brain-insight">
+              VIRA vous proposera la prochaine action à privilégier.
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="glass-card stage">
-        <div class="stage-head"><span class="stage-icon">✦</span><div><div class="stage-title">4. Créer votre campagne</div><p class="stage-help">Tout ce qu’il faut pour passer de l’idée au contenu final.</p></div></div>
-        <div class="workflow-actions">
-          <button id="scenario" class="action-card scenario-step" type="button"><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></span><span class="action-copy"><strong>Scénario & Copy</strong><span>Générez votre scénario et vos textes</span></span></button>
-          <button id="generate" class="action-card visuals" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5.5 17 4.2-4 3.1 2.7 2.5-2.3 3.2 3.6"/><path d="M18.5 2.5v3M17 4h3"/></svg></span><span class="action-copy"><strong>Visuels</strong><span>Créez des visuels professionnels</span></span></button>
-          <button id="testVoice" class="action-card voice" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6.5 11a5.5 5.5 0 0 0 11 0M12 16.5V21M9 21h6"/><path d="M4 9v4M20 9v4"/></svg></span><span class="action-copy"><strong>Voix & Audio</strong><span>Ajoutez voix off et musique</span></span></button>
-          <button id="video" class="action-card video" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="3"/><path d="m9 9 4.5 3L9 15Z"/><path d="m17 9 4-2v10l-4-2"/></svg></span><span class="action-copy"><strong>Vidéo finale</strong><span>Assemblez votre vidéo complète</span></span></button>
-          <button class="action-card download-step" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="m8 10 4 4 4-4"/><path d="M5 17v2.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V17"/></svg></span><span class="action-copy"><strong>Télécharger</strong><span>Téléchargez et partagez partout</span></span></button>
+      <section class="stage glass-card">
+        <div class="stage-head">
+          <div class="number">4</div>
+          <div>
+            <div class="stage-title">Créer votre campagne</div>
+            <p class="stage-help">
+              Tout ce qu’il faut pour passer de l’idée au contenu final.
+            </p>
+          </div>
         </div>
-        <div class="test-badge premium-test-badge"><span class="premium-test-icon" aria-hidden="true"><svg viewBox="0 0 24 24">
-<path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/>
-<path d="M7.8 15h8.4"/><circle cx="10" cy="17.5" r=".7"/><circle cx="14.5" cy="13" r=".6"/>
-</svg></span><span>Visuels et vidéo en mode test gratuit par défaut</span></div>
-        <button id="validateScenario" class="action-card validate vira-validate" type="button" style="display:none">
-  <span class="vira-validate-mark" aria-hidden="true">
-    <svg viewBox="0 0 24 24"><path d="m7.5 12.2 2.8 2.8 6.2-6.4"/></svg>
-  </span>
-  <span class="action-copy">
-    <strong>Valider le scénario</strong>
-    <span>Confirmer et passer à l’étape suivante</span>
-  </span>
-  <span class="vira-validate-arrow" aria-hidden="true">
-    <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
-  </span>
-</button>
-        <div id="scenarioStatus" class="status-box" aria-live="polite"></div><div id="scenarioResult" class="campaign-result"></div>
-        <div id="progressWrap" class="progress-wrap"><div class="progress-meta"><span id="progressLabel">Préparation</span><strong id="progressPercent">0%</strong></div><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div></div>
-        <div id="status" class="status-box" aria-live="polite"></div><div id="result" class="visual-results"></div><div id="videoStatus" class="status-box" aria-live="polite"></div><div id="videoResult" class="video-result"></div>
+
+        <div class="workflow-actions">
+
+          <button id="generate" class="action-card scenario-step" type="button">
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M6 4h12v16H6z"/>
+                <path d="M9 8h6M9 12h6M9 16h4"/>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Scénario & Copy</strong>
+              <span>Générez votre scénario et vos textes</span>
+            </span>
+          </button>
+
+          <button id="visuals" class="action-card visuals" type="button" disabled>
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="4" y="5" width="16" height="14" rx="2"/>
+                <circle cx="9" cy="10" r="1.5"/>
+                <path d="m6 17 4-4 3 3 2-2 3 3"/>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Visuels</strong>
+              <span>Créez des visuels professionnels</span>
+            </span>
+          </button>
+
+          <button id="testVoice" class="action-card voice" type="button" disabled>
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="9" y="3" width="6" height="11" rx="3"/>
+                <path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Voix & Audio</strong>
+              <span>Ajoutez une narration professionnelle</span>
+            </span>
+          </button>
+
+          <button id="video" class="action-card video" type="button" disabled>
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="5" width="14" height="14" rx="2"/>
+                <path d="m17 10 4-2v8l-4-2z"/>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Vidéo finale</strong>
+              <span>Assemblez votre campagne en vidéo</span>
+            </span>
+          </button>
+
+          <button
+            id="downloadCampaign"
+            class="action-card download-step"
+            type="button"
+            disabled
+          >
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 4v11"/>
+                <path d="m8 11 4 4 4-4"/>
+                <path d="M5 20h14"/>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Télécharger</strong>
+              <span>Exportez votre contenu final</span>
+            </span>
+          </button>
+
+        </div>
+
+        <button
+          id="validateScenario"
+          class="action-card validate vira-validate"
+          type="button"
+          style="display:none"
+        >
+          <span class="vira-validate-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="m7.5 12.2 2.8 2.8 6.2-6.4"/>
+            </svg>
+          </span>
+
+          <span class="action-copy">
+            <strong>Valider le scénario</strong>
+            <span>Confirmer et passer à l’étape suivante</span>
+          </span>
+
+          <span class="vira-validate-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="m9 6 6 6-6 6"/>
+            </svg>
+          </span>
+        </button>
+
+        <div id="scenarioStatus" class="status-box"></div>
+        <div id="scenarioResult" class="campaign-result"></div>
+
+                <div id="progressWrap" class="progress-wrap">
+          <div class="progress-meta">
+            <span id="status">Préparation...</span>
+            <span id="progressPercent">0%</span>
+          </div>
+
+          <div class="progress-track">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div id="result" class="visual-results"></div>
+
+        <div id="videoStatus" class="status-box"></div>
+
+        <div id="videoResult" class="video-result"></div>
+
+        <div class="test-badge">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3v18M3 12h18"/>
+            <circle cx="12" cy="12" r="8"/>
+          </svg>
+          Mode construction actif — génération visuelle et vidéo gratuite pour les tests
+        </div>
+
       </section>
+             <nav class="bottom-nav">
+        <button class="nav-item active" type="button">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 11.5 12 4l9 7.5"/>
+              <path d="M5.5 10v9h13v-9"/>
+            </svg>
+          </span>
+          Accueil
+        </button>
+
+        <button class="nav-item" type="button">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <rect x="4" y="4" width="16" height="16" rx="3"/>
+              <path d="M8 9h8M8 13h8M8 17h5"/>
+            </svg>
+          </span>
+          Campagnes
+        </button>
+
+        <button class="nav-item" type="button">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M5 4h14v16H5z"/>
+              <path d="M8 8h8M8 12h8M8 16h5"/>
+            </svg>
+          </span>
+          Bibliothèque
+        </button>
+
+        <button class="nav-item" type="button">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 15 6l-.3-2.6h-4L10.4 6A7 7 0 0 0 9 7.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1A7 7 0 0 0 10.4 18l.3 2.6h4L15 18a7 7 0 0 0 1.5-1.1l2.4 1 2-3.4-2-1.5c.1-.3.1-.7.1-1z"/>
+              </svg>
+            </span>
+          Réglages
+        </button>
+      </nav>
+
     </main>
   </div>
-  <nav class="mobile-nav"><button class="active" type="button"><span>⌂</span>Accueil</button><button type="button"><span>▣</span>Campagnes</button><button type="button"><span>▤</span>Contenus</button><button type="button"><span>⚙</span>Réglages</button></nav>
-  <script>
-  (() => {
-    "use strict";
 
-    // VIRA reste économique pendant la construction.
-    // Passe ces deux constantes à false quand tu veux utiliser les vraies générations.
-    const FREE_VISUAL_MODE = true;
+  <script>     
+        const FREE_VISUAL_MODE = true;
     const FREE_VIDEO_MODE = true;
 
-    const $ = (id) => document.getElementById(id);
+    let selectedMarketingType = "";
+    let rawScenario = "";
+    let scenarioScenes = [];
+    let generatedVisuals = [];
+    let generatedVoiceUrl = "";
+    let generatedVideoUrl = "";
+
     const els = {
-      prompt: $("prompt"),
-      promptCount: $("promptCount"),
-      audience: $("targetAudience"),
-      goal: $("marketingGoal"),
-      tone: $("campaignTone"),
-      platform: $("platform"),
-      platformTip: $("platformTip"),
-      toneIcon: $("tonePremiumIcon"),
-      platformIcon: $("platformPremiumIcon"),
-      scenarioBtn: $("scenario"),
-      scenarioStatus: $("scenarioStatus"),
-      scenarioResult: $("scenarioResult"),
-      validateBtn: $("validateScenario"),
-      voiceBtn: $("testVoice"),
-      visualBtn: $("generate"),
-      videoBtn: $("video"),
-      status: $("status"),
-      result: $("result"),
-      videoStatus: $("videoStatus"),
-      videoResult: $("videoResult"),
-      progressWrap: $("progressWrap"),
-      progressLabel: $("progressLabel"),
-      progressPercent: $("progressPercent"),
-      progressFill: $("progressFill"),
-      brainBtn: $("brainAnalyzeBtn"),
-      score: $("growthScoreNumber"),
-      scoreCircle: $("growthScoreCircle"),
-      opportunity: $("brainOpportunity"),
-      recommended: $("brainRecommendedAction"),
-      creditCount: $("creditCount")
+      idea: document.getElementById("idea"),
+      targetAudience: document.getElementById("targetAudience"),
+      marketingGoal: document.getElementById("marketingGoal"),
+      tone: document.getElementById("tone"),
+      platform: document.getElementById("platform"),
+
+      analyzeBrain: document.getElementById("analyzeBrain"),
+
+      brainScoreValue: document.getElementById("brainScoreValue"),
+      brainRingValue: document.getElementById("brainRingValue"),
+      brainScoreRing: document.getElementById("brainScoreRing"),
+      brainScoreNote: document.getElementById("brainScoreNote"),
+      brainMessage: document.getElementById("brainMessage"),
+      brainOpportunity: document.getElementById("brainOpportunity"),
+      brainAction: document.getElementById("brainAction"),
+
+      scenarioButton: document.getElementById("generate"),
+      visualBtn: document.getElementById("visuals"),
+      voiceBtn: document.getElementById("testVoice"),
+      videoBtn: document.getElementById("video"),
+      downloadBtn: document.getElementById("downloadCampaign"),
+      validateBtn: document.getElementById("validateScenario"),
+
+      scenarioStatus: document.getElementById("scenarioStatus"),
+      scenarioResult: document.getElementById("scenarioResult"),
+
+      progressWrap: document.getElementById("progressWrap"),
+      progressStatus: document.getElementById("status"),
+      progressPercent: document.getElementById("progressPercent"),
+      progressFill: document.getElementById("progressFill"),
+
+      visualResult: document.getElementById("result"),
+      videoStatus: document.getElementById("videoStatus"),
+      videoResult: document.getElementById("videoResult")
     };
 
-    let selectedMarketingType = localStorage.getItem("viraMarketingType") || "";
-    let rawScenario = localStorage.getItem("viraScenario") || "";
-    let generatedImages = [];
-    let finalVideoUrl = "";
-
-    const marketingMeta = {
-      "🛍️ Vendre un produit": {
-        score: 78,
-        opportunity: "✦ Opportunité : présenter clairement le bénéfice principal du produit et créer un désir d’achat rapide.",
-        action: "→ Construisez une campagne produit avec hook, bénéfice concret, preuve et appel à l’achat.",
-        prompt: "Ex : Je lance une nouvelle paire de chaussures de sport légère et confortable..."
-      },
-      "📱 Réseaux sociaux": {
-        score: 74,
-        opportunity: "✦ Opportunité : augmenter la portée et l’engagement grâce à un contenu court et partageable.",
-        action: "→ Priorisez une accroche très forte et un contenu facile à commenter, enregistrer ou partager.",
-        prompt: "Ex : Je veux développer la visibilité de ma marque sur les réseaux sociaux..."
-      },
-      "💼 Promouvoir un service": {
-        score: 82,
-        opportunity: "✦ Opportunité : transformer un problème client précis en demande de contact ou réservation.",
-        action: "→ Montrez le problème, votre solution, le résultat attendu et terminez par une prise de contact claire.",
-        prompt: "Ex : Je veux promouvoir mon service de nettoyage résidentiel auprès de propriétaires..."
-      },
-      "📢 Créer une publicité": {
-        score: 86,
-        opportunity: "✦ Opportunité : concentrer le message sur une offre claire et une action mesurable.",
-        action: "→ Créez une publicité orientée conversion avec hook, solution, bénéfice et appel à l’action.",
-        prompt: "Ex : Je veux créer une publicité pour attirer de nouveaux clients vers mon entreprise..."
-      }
-    };
-
-    const icons = {
-      globe: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a15 15 0 0 1 0 18"></path><path d="M12 3a15 15 0 0 0 0 18"></path></svg>`,
-      Instagram: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>`,
-      Facebook: `<svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v6h4v-6h3l1-4h-4V9c0-.7.3-1 1-1z"></path></svg>`,
-      TikTok: `<svg viewBox="0 0 24 24"><path d="M14 4v10a4 4 0 1 1-4-4"></path><path d="M14 4c1 3 3 4 6 4"></path></svg>`,
-      YouTube: `<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="4"></rect><path d="m10 9 5 3-5 3z"></path></svg>`,
-      LinkedIn: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M7 10v7"></path><path d="M7 7h.01"></path><path d="M11 17v-4a3 3 0 0 1 6 0v4"></path></svg>`,
-      Professionnel: `<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg>`,
-      Dynamique: `<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"></path></svg>`,
-      Amical: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><path d="M9 9h.01M15 9h.01"></path></svg>`,
-      Premium: `<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9l4-6z"></path><path d="M2 9h20M9 3l3 6 3-6"></path></svg>`,
-      Inspirant: `<svg viewBox="0 0 24 24"><path d="m12 2 2.8 6.2L21 11l-6.2 2.8L12 20l-2.8-6.2L3 11l6.2-2.8L12 2z"></path></svg>`
-    };
-
-    function escapeHtml(value = "") {
-      return String(value).replace(/[&<>'"]/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));
+    function escapeHTML(value = "") {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    function setStatus(el, message = "", type = "") {
-      el.className = "status-box" + (type ? ` ${type}` : "");
-      el.innerHTML = message;
+    function uiIcon(name) {
+      const icons = {
+        success: `
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8"></circle>
+            <path d="m8.5 12 2.2 2.3 4.8-5"></path>
+          </svg>
+        `,
+
+        error: `
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8"></circle>
+            <path d="m9 9 6 6M15 9l-6 6"></path>
+          </svg>
+        `,
+
+        warning: `
+          <svg viewBox="0 0 24 24">
+            <path d="M12 4 3.8 19h16.4L12 4z"></path>
+            <path d="M12 9v4M12 16.5v.1"></path>
+          </svg>
+        `,
+
+        loading: `
+          <svg viewBox="0 0 24 24">
+            <path d="M20 12a8 8 0 1 1-2.3-5.7"></path>
+          </svg>
+        `,
+
+        target: `
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8"></circle>
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v3M22 12h-3"></path>
+          </svg>
+        `,
+
+        audience: `
+          <svg viewBox="0 0 24 24">
+            <circle cx="9" cy="8" r="3"></circle>
+            <path d="M4 19c.4-4 2-6 5-6s4.6 2 5 6"></path>
+            <circle cx="17" cy="9" r="2"></circle>
+            <path d="M15 14c2.7 0 4.3 1.7 4.7 5"></path>
+          </svg>
+        `,
+
+        hook: `
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3v5"></path>
+            <path d="M8 7h8"></path>
+            <path d="M9 7v4a3 3 0 0 0 6 0V7"></path>
+            <path d="M12 14v7"></path>
+          </svg>
+        `,
+
+        copy: `
+          <svg viewBox="0 0 24 24">
+            <path d="M6 4h12v16H6z"></path>
+            <path d="M9 8h6M9 12h6M9 16h4"></path>
+          </svg>
+        `,
+
+        hashtag: `
+          <svg viewBox="0 0 24 24">
+            <path d="M9 3 7 21M17 3l-2 18M4 9h16M3 15h16"></path>
+          </svg>
+        `,
+
+        scenes: `
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+            <path d="m10 9 5 3-5 3z"></path>
+          </svg>
+        `,
+
+        narration: `
+          <svg viewBox="0 0 24 24">
+            <rect x="9" y="3" width="6" height="11" rx="3"></rect>
+            <path d="M6 11a6 6 0 0 0 12 0M12 17v4"></path>
+          </svg>
+        `,
+
+        cta: `
+          <svg viewBox="0 0 24 24">
+            <path d="M5 12h13"></path>
+            <path d="m14 7 5 5-5 5"></path>
+          </svg>
+        `,
+
+        image: `
+          <svg viewBox="0 0 24 24">
+            <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+            <circle cx="9" cy="10" r="1.5"></circle>
+            <path d="m6 17 4-4 3 3 2-2 3 3"></path>
+          </svg>
+        `,
+
+        style: `
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 0-4H12a2 2 0 0 1 0-4h3a6 6 0 0 0 0-12z"></path>
+            <circle cx="7.5" cy="10" r=".8"></circle>
+            <circle cx="9" cy="6.5" r=".8"></circle>
+            <circle cx="14" cy="6" r=".8"></circle>
+          </svg>
+        `,
+
+        video: `
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="5" width="14" height="14" rx="2"></rect>
+            <path d="m17 10 4-2v8l-4-2z"></path>
+          </svg>
+        `
+      };
+
+      return icons[name] || icons.success;
+    }
+
+    function setStatus(element, message = "", type = "") {
+      if (!element) return;
+
+      if (!message) {
+        element.innerHTML = "";
+        element.className = "status-box";
+        return;
+      }
+
+      const statusType =
+        ["success", "error", "warning", "loading"].includes(type)
+          ? type
+          : "loading";
+
+      const titles = {
+        success: "Terminé",
+        error: "Une erreur est survenue",
+        warning: "Vérification requise",
+        loading: "VIRA travaille"
+      };
+
+      element.className = `status-box ${statusType}`;
+
+      element.innerHTML = `
+        <div class="status-premium">
+          <span class="status-premium-icon">
+            ${uiIcon(statusType)}
+          </span>
+
+          <span class="status-premium-copy">
+            <strong>${titles[statusType]}</strong>
+            <span>${escapeHTML(message)}</span>
+          </span>
+        </div>
+      `;
+    }
+
+    function campaignHeading(icon, label) {
+      return `
+        <span class="campaign-heading">
+          <span class="campaign-heading-icon">
+            ${uiIcon(icon)}
+          </span>
+          <span>${escapeHTML(label)}</span>
+        </span>
+      `;
     }
 
     function setProgress(percent, label) {
-      const safe = Math.max(0, Math.min(100, Number(percent) || 0));
-      els.progressWrap.style.display = "block";
-      els.progressFill.style.width = `${safe}%`;
-      els.progressPercent.textContent = `${Math.round(safe)}%`;
-      els.progressLabel.textContent = label || "Préparation";
-    }
+      const safePercent = Math.max(
+        0,
+        Math.min(100, Number(percent) || 0)
+      );
 
-    function hideProgress(delay = 700) {
-      setTimeout(() => { els.progressWrap.style.display = "none"; }, delay);
-    }
+      if (els.progressWrap) {
+        els.progressWrap.style.display = "block";
+      }
 
-    function currentChoice() {
-      return document.querySelector(".marketing-choice.active");
-    }
+      if (els.progressFill) {
+        els.progressFill.style.width = `${safePercent}%`;
+      }
 
-    function updateBrain(animated = false) {
-      const meta = marketingMeta[selectedMarketingType];
-      let score = meta?.score || 60;
-      const prompt = els.prompt.value.trim();
-      const audience = els.audience.value.trim();
-      const goal = els.goal.value.trim();
-      const platform = els.platform.value;
+      if (els.progressPercent) {
+        els.progressPercent.textContent = `${safePercent}%`;
+      }
 
-      if (prompt.length >= 20) score += 4;
-      if (audience.length >= 5) score += 4;
-      if (goal.length >= 5) score += 4;
-      if (platform) score += 3;
-      score = Math.min(score, 100);
-
-      const render = () => {
-        els.score.textContent = score;
-        els.scoreCircle.style.setProperty("--score-deg", `${score * 3.6}deg`);
-        els.opportunity.textContent = meta?.opportunity || "✦ Choisissez un objectif pour lancer l’analyse.";
-        els.recommended.textContent = meta?.action || "→ VIRA vous proposera l’action prioritaire à réaliser.";
-      };
-
-      if (animated) {
-        els.brainBtn.disabled = true;
-        els.brainBtn.textContent = "✦ Analyse...";
-        setTimeout(() => {
-          render();
-          els.brainBtn.disabled = false;
-          els.brainBtn.textContent = "✦ Analyser ma campagne";
-        }, 550);
-      } else render();
-    }
-
-    function updateToneIcon() { els.toneIcon.innerHTML = icons[els.tone.value] || icons.Professionnel; }
-    function updatePlatformIcon() { els.platformIcon.innerHTML = icons[els.platform.value] || icons.globe; }
-
-    function updatePlatformTip() {
-      const tips = {
-        TikTok: "TikTok : hook immédiat, rythme rapide et scènes très visuelles.",
-        Instagram: "Instagram : visuel fort, format Reel et engagement rapide.",
-        Facebook: "Facebook : offre claire, confiance et conversion.",
-        YouTube: "YouTube : narration, rétention et appel à l’action.",
-        LinkedIn: "LinkedIn : crédibilité, expertise et audience professionnelle."
-      };
-      if (tips[els.platform.value]) {
-        els.platformTip.textContent = tips[els.platform.value];
-        els.platformTip.style.display = "block";
-      } else {
-        els.platformTip.textContent = "";
-        els.platformTip.style.display = "none";
+      if (els.progressStatus && label) {
+        els.progressStatus.textContent = label;
       }
     }
 
-    function saveForm() {
-      localStorage.setItem("viraIdea", els.prompt.value);
-      localStorage.setItem("viraMarketingGoal", els.goal.value);
-      localStorage.setItem("viraTargetAudience", els.audience.value);
-      localStorage.setItem("viraPlatform", els.platform.value);
-      localStorage.setItem("viraCampaignTone", els.tone.value);
-      if (selectedMarketingType) localStorage.setItem("viraMarketingType", selectedMarketingType);
-    }
-
-    function restoreForm() {
-      els.prompt.value = localStorage.getItem("viraIdea") || "";
-      els.goal.value = localStorage.getItem("viraMarketingGoal") || "";
-      els.audience.value = localStorage.getItem("viraTargetAudience") || "";
-      els.platform.value = localStorage.getItem("viraPlatform") || "";
-      els.tone.value = localStorage.getItem("viraCampaignTone") || "Professionnel";
-      els.promptCount.textContent = els.prompt.value.length;
-
-      document.querySelectorAll(".marketing-choice").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.type === selectedMarketingType);
-      });
-      if (selectedMarketingType && marketingMeta[selectedMarketingType]) {
-        els.prompt.placeholder = marketingMeta[selectedMarketingType].prompt;
+    function resetProgress() {
+      if (els.progressWrap) {
+        els.progressWrap.style.display = "none";
       }
-      updateToneIcon();
-      updatePlatformIcon();
-      updatePlatformTip();
-      updateBrain();
+
+      if (els.progressFill) {
+        els.progressFill.style.width = "0%";
+      }
+
+      if (els.progressPercent) {
+        els.progressPercent.textContent = "0%";
+      }
+
+      if (els.progressStatus) {
+        els.progressStatus.textContent = "Préparation...";
+      }
     }
 
-    function resetGeneratedFlow() {
-      rawScenario = "";
-      generatedImages = [];
-      finalVideoUrl = "";
-      localStorage.removeItem("viraScenario");
-      els.scenarioResult.innerHTML = "";
-      els.result.innerHTML = "";
-      els.videoResult.innerHTML = "";
-      setStatus(els.scenarioStatus, "");
-      setStatus(els.status, "");
-      setStatus(els.videoStatus, "");
-      els.validateBtn.style.display = "none";
-      els.voiceBtn.style.display = "flex"; els.voiceBtn.disabled = false; els.voiceBtn.disabled = true;
-      els.visualBtn.style.display = "flex"; els.visualBtn.disabled = false; els.visualBtn.disabled = true;
-      els.videoBtn.style.display = "flex"; els.videoBtn.disabled = false; els.videoBtn.disabled = true;
-    }
+    document
+      .querySelectorAll(".marketing-choice")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelectorAll(".marketing-choice")
+            .forEach((item) => {
+              item.classList.remove("active");
+            });
 
-    function extractSection(text, heading, allHeadings) {
-      const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['’]");
-      const others = allHeadings.filter(h => h !== heading).map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['’]")).join("|");
-      const re = new RegExp(`${escaped}\\s*:?\\s*([\\s\\S]*?)(?=\\n\\s*(?:${others})\\s*:?|$)`, "i");
-      return text.match(re)?.[1]?.trim() || "";
-    }
-
-    function parseScenario(text) {
-      const clean = text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "").replace(/SCENE/gi, "SCÈNE").trim();
-      const headers = ["TITRE","OBJECTIF","PUBLIC CIBLE","ACCROCHE","TEXTE PUBLICATION","HASHTAGS","SCÈNE 1","SCÈNE 2","SCÈNE 3","SCÈNE 4","SCÈNE 5","NARRATION","APPEL À L'ACTION","APPEL À L’ACTION","PROMPT VISUEL","STYLE"];
-      const data = {
-        title: extractSection(clean,"TITRE",headers),
-        objective: extractSection(clean,"OBJECTIF",headers),
-        target: extractSection(clean,"PUBLIC CIBLE",headers),
-        hook: extractSection(clean,"ACCROCHE",headers),
-        publication: extractSection(clean,"TEXTE PUBLICATION",headers),
-        hashtags: extractSection(clean,"HASHTAGS",headers),
-        narration: extractSection(clean,"NARRATION",headers),
-        cta: extractSection(clean,"APPEL À L'ACTION",headers) || extractSection(clean,"APPEL À L’ACTION",headers),
-        visualPrompt: extractSection(clean,"PROMPT VISUEL",headers),
-        style: extractSection(clean,"STYLE",headers),
-        scenes: []
+          button.classList.add("active");
+          selectedMarketingType =
+            button.dataset.marketing || "";
+        });
+      });      
+              function getFormData() {
+      return {
+        idea: (els.idea?.value || "").trim(),
+        targetAudience: (els.targetAudience?.value || "").trim(),
+        marketingGoal: (els.marketingGoal?.value || "").trim(),
+        tone: els.tone?.value || "Professionnel",
+        platform: els.platform?.value || ""
       };
-      for (let i=1;i<=5;i++) data.scenes.push(extractSection(clean,`SCÈNE ${i}`,headers));
+    }
+
+    function validateCampaignForm() {
+      const data = getFormData();
+
+      if (!selectedMarketingType) {
+        setStatus(
+          els.scenarioStatus,
+          "Choisissez d’abord votre objectif marketing.",
+          "warning"
+        );
+        return null;
+      }
+
+      if (!data.idea) {
+        setStatus(
+          els.scenarioStatus,
+          "Ajoutez une description de votre produit ou service.",
+          "warning"
+        );
+        return null;
+      }
+
+      if (!data.targetAudience) {
+        setStatus(
+          els.scenarioStatus,
+          "Indiquez votre audience cible.",
+          "warning"
+        );
+        return null;
+      }
+
+      if (!data.marketingGoal) {
+        setStatus(
+          els.scenarioStatus,
+          "Indiquez l’objectif principal de votre campagne.",
+          "warning"
+        );
+        return null;
+      }
+
+      if (!data.platform) {
+        setStatus(
+          els.scenarioStatus,
+          "Choisissez une plateforme.",
+          "warning"
+        );
+        return null;
+      }
+
       return data;
     }
 
-    function renderScenario(text) {
-      rawScenario = text.trim();
-      localStorage.setItem("viraScenario", rawScenario);
-      const d = parseScenario(rawScenario);
+    function calculateBrainScore(data) {
+      let score = 68;
+
+      if (data.idea.length >= 80) score += 8;
+      if (data.idea.length >= 140) score += 4;
+      if (data.targetAudience.length >= 5) score += 5;
+      if (data.marketingGoal.length >= 8) score += 5;
+      if (data.platform) score += 4;
+      if (selectedMarketingType) score += 4;
+
+      return Math.min(97, score);
+    }
+
+    function updateBrainScore(score) {
+      const safeScore = Math.max(
+        0,
+        Math.min(100, Number(score) || 0)
+      );
+
+      if (els.brainScoreValue) {
+        els.brainScoreValue.textContent = safeScore;
+      }
+
+      if (els.brainRingValue) {
+        els.brainRingValue.textContent = safeScore;
+      }
+
+      if (els.brainScoreRing) {
+        const degrees = safeScore * 3.6;
+        els.brainScoreRing.style.setProperty(
+          "--score-deg",
+          `${degrees}deg`
+        );
+      }
+
+      if (els.brainScoreNote) {
+        if (safeScore >= 90) {
+          els.brainScoreNote.textContent =
+            "Excellent potentiel de croissance";
+        } else if (safeScore >= 80) {
+          els.brainScoreNote.textContent =
+            "Très bon potentiel de croissance";
+        } else if (safeScore >= 70) {
+          els.brainScoreNote.textContent =
+            "Bon potentiel de croissance";
+        } else {
+          els.brainScoreNote.textContent =
+            "Potentiel à optimiser";
+        }
+      }
+    }
+
+    function buildBrainInsights(data, score) {
+      let opportunity =
+        "Transformez un problème client précis en demande de contact ou en action mesurable.";
+
+      let action =
+        "Montrez le problème, votre solution, le résultat attendu et terminez par un appel à l’action clair.";
+
+      if (data.platform === "Instagram") {
+        opportunity =
+          "Utilisez un message visuel très clair dès les premières secondes pour arrêter le défilement et attirer les bons prospects.";
+
+        action =
+          "Commencez par une accroche forte, montrez rapidement la valeur de votre offre et terminez par une action simple : message, clic ou réservation.";
+      }
+
+      if (data.platform === "TikTok") {
+        opportunity =
+          "Captez l’attention immédiatement avec un problème concret que votre audience reconnaît.";
+
+        action =
+          "Utilisez une accroche très courte, un rythme rapide et une démonstration claire du résultat obtenu.";
+      }
+
+      if (data.platform === "LinkedIn") {
+        opportunity =
+          "Positionnez votre offre comme une solution professionnelle à un problème mesurable.";
+
+        action =
+          "Présentez le problème, la valeur d’affaires, une preuve ou un résultat attendu, puis proposez une prise de contact.";
+      }
+
+      if (els.brainMessage) {
+        els.brainMessage.innerHTML = `
+          <span class="ui-icon" style="color:#c873ff;">
+            ${uiIcon("target")}
+          </span>
+
+          <span>
+            Votre projet présente un potentiel de
+            <strong>${score}/100</strong>.
+            En appliquant les recommandations de VIRA Brain,
+            vous pouvez améliorer la clarté de votre offre
+            et accélérer la conversion.
+          </span>
+        `;
+      }
+
+      if (els.brainOpportunity) {
+        els.brainOpportunity.textContent = opportunity;
+      }
+
+      if (els.brainAction) {
+        els.brainAction.textContent = action;
+      }
+    }
+
+    if (els.analyzeBrain) {
+      els.analyzeBrain.addEventListener("click", () => {
+        const data = getFormData();
+
+        if (!selectedMarketingType) {
+          setStatus(
+            els.scenarioStatus,
+            "Choisissez votre objectif marketing avant l’analyse.",
+            "warning"
+          );
+          return;
+        }
+
+        if (!data.idea) {
+          setStatus(
+            els.scenarioStatus,
+            "Ajoutez une description avant de lancer l’analyse.",
+            "warning"
+          );
+          return;
+        }
+
+        if (!data.targetAudience) {
+          setStatus(
+            els.scenarioStatus,
+            "Ajoutez votre audience cible.",
+            "warning"
+          );
+          return;
+        }
+
+        if (!data.marketingGoal) {
+          setStatus(
+            els.scenarioStatus,
+            "Ajoutez votre objectif marketing.",
+            "warning"
+          );
+          return;
+        }
+
+        if (!data.platform) {
+          setStatus(
+            els.scenarioStatus,
+            "Choisissez votre plateforme.",
+            "warning"
+          );
+          return;
+        }
+
+        const score = calculateBrainScore(data);
+
+        updateBrainScore(score);
+        buildBrainInsights(data, score);
+
+        setStatus(
+          els.scenarioStatus,
+          "Analyse terminée. VIRA Brain a préparé votre stratégie.",
+          "success"
+        );
+      });
+    }
+
+    function extractSection(text, heading, nextHeadings = []) {
+      if (!text) return "";
+
+      const escapedHeading =
+        heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+      let endPattern = "$";
+
+      if (nextHeadings.length) {
+        endPattern =
+          `(?=${nextHeadings
+            .map((item) =>
+              item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+            )
+            .join("|")}|$)`;
+      }
+
+      const regex = new RegExp(
+        `${escapedHeading}\\s*:?\\s*([\\s\\S]*?)${endPattern}`,
+        "i"
+      );
+
+      const match = text.match(regex);
+
+      return match ? match[1].trim() : "";
+    }
+
+    function renderScenario(scenario, scenes = []) {
+      if (!els.scenarioResult) return;
+
+      const title = extractSection(
+        scenario,
+        "TITRE",
+        ["OBJECTIF"]
+      );
+
+      const objective = extractSection(
+        scenario,
+        "OBJECTIF",
+        ["PUBLIC CIBLE"]
+      );
+
+      const audience = extractSection(
+        scenario,
+        "PUBLIC CIBLE",
+        ["ACCROCHE"]
+      );
+
+      const hook = extractSection(
+        scenario,
+        "ACCROCHE",
+        ["TEXTE DE PUBLICATION"]
+      );
+
+      const post = extractSection(
+        scenario,
+        "TEXTE DE PUBLICATION",
+        ["HASHTAGS"]
+      );
+
+      const hashtags = extractSection(
+        scenario,
+        "HASHTAGS",
+        ["SCÈNE 1", "SCENE 1"]
+      );
+
+      const narration = extractSection(
+        scenario,
+        "NARRATION",
+        ["APPEL À L'ACTION"]
+      );
+
+      const cta = extractSection(
+        scenario,
+        "APPEL À L'ACTION",
+        ["PROMPT VISUEL"]
+      );
+
+      const visualPrompt = extractSection(
+        scenario,
+        "PROMPT VISUEL",
+        ["STYLE"]
+      );
+
+      const style = extractSection(
+        scenario,
+        "STYLE"
+      );
+
+      const sceneHTML =
+        Array.isArray(scenes) && scenes.length
+          ? scenes
+              .map((scene, index) => {
+                const sceneText =
+                  typeof scene === "string"
+                    ? scene
+                    : (
+                        scene.text ||
+                        scene.content ||
+                        scene.description ||
+                        JSON.stringify(scene)
+                      );
+
+                return `
+                  <div class="scene-item">
+                    <strong>Scène ${index + 1}</strong>
+                    <p>${escapeHTML(sceneText)}</p>
+                  </div>
+                `;
+              })
+              .join("")
+          : `
+              <p>
+                Les scènes sont incluses dans le scénario généré.
+              </p>
+            `;
+
       els.scenarioResult.innerHTML = `
-        <div class="result-ready"><strong>✓ Votre campagne est prête</strong><span>Stratégie, contenu et 5 scènes générés.</span></div>
-        <h2>${escapeHtml(d.title || "Campagne VIRA")}</h2>
-        <div class="campaign-section"><strong>◎ Objectif</strong><p>${escapeHtml(d.objective || els.goal.value)}</p></div>
-        <div class="campaign-section"><strong>◇ Public cible</strong><p>${escapeHtml(d.target || els.audience.value)}</p></div>
-        <div class="campaign-section"><strong>✦ Accroche</strong><p>${escapeHtml(d.hook)}</p></div>
-        <div class="campaign-section"><strong>▤ Texte de publication</strong><p>${escapeHtml(d.publication)}</p></div>
-        <div class="campaign-section"><strong># Hashtags</strong><p>${escapeHtml(d.hashtags)}</p></div>
-        <details class="campaign-section"><summary>▶ Scènes (${d.scenes.filter(Boolean).length}/5)</summary>${d.scenes.map((s,i)=>`<div class="scene-item"><strong>Scène ${i+1}</strong><p>${escapeHtml(s || "Scène à compléter")}</p></div>`).join("")}</details>
-        <details class="campaign-section"><summary>◉ Narration</summary><p>${escapeHtml(d.narration)}</p></details>
-        <div class="campaign-section"><strong>↗ Appel à l’action</strong><p>${escapeHtml(d.cta)}</p></div>
-        <details class="campaign-section"><summary>◇ Prompt visuel</summary><p>${escapeHtml(d.visualPrompt)}</p></details>
-        <details class="campaign-section"><summary>✦ Style</summary><p>${escapeHtml(d.style)}</p></details>`;
-      els.validateBtn.style.display = "flex";
-      els.voiceBtn.style.display = "flex";
-    }
+        <div class="result-ready">
+          <span class="status-premium-icon"
+                style="color:#72f0a4;">
+            ${uiIcon("success")}
+          </span>
 
-    function makeTestImage(scene, index) {
-      const sceneLabel = `SCÈNE ${index + 1}`;
-      const short = (scene || "Visuel marketing VIRA").replace(/[<>&]/g, "").slice(0, 46);
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
-        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#181126"/><stop offset="1" stop-color="#08070c"/></linearGradient><radialGradient id="r"><stop stop-color="#7c3aed" stop-opacity=".40"/><stop offset="1" stop-color="#7c3aed" stop-opacity="0"/></radialGradient></defs>
-        <rect width="720" height="1280" fill="url(#g)"/><circle cx="570" cy="170" r="330" fill="url(#r)"/>
-        <rect x="55" y="70" width="610" height="1140" rx="48" fill="none" stroke="#a855f7" stroke-opacity=".28" stroke-width="2"/>
-        <text x="360" y="550" text-anchor="middle" fill="#c084fc" font-family="Arial" font-size="38" font-weight="700">${sceneLabel}</text>
-        <text x="360" y="625" text-anchor="middle" fill="#ffffff" font-family="Arial" font-size="31" font-weight="700">VIRA PREMIUM</text>
-        <text x="360" y="690" text-anchor="middle" fill="#9d98aa" font-family="Arial" font-size="20">${escapeHtml(short)}</text>
-        <text x="360" y="1120" text-anchor="middle" fill="#777183" font-family="Arial" font-size="17">MODE TEST GRATUIT</text>
-      </svg>`;
-      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-    }
+          <span class="result-ready-copy">
+            <strong>Campagne prête</strong>
+            <span>Scénario, copy et structure créative générés.</span>
+          </span>
+        </div>
 
-    function renderImages(images, scenes, test = false) {
-      els.result.innerHTML = `<div class="results-panel"><h3>✦ Visuels de campagne</h3><div class="meta">${images.length}/5 scènes ${test ? "• mode test gratuit" : "• générées par IA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></div>`;
-    }
-
-    async function generateRealImages(scenes, visualPrompt, style) {
-      const images = [];
-      for (let i=0;i<5;i++) {
-        setProgress(15 + i*14, `Création du visuel ${i+1}/5`);
-        const prompt = `${visualPrompt || "Professional premium marketing visual"}. Scene ${i+1}: ${scenes[i]}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Maintain visual continuity with the other scenes. No text or typography in the image.`;
-        const response = await fetch("/api/images/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,size:"1024x1536",quality:"low"})});
-        const data = await response.json();
-        if (!response.ok) throw new Error(data?.error || `Erreur visuel ${i+1}`);
-        const url = data?.url || data?.image?.url;
-        if (!url) throw new Error(`Aucune image reçue pour la scène ${i+1}.`);
-        images.push(url);
-      }
-      return images;
-    }
-
-    async function waitForRunwayTask(taskId, sceneNumber) {
-      for (let attempt=0; attempt<90; attempt++) {
-        await new Promise(r => setTimeout(r, 5000));
-        const r = await fetch(`/api/video/${encodeURIComponent(taskId)}/status`);
-        const d = await r.json();
-        if (!r.ok) throw new Error(d?.error || `Erreur vidéo scène ${sceneNumber}`);
-        const status = String(d.status || "").toUpperCase();
-        if (["SUCCEEDED","COMPLETED","SUCCESS"].includes(status)) {
-          const url = Array.isArray(d.output) ? d.output[0] : null;
-          if (!url) throw new Error(`Clip ${sceneNumber} terminé sans URL.`);
-          return url;
+        ${
+          title
+            ? `
+              <div class="campaign-section">
+                <strong>
+                  ${campaignHeading("copy", "Titre")}
+                </strong>
+                <p>${escapeHTML(title)}</p>
+              </div>
+            `
+            : ""
         }
-        if (["FAILED","CANCELED","CANCELLED"].includes(status)) throw new Error(`La scène ${sceneNumber} a échoué.`);
-        setProgress(30 + Math.min(48, attempt*.7), `Vidéo scène ${sceneNumber}/5 • ${d.status || "en cours"}`);
-      }
-      throw new Error(`La scène ${sceneNumber} prend trop de temps.`);
-    }
 
-    async function createFinalVideo() {
-      const d = parseScenario(rawScenario);
-      setProgress(8, "Préparation des 5 scènes");
-      const start = await fetch("/api/video/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:rawScenario,images:generatedImages})});
-      const data = await start.json();
-      if (!start.ok) throw new Error(data?.error || "Impossible de lancer la vidéo.");
+        ${
+          objective
+            ? `
+              <div class="campaign-section">
+                <strong>
+                  ${campaignHeading("target", "Objectif")}
+                </strong>
+                <p>${escapeHTML(objective)}</p>
+              </div>
+            `
+            : ""
+        }
 
-      const clips = Array.isArray(data.clips) ? data.clips : [];
-      if (clips.length !== 5) throw new Error("VIRA n’a pas reçu 5 clips vidéo.");
-      if (clips.some(c => !c.taskId)) {
-        throw new Error("Les clips sont préparés, mais Runway est encore en mode PREPARE sur le serveur. Active RUNWAY_EXECUTION=generate pour produire la vraie vidéo.");
-      }
+        ${
+          audience
+            ? `
+              <div class="campaign-section">
+                <strong>
+                  ${campaignHeading("audience", "Public cible")}
+                </strong>
+                <p>${escapeHTML(audience)}</p>
+              </div>
+            `
+            : ""
+        }
 
-      const videoUrls = [];
-      for (let i=0;i<5;i++) videoUrls.push(await waitForRunwayTask(clips[i].taskId, i+1));
-      setProgress(82, "Assemblage des 5 clips");
+        ${
+          hook
+            ? `
+              <div class="campaign-section">
+                <strong>
+                  ${campaignHeading("hook", "Accroche")}
+                </strong>
+                <p>${escapeHTML(hook)}</p>
+              </div>
+            `
+            : ""
+        }
 
-      const assemble = await fetch("/api/video/assemble", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({videoUrls})});
-      if (!assemble.ok) {
-        let msg = "Impossible d’assembler la vidéo.";
-        try { const e = await assemble.json(); msg = e?.error || msg; } catch {}
-        throw new Error(msg);
-      }
-      let videoBlob = await assemble.blob();
+        ${
+          post
+            ? `
+              <div class="campaign-section">
+                <strong>
+                  ${campaignHeading("copy", "Texte de publication")}
+                </strong>
+                <p>${escapeHTML(post)}</p>
+              </div>
+            `
+            : ""
+        }
 
-      const narration = d.narration.trim();
-      if (narration) {
-        setProgress(90, "Ajout de la narration");
-        const voice = await fetch("/api/voice/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:narration})});
-        if (voice.ok) {
-          const audioBlob = await voice.blob();
-          const fd = new FormData();
-          fd.append("video", videoBlob, "vira-video.mp4");
-          fd.append("audio", audioBlob, "vira-voice.mp3");
-          const merge = await fetch("/api/video/merge", {method:"POST",body:fd});
-          if (merge.ok) videoBlob = await merge.blob();
+        ${
+          hashtags
+            ? `
+              <div class="campaign-section">
+                <strong>
+                  ${campaignHeading("hashtag", "Hashtags")}
+                </strong>
+                <p>${escapeHTML(hashtags)}</p>
+              </div>
+            `
+            : ""
+        }
+
+        <details class="campaign-section">
+          <summary>
+            ${campaignHeading(
+              "scenes",
+              `Scènes (${Array.isArray(scenes) && scenes.length
+                ? scenes.length
+                : 5}/5)`
+            )}
+          </summary>
+
+          <div style="margin-top:9px;">
+            ${sceneHTML}
+          </div>
+        </details>
+
+        ${
+          narration
+            ? `
+              <details class="campaign-section">
+                <summary>
+                  ${campaignHeading("narration", "Narration")}
+                </summary>
+                <p>${escapeHTML(narration)}</p>
+              </details>
+            `
+            : ""
+        }
+
+        ${
+          cta
+            ? `
+              <div class="campaign-section">
+                <strong>
+                  ${campaignHeading("cta", "Appel à l’action")}
+                </strong>
+                <p>${escapeHTML(cta)}</p>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          visualPrompt
+            ? `
+              <details class="campaign-section">
+                <summary>
+                  ${campaignHeading("image", "Prompt visuel")}
+                </summary>
+                <p>${escapeHTML(visualPrompt)}</p>
+              </details>
+            `
+            : ""
+        }
+
+        ${
+          style
+            ? `
+              <details class="campaign-section">
+                <summary>
+                  ${campaignHeading("style", "Style")}
+                </summary>
+                <p>${escapeHTML(style)}</p>
+              </details>
+            `
+            : ""
+        }
+      `;
+
+      if (els.validateBtn) {
+        els.validateBtn.style.display = "flex";
+        els.validateBtn.disabled = false;
+
+        const strong =
+          els.validateBtn.querySelector("strong");
+
+        const sub =
+          els.validateBtn.querySelector(".action-copy span");
+
+        if (strong) {
+          strong.textContent = "Valider le scénario";
+        }
+
+        if (sub) {
+          sub.textContent =
+            "Confirmer et passer à l’étape suivante";
         }
       }
-
-      setProgress(100, "Vidéo terminée");
-      return URL.createObjectURL(videoBlob);
     }
 
-    document.querySelectorAll(".marketing-choice").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".marketing-choice").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        selectedMarketingType = btn.dataset.type;
-        localStorage.setItem("viraMarketingType", selectedMarketingType);
-        els.prompt.placeholder = marketingMeta[selectedMarketingType]?.prompt || els.prompt.placeholder;
-        resetGeneratedFlow();
-        saveForm();
-        updateBrain();
+    if (els.scenarioButton) {
+      els.scenarioButton.addEventListener(
+        "click",
+        async () => {
+          const data = validateCampaignForm();
+
+          if (!data) return;
+
+          els.scenarioButton.disabled = true;
+
+          setStatus(
+            els.scenarioStatus,
+            "Création de votre campagne en cours...",
+            "loading"
+          );
+
+          setProgress(12, "Analyse de votre demande...");
+
+          try {
+            setProgress(32, "Construction de la stratégie...");
+
+            const response = await fetch(
+              "/api/scenario/generate",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  idea: data.idea,
+                  marketingType: selectedMarketingType,
+                  businessName: "",
+                  marketingGoal: data.marketingGoal,
+                  targetAudience: data.targetAudience,
+                  platform: data.platform,
+                  tone: data.tone
+                })
+              }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok || !result.ok) {
+              throw new Error(
+                result.error ||
+                result.message ||
+                "Impossible de générer la campagne."
+              );
+            }
+
+            setProgress(76, "Finalisation du scénario...");
+
+            rawScenario =
+              result.scenario ||
+              result.output ||
+              "";
+
+            scenarioScenes =
+              Array.isArray(result.scenes)
+                ? result.scenes
+                : [];
+
+            if (!rawScenario) {
+              throw new Error(
+                "Aucun scénario reçu du serveur."
+              );
+            }
+
+            renderScenario(
+              rawScenario,
+              scenarioScenes
+            );
+
+            setProgress(100, "Campagne prête");
+
+            setStatus(
+              els.scenarioStatus,
+              "Campagne générée avec succès.",
+              "success"
+            );
+          } catch (error) {
+            resetProgress();
+
+            setStatus(
+              els.scenarioStatus,
+              error?.message ||
+              "Une erreur est survenue pendant la génération.",
+              "error"
+            );
+          } finally {
+            els.scenarioButton.disabled = false;
+          }
+        }
+      );
+        if (els.validateBtn) {
+      els.validateBtn.addEventListener("click", () => {
+        if (!rawScenario) {
+          setStatus(
+            els.scenarioStatus,
+            "Aucun scénario à valider.",
+            "warning"
+          );
+          return;
+        }
+
+        const title =
+          els.validateBtn.querySelector("strong");
+
+        const subtitle =
+          els.validateBtn.querySelector(".action-copy span");
+
+        if (title) {
+          title.textContent = "Scénario validé";
+        }
+
+        if (subtitle) {
+          subtitle.textContent =
+            "Prêt pour la création des visuels";
+        }
+
+        els.validateBtn.disabled = true;
+
+        if (els.visualBtn) {
+          els.visualBtn.disabled = false;
+        }
+
+        if (els.voiceBtn) {
+          els.voiceBtn.disabled = false;
+        }
+
+        setStatus(
+          els.scenarioStatus,
+          "Scénario validé avec succès. Votre campagne est prête pour les prochaines étapes.",
+          "success"
+        );
       });
-    });
-
-    els.prompt.addEventListener("input", () => { els.promptCount.textContent = els.prompt.value.length; saveForm(); updateBrain(); });
-    els.audience.addEventListener("input", () => { saveForm(); updateBrain(); });
-    els.goal.addEventListener("input", () => { saveForm(); updateBrain(); });
-    els.tone.addEventListener("change", () => { updateToneIcon(); saveForm(); });
-    els.platform.addEventListener("change", () => { updatePlatformIcon(); updatePlatformTip(); saveForm(); updateBrain(); });
-    els.brainBtn.addEventListener("click", () => updateBrain(true));
-
-    els.scenarioBtn.addEventListener("click", async () => {
-      const idea = els.prompt.value.trim();
-      const audience = els.audience.value.trim();
-      const goal = els.goal.value.trim();
-      const platform = els.platform.value;
-      if (!selectedMarketingType) return setStatus(els.scenarioStatus,"⚠️ Choisissez d’abord votre objectif.","error");
-      if (!idea) return setStatus(els.scenarioStatus,"⚠️ Décrivez votre produit ou votre service.","error");
-      if (!audience || !goal || !platform) return setStatus(els.scenarioStatus,"⚠️ Complétez l’audience, l’objectif principal et la plateforme.","error");
-
-      saveForm();
-      els.scenarioBtn.disabled = true;
-      els.scenarioResult.innerHTML = "";
-      setStatus(els.scenarioStatus,`<div class="loader"><div class="loader-star">✦</div><div><strong>VIRA prépare votre campagne</strong><br><span style="color:#938d9f">Analyse de l’offre, de l’audience et de la plateforme…</span></div><div class="loader-dots"><i></i><i></i><i></i></div></div>`);
-      setProgress(8,"Analyse de la campagne");
-
-      try {
-        const response = await fetch("/api/scenario/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idea,marketingType:selectedMarketingType,businessName:"",marketingGoal:goal,targetAudience:audience,platform,campaignTone:els.tone.value})});
-        const data = await response.json();
-        if (!response.ok) throw new Error(data?.error?.message || data?.error || "Erreur de génération de campagne.");
-        const scenario = data?.scenario || data?.output_text || "";
-        if (!scenario.trim()) throw new Error("Aucun scénario reçu du serveur.");
-        setProgress(100,"Campagne prête");
-        renderScenario(scenario);
-        setStatus(els.scenarioStatus,"✅ Campagne générée. Vérifiez-la puis validez le scénario.","success");
-      } catch (error) {
-        console.error(error);
-        setStatus(els.scenarioStatus,`❌ ${escapeHtml(error.message || "Erreur inconnue")}`,"error");
-      } finally {
-        els.scenarioBtn.disabled = false;
-        hideProgress();
-      }
-    });
-
-    els.validateBtn.addEventListener("click", () => {
-      if (!rawScenario) return setStatus(els.scenarioStatus,"⚠️ Aucun scénario à valider.","error");
-      els.validateBtn.querySelector("strong").textContent = "Scénario validé ✓";
-      els.validateBtn.disabled = true;
-      els.visualBtn.style.display = "flex";
-      els.voiceBtn.style.display = "flex";
-      setStatus(els.scenarioStatus,"✅ Scénario validé. Vous pouvez maintenant créer les visuels.","success");
-    });
-
-    els.voiceBtn.addEventListener("click", async () => {
-      if (!rawScenario) return;
-      const narration = parseScenario(rawScenario).narration || rawScenario;
-      const shortText = narration.trim().split(/\s+/).slice(0,18).join(" ");
-      els.voiceBtn.disabled = true;
-      setStatus(els.status,"◉ Génération de l’aperçu voix…");
-      try {
-        const response = await fetch("/api/voice/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:shortText})});
-        if (!response.ok) throw new Error("Impossible de générer la voix.");
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.play();
-        setStatus(els.status,"✅ Aperçu voix généré.","success");
-      } catch (error) {
-        setStatus(els.status,`❌ ${escapeHtml(error.message)}`,"error");
-      } finally { els.voiceBtn.disabled = false; }
-    });
-
-    els.visualBtn.addEventListener("click", async () => {
-      if (!rawScenario) return setStatus(els.status,"⚠️ Créez et validez d’abord un scénario.","error");
-      const d = parseScenario(rawScenario);
-      const scenes = d.scenes.filter(Boolean);
-      if (scenes.length !== 5) return setStatus(els.status,`⚠️ VIRA a besoin de 5 scènes. Scènes détectées : ${scenes.length}.`,"error");
-
-      els.visualBtn.disabled = true;
-      els.result.innerHTML = "";
-      els.videoResult.innerHTML = "";
-      els.videoBtn.style.display = "flex"; els.videoBtn.disabled = true;
-      setProgress(10,"Préparation des visuels");
-      try {
-        if (FREE_VISUAL_MODE) {
-          for (let i=0;i<5;i++) { setProgress(18 + i*16,`Simulation du visuel ${i+1}/5`); await new Promise(r=>setTimeout(r,180)); }
-          generatedImages = scenes.map(makeTestImage);
-          setProgress(100,"5 visuels prêts");
-          renderImages(generatedImages, scenes, true);
-          setStatus(els.status,"✅ 5 visuels Premium simulés gratuitement. Aucun crédit image utilisé.","success");
-        } else {
-          generatedImages = await generateRealImages(scenes,d.visualPrompt,d.style);
-          setProgress(100,"5 visuels prêts");
-          renderImages(generatedImages,scenes,false);
-          setStatus(els.status,"✅ 5 visuels IA générés.","success");
-        }
-        els.videoBtn.style.display = "flex";
-      } catch (error) {
-        console.error(error);
-        setStatus(els.status,`❌ ${escapeHtml(error.message || "Erreur de génération des visuels")}`,"error");
-      } finally {
-        els.visualBtn.disabled = false;
-        hideProgress(900);
-      }
-    });
-
-    els.videoBtn.addEventListener("click", async () => {
-      if (generatedImages.length !== 5) return setStatus(els.videoStatus,"⚠️ Créez d’abord les 5 visuels.","error");
-      els.videoBtn.disabled = true;
-      els.videoResult.innerHTML = "";
-      setProgress(5,"Préparation de la vidéo");
-      try {
-        if (FREE_VIDEO_MODE) {
-          const steps = [18,34,51,67,82,94,100];
-          for (const p of steps) { setProgress(p,p<100?"Simulation de la vidéo Premium":"Simulation terminée"); await new Promise(r=>setTimeout(r,240)); }
-          els.videoResult.innerHTML = `<div class="results-panel"><h3>🎬 Vidéo prête pour le test</h3><div class="meta">Mode test gratuit : aucune génération vidéo payante n’a été lancée.</div><div class="campaign-section"><strong>✓ Pipeline validé</strong><p>Les 5 visuels sont prêts. Pour générer la vraie vidéo, passez FREE_VIDEO_MODE à false et activez Runway sur le serveur.</p></div></div>`;
-          setStatus(els.videoStatus,"✅ Simulation vidéo terminée sans utiliser de crédits vidéo.","success");
-        } else {
-          finalVideoUrl = await createFinalVideo();
-          els.videoResult.innerHTML = `<div class="results-panel"><h3>🎬 Vidéo finale VIRA</h3><div class="meta">5 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video><a class="download-link" href="${finalVideoUrl}" download="VIRA-campagne-final.mp4">↓ Télécharger la vidéo finale</a></div>`;
-          setStatus(els.videoStatus,"✅ Vidéo finale créée avec succès.","success");
-        }
-      } catch (error) {
-        console.error(error);
-        setStatus(els.videoStatus,`❌ ${escapeHtml(error.message || "Erreur de création vidéo")}`,"error");
-      } finally {
-        els.videoBtn.disabled = false;
-        hideProgress(1200);
-      }
-    });
-
-    // Navigation visuelle uniquement pour l’instant : elle ne casse jamais le workflow principal.
-    [...document.querySelectorAll(".sidebar-link"), ...document.querySelectorAll(".mobile-nav button")].forEach(btn => {
-      btn.addEventListener("click", () => {
-        const group = btn.closest(".sidebar-nav") ? document.querySelectorAll(".sidebar-link") : document.querySelectorAll(".mobile-nav button");
-        group.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-      });
-    });
-
-
-    const scoreMirror = document.getElementById("growthScoreMini");
-    const scoreSource = document.getElementById("growthScoreNumber");
-    if (scoreMirror && scoreSource) {
-      const syncScore = () => scoreMirror.textContent = scoreSource.textContent;
-      syncScore();
-      new MutationObserver(syncScore).observe(scoreSource,{childList:true,characterData:true,subtree:true});
     }
 
-    restoreForm();
-    const savedCredits = localStorage.getItem("viraCredits");
-    if (savedCredits) els.creditCount.textContent = savedCredits;
-    if (rawScenario) {
-      renderScenario(rawScenario);
-      els.validateBtn.style.display = "flex";
-      els.voiceBtn.disabled = false;
+    function buildFreeVisuals() {
+      const gradients = [
+        "linear-gradient(145deg,#23103a,#6b21a8,#172554)",
+        "linear-gradient(145deg,#071c19,#065f46,#172554)",
+        "linear-gradient(145deg,#21120b,#9a3412,#3b0764)",
+        "linear-gradient(145deg,#111827,#1d4ed8,#581c87)",
+        "linear-gradient(145deg,#18181b,#7e22ce,#0f766e)"
+      ];
+
+      return Array.from(
+        { length: 5 },
+        (_, index) => ({
+          scene: index + 1,
+          background: gradients[index]
+        })
+      );
     }
-  })();
+
+    function renderFreeVisuals(items) {
+      if (!els.visualResult) return;
+
+      const cards = items
+        .map(
+          (item) => `
+            <div class="visual-card">
+              <div
+                class="visual-frame"
+                style="background:${item.background};"
+              >
+                <div
+                  style="
+                    position:absolute;
+                    inset:0;
+                    display:grid;
+                    place-items:center;
+                    padding:18px;
+                    text-align:center;
+                    background:
+                      radial-gradient(
+                        circle at 50% 20%,
+                        rgba(255,255,255,.10),
+                        transparent 35%
+                      );
+                  "
+                >
+                  <div>
+                    <span
+                      class="campaign-heading-icon"
+                      style="
+                        width:42px;
+                        height:42px;
+                        margin:auto;
+                        color:#fff;
+                        background:rgba(255,255,255,.08);
+                        border-color:rgba(255,255,255,.13);
+                      "
+                    >
+                      ${uiIcon("image")}
+                    </span>
+
+                    <div
+                      style="
+                        margin-top:10px;
+                        font-size:11px;
+                        font-weight:950;
+                      "
+                    >
+                      Visuel ${item.scene}
+                    </div>
+
+                    <div
+                      style="
+                        margin-top:4px;
+                        color:rgba(255,255,255,.60);
+                        font-size:8px;
+                      "
+                    >
+                      Aperçu de construction
+                    </div>
+                  </div>
+                </div>
+
+                <span class="visual-number">
+                  SCÈNE ${item.scene}
+                </span>
+              </div>
+
+              <div class="visual-caption">
+                Direction visuelle premium préparée pour la scène ${item.scene}.
+              </div>
+            </div>
+          `
+        )
+        .join("");
+
+      els.visualResult.innerHTML = `
+        <div class="results-panel">
+          <div class="result-ready">
+            <span
+              class="status-premium-icon"
+              style="color:#72f0a4;"
+            >
+              ${uiIcon("success")}
+            </span>
+
+            <span class="result-ready-copy">
+              <strong>Direction visuelle prête</strong>
+              <span>
+                5 aperçus ont été préparés pour votre campagne.
+              </span>
+            </span>
+          </div>
+
+          <div class="visual-strip">
+            ${cards}
+          </div>
+        </div>
+      `;
+    }
+
+    if (els.visualBtn) {
+      els.visualBtn.addEventListener(
+        "click",
+        async () => {
+          if (!rawScenario) {
+            setStatus(
+              els.scenarioStatus,
+              "Générez et validez d’abord votre scénario.",
+              "warning"
+            );
+            return;
+          }
+
+          if (!els.validateBtn?.disabled) {
+            setStatus(
+              els.scenarioStatus,
+              "Validez le scénario avant de créer les visuels.",
+              "warning"
+            );
+            return;
+          }
+
+          els.visualBtn.disabled = true;
+
+          setProgress(
+            15,
+            "Préparation de la direction visuelle..."
+          );
+
+          try {
+            if (FREE_VISUAL_MODE) {
+              await new Promise((resolve) =>
+                setTimeout(resolve, 500)
+              );
+
+              setProgress(
+                55,
+                "Construction des 5 scènes..."
+              );
+
+              await new Promise((resolve) =>
+                setTimeout(resolve, 500)
+              );
+
+              generatedVisuals =
+                buildFreeVisuals();
+
+              renderFreeVisuals(
+                generatedVisuals
+              );
+
+              setProgress(
+                100,
+                "Visuels prêts"
+              );
+
+              setStatus(
+                els.scenarioStatus,
+                "Les aperçus visuels sont prêts.",
+                "success"
+              );
+
+              if (els.videoBtn) {
+                els.videoBtn.disabled = false;
+              }
+
+              return;
+            }
+
+            setProgress(
+              35,
+              "Génération des visuels..."
+            );
+
+            const response = await fetch(
+              "/api/images/generate",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  scenario: rawScenario,
+                  scenes: scenarioScenes
+                })
+              }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.ok) {
+              throw new Error(
+                data.error ||
+                "Impossible de générer les visuels."
+              );
+            }
+
+            generatedVisuals =
+              data.images ||
+              data.visuals ||
+              [];
+
+            if (!generatedVisuals.length) {
+              throw new Error(
+                "Aucun visuel reçu du serveur."
+              );
+            }
+
+            els.visualResult.innerHTML = `
+              <div class="results-panel">
+                <div class="result-ready">
+                  <span
+                    class="status-premium-icon"
+                    style="color:#72f0a4;"
+                  >
+                    ${uiIcon("success")}
+                  </span>
+
+                  <span class="result-ready-copy">
+                    <strong>Visuels générés</strong>
+                    <span>
+                      Votre direction créative est prête.
+                    </span>
+                  </span>
+                </div>
+
+                <div class="visual-strip">
+                  ${generatedVisuals
+                    .map((item, index) => {
+                      const url =
+                        typeof item === "string"
+                          ? item
+                          : (
+                              item.url ||
+                              item.imageUrl ||
+                              item.image ||
+                              ""
+                            );
+
+                      if (!url) return "";
+
+                      return `
+                        <div class="visual-card">
+                          <div class="visual-frame">
+                            <img
+                              src="${escapeHTML(url)}"
+                              alt="Visuel ${index + 1}"
+                            />
+                            <span class="visual-number">
+                              SCÈNE ${index + 1}
+                            </span>
+                          </div>
+                        </div>
+                      `;
+                    })
+                    .join("")}
+                </div>
+              </div>
+            `;
+
+            setProgress(
+              100,
+              "Visuels prêts"
+            );
+
+            if (els.videoBtn) {
+              els.videoBtn.disabled = false;
+            }
+
+            setStatus(
+              els.scenarioStatus,
+              "Les visuels ont été générés avec succès.",
+              "success"
+            );
+          } catch (error) {
+            resetProgress();
+
+            setStatus(
+              els.scenarioStatus,
+              error?.message ||
+                "Impossible de créer les visuels.",
+              "error"
+            );
+          } finally {
+            els.visualBtn.disabled = false;
+          }
+        }
+      );
+    }
+
+    if (els.voiceBtn) {
+      els.voiceBtn.addEventListener(
+        "click",
+        async () => {
+          if (!rawScenario) {
+            setStatus(
+              els.scenarioStatus,
+              "Générez et validez d’abord votre scénario.",
+              "warning"
+            );
+            return;
+          }
+
+          if (!els.validateBtn?.disabled) {
+            setStatus(
+              els.scenarioStatus,
+              "Validez le scénario avant de préparer la narration.",
+              "warning"
+            );
+            return;
+          }
+
+          els.voiceBtn.disabled = true;
+
+          setStatus(
+            els.scenarioStatus,
+            "Préparation de la narration...",
+            "loading"
+          );
+
+          try {
+            const narration =
+              extractSection(
+                rawScenario,
+                "NARRATION",
+                ["APPEL À L'ACTION"]
+              ) || rawScenario;
+
+            const response = await fetch(
+              "/api/voice/generate",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  text: narration
+                })
+              }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.ok) {
+              throw new Error(
+                data.error ||
+                  data.message ||
+                  "Impossible de générer la narration."
+              );
+            }
+
+            generatedVoiceUrl =
+              data.audioUrl ||
+              data.url ||
+              data.audio ||
+              "";
+
+            setStatus(
+              els.scenarioStatus,
+              "Narration prête pour votre campagne.",
+              "success"
+            );
+
+            if (els.videoBtn) {
+              els.videoBtn.disabled = false;
+            }
+          } catch (error) {
+            setStatus(
+              els.scenarioStatus,
+              error?.message ||
+                "Impossible de préparer la narration.",
+              "error"
+            );
+          } finally {
+            els.voiceBtn.disabled = false;
+          }
+        }
+      );
+    }
+        if (els.videoBtn) {
+      els.videoBtn.addEventListener(
+        "click",
+        async () => {
+          if (!rawScenario) {
+            setStatus(
+              els.videoStatus,
+              "Générez et validez d’abord votre scénario.",
+              "warning"
+            );
+            return;
+          }
+
+          els.videoBtn.disabled = true;
+
+          setStatus(
+            els.videoStatus,
+            "Préparation de votre vidéo finale...",
+            "loading"
+          );
+
+          setProgress(
+            15,
+            "Préparation de la vidéo..."
+          );
+
+          try {
+            if (FREE_VIDEO_MODE) {
+              await new Promise((resolve) =>
+                setTimeout(resolve, 600)
+              );
+
+              setProgress(
+                55,
+                "Assemblage de la campagne..."
+              );
+
+              await new Promise((resolve) =>
+                setTimeout(resolve, 600)
+              );
+
+              setProgress(
+                100,
+                "Vidéo prête"
+              );
+
+              els.videoResult.innerHTML = `
+                <div class="results-panel">
+                  <div class="result-ready">
+                    <span
+                      class="status-premium-icon"
+                      style="color:#72f0a4;"
+                    >
+                      ${uiIcon("video")}
+                    </span>
+
+                    <span class="result-ready-copy">
+                      <strong>Vidéo prête pour le test</strong>
+                      <span>
+                        Le mode construction évite la consommation de crédits.
+                      </span>
+                    </span>
+                  </div>
+
+                  <div class="campaign-section">
+                    <strong>
+                      ${campaignHeading(
+                        "video",
+                        "Aperçu vidéo"
+                      )}
+                    </strong>
+
+                    <p>
+                      Votre scénario, vos visuels et votre narration
+                      sont prêts pour l’assemblage final.
+                    </p>
+                  </div>
+                </div>
+              `;
+
+              setStatus(
+                els.videoStatus,
+                "Votre campagne vidéo est prête en mode construction.",
+                "success"
+              );
+
+              if (els.downloadBtn) {
+                els.downloadBtn.disabled = false;
+                els.downloadBtn.style.opacity = "1";
+              }
+
+              return;
+            }
+
+            const response = await fetch(
+              "/api/video/generate",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  prompt: rawScenario,
+                  scenario: rawScenario,
+                  scenes: scenarioScenes,
+                  visuals: generatedVisuals,
+                  audioUrl: generatedVoiceUrl
+                })
+              }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.ok) {
+              throw new Error(
+                data.error ||
+                  data.message ||
+                  "Impossible de générer la vidéo."
+              );
+            }
+
+            generatedVideoUrl =
+              data.videoUrl ||
+              data.url ||
+              data.video ||
+              "";
+
+            if (!generatedVideoUrl) {
+              throw new Error(
+                "Aucune vidéo reçue du serveur."
+              );
+            }
+
+            els.videoResult.innerHTML = `
+              <div class="results-panel">
+                <div class="result-ready">
+                  <span
+                    class="status-premium-icon"
+                    style="color:#72f0a4;"
+                  >
+                    ${uiIcon("success")}
+                  </span>
+
+                  <span class="result-ready-copy">
+                    <strong>Vidéo finale prête</strong>
+                    <span>
+                      Votre campagne est prête à être exportée.
+                    </span>
+                  </span>
+                </div>
+
+                <video
+                  class="video-player"
+                  src="${escapeHTML(generatedVideoUrl)}"
+                  controls
+                  playsinline
+                ></video>
+              </div>
+            `;
+
+            setProgress(
+              100,
+              "Vidéo prête"
+            );
+
+            setStatus(
+              els.videoStatus,
+              "Votre vidéo finale a été générée avec succès.",
+              "success"
+            );
+
+            if (els.downloadBtn) {
+              els.downloadBtn.disabled = false;
+              els.downloadBtn.style.opacity = "1";
+            }
+          } catch (error) {
+            resetProgress();
+
+            setStatus(
+              els.videoStatus,
+              error?.message ||
+                "Impossible de générer la vidéo.",
+              "error"
+            );
+          } finally {
+            els.videoBtn.disabled = false;
+          }
+        }
+      );
+    }
+
+    if (els.downloadBtn) {
+      els.downloadBtn.addEventListener(
+        "click",
+        () => {
+          if (FREE_VIDEO_MODE && !generatedVideoUrl) {
+            setStatus(
+              els.videoStatus,
+              "Le téléchargement réel sera disponible lorsque la génération vidéo sera activée.",
+              "warning"
+            );
+            return;
+          }
+
+          if (!generatedVideoUrl) {
+            setStatus(
+              els.videoStatus,
+              "Aucune vidéo disponible à télécharger.",
+              "warning"
+            );
+            return;
+          }
+
+          const link =
+            document.createElement("a");
+
+          link.href = generatedVideoUrl;
+          link.download = "vira-campagne.mp4";
+          link.rel = "noopener";
+
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          setStatus(
+            els.videoStatus,
+            "Téléchargement de votre campagne lancé.",
+            "success"
+          );
+        }
+      );
+    }
+
+    resetProgress();
+
   </script>
 </body>
-</html>
+</html>  
