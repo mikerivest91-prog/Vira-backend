@@ -1225,7 +1225,7 @@ const analysisProgressTimer = setInterval(() => {
         const scenario = data?.scenario || data?.output_text || "";
         if (!scenario.trim()) throw new Error("Aucun scénario reçu du serveur.");
       clearInterval(analysisProgressTimer);
-        setProgress(100,"Campagne prête");
+        setProgress(25,"Scénario prêt");
         
         renderScenario(scenario);
         setStatus(els.scenarioStatus,"Campagne générée. Vérifiez-la puis validez le scénario.","success");
@@ -1375,7 +1375,7 @@ const narration =
         if (FREE_VISUAL_MODE) {
           for (let i=0;i<5;i++) { setProgress(18 + i*16,`Simulation du visuel ${i+1}/5`); await new Promise(r=>setTimeout(r,180)); }
           generatedImages = scenes.map(makeTestImage);
-          setProgress(100,"5 visuels prêts");
+          setProgress(50,"Visuels prêts");
           renderImages(generatedImages, scenes, true);
           setStatus(els.status,"5 visuels Premium simulés gratuitement. Aucun crédit image utilisé.","success");
         } else {
@@ -1405,11 +1405,11 @@ els.videoBtn.addEventListener("click", async () => {
   els.videoBtn.disabled = true;
   els.downloadBtn.disabled = true;
   els.videoResult.innerHTML = "";
-  setProgress(5, "Préparation de la vidéo");
+  setProgress(55, "Préparation de la vidéo");
 
   try {
 if (FREE_VIDEO_MODE) {
-  const steps = [18,34,51,67,82,94,100];
+const steps = [60,65,70,75,80,85,90];
 
   for (const p of steps) {
     setProgress(p, p < 100
@@ -1452,10 +1452,12 @@ if (FREE_VIDEO_MODE) {
   );
     els.downloadBtn.disabled = false; 
   els.downloadBtn.classList.add("is-ready");
+  setProgress(100, "Prêt à télécharger");
         } else {
           finalVideoUrl = await createFinalVideo();
   els.downloadBtn.disabled = false;
   els.downloadBtn.classList.add("is-ready");
+  setProgress(100, "Prêt à télécharger");
           els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo finale VIRA</span></h3><div class="meta">5 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video><a class="download-link" href="${finalVideoUrl}" download="VIRA-campagne-final.mp4">Télécharger la vidéo finale</a></div>`;
           setStatus(els.videoStatus,"Vidéo finale créée avec succès.","success");
         }
