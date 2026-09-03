@@ -32,6 +32,9 @@ app.use(
   })
 );
 app.use(express.static("public"));
+app.get("/", (req, res) => {
+  res.sendFile("index.html", { root: "public" });
+});
 // ======================================================
 // OUTILS
 // ======================================================
