@@ -1330,7 +1330,20 @@ els.voiceBtn.addEventListener("click", async () => {
         hideProgress(900);
       }
     });
+els.videoBtn.addEventListener("click", async () => {
+  if (generatedImages.length !== 5) {
+    return setStatus(
+      els.videoStatus,
+      "Générez d’abord les 5 visuels.",
+      "warning"
+    );
+  }
 
+  els.videoBtn.disabled = true;
+  els.videoResult.innerHTML = "";
+  setProgress(5, "Préparation de la vidéo");
+
+  try {
 if (FREE_VIDEO_MODE) {
   const steps = [18,34,51,67,82,94,100];
 
