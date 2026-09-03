@@ -2,7 +2,11 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import RunwayML from "@runwayml/sdk";
-
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicDir = path.join(__dirname, "public");
 // ======================================================
 // VIRA MARKETING IA — BACKEND
 // ======================================================
@@ -31,10 +35,14 @@ app.use(
     limit: "25mb"
   })
 );
-app.use(express.static("public"));
+
+app.use(express.static(publicDir));
+
 app.get("/", (req, res) => {
-  res.sendFile("index.html", { root: "public" });
+  res.sendFile(path.join(publicDir, "index.html"));
 });
+
+
 // ======================================================
 // OUTILS
 // ======================================================
