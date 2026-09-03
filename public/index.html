@@ -1383,6 +1383,7 @@ els.videoBtn.addEventListener("click", async () => {
   }
 
   els.videoBtn.disabled = true;
+  els.downloadBtn.disabled = true;
   els.videoResult.innerHTML = "";
   setProgress(5, "Préparation de la vidéo");
 
@@ -1429,7 +1430,7 @@ if (FREE_VIDEO_MODE) {
     "Vidéo finale prête — votre campagne est complète.",
     "success"
   );
-          
+    els.downloadBtn.disabled = false;      
         } else {
           finalVideoUrl = await createFinalVideo();
           els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo finale VIRA</span></h3><div class="meta">5 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video><a class="download-link" href="${finalVideoUrl}" download="VIRA-campagne-final.mp4">Télécharger la vidéo finale</a></div>`;
