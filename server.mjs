@@ -509,25 +509,32 @@ STYLE:
         });
     }
 
-    const scenario =
-      extractOutputText(data);
+    let scenario =
+  extractOutputText(data);
 
-    if (!scenario) {
-      return res.status(502).json({
-        ok: false,
-        error:
-          "Aucun scénario reçu d'OpenAI."
-      });
-    }
+if (!scenario) {
+  return res.status(502).json({
+    ok: false,
+    error: "Aucun scénario reçu."
+  });
+}
 
-    const scenes =
-      extractScenes(scenario);
+// Protection finale de la marque VIRA
+scenario = scenario
+  .replace(/\bintelligence artificielle\b/gi, "technologie")
+  .replace(/\bIA\b/gi, "")
+  .replace(/\bAI\b/gi, "")
+  .replace(/[ \t]{2,}/g, " ")
+  .trim();
 
-    return res.json({
-      ok: true,
-      scenario,
-      scenes
-    });
+const scenes =
+  extractScenes(scenario);
+
+return res.json({
+  ok: true,
+  scenario,
+  scenes
+});
 
   } catch (error) {
     console.error(
