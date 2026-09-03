@@ -1194,15 +1194,12 @@ body{background:radial-gradient(circle at 70% -10%,rgba(87,58,198,.13),transpare
       els.scenarioBtn.disabled = true;
       els.scenarioResult.innerHTML = "";
       setStatus(els.scenarioStatus,`<div class="loader"><div class="loader-star">✦</div><div><strong>VIRA prépare votre campagne</strong><br><span style="color:#938d9f">Analyse de l’offre, de l’audience et de la plateforme…</span></div><div class="loader-dots"><i></i><i></i><i></i></div></div>`);
- setProgress(8, "Analyse de la campagne");
+ setProgress(0, "Démarrage de l’analyse");
 
 const analysisSteps = [
-  [18, "Analyse de votre offre"],
-  [31, "Étude de votre audience"],
-  [46, "Analyse de votre objectif"],
-  [62, "Optimisation du message"],
-  [76, "Construction de la stratégie"],
-  [88, "Finalisation de la campagne"]
+  [25, "Analyse de votre offre"],
+  [50, "Étude de votre audience"],
+  [75, "Construction de la campagne"]
 ];
 
 let analysisStepIndex = 0;
@@ -1226,7 +1223,7 @@ const analysisProgressTimer = setInterval(() => {
         const scenario = data?.scenario || data?.output_text || "";
         if (!scenario.trim()) throw new Error("Aucun scénario reçu du serveur.");
       clearInterval(analysisProgressTimer);
-        setProgress(25,"Scénario prêt");
+        setProgress(100,"Scénario prêt");
         
         renderScenario(scenario);
         setStatus(els.scenarioStatus,"Campagne générée. Vérifiez-la puis validez le scénario.","success");
