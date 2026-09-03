@@ -1218,7 +1218,13 @@ const analysisProgressTimer = setInterval(() => {
 }, 1200);
       try {
         const response = await fetch("/api/scenario/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idea,marketingType:selectedMarketingType,businessName:"",marketingGoal:goal,targetAudience:audience,platform,campaignTone:els.tone.value})});
-        const data = await response.json();
+        const contentType = response.headers.get("content-type") || "";
+
+if (!contentType.includes("application/json")) {
+  throw new Error("Le serveur VIRA est temporairement indisponible. Réessayez dans quelques secondes.");
+}
+
+const data = await response.json();
         if (!response.ok) throw new Error(data?.error?.message || data?.error || "Erreur de génération de campagne.");
         const scenario = data?.scenario || data?.output_text || "";
         if (!scenario.trim()) throw new Error("Aucun scénario reçu du serveur.");
