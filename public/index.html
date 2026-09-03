@@ -404,7 +404,65 @@ html,body{max-width:100%;overflow-x:hidden}
   .vira-validate{max-width:620px!important;margin:18px auto 0!important}
   .campaign-result{max-width:980px!important;margin-left:auto!important;margin-right:auto!important}
 }
+/* ÉTAT PREMIUM — SCÉNARIO VALIDÉ */
 
+.vira-validate:disabled{
+  opacity:1!important;
+  filter:none!important;
+  cursor:default!important;
+
+  border:1px solid rgba(99,255,170,.42)!important;
+
+  background:
+    radial-gradient(circle at 15% 0%,
+      rgba(61,255,164,.13),
+      transparent 40%),
+    radial-gradient(circle at 95% 100%,
+      rgba(63,110,255,.10),
+      transparent 42%),
+    linear-gradient(135deg,
+      #0d1816 0%,
+      #09110f 55%,
+      #090b10 100%)!important;
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.35),
+    0 0 26px rgba(61,255,164,.10),
+    inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+
+.vira-validate:disabled::after{
+  display:none!important;
+}
+
+.vira-validate:disabled .vira-validate-mark{
+  color:#72ffad!important;
+  border-color:rgba(114,255,173,.32)!important;
+  background:rgba(51,190,116,.10)!important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 0 20px rgba(72,255,158,.12)!important;
+}
+
+.vira-validate:disabled .action-copy{
+  padding-bottom:0!important;
+}
+
+.vira-validate:disabled .action-copy strong{
+  color:#f2fff8!important;
+}
+
+.vira-validate:disabled .action-copy span{
+  color:#9db8aa!important;
+}
+
+.vira-validate:disabled .vira-validate-arrow{
+  display:grid!important;
+  color:#72ffad!important;
+  border-color:rgba(114,255,173,.20)!important;
+background:rgba(46,154,98,.09)!important;
+}
 </style>
 </head>
 <body>
