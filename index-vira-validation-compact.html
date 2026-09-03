@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07070b" />
+  <title>VIRA</title>
+  <style>
+    :root{--bg:#05050a;--panel:#0d0b16;--panel2:#12101d;--line:rgba(146,74,255,.28);--line2:rgba(190,100,255,.7);--text:#faf8ff;--muted:#a29baa;--purple:#a63bff;--violet:#7c3aed;--blue:#3887ff;--green:#4ade80;--cyan:#38bdf8;--orange:#fb923c;--shadow:0 24px 70px rgba(0,0,0,.38)}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -10%,rgba(113,40,255,.18),transparent 34%),radial-gradient(circle at 90% 12%,rgba(46,93,255,.10),transparent 30%),#05050a;overflow-x:hidden} button,input,textarea,select{font:inherit}
+    .app-shell{min-height:100vh}.desktop-sidebar{display:none}.main{width:min(1440px,100%);margin:auto;padding:24px 18px 110px}.vira-topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:28px}.vira-brand{display:flex;align-items:center;gap:13px}.vira-mark{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:27px;font-weight:950;background:linear-gradient(145deg,#8f2bff,#3464ff);box-shadow:0 12px 28px rgba(124,58,237,.35)}.logo{font-size:29px;font-weight:950;letter-spacing:.11em}.subtitle{margin-top:3px;color:#9b93a8;font-size:10px;font-weight:850;letter-spacing:.23em}.credit-badge{padding:11px 18px;border-radius:17px;border:1px solid rgba(155,88,255,.35);background:rgba(10,9,16,.72);font-weight:900;white-space:nowrap}.credit-badge small{margin-left:5px;color:#8f8899;font-size:10px}.welcome-block{margin-bottom:24px}.welcome-block h1{margin:0;font-size:clamp(31px,5vw,50px);letter-spacing:-.04em;line-height:1.04}.welcome-block p{margin:9px 0 0;color:#a8a1b0;font-size:14px}.glass-card{border:1px solid var(--line);background:linear-gradient(145deg,rgba(18,14,30,.98),rgba(8,7,13,.99));box-shadow:inset 0 1px 0 rgba(255,255,255,.025),var(--shadow);border-radius:23px}.stage{padding:18px;margin-top:16px}.stage-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}.stage-icon,.number{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(126,38,255,.28),rgba(68,27,122,.28));border:1px solid rgba(169,77,255,.25);color:#c466ff;font-size:20px;font-weight:900;box-shadow:0 0 22px rgba(168,66,255,.12)}.number{width:35px;height:35px;font-size:15px}.stage-title{font-size:18px;font-weight:950}.stage-help{margin:3px 0 0;color:#a39cac;font-size:12px}.marketing-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.marketing-choice{position:relative;min-height:155px;padding:14px 9px;border:1px solid rgba(149,139,170,.18);border-radius:18px;background:linear-gradient(145deg,#0c0a13,#07070b);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;cursor:pointer}.marketing-choice.active{border-color:#d266ff;box-shadow:0 0 0 1px rgba(188,83,255,.22),0 0 28px rgba(161,54,255,.18);background:radial-gradient(circle at 40% 22%,rgba(132,42,255,.2),transparent 55%),#0d0b15}.choice-icon{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;background:rgba(126,39,220,.10);border:1px solid rgba(168,85,247,.12)}.choice-icon svg{width:37px;height:37px;fill:none;stroke:currentColor;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}.launch{color:#c44eff}.brand{color:#38a9ff}.leads{color:#cb43ff}.sale{color:#ff8c3f}.choice-title{font-size:14px;font-weight:950;line-height:1.12}.choice-description{color:#928b9b;font-size:10px;line-height:1.35}.choice-check{display:none;position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;place-items:center;background:linear-gradient(145deg,#c959ff,#843cff);font-weight:950}.marketing-choice.active .choice-check{display:grid}
+    .form-grid{display:grid;gap:12px}.form-grid.two{margin-top:12px}.field-group{position:relative;display:flex;flex-direction:column;gap:6px}.field-group label{font-size:11px;color:#dcd7e2;font-weight:800;margin-left:2px}.field-group input,.field-group textarea,.field-group select{width:100%;border:1px solid rgba(136,74,207,.34);border-radius:15px;background:#0a0910;color:#fff;outline:none}.field-group input,.field-group select{height:58px;padding:0 15px}.field-group textarea{min-height:108px;padding:16px 15px 28px;resize:vertical}.field-group input:focus,.field-group textarea:focus,.field-group select:focus{border-color:#a944f8;box-shadow:0 0 0 3px rgba(169,68,248,.09)}.char-count{position:absolute;right:12px;bottom:9px;color:#857e8d;font-size:9px}.field-icon{position:absolute;left:14px;bottom:18px;width:22px;height:22px;color:#c34cff;pointer-events:none}.field-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}.with-icon select{padding-left:46px}.platform-tip{display:none;margin-top:9px;padding:10px 12px;border-radius:12px;background:rgba(108,44,182,.08);border:1px solid rgba(150,68,232,.18);color:#a79fad;font-size:10px}
+    .primary-cta{width:100%;min-height:72px;border:0;border-radius:17px;color:white;background:linear-gradient(100deg,#7d1cff,#a528ff 52%,#335cff);font-weight:950;font-size:17px;box-shadow:0 15px 35px rgba(119,43,255,.28);cursor:pointer}.brain-run{margin-top:14px}.brain-run small{display:block;margin-top:3px;font-size:11px;font-weight:500;color:#eadcff}.test-badge{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;border:1px solid rgba(56,189,248,.16);color:#a5e5ff;background:rgba(56,189,248,.05);font-size:9px;font-weight:800}
+    .brain-layout{display:grid;gap:12px;margin-top:16px}.score-panel,.brain-message,.insight-box{padding:18px;border-radius:17px;border:1px solid rgba(151,82,219,.22);background:linear-gradient(145deg,#0e0c17,#09080d)}.score-panel{display:flex;align-items:center;justify-content:space-between;gap:15px}.eyebrow{color:#c95aff;font-size:11px;font-weight:950;letter-spacing:.13em}.score-big{margin-top:6px;font-size:58px;line-height:.88;font-weight:950;letter-spacing:-.05em}.score-big span{font-size:26px;color:#b948ff;font-weight:500}.score-note{margin-top:10px;color:#5df28c;font-size:10px;font-weight:850}.score-ring{--score-deg:216deg;width:118px;height:118px;flex:0 0 118px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#0b0910 55%,transparent 57%),conic-gradient(#b63cff 0 var(--score-deg),#2d2540 var(--score-deg) 360deg);box-shadow:0 0 34px rgba(175,60,255,.22)}.score-ring strong{font-size:30px}.score-ring small{display:block;text-align:center;color:#91899b;font-size:10px}.brain-message{font-size:13px;line-height:1.55;color:#e4ddea;display:flex;gap:12px}.spark{color:#c955ff;font-size:22px}.brain-insights{display:grid;gap:12px}.insight-box{font-size:12px;line-height:1.55}.insight-box.opportunity{border-color:rgba(74,222,128,.48);box-shadow:0 0 24px rgba(74,222,128,.08)}.insight-box.action{border-color:rgba(59,130,246,.58);box-shadow:0 0 26px rgba(59,130,246,.10)}.insight-title{display:flex;align-items:center;gap:8px;font-weight:950;margin-bottom:10px}.insight-title.green{color:#dfffea}.insight-title.blue{color:#e7f0ff}.brain-insight{color:#d8d1de}.brain-actions{display:none}
+    .workflow-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:15px}.action-card{min-height:78px;padding:12px;border-radius:15px;border:1px solid rgba(133,89,188,.22);background:linear-gradient(145deg,#100c1b,#09080f);color:white;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer}.action-card:disabled{opacity:.42;cursor:not-allowed}.action-icon{width:43px;height:43px;flex:0 0 43px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:rgba(127,39,217,.14);border:1px solid rgba(169,74,255,.16)}.action-copy{min-width:0}.action-copy strong{display:block;font-size:12px}.action-copy span{display:block;margin-top:4px;color:#afa6b5;font-size:9px;line-height:1.35}.chev{display:none}.validate{display:none}.scenario-step .action-icon{color:#d74dff}.visuals .action-icon{color:#53e49c}.voice .action-icon{color:#cb55ff}.video .action-icon{color:#55c7ff}.download-step .action-icon{color:#72f2bd}.download-step{opacity:.42}
+    .status-box:empty,.campaign-result:empty,.visual-results:empty,.video-result:empty{display:none}.status-box{margin-top:12px;padding:13px;border-radius:14px;border:1px solid rgba(154,82,225,.20);background:rgba(87,42,137,.08);font-size:11px;color:#cdc5d3}.status-box.error{border-color:rgba(251,113,133,.35);color:#ffd1d7}.status-box.success{border-color:rgba(74,222,128,.30);color:#c8ffd9}.campaign-result,.results-panel{margin-top:14px;padding:15px;border-radius:17px;border:1px solid rgba(155,82,225,.20);background:#0b0911}.campaign-result h2{margin:0 0 11px;font-size:20px}.campaign-section{margin-top:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05)}.campaign-section p{margin:6px 0 0;color:#c6bdcd;font-size:11px;line-height:1.5;white-space:pre-line}.campaign-section strong,.campaign-section summary{font-size:11px}.scene-item{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}details summary{cursor:pointer}.result-ready{padding:11px;border-radius:12px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.16);font-size:11px;margin-bottom:12px}.progress-wrap{display:none;margin-top:12px}.progress-meta{display:flex;justify-content:space-between;font-size:10px;color:#a39aaa;margin-bottom:6px}.progress-track{height:7px;border-radius:999px;background:#191522;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#7c3aed,#b832ff,#3b82f6)}.visual-strip{display:flex;gap:10px;overflow-x:auto;margin-top:10px}.visual-card{flex:0 0 145px}.visual-frame{position:relative;aspect-ratio:9/16;border-radius:13px;overflow:hidden}.visual-frame img{width:100%;height:100%;object-fit:cover}.visual-number{position:absolute;top:6px;left:6px;padding:4px 6px;border-radius:7px;background:rgba(0,0,0,.65);font-size:8px}.visual-caption{margin-top:6px;color:#9f96a7;font-size:9px}.video-player{width:100%;margin-top:10px;border-radius:14px}.download-link{display:flex;margin-top:10px;min-height:48px;align-items:center;justify-content:center;border-radius:13px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);color:#d9ffe8;text-decoration:none;font-size:11px;font-weight:900}
+    .mobile-nav{position:fixed;z-index:30;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(92vw,520px);display:grid;grid-template-columns:repeat(4,1fr);padding:8px;border-radius:20px;background:rgba(8,7,13,.9);border:1px solid rgba(150,78,228,.2);backdrop-filter:blur(18px);box-shadow:0 15px 40px rgba(0,0,0,.45)}.mobile-nav button{border:0;background:transparent;color:#837b8e;font-size:9px;font-weight:800;padding:7px 2px}.mobile-nav span{display:block;font-size:16px;margin-bottom:3px}.mobile-nav .active{color:#d8a8ff}
+    @media(min-width:760px){.main{padding:34px 42px 70px}.stage{padding:24px}.marketing-options{grid-template-columns:repeat(4,1fr)}.form-grid.two{grid-template-columns:repeat(2,1fr)}.brain-layout{grid-template-columns:1fr 1fr}.brain-insights{grid-template-columns:1fr 1fr;grid-column:1/-1}.workflow-actions{grid-template-columns:repeat(5,1fr)}.action-card{min-height:105px;flex-direction:column;align-items:flex-start;justify-content:center}.action-copy strong{font-size:12px}.mobile-nav{display:none}}
+    @media(min-width:1100px){.main{padding-left:60px;padding-right:60px}.welcome-block{margin-bottom:30px}.stage{padding:26px}.marketing-choice{min-height:175px}.brain-layout{grid-template-columns:1.05fr .95fr}.score-panel{padding:28px}.score-big{font-size:72px}}
+  
+
+    /* ===== VIRA PREMIUM — MOBILE FINAL REFINEMENT ===== */
+    @media (max-width:759px){
+      body{background:radial-gradient(circle at 18% -6%,rgba(111,38,255,.20),transparent 32%),radial-gradient(circle at 100% 12%,rgba(50,91,255,.11),transparent 28%),#05050a}
+      .main{padding:20px 14px calc(132px + env(safe-area-inset-bottom));max-width:680px}
+      .vira-topbar{margin-bottom:24px;gap:10px}.vira-brand{gap:11px}.vira-mark{width:46px;height:46px;border-radius:14px;font-size:25px}.logo{font-size:26px}.subtitle{font-size:9px}.credit-badge{padding:10px 13px;border-radius:16px;font-size:13px}.credit-badge small{font-size:9px}
+      .welcome-block{margin-bottom:20px}.welcome-block h1{font-size:clamp(31px,9vw,42px);line-height:1.05}.welcome-block p{font-size:13px;line-height:1.45;max-width:92%}
+      .glass-card{border-radius:22px}.stage{padding:16px;margin-top:14px;overflow:hidden}.stage-head{gap:10px;margin-bottom:8px;align-items:flex-start}.stage-icon,.number{width:40px;height:40px;flex:0 0 40px;border-radius:12px}.stage-title{font-size:17px;line-height:1.18}.stage-help{font-size:11px;line-height:1.4}
+      .marketing-options{gap:9px;margin-top:14px}.marketing-choice{min-height:146px;padding:12px 8px;border-radius:17px;gap:7px}.choice-icon{width:52px;height:52px}.choice-icon svg{width:34px;height:34px}.choice-title{font-size:13px}.choice-description{display:none}.choice-check{width:27px;height:27px;right:9px;top:9px}
+      .form-grid{gap:11px}.field-group{min-width:0}.field-group label{font-size:11px}.field-group input,.field-group textarea,.field-group select{font-size:15px;max-width:100%;min-width:0}.field-group input,.field-group select{height:54px;padding-left:14px;padding-right:14px}.field-group textarea{min-height:104px;padding:14px 14px 27px}.with-icon select{padding-left:45px}.field-icon{bottom:16px}.char-count{font-size:9px}.platform-tip{font-size:10px}
+      .primary-cta{min-height:64px;font-size:16px;border-radius:17px}.brain-run{margin-top:13px}.brain-run small{font-size:10px}
+      .brain-layout{gap:10px;margin-top:13px}.score-panel,.brain-message,.insight-box{padding:14px;border-radius:16px}.score-panel{gap:12px;min-width:0}.score-panel>div:first-child{min-width:0;flex:1}.eyebrow{font-size:10px}.score-big{font-size:44px;line-height:.92;white-space:nowrap}.score-big span{font-size:21px}.score-note{font-size:9px;line-height:1.3;margin-top:7px}.score-ring{width:96px;height:96px;flex:0 0 96px}.score-ring strong{font-size:27px}.score-ring small{font-size:9px}.brain-message{font-size:11.5px;line-height:1.48;gap:9px}.spark{font-size:19px}.brain-insights{gap:10px}.insight-box{font-size:11px;line-height:1.5}.insight-title{margin-bottom:8px;font-size:11px}.brain-insight{overflow-wrap:anywhere}
+      .workflow-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:13px}.action-card{min-height:90px;padding:11px;border-radius:15px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;overflow:hidden}.action-icon{width:39px;height:39px;flex:0 0 39px;border-radius:11px;font-size:18px}.action-copy{width:100%;min-width:0}.action-copy strong{font-size:11.5px;line-height:1.2}.action-copy span{font-size:8.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.download-step{grid-column:1/-1;min-height:76px;flex-direction:row;align-items:center}.download-step .action-copy span{-webkit-line-clamp:1}.test-badge{max-width:100%;font-size:8.5px;white-space:normal;line-height:1.3}
+      .campaign-result,.results-panel{padding:13px;border-radius:16px}.campaign-result h2{font-size:18px}.campaign-section p{overflow-wrap:anywhere}.visual-card{flex:0 0 126px;width:126px}.video-player{max-height:58vh}
+      .mobile-nav{bottom:max(4px,env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:520px;padding:5px 7px;border-radius:17px;min-height:58px}.mobile-nav button{padding:4px 2px;font-size:8px;line-height:1.15}.mobile-nav span{font-size:14px;margin-bottom:2px}.main{padding-bottom:calc(72px + env(safe-area-inset-bottom));scroll-padding-bottom:76px}.field-group,.stage,.brain-message,.insight-box,.action-card{scroll-margin-bottom:110px}
+    }
+
+    @media (max-width:390px){
+      .main{padding-left:11px;padding-right:11px}.stage{padding:14px}.credit-badge{padding:9px 10px}.credit-badge small{display:none}.welcome-block h1{font-size:30px}.marketing-choice{min-height:136px}.choice-icon{width:48px;height:48px}.choice-title{font-size:12px}.score-big{font-size:39px}.score-big span{font-size:18px}.score-ring{width:88px;height:88px;flex-basis:88px}.score-ring strong{font-size:24px}.workflow-actions{gap:8px}.action-card{min-height:86px;padding:10px}.stage-title{font-size:16px}
+    }
+
+  
+    /* ===== VIRA PREMIUM — WELCOME + ICONS + MOBILE NAV SAFE AREA ===== */
+    .premium-welcome{position:relative;padding:10px 0 4px}
+    .welcome-kicker{display:inline-flex;align-items:center;gap:7px;margin-bottom:10px;padding:7px 10px;border:1px solid rgba(190,76,255,.25);border-radius:999px;background:rgba(149,45,255,.08);color:#c991ff;font-size:9px;font-weight:900;letter-spacing:1.35px}
+    .welcome-spark{font-size:13px;color:#df67ff;filter:drop-shadow(0 0 8px rgba(202,67,255,.6))}
+    .premium-welcome h1{letter-spacing:-1.5px}
+    .vira-gradient{background:linear-gradient(110deg,#f1c2ff 0%,#bd4cff 42%,#5572ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 28px rgba(149,64,255,.16)}
+    .premium-welcome p{max-width:590px}
+    .premium-inline-icon{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;margin-right:7px;border-radius:7px;background:linear-gradient(145deg,rgba(170,48,255,.18),rgba(45,116,255,.13));border:1px solid rgba(100,128,255,.22);vertical-align:middle}
+    .premium-inline-icon svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .premium-video-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+    @media(max-width:759px){
+      .mobile-nav{bottom:max(2px,env(safe-area-inset-bottom));min-height:54px;padding:4px 7px;border-radius:16px}
+      .mobile-nav button{padding:3px 2px}
+      .mobile-nav span{font-size:13px;margin-bottom:1px}
+      .main{padding-bottom:calc(155px + env(safe-area-inset-bottom)) !important;scroll-padding-bottom:145px}
+      .main::after{content:"";display:block;height:90px;width:100%;pointer-events:none}
+      .field-group,.stage,.brain-message,.insight-box,.action-card{scroll-margin-bottom:145px}
+      .premium-welcome{padding-top:7px}
+      .welcome-kicker{font-size:8px;margin-bottom:9px}
+    }
+
+  .premium-action-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}.premium-action-icon{filter:drop-shadow(0 0 9px rgba(140,70,255,.18))}
+
+/* ===== VIRA PREMIUM POLISH — visual only ===== */
+.premium-inline-icon{
+  width:22px;height:22px;display:inline-grid;place-items:center;
+  flex:0 0 22px;border-radius:7px;
+  background:linear-gradient(145deg,rgba(120,76,255,.18),rgba(38,198,255,.10));
+  border:1px solid rgba(151,115,255,.24);
+  box-shadow:0 0 16px rgba(124,76,255,.15),inset 0 0 10px rgba(90,196,255,.05);
+  vertical-align:middle;margin-right:5px
+}
+.premium-inline-icon svg{
+  width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.45;
+  stroke-linecap:round;stroke-linejoin:round
+}
+.brain-circuit-icon{color:#9b7cff}
+.insight-title.blue{display:flex;align-items:center;gap:4px}
+
+.action-card .premium-action-icon{
+  position:relative;overflow:hidden;
+  background:linear-gradient(145deg,rgba(115,67,255,.16),rgba(31,184,255,.07));
+  border:1px solid rgba(142,104,255,.18);
+  border-radius:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 15px rgba(119,69,255,.10)
+}
+.action-card .premium-action-icon::after{
+  content:"";position:absolute;inset:2px;border-radius:9px;
+  background:radial-gradient(circle at 28% 18%,rgba(255,255,255,.09),transparent 43%);
+  pointer-events:none
+}
+.action-card .premium-action-icon svg{
+  width:21px;height:21px;position:relative;z-index:1;
+  filter:drop-shadow(0 0 5px currentColor)
+}
+.action-card.download-step .premium-action-icon{
+  background:linear-gradient(145deg,rgba(126,70,255,.20),rgba(53,105,255,.10));
+  border-color:rgba(155,111,255,.25)
+}
+
+.premium-test-badge{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(90deg,rgba(100,55,220,.13),rgba(43,113,235,.10),rgba(30,180,194,.08));
+  border:1px solid rgba(132,99,255,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 8px 24px rgba(0,0,0,.10)
+}
+.premium-test-icon{
+  width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px;
+  border-radius:7px;color:#9b7cff;
+  background:rgba(125,77,255,.10);border:1px solid rgba(146,105,255,.18)
+}
+.premium-test-icon svg{
+  width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.65;
+  stroke-linecap:round;stroke-linejoin:round
+}
+
+
+.vira-brain-title{display:flex;align-items:center;gap:8px}
+.vira-brain-logo{
+  width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;
+  border-radius:11px;color:#9d7cff;
+  background:linear-gradient(145deg,rgba(126,73,255,.20),rgba(39,184,255,.09));
+  border:1px solid rgba(153,111,255,.27);
+  box-shadow:0 0 20px rgba(119,71,255,.18),inset 0 1px 0 rgba(255,255,255,.05)
+}
+.vira-brain-logo svg{
+  width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.35;
+  stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 5px rgba(156,124,255,.65))
+}
+
+
+/* ===== VIRA MOBILE — COMPACT END SPACING ===== */
+@media (max-width:759px){
+  .main{
+    padding-bottom:calc(74px + env(safe-area-inset-bottom)) !important;
+    scroll-padding-bottom:74px !important;
+  }
+  .main::after{
+    content:none !important;
+    display:none !important;
+    height:0 !important;
+  }
+}
+
+
+
+/* ===== VIRA — COMPACT PREMIUM VALIDATION CTA ===== */
+.premium-validate{
+  width:100%;
+  min-height:58px !important;
+  margin-top:12px;
+  padding:0 18px !important;
+  display:none;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:10px !important;
+  border-radius:15px !important;
+  border:1px solid rgba(192,106,255,.48) !important;
+  background:linear-gradient(100deg,#7d1cff 0%,#a528ff 48%,#335cff 100%) !important;
+  box-shadow:0 12px 28px rgba(119,43,255,.24),inset 0 1px 0 rgba(255,255,255,.15) !important;
+  color:#fff;
+  text-align:center !important;
+  overflow:hidden;
+  opacity:1 !important;
+}
+.premium-validate .action-copy{
+  width:auto !important;
+  flex:0 1 auto !important;
+  min-width:0;
+}
+.premium-validate .action-copy strong{
+  display:block;
+  font-size:14px !important;
+  line-height:1 !important;
+  font-weight:950;
+  color:#fff;
+  white-space:nowrap;
+}
+.premium-validate-icon{
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  color:#fff;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.20);
+}
+.premium-validate-icon svg{
+  width:16px;
+  height:16px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.premium-validate:not(:disabled):active{
+  transform:scale(.985);
+  filter:brightness(1.05);
+}
+.premium-validate:disabled{
+  cursor:default;
+  opacity:1 !important;
+  border-color:rgba(74,222,128,.42) !important;
+  background:linear-gradient(100deg,rgba(20,125,82,.95),rgba(28,157,105,.95)) !important;
+  box-shadow:0 10px 24px rgba(38,180,113,.16),inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+.premium-validate:disabled .premium-validate-icon{
+  background:rgba(255,255,255,.10);
+  border-color:rgba(255,255,255,.18);
+}
+@media(max-width:759px){
+  .premium-validate{
+    min-height:56px !important;
+    padding:0 15px !important;
+    border-radius:14px !important;
+  }
+  .premium-validate .action-copy strong{font-size:13px !important}
+  .premium-validate-icon{width:26px;height:26px;flex-basis:26px}
+}
+.result-ready{
+  display:flex;
+  align-items:flex-start;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.result-ready strong{display:inline-block}
+.result-ready-copy{display:inline-block;color:#cfc8d6}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main">
+      <header class="vira-topbar">
+        <div class="vira-brand"><div class="vira-mark">V</div><div><div class="logo">VIRA</div><div class="subtitle">CREATIVE STUDIO</div></div></div>
+        <div class="credit-badge">⚡ <span id="creditCount">100</span><small>crédits</small></div>
+      </header>
+
+      <section class="welcome-block premium-welcome">
+        <div class="welcome-kicker"><span class="welcome-spark">✦</span> CREATIVE PLATFORM</div>
+        <h1>Bienvenue sur <span class="vira-gradient">VIRA</span></h1>
+        <p>Transformez vos idées en campagnes performantes.</p>
+      </section>
+
+      <section class="glass-card stage">
+        <div class="stage-head"><span class="stage-icon">◉</span><div><div class="stage-title">1. Objectif</div><p class="stage-help">Choisissez votre objectif principal</p></div></div>
+        <div class="marketing-options" id="marketingOptions">
+          <button type="button" class="marketing-choice" data-type="🛍️ Vendre un produit" data-key="launch"><div class="choice-icon launch"><svg viewBox="0 0 64 64"><path d="M12 29v8c0 3 2 5 5 5h7l20 10V14L24 24h-7c-3 0-5 2-5 5Z"/><path d="M24 42l4 12h8l-4-9"/><path d="M49 24c3 2 5 5 5 8s-2 6-5 8"/></svg></div><div class="choice-title">Lancement<br>de produit</div><div class="choice-check">✓</div></button>
+          <button type="button" class="marketing-choice" data-type="📱 Réseaux sociaux" data-key="brand"><div class="choice-icon brand"><svg viewBox="0 0 64 64"><circle cx="29" cy="35" r="19"/><circle cx="29" cy="35" r="11"/><circle cx="29" cy="35" r="3"/><path d="M29 35L47 17"/><path d="M43 13h8v8"/><path d="M47 17l7-7"/></svg></div><div class="choice-title">Notoriété<br>de marque</div><div class="choice-check">✓</div></button>
+          <button type="button" class="marketing-choice" data-type="💼 Promouvoir un service" data-key="leads"><div class="choice-icon leads"><svg viewBox="0 0 64 64"><path d="M10 52h44"/><rect x="14" y="34" width="8" height="18" rx="2"/><rect x="27" y="25" width="8" height="27" rx="2"/><rect x="40" y="15" width="8" height="37" rx="2"/></svg></div><div class="choice-title">Génération<br>de leads</div><div class="choice-check">✓</div></button>
+          <button type="button" class="marketing-choice" data-type="📢 Créer une publicité" data-key="sale"><div class="choice-icon sale"><svg viewBox="0 0 64 64"><path d="M10 14h7l4 27h27l6-18H20"/><circle cx="27" cy="50" r="3"/><circle cx="47" cy="50" r="3"/></svg></div><div class="choice-title">Promo /<br>Vente spéciale</div><div class="choice-check">✓</div></button>
+        </div>
+      </section>
+
+      <section class="glass-card stage">
+        <div class="stage-head"><span class="stage-icon">✎</span><div><div class="stage-title">2. Informations</div><p class="stage-help">Plus vous êtes précis, meilleure sera l’analyse.</p></div></div>
+        <div class="form-grid">
+          <div class="field-group"><label for="prompt">Description de votre produit ou service</label><textarea id="prompt" maxlength="500" placeholder="Ex : Une application pour créer des campagnes complètes en quelques secondes."></textarea><div class="char-count"><span id="promptCount">0</span>/500</div></div>
+        </div>
+        <div class="form-grid two">
+          <div class="field-group"><label for="targetAudience">Audience cible</label><input id="targetAudience" type="text" placeholder="PME, entrepreneurs, créateurs, agences." /></div>
+          <div class="field-group"><label for="marketingGoal">Objectif principal</label><input id="marketingGoal" type="text" placeholder="Obtenir plus de clients et augmenter les conversions." /></div>
+          <div class="field-group with-icon"><label for="campaignTone">Ton de la campagne</label><div class="field-icon" id="tonePremiumIcon"></div><select id="campaignTone"><option value="Professionnel">Professionnel</option><option value="Dynamique">Dynamique</option><option value="Amical">Amical</option><option value="Premium">Premium</option><option value="Inspirant">Inspirant</option></select></div>
+          <div class="field-group with-icon"><label for="platform">Plateforme principale</label><div class="field-icon" id="platformPremiumIcon"></div><select id="platform"><option value="">Choisir une plateforme</option><option value="Instagram">Instagram</option><option value="Facebook">Facebook</option><option value="TikTok">TikTok</option><option value="YouTube">YouTube</option><option value="LinkedIn">LinkedIn</option></select></div>
+        </div>
+        <div id="platformTip" class="platform-tip"></div>
+        <button id="brainAnalyzeBtn" class="primary-cta brain-run" type="button">✦ Analyser ma campagne<small>Obtenez votre Growth Score et des recommandations personnalisées</small></button>
+      </section>
+
+      <section class="glass-card stage">
+        <div class="stage-head"><div><div class="stage-title vira-brain-title"><span class="vira-brain-logo" aria-hidden="true"><svg viewBox="0 0 32 32">
+<path d="M12.3 5.5A5 5 0 0 0 5.7 10a5.2 5.2 0 0 0-1.5 8.8 5.1 5.1 0 0 0 5 7.7c1.2 1.3 3.1 1.7 4.8.9V4.8c-.6-.2-1.2 0-1.7.7Z"/>
+<path d="M19.7 5.5A5 5 0 0 1 26.3 10a5.2 5.2 0 0 1 1.5 8.8 5.1 5.1 0 0 1-5 7.7c-1.2 1.3-3.1 1.7-4.8.9V4.8c.6-.2 1.2 0 1.7.7Z"/>
+<path d="M9 11h5M8 17h6M23 11h-5M24 17h-6M11 22h3M21 22h-3"/>
+<circle cx="8" cy="11" r="1"/><circle cx="7" cy="17" r="1"/><circle cx="10" cy="22" r="1"/>
+<circle cx="24" cy="11" r="1"/><circle cx="25" cy="17" r="1"/><circle cx="22" cy="22" r="1"/>
+</svg></span><span>3. VIRA Brain</span></div><p class="stage-help">Analyse de croissance</p></div></div>
+        <div class="brain-layout">
+          <div class="score-panel"><div><div class="eyebrow">GROWTH SCORE</div><div class="score-big"><span id="growthScoreNumber">60</span><span>/100</span></div><div class="score-note">Excellent potentiel de croissance</div></div><div class="score-ring" id="growthScoreCircle"><div><strong id="growthScoreMini">60</strong><small>/100</small></div></div></div>
+          <div class="brain-message"><span class="spark">✦</span><div>Votre projet a un fort potentiel sur votre marché. En appliquant les recommandations de VIRA Brain, vous pouvez accélérer l’acquisition de clients et maximiser vos résultats rapidement.</div></div>
+          <div class="brain-insights">
+            <div class="insight-box opportunity"><div class="insight-title green">✦ OPPORTUNITÉS DÉTECTÉES</div><div class="brain-insight" id="brainOpportunity">Choisissez un objectif pour lancer l’analyse.</div></div>
+            <div class="insight-box action"><div class="insight-title blue"><span class="premium-inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 3h8v8"/><path d="M21 3l-9 9"/><path d="M11 5H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-5"/></svg></span>ACTIONS RECOMMANDÉES</div><div class="brain-insight" id="brainRecommendedAction">VIRA vous proposera l’action prioritaire à réaliser.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="glass-card stage">
+        <div class="stage-head"><span class="stage-icon">✦</span><div><div class="stage-title">4. Créer votre campagne</div><p class="stage-help">Tout ce qu’il faut pour passer de l’idée au contenu final.</p></div></div>
+        <div class="workflow-actions">
+          <button id="scenario" class="action-card scenario-step" type="button"><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></span><span class="action-copy"><strong>Scénario & Copy</strong><span>Générez votre scénario et vos textes</span></span></button>
+          <button id="generate" class="action-card visuals" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5.5 17 4.2-4 3.1 2.7 2.5-2.3 3.2 3.6"/><path d="M18.5 2.5v3M17 4h3"/></svg></span><span class="action-copy"><strong>Visuels</strong><span>Créez des visuels professionnels</span></span></button>
+          <button id="testVoice" class="action-card voice" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6.5 11a5.5 5.5 0 0 0 11 0M12 16.5V21M9 21h6"/><path d="M4 9v4M20 9v4"/></svg></span><span class="action-copy"><strong>Voix & Audio</strong><span>Ajoutez voix off et musique</span></span></button>
+          <button id="video" class="action-card video" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="3"/><path d="m9 9 4.5 3L9 15Z"/><path d="m17 9 4-2v10l-4-2"/></svg></span><span class="action-copy"><strong>Vidéo finale</strong><span>Assemblez votre vidéo complète</span></span></button>
+          <button class="action-card download-step" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="m8 10 4 4 4-4"/><path d="M5 17v2.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V17"/></svg></span><span class="action-copy"><strong>Télécharger</strong><span>Téléchargez et partagez partout</span></span></button>
+        </div>
+        <div class="test-badge premium-test-badge"><span class="premium-test-icon" aria-hidden="true"><svg viewBox="0 0 24 24">
+<path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/>
+<path d="M7.8 15h8.4"/><circle cx="10" cy="17.5" r=".7"/><circle cx="14.5" cy="13" r=".6"/>
+</svg></span><span>Visuels et vidéo en mode test gratuit par défaut</span></div>
+        <button id="validateScenario" class="action-card validate premium-validate" type="button" style="display:none">
+  <span class="premium-validate-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path d="m7.8 12.2 2.7 2.7 5.8-6"/></svg>
+  </span>
+  <span class="action-copy"><strong>Valider le scénario</strong></span>
+</button>
+        <div id="scenarioStatus" class="status-box" aria-live="polite"></div><div id="scenarioResult" class="campaign-result"></div>
+        <div id="progressWrap" class="progress-wrap"><div class="progress-meta"><span id="progressLabel">Préparation</span><strong id="progressPercent">0%</strong></div><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div></div>
+        <div id="status" class="status-box" aria-live="polite"></div><div id="result" class="visual-results"></div><div id="videoStatus" class="status-box" aria-live="polite"></div><div id="videoResult" class="video-result"></div>
+      </section>
+    </main>
+  </div>
+  <nav class="mobile-nav"><button class="active" type="button"><span>⌂</span>Accueil</button><button type="button"><span>▣</span>Campagnes</button><button type="button"><span>▤</span>Contenus</button><button type="button"><span>⚙</span>Réglages</button></nav>
+  <script>
+  (() => {
+    "use strict";
+
+    // VIRA reste économique pendant la construction.
+    // Passe ces deux constantes à false quand tu veux utiliser les vraies générations.
+    const FREE_VISUAL_MODE = true;
+    const FREE_VIDEO_MODE = true;
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      prompt: $("prompt"),
+      promptCount: $("promptCount"),
+      audience: $("targetAudience"),
+      goal: $("marketingGoal"),
+      tone: $("campaignTone"),
+      platform: $("platform"),
+      platformTip: $("platformTip"),
+      toneIcon: $("tonePremiumIcon"),
+      platformIcon: $("platformPremiumIcon"),
+      scenarioBtn: $("scenario"),
+      scenarioStatus: $("scenarioStatus"),
+      scenarioResult: $("scenarioResult"),
+      validateBtn: $("validateScenario"),
+      voiceBtn: $("testVoice"),
+      visualBtn: $("generate"),
+      videoBtn: $("video"),
+      status: $("status"),
+      result: $("result"),
+      videoStatus: $("videoStatus"),
+      videoResult: $("videoResult"),
+      progressWrap: $("progressWrap"),
+      progressLabel: $("progressLabel"),
+      progressPercent: $("progressPercent"),
+      progressFill: $("progressFill"),
+      brainBtn: $("brainAnalyzeBtn"),
+      score: $("growthScoreNumber"),
+      scoreCircle: $("growthScoreCircle"),
+      opportunity: $("brainOpportunity"),
+      recommended: $("brainRecommendedAction"),
+      creditCount: $("creditCount")
+    };
+
+    let selectedMarketingType = localStorage.getItem("viraMarketingType") || "";
+    let rawScenario = localStorage.getItem("viraScenario") || "";
+    let generatedImages = [];
+    let finalVideoUrl = "";
+
+    const marketingMeta = {
+      "🛍️ Vendre un produit": {
+        score: 78,
+        opportunity: "✦ Opportunité : présenter clairement le bénéfice principal du produit et créer un désir d’achat rapide.",
+        action: "→ Construisez une campagne produit avec hook, bénéfice concret, preuve et appel à l’achat.",
+        prompt: "Ex : Je lance une nouvelle paire de chaussures de sport légère et confortable..."
+      },
+      "📱 Réseaux sociaux": {
+        score: 74,
+        opportunity: "✦ Opportunité : augmenter la portée et l’engagement grâce à un contenu court et partageable.",
+        action: "→ Priorisez une accroche très forte et un contenu facile à commenter, enregistrer ou partager.",
+        prompt: "Ex : Je veux développer la visibilité de ma marque sur les réseaux sociaux..."
+      },
+      "💼 Promouvoir un service": {
+        score: 82,
+        opportunity: "✦ Opportunité : transformer un problème client précis en demande de contact ou réservation.",
+        action: "→ Montrez le problème, votre solution, le résultat attendu et terminez par une prise de contact claire.",
+        prompt: "Ex : Je veux promouvoir mon service de nettoyage résidentiel auprès de propriétaires..."
+      },
+      "📢 Créer une publicité": {
+        score: 86,
+        opportunity: "✦ Opportunité : concentrer le message sur une offre claire et une action mesurable.",
+        action: "→ Créez une publicité orientée conversion avec hook, solution, bénéfice et appel à l’action.",
+        prompt: "Ex : Je veux créer une publicité pour attirer de nouveaux clients vers mon entreprise..."
+      }
+    };
+
+    const icons = {
+      globe: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a15 15 0 0 1 0 18"></path><path d="M12 3a15 15 0 0 0 0 18"></path></svg>`,
+      Instagram: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>`,
+      Facebook: `<svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v6h4v-6h3l1-4h-4V9c0-.7.3-1 1-1z"></path></svg>`,
+      TikTok: `<svg viewBox="0 0 24 24"><path d="M14 4v10a4 4 0 1 1-4-4"></path><path d="M14 4c1 3 3 4 6 4"></path></svg>`,
+      YouTube: `<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="4"></rect><path d="m10 9 5 3-5 3z"></path></svg>`,
+      LinkedIn: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M7 10v7"></path><path d="M7 7h.01"></path><path d="M11 17v-4a3 3 0 0 1 6 0v4"></path></svg>`,
+      Professionnel: `<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg>`,
+      Dynamique: `<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"></path></svg>`,
+      Amical: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><path d="M9 9h.01M15 9h.01"></path></svg>`,
+      Premium: `<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9l4-6z"></path><path d="M2 9h20M9 3l3 6 3-6"></path></svg>`,
+      Inspirant: `<svg viewBox="0 0 24 24"><path d="m12 2 2.8 6.2L21 11l-6.2 2.8L12 20l-2.8-6.2L3 11l6.2-2.8L12 2z"></path></svg>`
+    };
+
+    function escapeHtml(value = "") {
+      return String(value).replace(/[&<>'"]/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));
+    }
+
+    function setStatus(el, message = "", type = "") {
+      el.className = "status-box" + (type ? ` ${type}` : "");
+      el.innerHTML = message;
+    }
+
+    function setProgress(percent, label) {
+      const safe = Math.max(0, Math.min(100, Number(percent) || 0));
+      els.progressWrap.style.display = "block";
+      els.progressFill.style.width = `${safe}%`;
+      els.progressPercent.textContent = `${Math.round(safe)}%`;
+      els.progressLabel.textContent = label || "Préparation";
+    }
+
+    function hideProgress(delay = 700) {
+      setTimeout(() => { els.progressWrap.style.display = "none"; }, delay);
+    }
+
+    function currentChoice() {
+      return document.querySelector(".marketing-choice.active");
+    }
+
+    function updateBrain(animated = false) {
+      const meta = marketingMeta[selectedMarketingType];
+      let score = meta?.score || 60;
+      const prompt = els.prompt.value.trim();
+      const audience = els.audience.value.trim();
+      const goal = els.goal.value.trim();
+      const platform = els.platform.value;
+
+      if (prompt.length >= 20) score += 4;
+      if (audience.length >= 5) score += 4;
+      if (goal.length >= 5) score += 4;
+      if (platform) score += 3;
+      score = Math.min(score, 100);
+
+      const render = () => {
+        els.score.textContent = score;
+        els.scoreCircle.style.setProperty("--score-deg", `${score * 3.6}deg`);
+        els.opportunity.textContent = meta?.opportunity || "✦ Choisissez un objectif pour lancer l’analyse.";
+        els.recommended.textContent = meta?.action || "→ VIRA vous proposera l’action prioritaire à réaliser.";
+      };
+
+      if (animated) {
+        els.brainBtn.disabled = true;
+        els.brainBtn.textContent = "✦ Analyse...";
+        setTimeout(() => {
+          render();
+          els.brainBtn.disabled = false;
+          els.brainBtn.textContent = "✦ Analyser ma campagne";
+        }, 550);
+      } else render();
+    }
+
+    function updateToneIcon() { els.toneIcon.innerHTML = icons[els.tone.value] || icons.Professionnel; }
+    function updatePlatformIcon() { els.platformIcon.innerHTML = icons[els.platform.value] || icons.globe; }
+
+    function updatePlatformTip() {
+      const tips = {
+        TikTok: "TikTok : hook immédiat, rythme rapide et scènes très visuelles.",
+        Instagram: "Instagram : visuel fort, format Reel et engagement rapide.",
+        Facebook: "Facebook : offre claire, confiance et conversion.",
+        YouTube: "YouTube : narration, rétention et appel à l’action.",
+        LinkedIn: "LinkedIn : crédibilité, expertise et audience professionnelle."
+      };
+      if (tips[els.platform.value]) {
+        els.platformTip.textContent = tips[els.platform.value];
+        els.platformTip.style.display = "block";
+      } else {
+        els.platformTip.textContent = "";
+        els.platformTip.style.display = "none";
+      }
+    }
+
+    function saveForm() {
+      localStorage.setItem("viraIdea", els.prompt.value);
+      localStorage.setItem("viraMarketingGoal", els.goal.value);
+      localStorage.setItem("viraTargetAudience", els.audience.value);
+      localStorage.setItem("viraPlatform", els.platform.value);
+      localStorage.setItem("viraCampaignTone", els.tone.value);
+      if (selectedMarketingType) localStorage.setItem("viraMarketingType", selectedMarketingType);
+    }
+
+    function restoreForm() {
+      els.prompt.value = localStorage.getItem("viraIdea") || "";
+      els.goal.value = localStorage.getItem("viraMarketingGoal") || "";
+      els.audience.value = localStorage.getItem("viraTargetAudience") || "";
+      els.platform.value = localStorage.getItem("viraPlatform") || "";
+      els.tone.value = localStorage.getItem("viraCampaignTone") || "Professionnel";
+      els.promptCount.textContent = els.prompt.value.length;
+
+      document.querySelectorAll(".marketing-choice").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.type === selectedMarketingType);
+      });
+      if (selectedMarketingType && marketingMeta[selectedMarketingType]) {
+        els.prompt.placeholder = marketingMeta[selectedMarketingType].prompt;
+      }
+      updateToneIcon();
+      updatePlatformIcon();
+      updatePlatformTip();
+      updateBrain();
+    }
+
+    function resetGeneratedFlow() {
+      rawScenario = "";
+      generatedImages = [];
+      finalVideoUrl = "";
+      localStorage.removeItem("viraScenario");
+      els.scenarioResult.innerHTML = "";
+      els.result.innerHTML = "";
+      els.videoResult.innerHTML = "";
+      setStatus(els.scenarioStatus, "");
+      setStatus(els.status, "");
+      setStatus(els.videoStatus, "");
+      els.validateBtn.style.display = "none";
+      els.voiceBtn.style.display = "flex"; els.voiceBtn.disabled = false; els.voiceBtn.disabled = true;
+      els.visualBtn.style.display = "flex"; els.visualBtn.disabled = false; els.visualBtn.disabled = true;
+      els.videoBtn.style.display = "flex"; els.videoBtn.disabled = false; els.videoBtn.disabled = true;
+    }
+
+    function extractSection(text, heading, allHeadings) {
+      const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['’]");
+      const others = allHeadings.filter(h => h !== heading).map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['’]")).join("|");
+      const re = new RegExp(`${escaped}\\s*:?\\s*([\\s\\S]*?)(?=\\n\\s*(?:${others})\\s*:?|$)`, "i");
+      return text.match(re)?.[1]?.trim() || "";
+    }
+
+    function parseScenario(text) {
+      const clean = text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "").replace(/SCENE/gi, "SCÈNE").trim();
+      const headers = ["TITRE","OBJECTIF","PUBLIC CIBLE","ACCROCHE","TEXTE PUBLICATION","HASHTAGS","SCÈNE 1","SCÈNE 2","SCÈNE 3","SCÈNE 4","SCÈNE 5","NARRATION","APPEL À L'ACTION","APPEL À L’ACTION","PROMPT VISUEL","STYLE"];
+      const data = {
+        title: extractSection(clean,"TITRE",headers),
+        objective: extractSection(clean,"OBJECTIF",headers),
+        target: extractSection(clean,"PUBLIC CIBLE",headers),
+        hook: extractSection(clean,"ACCROCHE",headers),
+        publication: extractSection(clean,"TEXTE PUBLICATION",headers),
+        hashtags: extractSection(clean,"HASHTAGS",headers),
+        narration: extractSection(clean,"NARRATION",headers),
+        cta: extractSection(clean,"APPEL À L'ACTION",headers) || extractSection(clean,"APPEL À L’ACTION",headers),
+        visualPrompt: extractSection(clean,"PROMPT VISUEL",headers),
+        style: extractSection(clean,"STYLE",headers),
+        scenes: []
+      };
+      for (let i=1;i<=5;i++) data.scenes.push(extractSection(clean,`SCÈNE ${i}`,headers));
+      return data;
+    }
+
+    function renderScenario(text) {
+      rawScenario = text.trim();
+      localStorage.setItem("viraScenario", rawScenario);
+      const d = parseScenario(rawScenario);
+      els.scenarioResult.innerHTML = `
+        <div class="result-ready"><strong>✅ Votre campagne est prête</strong><span class="result-ready-copy">Stratégie, contenu et 5 scènes générés.</span></div>
+        <h2>${escapeHtml(d.title || "Campagne VIRA")}</h2>
+        <div class="campaign-section"><strong>◎ Objectif</strong><p>${escapeHtml(d.objective || els.goal.value)}</p></div>
+        <div class="campaign-section"><strong>◇ Public cible</strong><p>${escapeHtml(d.target || els.audience.value)}</p></div>
+        <div class="campaign-section"><strong>✦ Accroche</strong><p>${escapeHtml(d.hook)}</p></div>
+        <div class="campaign-section"><strong>▤ Texte de publication</strong><p>${escapeHtml(d.publication)}</p></div>
+        <div class="campaign-section"><strong># Hashtags</strong><p>${escapeHtml(d.hashtags)}</p></div>
+        <details class="campaign-section"><summary>▶ Scènes (${d.scenes.filter(Boolean).length}/5)</summary>${d.scenes.map((s,i)=>`<div class="scene-item"><strong>Scène ${i+1}</strong><p>${escapeHtml(s || "Scène à compléter")}</p></div>`).join("")}</details>
+        <details class="campaign-section"><summary>◉ Narration</summary><p>${escapeHtml(d.narration)}</p></details>
+        <div class="campaign-section"><strong>↗ Appel à l’action</strong><p>${escapeHtml(d.cta)}</p></div>
+        <details class="campaign-section"><summary>◇ Prompt visuel</summary><p>${escapeHtml(d.visualPrompt)}</p></details>
+        <details class="campaign-section"><summary>✦ Style</summary><p>${escapeHtml(d.style)}</p></details>`;
+      els.validateBtn.style.display = "flex";
+      els.voiceBtn.style.display = "flex";
+    }
+
+    function makeTestImage(scene, index) {
+      const sceneLabel = `SCÈNE ${index + 1}`;
+      const short = (scene || "Visuel marketing VIRA").replace(/[<>&]/g, "").slice(0, 46);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#181126"/><stop offset="1" stop-color="#08070c"/></linearGradient><radialGradient id="r"><stop stop-color="#7c3aed" stop-opacity=".40"/><stop offset="1" stop-color="#7c3aed" stop-opacity="0"/></radialGradient></defs>
+        <rect width="720" height="1280" fill="url(#g)"/><circle cx="570" cy="170" r="330" fill="url(#r)"/>
+        <rect x="55" y="70" width="610" height="1140" rx="48" fill="none" stroke="#a855f7" stroke-opacity=".28" stroke-width="2"/>
+        <text x="360" y="550" text-anchor="middle" fill="#c084fc" font-family="Arial" font-size="38" font-weight="700">${sceneLabel}</text>
+        <text x="360" y="625" text-anchor="middle" fill="#ffffff" font-family="Arial" font-size="31" font-weight="700">VIRA PREMIUM</text>
+        <text x="360" y="690" text-anchor="middle" fill="#9d98aa" font-family="Arial" font-size="20">${escapeHtml(short)}</text>
+        <text x="360" y="1120" text-anchor="middle" fill="#777183" font-family="Arial" font-size="17">MODE TEST GRATUIT</text>
+      </svg>`;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
+    function renderImages(images, scenes, test = false) {
+      els.result.innerHTML = `<div class="results-panel"><h3>✦ Visuels de campagne</h3><div class="meta">${images.length}/5 scènes ${test ? "• mode test gratuit" : "• générées par IA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></div>`;
+    }
+
+    async function generateRealImages(scenes, visualPrompt, style) {
+      const images = [];
+      for (let i=0;i<5;i++) {
+        setProgress(15 + i*14, `Création du visuel ${i+1}/5`);
+        const prompt = `${visualPrompt || "Professional premium marketing visual"}. Scene ${i+1}: ${scenes[i]}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Maintain visual continuity with the other scenes. No text or typography in the image.`;
+        const response = await fetch("/api/images/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,size:"1024x1536",quality:"low"})});
+        const data = await response.json();
+        if (!response.ok) throw new Error(data?.error || `Erreur visuel ${i+1}`);
+        const url = data?.url || data?.image?.url;
+        if (!url) throw new Error(`Aucune image reçue pour la scène ${i+1}.`);
+        images.push(url);
+      }
+      return images;
+    }
+
+    async function waitForRunwayTask(taskId, sceneNumber) {
+      for (let attempt=0; attempt<90; attempt++) {
+        await new Promise(r => setTimeout(r, 5000));
+        const r = await fetch(`/api/video/${encodeURIComponent(taskId)}/status`);
+        const d = await r.json();
+        if (!r.ok) throw new Error(d?.error || `Erreur vidéo scène ${sceneNumber}`);
+        const status = String(d.status || "").toUpperCase();
+        if (["SUCCEEDED","COMPLETED","SUCCESS"].includes(status)) {
+          const url = Array.isArray(d.output) ? d.output[0] : null;
+          if (!url) throw new Error(`Clip ${sceneNumber} terminé sans URL.`);
+          return url;
+        }
+        if (["FAILED","CANCELED","CANCELLED"].includes(status)) throw new Error(`La scène ${sceneNumber} a échoué.`);
+        setProgress(30 + Math.min(48, attempt*.7), `Vidéo scène ${sceneNumber}/5 • ${d.status || "en cours"}`);
+      }
+      throw new Error(`La scène ${sceneNumber} prend trop de temps.`);
+    }
+
+    async function createFinalVideo() {
+      const d = parseScenario(rawScenario);
+      setProgress(8, "Préparation des 5 scènes");
+      const start = await fetch("/api/video/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:rawScenario,images:generatedImages})});
+      const data = await start.json();
+      if (!start.ok) throw new Error(data?.error || "Impossible de lancer la vidéo.");
+
+      const clips = Array.isArray(data.clips) ? data.clips : [];
+      if (clips.length !== 5) throw new Error("VIRA n’a pas reçu 5 clips vidéo.");
+      if (clips.some(c => !c.taskId)) {
+        throw new Error("Les clips sont préparés, mais Runway est encore en mode PREPARE sur le serveur. Active RUNWAY_EXECUTION=generate pour produire la vraie vidéo.");
+      }
+
+      const videoUrls = [];
+      for (let i=0;i<5;i++) videoUrls.push(await waitForRunwayTask(clips[i].taskId, i+1));
+      setProgress(82, "Assemblage des 5 clips");
+
+      const assemble = await fetch("/api/video/assemble", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({videoUrls})});
+      if (!assemble.ok) {
+        let msg = "Impossible d’assembler la vidéo.";
+        try { const e = await assemble.json(); msg = e?.error || msg; } catch {}
+        throw new Error(msg);
+      }
+      let videoBlob = await assemble.blob();
+
+      const narration = d.narration.trim();
+      if (narration) {
+        setProgress(90, "Ajout de la narration");
+        const voice = await fetch("/api/voice/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:narration})});
+        if (voice.ok) {
+          const audioBlob = await voice.blob();
+          const fd = new FormData();
+          fd.append("video", videoBlob, "vira-video.mp4");
+          fd.append("audio", audioBlob, "vira-voice.mp3");
+          const merge = await fetch("/api/video/merge", {method:"POST",body:fd});
+          if (merge.ok) videoBlob = await merge.blob();
+        }
+      }
+
+      setProgress(100, "Vidéo terminée");
+      return URL.createObjectURL(videoBlob);
+    }
+
+    document.querySelectorAll(".marketing-choice").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".marketing-choice").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedMarketingType = btn.dataset.type;
+        localStorage.setItem("viraMarketingType", selectedMarketingType);
+        els.prompt.placeholder = marketingMeta[selectedMarketingType]?.prompt || els.prompt.placeholder;
+        resetGeneratedFlow();
+        saveForm();
+        updateBrain();
+      });
+    });
+
+    els.prompt.addEventListener("input", () => { els.promptCount.textContent = els.prompt.value.length; saveForm(); updateBrain(); });
+    els.audience.addEventListener("input", () => { saveForm(); updateBrain(); });
+    els.goal.addEventListener("input", () => { saveForm(); updateBrain(); });
+    els.tone.addEventListener("change", () => { updateToneIcon(); saveForm(); });
+    els.platform.addEventListener("change", () => { updatePlatformIcon(); updatePlatformTip(); saveForm(); updateBrain(); });
+    els.brainBtn.addEventListener("click", () => updateBrain(true));
+
+    els.scenarioBtn.addEventListener("click", async () => {
+      const idea = els.prompt.value.trim();
+      const audience = els.audience.value.trim();
+      const goal = els.goal.value.trim();
+      const platform = els.platform.value;
+      if (!selectedMarketingType) return setStatus(els.scenarioStatus,"⚠️ Choisissez d’abord votre objectif.","error");
+      if (!idea) return setStatus(els.scenarioStatus,"⚠️ Décrivez votre produit ou votre service.","error");
+      if (!audience || !goal || !platform) return setStatus(els.scenarioStatus,"⚠️ Complétez l’audience, l’objectif principal et la plateforme.","error");
+
+      saveForm();
+      els.scenarioBtn.disabled = true;
+      els.scenarioResult.innerHTML = "";
+      setStatus(els.scenarioStatus,`<div class="loader"><div class="loader-star">✦</div><div><strong>VIRA prépare votre campagne</strong><br><span style="color:#938d9f">Analyse de l’offre, de l’audience et de la plateforme…</span></div><div class="loader-dots"><i></i><i></i><i></i></div></div>`);
+      setProgress(8,"Analyse de la campagne");
+
+      try {
+        const response = await fetch("/api/scenario/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idea,marketingType:selectedMarketingType,businessName:"",marketingGoal:goal,targetAudience:audience,platform,campaignTone:els.tone.value})});
+        const data = await response.json();
+        if (!response.ok) throw new Error(data?.error?.message || data?.error || "Erreur de génération de campagne.");
+        const scenario = data?.scenario || data?.output_text || "";
+        if (!scenario.trim()) throw new Error("Aucun scénario reçu du serveur.");
+        setProgress(100,"Campagne prête");
+        renderScenario(scenario);
+        setStatus(els.scenarioStatus,"✅ Campagne générée. Vérifiez-la puis validez le scénario.","success");
+      } catch (error) {
+        console.error(error);
+        setStatus(els.scenarioStatus,`❌ ${escapeHtml(error.message || "Erreur inconnue")}`,"error");
+      } finally {
+        els.scenarioBtn.disabled = false;
+        hideProgress();
+      }
+    });
+
+    els.validateBtn.addEventListener("click", () => {
+      if (!rawScenario) return setStatus(els.scenarioStatus,"⚠️ Aucun scénario à valider.","error");
+      els.validateBtn.querySelector("strong").textContent = "Scénario validé ✓";
+      els.validateBtn.disabled = true;
+      els.visualBtn.style.display = "flex";
+      els.voiceBtn.style.display = "flex";
+      setStatus(els.scenarioStatus,"✅ Scénario validé. Vous pouvez maintenant créer les visuels.","success");
+    });
+
+    els.voiceBtn.addEventListener("click", async () => {
+      if (!rawScenario) return;
+      const narration = parseScenario(rawScenario).narration || rawScenario;
+      const shortText = narration.trim().split(/\s+/).slice(0,18).join(" ");
+      els.voiceBtn.disabled = true;
+      setStatus(els.status,"◉ Génération de l’aperçu voix…");
+      try {
+        const response = await fetch("/api/voice/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:shortText})});
+        if (!response.ok) throw new Error("Impossible de générer la voix.");
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+        setStatus(els.status,"✅ Aperçu voix généré.","success");
+      } catch (error) {
+        setStatus(els.status,`❌ ${escapeHtml(error.message)}`,"error");
+      } finally { els.voiceBtn.disabled = false; }
+    });
+
+    els.visualBtn.addEventListener("click", async () => {
+      if (!rawScenario) return setStatus(els.status,"⚠️ Créez et validez d’abord un scénario.","error");
+      const d = parseScenario(rawScenario);
+      const scenes = d.scenes.filter(Boolean);
+      if (scenes.length !== 5) return setStatus(els.status,`⚠️ VIRA a besoin de 5 scènes. Scènes détectées : ${scenes.length}.`,"error");
+
+      els.visualBtn.disabled = true;
+      els.result.innerHTML = "";
+      els.videoResult.innerHTML = "";
+      els.videoBtn.style.display = "flex"; els.videoBtn.disabled = true;
+      setProgress(10,"Préparation des visuels");
+      try {
+        if (FREE_VISUAL_MODE) {
+          for (let i=0;i<5;i++) { setProgress(18 + i*16,`Simulation du visuel ${i+1}/5`); await new Promise(r=>setTimeout(r,180)); }
+          generatedImages = scenes.map(makeTestImage);
+          setProgress(100,"5 visuels prêts");
+          renderImages(generatedImages, scenes, true);
+          setStatus(els.status,"✅ 5 visuels Premium simulés gratuitement. Aucun crédit image utilisé.","success");
+        } else {
+          generatedImages = await generateRealImages(scenes,d.visualPrompt,d.style);
+          setProgress(100,"5 visuels prêts");
+          renderImages(generatedImages,scenes,false);
+          setStatus(els.status,"✅ 5 visuels IA générés.","success");
+        }
+        els.videoBtn.style.display = "flex";
+      } catch (error) {
+        console.error(error);
+        setStatus(els.status,`❌ ${escapeHtml(error.message || "Erreur de génération des visuels")}`,"error");
+      } finally {
+        els.visualBtn.disabled = false;
+        hideProgress(900);
+      }
+    });
+
+    els.videoBtn.addEventListener("click", async () => {
+      if (generatedImages.length !== 5) return setStatus(els.videoStatus,"⚠️ Créez d’abord les 5 visuels.","error");
+      els.videoBtn.disabled = true;
+      els.videoResult.innerHTML = "";
+      setProgress(5,"Préparation de la vidéo");
+      try {
+        if (FREE_VIDEO_MODE) {
+          const steps = [18,34,51,67,82,94,100];
+          for (const p of steps) { setProgress(p,p<100?"Simulation de la vidéo Premium":"Simulation terminée"); await new Promise(r=>setTimeout(r,240)); }
+          els.videoResult.innerHTML = `<div class="results-panel"><h3>🎬 Vidéo prête pour le test</h3><div class="meta">Mode test gratuit : aucune génération vidéo payante n’a été lancée.</div><div class="campaign-section"><strong>✓ Pipeline validé</strong><p>Les 5 visuels sont prêts. Pour générer la vraie vidéo, passez FREE_VIDEO_MODE à false et activez Runway sur le serveur.</p></div></div>`;
+          setStatus(els.videoStatus,"✅ Simulation vidéo terminée sans utiliser de crédits vidéo.","success");
+        } else {
+          finalVideoUrl = await createFinalVideo();
+          els.videoResult.innerHTML = `<div class="results-panel"><h3>🎬 Vidéo finale VIRA</h3><div class="meta">5 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video><a class="download-link" href="${finalVideoUrl}" download="VIRA-campagne-final.mp4">↓ Télécharger la vidéo finale</a></div>`;
+          setStatus(els.videoStatus,"✅ Vidéo finale créée avec succès.","success");
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(els.videoStatus,`❌ ${escapeHtml(error.message || "Erreur de création vidéo")}`,"error");
+      } finally {
+        els.videoBtn.disabled = false;
+        hideProgress(1200);
+      }
+    });
+
+    // Navigation visuelle uniquement pour l’instant : elle ne casse jamais le workflow principal.
+    [...document.querySelectorAll(".sidebar-link"), ...document.querySelectorAll(".mobile-nav button")].forEach(btn => {
+      btn.addEventListener("click", () => {
+        const group = btn.closest(".sidebar-nav") ? document.querySelectorAll(".sidebar-link") : document.querySelectorAll(".mobile-nav button");
+        group.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+
+    const scoreMirror = document.getElementById("growthScoreMini");
+    const scoreSource = document.getElementById("growthScoreNumber");
+    if (scoreMirror && scoreSource) {
+      const syncScore = () => scoreMirror.textContent = scoreSource.textContent;
+      syncScore();
+      new MutationObserver(syncScore).observe(scoreSource,{childList:true,characterData:true,subtree:true});
+    }
+
+    restoreForm();
+    const savedCredits = localStorage.getItem("viraCredits");
+    if (savedCredits) els.creditCount.textContent = savedCredits;
+    if (rawScenario) {
+      renderScenario(rawScenario);
+      els.validateBtn.style.display = "flex";
+      els.voiceBtn.disabled = false;
+    }
+  })();
+  </script>
+</body>
+</html>
