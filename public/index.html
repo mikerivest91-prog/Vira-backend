@@ -1251,9 +1251,25 @@ els.voiceBtn.addEventListener("click", async () => {
     );
   }
 
-  const narration =
-    parseScenario(rawScenario).narration || rawScenario;
+  const parsedScenario = parseScenario(rawScenario);
 
+const narration =
+  (parsedScenario.narration || "")
+    .replace(/SC[ÈE]NE\s*\d+/gi, "")
+    .replace(/NARRATION\s*:?/gi, "")
+    .replace(/ACCROCHE\s*:?/gi, "")
+    .replace(/APPEL À L['’]ACTION\s*:?/gi, "")
+    .replace(/PROMPT VISUEL\s*:?/gi, "")
+    .replace(/STYLE\s*:?/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (!narration) {
+  return setStatus(
+    els.status,
+    "Aucune narration valide trouvée.",
+    "warning"
+  );
+  }
   els.voiceBtn.disabled = true;
 
   setStatus(
