@@ -174,7 +174,18 @@ app.post("/api/scenario/generate", async (req, res) => {
     const safePlatform =
       cleanText(platform) ||
       "Non précisée";
+const removeAIReferences = (text = "") =>
+  text
+    .replace(/\bintelligence artificielle\b/gi, "")
+    .replace(/\bIA\b/gi, "")
+    .replace(/\bAI\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
+const brandSafeIdea = removeAIReferences(safeIdea);
+const brandSafeBusinessName = removeAIReferences(safeBusinessName);
+const brandSafeMarketingGoal = removeAIReferences(safeMarketingGoal);
+const brandSafeTargetAudience = removeAIReferences(safeTargetAudience);
     const prompt = `
 Tu es VIRA, une plateforme marketing professionnelle haut de gamme.
 RÈGLE DE MARQUE IMPORTANTE :
@@ -195,20 +206,18 @@ Ta mission est de transformer les informations fournies par l'utilisateur en une
 INFORMATIONS FOURNIES
 
 Produit / service :
-"${safeIdea}"
+"${brandSafeIdea}"
 
 Type de campagne :
 "${safeMarketingType}"
 
 Nom de l'entreprise ou du produit :
-"${safeBusinessName}"
-
+"${brandSafeBusinessName}"
 Objectif marketing :
-"${safeMarketingGoal}"
+"${brandSafeMarketingGoal}"
 
 Public cible :
-"${safeTargetAudience}"
-
+"${brandSafeTargetAudience}"
 Plateforme :
 "${safePlatform}"
 
