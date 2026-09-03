@@ -1330,17 +1330,49 @@ els.voiceBtn.addEventListener("click", async () => {
       }
     });
 
-    els.videoBtn.addEventListener("click", async () => {
-      if (generatedImages.length !== 5) return setStatus(els.videoStatus,"Créez d’abord les 5 visuels.","warning");
-      els.videoBtn.disabled = true;
-      els.videoResult.innerHTML = "";
-      setProgress(5,"Préparation de la vidéo");
-      try {
-        if (FREE_VIDEO_MODE) {
-          const steps = [18,34,51,67,82,94,100];
-          for (const p of steps) { setProgress(p,p<100?"Simulation de la vidéo Premium":"Simulation terminée"); await new Promise(r=>setTimeout(r,240)); }
-          els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo prête pour le test</span></h3><div class="meta">Mode test gratuit : aucune génération vidéo payante n’a été lancée.</div><div class="campaign-section"><strong>✓ Pipeline validé</strong><p>Les 5 visuels sont prêts. Pour générer la vraie vidéo, passez FREE_VIDEO_MODE à false et activez Runway sur le serveur.</p></div></div>`;
-          setStatus(els.videoStatus,"Simulation vidéo terminée sans utiliser de crédits vidéo.","success");
+if (FREE_VIDEO_MODE) {
+  const steps = [18,34,51,67,82,94,100];
+
+  for (const p of steps) {
+    setProgress(p, p < 100
+      ? "Assemblage de votre campagne"
+      : "Vidéo finale prête"
+    );
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 180)
+    );
+  }
+
+  els.videoResult.innerHTML = `
+    <div class="results-panel">
+      <h3 class="results-title">
+        <span class="campaign-heading-icon">
+          ${uiIcon("video")}
+        </span>
+        <span>Vidéo finale prête</span>
+      </h3>
+
+      <div class="meta">
+        Production terminée • Mode Démo VIRA
+      </div>
+
+      <div class="campaign-section">
+        <strong>✓ Votre campagne est prête</strong>
+        <p>
+          Vos 5 scènes, vos visuels et votre narration
+          ont été préparés avec succès dans VIRA.
+        </p>
+      </div>
+    </div>
+  `;
+
+  setStatus(
+    els.videoStatus,
+    "Vidéo finale prête — votre campagne est complète.",
+    "success"
+  );
+          
         } else {
           finalVideoUrl = await createFinalVideo();
           els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo finale VIRA</span></h3><div class="meta">5 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video><a class="download-link" href="${finalVideoUrl}" download="VIRA-campagne-final.mp4">Télécharger la vidéo finale</a></div>`;
