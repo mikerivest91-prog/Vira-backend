@@ -778,7 +778,7 @@ max-height:380px !important;
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Navigation principale">
-  <button class="active" type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.2 12 4l9 7.2"/><path d="M5.5 10v9h13v-9"/><path d="M9.5 19v-5h5v5"/></svg></span><span class="nav-label">Accueil</span></button>
+<button id="navHome" class="active" type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.2 12 4l9 7.2"/><path d="M5.5 10v9h13v-9"/><path d="M9.5 19v-5h5v5"/></svg></span><span class="nav-label">Accueil</span></button>
 <button id="navCampaigns" type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span><span class="nav-label">Campagnes</span></button>
   <button type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span class="nav-label">Contenus</span></button>
   <button type="button"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.5 1a7 7 0 0 0-2.1-1.2L14 3h-4l-.4 2.7a7 7 0 0 0-2.1 1.2l-2.5-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.5-1a7 7 0 0 0 2.1 1.2L10 21h4l.4-2.7a7 7 0 0 0 2.1-1.2l2.5 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></svg></span><span class="nav-label">Réglages</span></button>
@@ -811,6 +811,7 @@ max-height:380px !important;
       visualBtn: $("generate"),
       videoBtn: $("video"),
       downloadBtn: $("downloadVideo"),
+      navHome: $("navHome"),
       navCampaigns: $("navCampaigns"),
       status: $("status"),
       result: $("result"),
@@ -1368,6 +1369,22 @@ setStatus(els.status,"Campagne générée avec succès.","success");
 
       scenarioValidated = true;
       localStorage.setItem("viraScenarioValidated", "true");
+      const savedCampaigns = JSON.parse(
+  localStorage.getItem("viraCampaigns") || "[]"
+);
+
+if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
+  savedCampaigns.unshift({
+    id: Date.now(),
+    scenario: rawScenario,
+    createdAt: new Date().toISOString()
+  });
+
+  localStorage.setItem(
+    "viraCampaigns",
+    JSON.stringify(savedCampaigns)
+  );
+}
       updateWorkflowState();
 
       setStatus(
@@ -1381,7 +1398,7 @@ els.voiceBtn.addEventListener("click", async () => {
   if (!scenarioValidated || generatedImages.length !== 3) {
     return setStatus(
       els.status,
-      "Validez le scénario et générez les 5 visuels avant de préparer la voix.",
+      "Validez le scénario et générez les 3 visuels avant de préparer la voix.",
       "warning"
     );
   }
@@ -1666,9 +1683,15 @@ els.downloadBtn.addEventListener("click", async () => {
       els.validateBtn.disabled = false;
       updateWorkflowState();
     }
+    els.navHome?.addEventListener("click", () => {
+  window.location.reload();
+});
     els.navCampaigns?.addEventListener("click", () => {
       document.querySelector(".mobile-nav .active")?.classList.remove("active");
 els.navCampaigns?.classList.add("active");
+      const campaigns = JSON.parse(
+  localStorage.getItem("viraCampaigns") || "[]"
+);
   document.querySelector("main").innerHTML = `
     <section class="box">
       <div class="section-head">
