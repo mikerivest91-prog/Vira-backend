@@ -1667,6 +1667,8 @@ els.downloadBtn.addEventListener("click", async () => {
       updateWorkflowState();
     }
     els.navCampaigns?.addEventListener("click", () => {
+      document.querySelector(".mobile-nav .active")?.classList.remove("active");
+els.navCampaigns?.classList.add("active");
   document.querySelector("main").innerHTML = `
     <section class="box">
       <div class="section-head">
