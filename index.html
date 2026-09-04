@@ -369,10 +369,27 @@ html,body{max-width:100%;overflow-x:hidden}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
   transition:.2s ease;
 }
-    @media (max-width:759px){
-  .campaign-card-info{
-    width:100%;
-  }
+.campaign-card-content:has(.campaign-thumb){
+  display:grid !important;
+  grid-template-columns:112px minmax(0,1fr) !important;
+  gap:16px !important;
+  align-items:start !important;
+}
+
+.campaign-card-content:has(.campaign-thumb) .campaign-thumb{
+  width:112px !important;
+  height:112px !important;
+  max-width:112px !important;
+  margin:0 !important;
+  object-fit:cover;
+}
+
+.campaign-card-info > .campaign-status{
+  flex:0 0 auto !important;
+  flex-basis:auto !important;
+  width:max-content !important;
+  max-width:100%;
+}
 
   .campaign-resume,
   .campaign-delete{
