@@ -288,6 +288,16 @@ html,body{max-width:100%;overflow-x:hidden}
   font-weight:800;
   vertical-align:middle;
     }
+    .campaign-thumb{
+  width:72px;
+  height:72px;
+  object-fit:cover;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  display:block;
+  margin-bottom:12px;
+  background:#0b0d14;
+    }
 .campaign-resume{
   display:inline-flex;
   align-items:center;
@@ -1652,7 +1662,7 @@ const completedCampaign = {
     : localStorage.getItem("viraIdea") || "Campagne Marketing",
 
   scenario: rawScenario,
-
+image: generatedImages[0] || "",
   createdAt: existingCampaignIndex >= 0
     ? savedCampaigns[existingCampaignIndex].createdAt
     : new Date().toISOString(),
@@ -1838,6 +1848,7 @@ els.navCampaigns?.classList.add("active");
       const campaignListHtml = campaigns.length
   ? campaigns.map((campaign,   index) => `
       <div class="campaign-section saved-campaign" data-campaign-index="${index}">
+      ${campaign.image ? `<img class="campaign-thumb" src="${campaign.image}" alt="">` : ""}
         <strong>${campaign.title || "Campagne Marketing"}</strong>
       <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : "✓ Scénario validé"}</span>
       
