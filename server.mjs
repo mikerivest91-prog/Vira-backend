@@ -402,7 +402,7 @@ Il doit préciser :
 - la continuité visuelle;
 - l'esthétique publicitaire premium;
 - le format vertical 9:16.
-
+- Utilise le format vertical 9:16 pour la composition, mais ne mentionne jamais "9:16", "format 9:16" ou les dimensions du format dans le texte des scènes destiné à l'utilisateur.
 FORMAT DE SORTIE OBLIGATOIRE
 
 Respecte EXACTEMENT les titres suivants.
