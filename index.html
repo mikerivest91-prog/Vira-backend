@@ -1633,13 +1633,6 @@ localStorage.setItem(
 });
 
 els.downloadBtn.addEventListener("click", async () => {
-  if (!finalVideoUrl) {
-    return setStatus(
-      els.videoStatus,
-      "Mode aperçu : aucun MP4 réel n’est disponible. Activez la génération vidéo réelle pour exporter le fichier.",
-      "warning"
-    );
-  }
 
   els.downloadBtn.disabled = true;
 
@@ -1656,7 +1649,14 @@ els.downloadBtn.addEventListener("click", async () => {
       await new Promise(resolve => setTimeout(resolve, 220));
       setProgress(progress, label);
     }
-
+if (!finalVideoUrl) {
+  setStatus(
+    els.videoStatus,
+    "Mode aperçu : préparation terminée. Aucun MP4 réel n’est disponible.",
+    "warning"
+  );
+  return;
+}
     const link = document.createElement("a");
     link.href = finalVideoUrl;
     link.download = "VIRA-campagne-final.mp4";
