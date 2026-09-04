@@ -1872,8 +1872,7 @@ els.navCampaigns?.classList.add("active");
       ${campaign.image ? `<img class="campaign-thumb" src="${campaign.image}" alt="">` : ""}
       <div class="campaign-card-info">
         <strong>${campaign.title || "Campagne Marketing"}</strong>
-      <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : "✓ Scénario validé"}</span>
-      <p class="campaign-description">${(campaign.scenario || "").replace(/\s+/g, " ").slice(0, 110)}${(campaign.scenario || "").length > 110 ? "…" : ""}</p>
+      <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : "✓ Scénario validé"}</span><p class="campaign-description">${((campaign.scenario || "").match(/OBJECTIF\s*:\s*([^.\n]+)/i)?.[1] || campaign.scenario || "").trim().slice(0, 110)}${((campaign.scenario || "").match(/OBJECTIF\s*:\s*([^.\n]+)/i)?.[1] || campaign.scenario || "").trim().length > 110 ? "…" : ""}</p>
         <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" })}</p>
         <span class="campaign-resume">Reprendre la campagne →</span>
         <button class="campaign-delete" data-campaign-index="${index}" type="button">Supprimer</button></div>
