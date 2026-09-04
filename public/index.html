@@ -1163,14 +1163,14 @@ max-height:380px !important;
       localStorage.setItem("viraScenario", rawScenario);
       const d = parseScenario(rawScenario);
       els.scenarioResult.innerHTML = `
-        <div class="result-ready"><strong>✓ Votre campagne est prête</strong><span>Stratégie, contenu et 5 scènes générés.</span></div>
+        <div class="result-ready"><strong>✓ Votre campagne est prête</strong><span>Stratégie, contenu et 3 scènes générés.</span></div>
         <h2>${escapeHtml(d.title || "Campagne VIRA")}</h2>
         <div class="campaign-section"><strong>${campaignHeading("target","Objectif")}</strong><p>${escapeHtml(d.objective || els.goal.value)}</p></div>
         <div class="campaign-section"><strong>${campaignHeading("audience","Public cible")}</strong><p>${escapeHtml(d.target || els.audience.value)}</p></div>
         <div class="campaign-section"><strong>${campaignHeading("hook","Accroche")}</strong><p>${escapeHtml(d.hook)}</p></div>
         <div class="campaign-section"><strong>${campaignHeading("copy","Texte de publication")}</strong><p>${escapeHtml(d.publication)}</p></div>
         <div class="campaign-section"><strong>${campaignHeading("hashtag","Hashtags")}</strong><p>${escapeHtml(d.hashtags)}</p></div>
-        <details class="campaign-section"><summary>${campaignHeading("scenes",`Scènes (${d.scenes.filter(Boolean).length}/5)`)}</summary>${d.scenes.map((s,i)=>`<div class="scene-item"><strong>Scène ${i+1}</strong><p>${escapeHtml(s || "Scène à compléter")}</p></div>`).join("")}</details>
+        <details class="campaign-section"><summary>${campaignHeading("scenes",`Scènes (${d.scenes.filter(Boolean).length}/3)`)}</summary>${d.scenes.map((s,i)=>`<div class="scene-item"><strong>Scène ${i+1}</strong><p>${escapeHtml(s || "Scène à compléter")}</p></div>`).join("")}</details>
         <details class="campaign-section"><summary>${campaignHeading("narration","Narration")}</summary><p>${escapeHtml(d.narration)}</p></details>
         <div class="campaign-section"><strong>${campaignHeading("cta","Appel à l’action")}</strong><p>${escapeHtml(d.cta)}</p></div>
         <details class="campaign-section"><summary>${campaignHeading("image","Prompt visuel")}</summary><p>${escapeHtml(d.visualPrompt)}</p></details>
@@ -1197,7 +1197,7 @@ max-height:380px !important;
     }
 
     function renderImages(images, scenes, test = false) {
-      els.result.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></h3><div class="meta">${images.length}/5 scènes ${test ? "• mode test gratuit" : "• générées par VIRA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></div>`;
+      els.result.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></h3><div class="meta">${images.length}/3 scènes ${test ? "• mode test gratuit" : "• générées par VIRA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></div>`;
     }
 
     async function generateRealImages(scenes, visualPrompt, style) {
@@ -1235,7 +1235,7 @@ max-height:380px !important;
 
     async function createFinalVideo() {
       const d = parseScenario(rawScenario);
-      setProgress(8, "Préparation des 5 scènes");
+      setProgress(8, "Préparation des 3 scènes");
       const start = await fetch("/api/video/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:rawScenario,images:generatedImages})});
       const data = await start.json();
       if (!start.ok) throw new Error(data?.error || "Impossible de lancer la vidéo.");
@@ -1466,8 +1466,8 @@ els.voiceBtn.addEventListener("click", async () => {
 
       const d = parseScenario(rawScenario);
       const scenes = d.scenes.filter(Boolean);
-      if (scenes.length !== 5) {
-        return setStatus(els.status,`VIRA a besoin de 5 scènes. Scènes détectées : ${scenes.length}.`,"warning");
+      if (scenes.length !== 3) {
+        return setStatus(els.status,`VIRA a besoin de 3 scènes. Scènes détectées : ${scenes.length}.`,"warning");
       }
 
       els.visualBtn.disabled = true;
@@ -1485,7 +1485,7 @@ els.voiceBtn.addEventListener("click", async () => {
             [25,"Préparation des scènes"],
             [50,"Création des visuels"],
             [75,"Harmonisation de la campagne"],
-            [100,"5 visuels prêts"]
+            [100,"3 visuels prêts"]
           ];
           for (const [progress,label] of visualSteps) {
             await new Promise(r=>setTimeout(r,260));
@@ -1493,12 +1493,12 @@ els.voiceBtn.addEventListener("click", async () => {
           }
           generatedImages = scenes.map(makeTestImage);
           renderImages(generatedImages, scenes, true);
-          setStatus(els.status,"5 visuels Premium préparés en mode aperçu. Aucun crédit image utilisé.","success");
+          setStatus(els.status,"3 visuels Premium préparés en mode aperçu. Aucun crédit image utilisé.","success");
         } else {
           generatedImages = await generateRealImages(scenes,d.visualPrompt,d.style);
-          setProgress(100,"5 visuels prêts");
+          setProgress(100,"3 visuels prêts");
           renderImages(generatedImages,scenes,false);
-          setStatus(els.status,"5 visuels générés avec succès.","success");
+          setStatus(els.status,"3 visuels générés avec succès.","success");
         }
       } catch (error) {
         generatedImages = [];
@@ -1510,10 +1510,10 @@ els.voiceBtn.addEventListener("click", async () => {
       }
     });
 els.videoBtn.addEventListener("click", async () => {
-  if (generatedImages.length !== 5 || !voiceReady) {
+  if (generatedImages.length !== 3 || !voiceReady) {
     return setStatus(
       els.videoStatus,
-      "Préparez les 5 visuels et la voix avant de créer la vidéo finale.",
+      "Préparez les 3 visuels et la voix avant de créer la vidéo finale.",
       "warning"
     );
   }
@@ -1548,7 +1548,7 @@ els.videoBtn.addEventListener("click", async () => {
           <div class="meta">Préparation terminée • Mode aperçu VIRA</div>
           <div class="campaign-section">
             <strong>✓ Votre campagne est prête pour la génération finale</strong>
-            <p>Vos 5 scènes, vos visuels et votre narration ont été vérifiés. Le MP4 réel sera créé lorsque la génération vidéo réelle sera activée.</p>
+            <p>Vos 3 scènes, vos visuels et votre narration ont été vérifiés. Le MP4 réel sera créé lorsque la génération vidéo réelle sera activée.</p>
           </div>
         </div>`;
 
@@ -1561,7 +1561,7 @@ els.videoBtn.addEventListener("click", async () => {
     } else {
       finalVideoUrl = await createFinalVideo();
       videoReady = Boolean(finalVideoUrl);
-      els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo finale VIRA</span></h3><div class="meta">5 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video></div>`;
+      els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo finale VIRA</span></h3><div class="meta">3 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video></div>`;
       setStatus(els.videoStatus,"Vidéo finale créée avec succès.","success");
     }
   } catch (error) {
