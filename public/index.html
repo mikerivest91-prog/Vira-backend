@@ -1691,7 +1691,23 @@ els.navHome?.addEventListener("click", () => {
 els.navContent?.addEventListener("click", () => {
   document.querySelector(".mobile-nav .active")?.classList.remove("active");
   els.navContent?.classList.add("active");
-  alert("Page Contenus bientôt disponible.");
+
+  document.querySelector("main").innerHTML = `
+    <section class="box">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">VIRA WORKSPACE</span>
+          <h2>Mes contenus</h2>
+          <p>Retrouvez tous les contenus créés dans vos campagnes.</p>
+        </div>
+      </div>
+
+      <div class="campaign-section">
+        <strong>Aucun contenu sauvegardé pour le moment.</strong>
+        <p>Vos scénarios, textes, visuels et vidéos apparaîtront ici.</p>
+      </div>
+    </section>
+  `;
 });
     els.navCampaigns?.addEventListener("click", () => {
       document.querySelector(".mobile-nav .active")?.classList.remove("active");
