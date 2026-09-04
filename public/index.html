@@ -272,7 +272,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .campaign-section strong,.campaign-section summary{color:#f1e9f8;font-weight:900}
 .campaign-section p{color:#bdb5c5!important;overflow-wrap:anywhere;word-break:break-word}
     .campaign-status{display:inline-flex;align-items:center;margin-top:8px;padding:5px 9px;border-radius:999px;background:rgba(74,222,128,.10);border:1px solid rgba(74,222,128,.22);color:#86efac;font-size:11px;font-weight:800}
-
+.campaign-resume{display:block;margin-top:12px;color:#c084fc;font-size:12px;font-weight:800}
 /* Progress, generated media, download */
 .progress-track{background:#15111e!important;border:1px solid rgba(151,93,216,.10)}
 .progress-fill{box-shadow:0 0 15px rgba(174,55,255,.24)}
@@ -1775,6 +1775,7 @@ els.navCampaigns?.classList.add("active");
         <span class="campaign-status">✓ Terminée</span>
       
         <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" })}</p>
+        <span class="campaign-resume">Reprendre la campagne →</span>
       </div>
     `).join("")
   : `
