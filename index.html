@@ -1893,7 +1893,7 @@ els.navCampaigns?.classList.add("active");
       <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : "✓ Scénario validé"}</span><p class="campaign-description">${((campaign.scenario || "").match(/OBJECTIF\s*:\s*([^.\n]+)/i)?.[1] || campaign.scenario || "").trim().slice(0, 110)}${((campaign.scenario || "").match(/OBJECTIF\s*:\s*([^.\n]+)/i)?.[1] || campaign.scenario || "").trim().length > 110 ? "…" : ""}</p>
         <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" })}</p>
         <span class="campaign-resume"><span aria-hidden="true">▶</span> Reprendre la campagne</span>
-        <button class="campaign-delete" data-campaign-index="${index}" type="button"><span aria-hidden="true">🗑</span> Supprimer</button>
+<button class="campaign-delete" data-campaign-index="${index}" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v5M14 11v5"/></svg><span>Supprimer</span></button>
       </div>
       </div>
       </div>
