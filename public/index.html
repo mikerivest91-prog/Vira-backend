@@ -1768,14 +1768,15 @@ els.navCampaigns?.classList.add("active");
   localStorage.getItem("viraCampaigns") || "[]"
 );
       const campaignListHtml = campaigns.length
-  ? campaigns.map((campaign) => `
-      <div class="campaign-section">
+  ? campaigns.map((campaign,   index) => `
+      <div class="campaign-section saved-campaign" data-campaign-index="${index}">
         <strong>Campagne sauvegardée</strong>
         <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA")}</p>
       </div>
     `).join("")
   : `
     <div class="campaign-section">
+    
       <strong>Aucune campagne sauvegardée pour le moment.</strong>
       <p>Vos futures campagnes apparaîtront ici.</p>
     </div>
@@ -1793,6 +1794,19 @@ els.navCampaigns?.classList.add("active");
       ${campaignListHtml}
     </section>
   `;
+document.querySelectorAll(".saved-campaign").forEach((card) => {
+  card.addEventListener("click", () => {
+    const index = Number(card.dataset.campaignIndex);
+    const campaign = campaigns[index];
+
+    if (!campaign) return;
+
+    localStorage.setItem("viraScenario", campaign.scenario);
+    localStorage.setItem("viraScenarioValidated", "true");
+
+    window.location.reload();
+  });
+});
 });
   
 })();    
