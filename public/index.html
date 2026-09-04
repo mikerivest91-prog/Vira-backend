@@ -1587,14 +1587,20 @@ const completedCampaign = {
   id: existingCampaignIndex >= 0
     ? savedCampaigns[existingCampaignIndex].id
     : Date.now(),
+
+  title: existingCampaignIndex >= 0
+    ? savedCampaigns[existingCampaignIndex].title || "Campagne Marketing"
+    : localStorage.getItem("viraIdea") || "Campagne Marketing",
+
   scenario: rawScenario,
+
   createdAt: existingCampaignIndex >= 0
     ? savedCampaigns[existingCampaignIndex].createdAt
     : new Date().toISOString(),
+
   completedAt: new Date().toISOString(),
   status: "completed"
 };
-
 if (existingCampaignIndex >= 0) {
   savedCampaigns[existingCampaignIndex] = completedCampaign;
 } else {
