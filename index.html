@@ -812,6 +812,33 @@ max-height:380px !important;
     overflow-wrap:anywhere !important;
   }
 }
+    @media(max-width:520px){
+
+  .campaign-card-content:has(.campaign-thumb){
+    display:grid !important;
+    grid-template-columns:110px 1fr !important;
+    gap:14px !important;
+    align-items:start !important;
+  }
+
+  .campaign-thumb{
+    width:110px !important;
+    height:150px !important;
+    margin:0 !important;
+    object-fit:cover !important;
+    border-radius:14px !important;
+  }
+
+  .campaign-card-info{
+    min-width:0 !important;
+  }
+
+  .campaign-resume,
+  .campaign-delete{
+    width:100% !important;
+    margin-top:10px !important;
+  }
+    }
   </style>
 </head>
 <body>
