@@ -928,8 +928,8 @@ max-height:380px !important;
     let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
     let finalVideoUrl = "";
     let scenarioValidated = localStorage.getItem("viraScenarioValidated") === "true";
-    let voiceReady = false;
-    let videoReady = false;
+let voiceReady = localStorage.getItem("viraVoiceReady") === "true";
+   let videoReady = localStorage.getItem("viraVideoReady") === "true";
 
     const marketingMeta = {
       "🛍️ Vendre un produit": {
@@ -1550,6 +1550,7 @@ els.voiceBtn.addEventListener("click", async () => {
     }
 
     voiceReady = true;
+    localStorage.setItem("viraVoiceReady", "true");
     els.voiceBtn.querySelector("strong").textContent = "Voix prête";
     const voiceSubText = els.voiceBtn.querySelector(".action-copy span");
     if (voiceSubText) voiceSubText.textContent = "Narration préparée • aperçu VIRA";
@@ -1563,6 +1564,7 @@ els.voiceBtn.addEventListener("click", async () => {
     );
   } catch (error) {
     voiceReady = false;
+    localStorage.removeItem("viraVoiceReady");
     setStatus(els.status,"Impossible de préparer l’aperçu audio.","error");
   } finally {
     updateWorkflowState();
@@ -1666,6 +1668,7 @@ els.videoBtn.addEventListener("click", async () => {
         </div>`;
 
       videoReady = true;
+      localStorage.setItem("viraVideoReady", "true");
       const savedCampaigns = JSON.parse(
   localStorage.getItem("viraCampaigns") || "[]"
 );
