@@ -1116,7 +1116,7 @@ max-height:380px !important;
 
     function parseScenario(text) {
       const clean = text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "").replace(/SCENE/gi, "SCÈNE").trim();
-      const headers = ["TITRE","OBJECTIF","PUBLIC CIBLE","ACCROCHE","TEXTE PUBLICATION","HASHTAGS","SCÈNE 1","SCÈNE 2","SCÈNE 3","SCÈNE 4","SCÈNE 5","NARRATION","APPEL À L'ACTION","APPEL À L’ACTION","PROMPT VISUEL","STYLE"];
+      const headers = ["TITRE","OBJECTIF","PUBLIC CIBLE","ACCROCHE","TEXTE PUBLICATION","HASHTAGS","SCÈNE 1","SCÈNE 2","SCÈNE 3","NARRATION","APPEL À L'ACTION","APPEL À L’ACTION","PROMPT VISUEL","STYLE"];
       const data = {
         title: extractSection(clean,"TITRE",headers),
         objective: extractSection(clean,"OBJECTIF",headers),
@@ -1130,7 +1130,7 @@ max-height:380px !important;
         style: extractSection(clean,"STYLE",headers),
         scenes: []
       };
-      for (let i=1;i<=5;i++) data.scenes.push(extractSection(clean,`SCÈNE ${i}`,headers));
+      for (let i=1;i<=3;i++) data.scenes.push(extractSection(clean,`SCÈNE ${i}`,headers));
       return data;
     }
 
