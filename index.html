@@ -311,6 +311,13 @@ html,body{max-width:100%;overflow-x:hidden}
     .campaign-card-info{
   min-width:0;
     }
+    .campaign-description{
+  margin:8px 0 0;
+  color:#9ca3af;
+  font-size:12px;
+  line-height:1.5;
+  font-weight:500;
+    }
 .campaign-resume{
   display:inline-flex;
   align-items:center;
@@ -1866,7 +1873,7 @@ els.navCampaigns?.classList.add("active");
       <div class="campaign-card-info">
         <strong>${campaign.title || "Campagne Marketing"}</strong>
       <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : "✓ Scénario validé"}</span>
-      
+      <p class="campaign-description">${(campaign.scenario || "").replace(/\s+/g, " ").slice(0, 110)}${(campaign.scenario || "").length > 110 ? "…" : ""}</p>
         <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" })}</p>
         <span class="campaign-resume">Reprendre la campagne →</span>
         <button class="campaign-delete" data-campaign-index="${index}" type="button">Supprimer</button></div>
