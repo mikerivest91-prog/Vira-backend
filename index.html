@@ -298,6 +298,15 @@ html,body{max-width:100%;overflow-x:hidden}
   margin-bottom:12px;
   background:#0b0d14;
     }
+    .campaign-card-content{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:14px;
+  align-items:start;
+    }
+    .campaign-card-info{
+  min-width:0;
+    }
 .campaign-resume{
   display:inline-flex;
   align-items:center;
@@ -1848,13 +1857,16 @@ els.navCampaigns?.classList.add("active");
       const campaignListHtml = campaigns.length
   ? campaigns.map((campaign,   index) => `
       <div class="campaign-section saved-campaign" data-campaign-index="${index}">
+      <div class="campaign-card-content">
       ${campaign.image ? `<img class="campaign-thumb" src="${campaign.image}" alt="">` : ""}
+      <div class="campaign-card-info">
         <strong>${campaign.title || "Campagne Marketing"}</strong>
       <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : "✓ Scénario validé"}</span>
       
         <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" })}</p>
         <span class="campaign-resume">Reprendre la campagne →</span>
-        <button class="campaign-delete" data-campaign-index="${index}" type="button">Supprimer</button>
+        <button class="campaign-delete" data-campaign-index="${index}" type="button">Supprimer</button></div>
+      </div>
       </div>
     `).join("")
   : `
