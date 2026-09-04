@@ -1667,7 +1667,22 @@ els.downloadBtn.addEventListener("click", async () => {
       updateWorkflowState();
     }
     els.navCampaigns?.addEventListener("click", () => {
-  alert("Page Campagnes bientôt disponible.");
+  document.querySelector("main").innerHTML = `
+    <section class="box">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">VIRA WORKSPACE</span>
+          <h2>Mes campagnes</h2>
+          <p>Retrouvez, reprenez et gérez vos campagnes marketing.</p>
+        </div>
+      </div>
+
+      <div class="campaign-section">
+        <strong>Aucune campagne sauvegardée pour le moment.</strong>
+        <p>Vos futures campagnes apparaîtront ici.</p>
+      </div>
+    </section>
+  `;
 });
   
 })();    
