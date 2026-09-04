@@ -1347,7 +1347,7 @@ const data = await response.json();
         setProgress(100,"Scénario prêt");
         
         renderScenario(scenario);
-        setStatus(els.scenarioStatus,"Campagne générée. Vérifiez-la puis validez le scénario.","success");
+setStatus(els.status,"Campagne générée avec succès.","success");
       } catch (error) {
         console.error(error);
         setStatus(els.scenarioStatus,escapeHtml(error.message || "Erreur inconnue"),"error");
