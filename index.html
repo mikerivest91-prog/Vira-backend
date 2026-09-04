@@ -1913,6 +1913,7 @@ document.querySelectorAll(".saved-campaign").forEach((card) => {
 
     localStorage.setItem("viraScenario", campaign.scenario);
     localStorage.setItem("viraScenarioValidated", "true");
+    localStorage.setItem("viraResumePrompt", campaign.title || "");
 localStorage.setItem("viraResumeCampaign", "true");
     window.location.reload();
   });
@@ -1935,7 +1936,8 @@ localStorage.setItem("viraResumeCampaign", "true");
 });
  if (localStorage.getItem("viraResumeCampaign") === "true") {
   localStorage.removeItem("viraResumeCampaign");
-
+els.prompt.value = localStorage.getItem("viraResumePrompt") || "";
+localStorage.removeItem("viraResumePrompt");
   setTimeout(() => {
     document.querySelector(".workflow-actions")?.scrollIntoView({
       behavior: "smooth",
