@@ -1176,8 +1176,11 @@ els.visualBtn.disabled = !hasScenario;
       clearFinalVideoUrl();
 
       localStorage.removeItem("viraScenario");
-      localStorage.removeItem("viraScenarioValidated");
-
+localStorage.removeItem("viraScenarioValidated");
+localStorage.removeItem("viraVoiceReady");
+localStorage.removeItem("viraVideoReady");
+localStorage.removeItem("viraGeneratedImages");
+      
       els.scenarioResult.innerHTML = "";
       els.result.innerHTML = "";
       els.videoResult.innerHTML = "";
@@ -1470,6 +1473,11 @@ if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
     id: Date.now(),
   title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
     scenario: rawScenario,
+    audience: els.audience.value.trim(),
+    goal: els.goal.value.trim(),
+    tone: els.tone.value,
+    platform: els.platform.value,
+    marketingType: selectedMarketingType,
     createdAt: new Date().toISOString()
   });
 
@@ -1687,6 +1695,11 @@ const completedCampaign = {
     : localStorage.getItem("viraIdea") || "Campagne Marketing",
 
   scenario: rawScenario,
+  audience: els.audience.value.trim(),
+  goal: els.goal.value.trim(),
+  tone: els.tone.value,
+  platform: els.platform.value,
+  marketingType: selectedMarketingType,
 image: generatedImages[0] || "",
   createdAt: existingCampaignIndex >= 0
     ? savedCampaigns[existingCampaignIndex].createdAt
@@ -1910,7 +1923,16 @@ document.querySelectorAll(".saved-campaign").forEach((card) => {
     const campaign = campaigns[index];
 
     if (!campaign) return;
-
+const parsedCampaign = parseScenario(campaign.scenario || "");
+    localStorage.setItem("viraTargetAudience", campaign.audience || parsedCampaign.target || "");
+    localStorage.setItem("viraCampaignTone", campaign.tone || "Professionnel");
+    localStorage.setItem("viraPlatform", campaign.platform || "");
+    if (campaign.marketingType) {
+  localStorage.setItem("viraMarketingType", campaign.marketingType);
+} else {
+  localStorage.removeItem("viraMarketingType");
+    }
+    localStorage.setItem("viraIdea", campaign.title || "");
     localStorage.setItem("viraScenario", campaign.scenario);
     localStorage.setItem("viraScenarioValidated", "true");
     localStorage.setItem("viraResumePrompt", campaign.title || "");
@@ -1937,8 +1959,7 @@ localStorage.setItem("viraResumeCampaign", "true");
  if (localStorage.getItem("viraResumeCampaign") === "true") {
   localStorage.removeItem("viraResumeCampaign");
 els.prompt.value = localStorage.getItem("viraResumePrompt") || "";
-localStorage.removeItem("viraResumePrompt");
-  setTimeout(() => {
+
     document.querySelector(".workflow-actions")?.scrollIntoView({
       behavior: "smooth",
       block: "start"
