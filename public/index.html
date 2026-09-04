@@ -1377,7 +1377,7 @@ const data = await response.json();
     });
 
 els.voiceBtn.addEventListener("click", async () => {
-  if (!scenarioValidated || generatedImages.length !== 5) {
+  if (!scenarioValidated || generatedImages.length !== 3) {
     return setStatus(
       els.status,
       "Validez le scénario et générez les 5 visuels avant de préparer la voix.",
