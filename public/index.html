@@ -1379,7 +1379,7 @@ setStatus(els.status,"Campagne générée avec succès.","success");
 if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
   savedCampaigns.unshift({
     id: Date.now(),
-  title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
+  title: idea || localStorage.getItem("viraIdea") || "Campagne Marketing",
     scenario: rawScenario,
     createdAt: new Date().toISOString()
   });
