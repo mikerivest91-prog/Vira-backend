@@ -925,7 +925,7 @@ max-height:380px !important;
 
     let selectedMarketingType = localStorage.getItem("viraMarketingType") || "";
     let rawScenario = localStorage.getItem("viraScenario") || "";
-    let generatedImages = [];
+    let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
     let finalVideoUrl = "";
     let scenarioValidated = localStorage.getItem("viraScenarioValidated") === "true";
     let voiceReady = false;
@@ -1610,7 +1610,9 @@ els.voiceBtn.addEventListener("click", async () => {
           setProgress(100,"3 visuels prêts");
           renderImages(generatedImages,scenes,false);
           setStatus(els.status,"3 visuels générés avec succès.","success");
+          
         }
+localStorage.setItem("viraGeneratedImages", JSON.stringify(generatedImages));
       } catch (error) {
         generatedImages = [];
         console.error(error);
