@@ -1819,6 +1819,21 @@ document.querySelectorAll(".saved-campaign").forEach((card) => {
     window.location.reload();
   });
 });
+      document.querySelectorAll(".campaign-delete").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    const index = Number(button.dataset.campaignIndex);
+    campaigns.splice(index, 1);
+
+    localStorage.setItem(
+      "viraCampaigns",
+      JSON.stringify(campaigns)
+    );
+
+    button.closest(".saved-campaign")?.remove();
+  });
+});
 });
   
 })();    
