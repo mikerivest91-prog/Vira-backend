@@ -1783,6 +1783,7 @@ els.navCampaigns?.classList.add("active");
       
         <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" })}</p>
         <span class="campaign-resume">Reprendre la campagne →</span>
+        <button class="campaign-delete" data-campaign-index="${index}" type="button">Supprimer</button>
       </div>
     `).join("")
   : `
