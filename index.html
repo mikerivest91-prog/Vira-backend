@@ -272,7 +272,27 @@ html,body{max-width:100%;overflow-x:hidden}
 .campaign-section strong,.campaign-section summary{color:#f1e9f8;font-weight:900}
 .campaign-section p{color:#bdb5c5!important;overflow-wrap:anywhere;word-break:break-word}
     .campaign-status{display:inline-flex;align-items:center;margin-top:8px;padding:5px 9px;border-radius:999px;background:rgba(74,222,128,.10);border:1px solid rgba(74,222,128,.22);color:#86efac;font-size:11px;font-weight:800}
-.campaign-resume{display:block;margin-top:12px;color:#c084fc;font-size:12px;font-weight:800}
+.campaign-resume{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:14px;
+  padding:9px 14px;
+  border:1px solid rgba(192,132,252,.25);
+  border-radius:10px;
+  background:rgba(192,132,252,.08);
+  color:#c084fc;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.campaign-resume:hover{
+  background:rgba(192,132,252,.15);
+  border-color:rgba(192,132,252,.45);
+  transform:translateY(-1px);
+}
   .campaign-delete{
   margin-top:12px;
   padding:9px 14px;
