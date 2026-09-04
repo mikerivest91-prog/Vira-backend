@@ -641,6 +641,31 @@ summary:focus-visible{
     overflow:visible !important;
   }
 }
+    /* ===== VIRA MOBILE VISUAL CAROUSEL — SIZE FIX ===== */
+@media (max-width:759px){
+
+  .visual-card{
+    min-width:0 !important;
+  }
+
+  .visual-card img,
+  .visual-frame{
+    height:430px !important;
+    min-height:430px !important;
+    max-height:430px !important;
+    object-fit:cover !important;
+  }
+
+  .visual-caption{
+    width:100% !important;
+    max-width:none !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    word-break:normal !important;
+    overflow-wrap:anywhere !important;
+  }
+}
   </style>
 </head>
 <body>
