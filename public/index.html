@@ -1573,6 +1573,36 @@ els.videoBtn.addEventListener("click", async () => {
         </div>`;
 
       videoReady = true;
+      const savedCampaigns = JSON.parse(
+  localStorage.getItem("viraCampaigns") || "[]"
+);
+
+const existingCampaignIndex = savedCampaigns.findIndex(
+  campaign => campaign.scenario === rawScenario
+);
+
+const completedCampaign = {
+  id: existingCampaignIndex >= 0
+    ? savedCampaigns[existingCampaignIndex].id
+    : Date.now(),
+  scenario: rawScenario,
+  createdAt: existingCampaignIndex >= 0
+    ? savedCampaigns[existingCampaignIndex].createdAt
+    : new Date().toISOString(),
+  completedAt: new Date().toISOString(),
+  status: "completed"
+};
+
+if (existingCampaignIndex >= 0) {
+  savedCampaigns[existingCampaignIndex] = completedCampaign;
+} else {
+  savedCampaigns.unshift(completedCampaign);
+}
+
+localStorage.setItem(
+  "viraCampaigns",
+  JSON.stringify(savedCampaigns)
+);
       setStatus(
         els.videoStatus,
         "Aperçu vidéo prêt. La campagne est prête pour l’export réel.",
