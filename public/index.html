@@ -970,7 +970,7 @@ max-height:380px !important;
       els.voiceBtn.style.display = "flex";
       els.videoBtn.style.display = "flex";
 
-      els.visualBtn.disabled = !(hasScenario && scenarioValidated);
+els.visualBtn.disabled = !hasScenario;
       els.voiceBtn.disabled = !(hasScenario && scenarioValidated && hasVisuals);
       els.videoBtn.disabled = !(hasScenario && scenarioValidated && hasVisuals && voiceReady);
       els.downloadBtn.disabled = !videoReady;
