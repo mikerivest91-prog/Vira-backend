@@ -1684,13 +1684,14 @@ els.downloadBtn.addEventListener("click", async () => {
       els.validateBtn.disabled = false;
       updateWorkflowState();
     }
-    els.navHome?.addEventListener("click", () => {
+els.navHome?.addEventListener("click", () => {
   window.location.reload();
-      els.navContent?.addEventListener("click", () => {
+});
+
+els.navContent?.addEventListener("click", () => {
   document.querySelector(".mobile-nav .active")?.classList.remove("active");
   els.navContent?.classList.add("active");
   alert("Page Contenus bientôt disponible.");
-});
 });
     els.navCampaigns?.addEventListener("click", () => {
       document.querySelector(".mobile-nav .active")?.classList.remove("active");
