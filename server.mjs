@@ -91,7 +91,7 @@ function extractScenes(text) {
   const scenes = [];
 
   const regex =
-    /SC[ÈE]NE\s*([1-5])\s*:\s*([\s\S]*?)(?=SC[ÈE]NE\s*[1-5]\s*:|NARRATION\s*:|APPEL À L['’]ACTION\s*:|PROMPT VISUEL\s*:|STYLE\s*:|$)/gi;
+    /SC[ÈE]NE\s*([1-3])\s*:\s*([\s\S]*?)(?=SC[ÈE]NE\s*[1-3]\s*:|NARRATION\s*:|APPEL À L['’]ACTION\s*:|PROMPT VISUEL\s*:|STYLE\s*:|$)/gi;
 
   let match;
 
@@ -104,7 +104,7 @@ function extractScenes(text) {
 
   return scenes
     .sort((a, b) => a.number - b.number)
-    .slice(0, 5);
+    .slice(0, 3);
 }
 
 // ======================================================
@@ -274,7 +274,7 @@ ton professionnel, crédible et orienté valeur.
 
 STRUCTURE VIDÉO
 
-La campagne comporte EXACTEMENT 5 scènes.
+La campagne comporte EXACTEMENT 3 scènes.
 
 SCÈNE 1 :
 Hook visuel immédiat.
@@ -286,11 +286,7 @@ Montre clairement le problème, le besoin ou le désir du client.
 SCÈNE 3 :
 Présente le produit ou service comme solution.
 
-SCÈNE 4 :
-Montre le bénéfice, l'expérience ou le résultat crédible.
 
-SCÈNE 5 :
-Termine avec une conclusion forte et un appel à l'action.
 
 RÈGLES VISUELLES
 
@@ -356,7 +352,7 @@ Privilégie :
 NARRATION
 
 La narration doit :
-- correspondre aux 5 scènes;
+- correspondre aux 3 scènes;
 - être courte;
 - être naturelle;
 - être persuasive;
@@ -441,14 +437,9 @@ SCÈNE 2:
 SCÈNE 3:
 [description visuelle détaillée]
 
-SCÈNE 4:
-[description visuelle détaillée]
-
-SCÈNE 5:
-[description visuelle détaillée]
 
 NARRATION:
-[narration complète correspondant aux 5 scènes]
+[narration complète correspondant aux 3 scènes]
 
 APPEL À L'ACTION:
 [appel à l'action clair]
@@ -735,19 +726,19 @@ app.post("/api/video/generate", async (req, res) => {
     const scenes =
       extractScenes(safePrompt);
 
-    if (scenes.length !== 5) {
+    if (scenes.length !== 3) {
       return res.status(400).json({
         ok: false,
         error:
-          "VIRA a besoin de exactement 5 scènes."
+          "VIRA a besoin de exactement 3 scènes."
       });
     }
 
-    if (images.length !== 5) {
+    if (images.length !== 3) {
       return res.status(400).json({
         ok: false,
         error:
-          "VIRA a besoin de exactement 5 images."
+          "VIRA a besoin de exactement 3 images."
       });
     }
 
@@ -757,7 +748,7 @@ app.post("/api/video/generate", async (req, res) => {
         status: "prepared",
         provider: "disabled",
         message:
-          "Les 5 scènes et les 5 images sont prêtes."
+          "Les 3 scènes et les 3 images sont prêtes."
       });
     }
 
@@ -779,7 +770,7 @@ app.post("/api/video/generate", async (req, res) => {
 
     const clips = [];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       const image =
         cleanText(images[i]);
 
