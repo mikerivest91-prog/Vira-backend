@@ -303,13 +303,16 @@ html,body{max-width:100%;overflow-x:hidden}
 }
 
 .campaign-card-content:has(.campaign-thumb){
-  display:block;
+  display:grid;
+  grid-template-columns:112px minmax(0,1fr);
+  gap:16px;
+  align-items:start;
 }
 
 .campaign-card-content:has(.campaign-thumb) .campaign-thumb{
-  width:100%;
-  height:140px;
-  margin:0 0 16px;
+  width:112px;
+  height:112px;
+  margin:0;
   object-fit:cover;
 }
     .campaign-card-info{
