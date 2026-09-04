@@ -362,6 +362,38 @@ html,body{max-width:100%;overflow-x:hidden}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
   transition:.2s ease;
 }
+    @media (max-width:759px){
+  .campaign-card-info{
+    width:100%;
+  }
+
+  .campaign-resume,
+  .campaign-delete{
+    max-width:100%;
+    white-space:nowrap;
+  }
+
+  .campaign-card-info:has(.campaign-resume){
+    display:flex;
+    flex-wrap:wrap;
+    column-gap:8px;
+  }
+
+  .campaign-card-info > strong,
+  .campaign-card-info > .campaign-status,
+  .campaign-card-info > .campaign-description,
+  .campaign-card-info > p{
+    flex-basis:100%;
+  }
+
+  .campaign-resume{
+    flex:1 1 180px;
+  }
+
+  .campaign-delete{
+    flex:0 1 auto;
+  }
+    }
 /* Progress, generated media, download */
 .progress-track{background:#15111e!important;border:1px solid rgba(151,93,216,.10)}
 .progress-fill{box-shadow:0 0 15px rgba(174,55,255,.24)}
