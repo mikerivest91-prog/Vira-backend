@@ -1737,6 +1737,19 @@ els.navCampaigns?.classList.add("active");
       const campaigns = JSON.parse(
   localStorage.getItem("viraCampaigns") || "[]"
 );
+      const campaignListHtml = campaigns.length
+  ? campaigns.map((campaign) => `
+      <div class="campaign-section">
+        <strong>Campagne sauvegardée</strong>
+        <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA")}</p>
+      </div>
+    `).join("")
+  : `
+    <div class="campaign-section">
+      <strong>Aucune campagne sauvegardée pour le moment.</strong>
+      <p>Vos futures campagnes apparaîtront ici.</p>
+    </div>
+  `;
   document.querySelector("main").innerHTML = `
     <section class="box">
       <div class="section-head">
@@ -1747,10 +1760,7 @@ els.navCampaigns?.classList.add("active");
         </div>
       </div>
 
-      <div class="campaign-section">
-        <strong>Aucune campagne sauvegardée pour le moment.</strong>
-        <p>Vos futures campagnes apparaîtront ici.</p>
-      </div>
+      <${campaignListHtml}
     </section>
   `;
 });
