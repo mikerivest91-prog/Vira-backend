@@ -1774,7 +1774,7 @@ els.navCampaigns?.classList.add("active");
         <strong>Campagne Marketing</strong>
         <span class="campaign-status">✓ Terminée</span>
       
-        <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA")}</p>
+        <p>${new Date(campaign.createdAt).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" })}</p>
       </div>
     `).join("")
   : `
