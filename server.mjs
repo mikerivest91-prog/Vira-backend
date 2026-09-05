@@ -1,1008 +1,541 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import RunwayML from "@runwayml/sdk";
-import path from "path";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const publicDir = __dirname;
-// ======================================================
-// VIRA MARKETING IA — BACKEND
-// ======================================================
+import crypto from "node:crypto";
+import { promisify } from "node:util";
+import pg from "pg";
+
+const { Pool } = pg;
+const scrypt = promisify(crypto.scrypt);
 
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const RUNWAY_API_KEY = process.env.RUNWAYML_API_SECRET;
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
-const VIDEO_PROVIDER =
-  process.env.VIDEO_PROVIDER || "disabled";
+app.use(express.json({ limit: "2mb" }));
+app.use(express.static("public"));
 
-const runway = RUNWAY_API_KEY
-  ? new RunwayML()
-  : null;
-
-// ======================================================
-// MIDDLEWARE
-// ======================================================
-
-app.use(cors());
-
-app.use(
-  express.json({
-    limit: "25mb"
-  })
-);
-
-app.use(express.static(publicDir));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(publicDir, "index.html"));
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false
 });
 
+const SESSION_COOKIE = "vira_session";
+const SESSION_DAYS = 30;
 
-// ======================================================
-// OUTILS
-// ======================================================
-
-function cleanText(value) {
-  return typeof value === "string"
-    ? value.trim()
-    : "";
+function normalizeEmail(value = "") {
+  return String(value).trim().toLowerCase();
 }
 
-function extractOutputText(data) {
-  if (
-    typeof data?.output_text === "string" &&
-    data.output_text.trim()
-  ) {
-    return data.output_text.trim();
-  }
+function parseCookies(req) {
+  const cookies = {};
 
-  if (!Array.isArray(data?.output)) {
-    return "";
-  }
+  String(req.headers.cookie || "")
+    .split(";")
+    .forEach(part => {
+      const index = part.indexOf("=");
 
-  for (const item of data.output) {
-    if (!Array.isArray(item?.content)) {
-      continue;
-    }
+      if (index === -1) return;
 
-    for (const content of item.content) {
-      if (
-        content?.type === "output_text" &&
-        typeof content?.text === "string"
-      ) {
-        return content.text.trim();
+      const key = part.slice(0, index).trim();
+      const value = part.slice(index + 1).trim();
+
+      if (key) {
+        cookies[key] = decodeURIComponent(value);
       }
-    }
-  }
-
-  return "";
-}
-
-function extractScenes(text) {
-  if (typeof text !== "string") {
-    return [];
-  }
-
-  const scenes = [];
-
-  const regex =
-    /SC[ÈE]NE\s*([1-3])\s*:\s*([\s\S]*?)(?=SC[ÈE]NE\s*[1-3]\s*:|NARRATION\s*:|APPEL À L['’]ACTION\s*:|PROMPT VISUEL\s*:|STYLE\s*:|$)/gi;
-
-  let match;
-
-  while ((match = regex.exec(text)) !== null) {
-    scenes.push({
-      number: Number(match[1]),
-      text: cleanText(match[2])
     });
-  }
 
-  return scenes
-    .sort((a, b) => a.number - b.number)
-    .slice(0, 3);
+  return cookies;
 }
 
-// ======================================================
-// ACCUEIL / TEST SERVEUR
-// ======================================================
+function sessionHash(token) {
+  return crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+}
 
+async function hashPassword(password) {
+  const salt = crypto.randomBytes(16);
 
+  const derivedKey = await scrypt(
+    password,
+    salt,
+    64
+  );
 
-app.get("/api/health", (_req, res) => {
-  res.json({
-    ok: true,
-    service: "VIRA Marketing IA",
-    openaiConfigured: Boolean(OPENAI_API_KEY),
-    runwayConfigured: Boolean(RUNWAY_API_KEY),
-    videoProvider: VIDEO_PROVIDER
-  });
-});
+  return [
+    "scrypt",
+    salt.toString("hex"),
+    Buffer.from(derivedKey).toString("hex")
+  ].join("$");
+}
 
-// ======================================================
-// GÉNÉRATION DU SCÉNARIO MARKETING
-// ======================================================
-
-app.post("/api/scenario/generate", async (req, res) => {
+async function verifyPassword(password, stored) {
   try {
-    if (!OPENAI_API_KEY) {
-      return res.status(503).json({
-        ok: false,
-        error:
-          "OPENAI_API_KEY n'est pas configurée."
-      });
-    }
-
-    const {
-      idea,
-      marketingType,
-      businessName,
-      marketingGoal,
-      targetAudience,
-      platform
-    } = req.body || {};
-
-    const safeIdea = cleanText(idea);
-
-    if (!safeIdea) {
-      return res.status(400).json({
-        ok: false,
-        error: "Une idée est requise."
-      });
-    }
-
-    const safeMarketingType =
-      cleanText(marketingType) ||
-      "Campagne marketing générale";
-
-    const safeBusinessName =
-      cleanText(businessName) ||
-      "Non précisé";
-
-    const safeMarketingGoal =
-      cleanText(marketingGoal) ||
-      "Non précisé";
-
-    const safeTargetAudience =
-      cleanText(targetAudience) ||
-      "Non précisé";
-
-    const safePlatform =
-      cleanText(platform) ||
-      "Non précisée";
-const removeAIReferences = (text = "") =>
-  text
-    .replace(/\bintelligence artificielle\b/gi, "")
-    .replace(/\bIA\b/gi, "")
-    .replace(/\bAI\b/gi, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
-
-const brandSafeIdea = removeAIReferences(safeIdea);
-const brandSafeBusinessName = removeAIReferences(safeBusinessName);
-const brandSafeMarketingGoal = removeAIReferences(safeMarketingGoal);
-const brandSafeTargetAudience = removeAIReferences(safeTargetAudience);
-    const prompt = `
-Tu es VIRA, une plateforme marketing professionnelle haut de gamme.
-RÈGLE DE MARQUE IMPORTANTE :
-- Ne jamais utiliser les mots "IA", "intelligence artificielle" ou "AI" dans les textes destinés au client.
-- Présenter VIRA comme une plateforme marketing professionnelle.
-- Si les informations fournies mentionnent l'IA, reformuler naturellement sans reprendre ce terme.
-- Mettre l'accent sur les bénéfices : gain de temps, croissance, conversion, création de contenu et performance marketing.
-Tu es un directeur marketing senior spécialisé en :
-- marketing numérique
-- publicité
-- réseaux sociaux
-- copywriting
-- stratégie de conversion
-- création de vidéos publicitaires courtes
-
-Ta mission est de transformer les informations fournies par l'utilisateur en une campagne vidéo marketing professionnelle, crédible, persuasive et directement exploitable.
-
-INFORMATIONS FOURNIES
-
-Produit / service :
-"${brandSafeIdea}"
-
-Type de campagne :
-"${safeMarketingType}"
-
-Nom de l'entreprise ou du produit :
-"${brandSafeBusinessName}"
-Objectif marketing :
-"${brandSafeMarketingGoal}"
-
-Public cible :
-"${brandSafeTargetAudience}"
-Plateforme :
-"${safePlatform}"
-
-OBJECTIF PRINCIPAL
-
-Construis une campagne capable de :
-- capter immédiatement l'attention;
-- communiquer une proposition de valeur claire;
-- présenter un problème, un besoin ou un désir réel;
-- montrer comment le produit ou service apporte une solution;
-- créer de l'intérêt et de la confiance;
-- inciter à une action précise;
-- être directement transformable en vidéo marketing courte.
-
-ADAPTATION AU TYPE DE CAMPAGNE
-
-Si le type concerne la vente d'un produit :
-- mets le produit au centre;
-- montre son utilisation;
-- insiste sur son bénéfice principal;
-- termine avec un appel à l'action.
-
-Si le type concerne la promotion d'un service :
-- commence par le problème ou besoin du client;
-- présente le service comme solution;
-- montre un résultat crédible.
-
-Si le type concerne les réseaux sociaux :
-- utilise un hook très rapide;
-- privilégie un contenu dynamique;
-- optimise la rétention.
-
-Si le type concerne une publicité :
-- construis une publicité orientée conversion;
-- présente clairement l'offre;
-- termine avec un CTA fort.
-
-ADAPTATION À LA PLATEFORME
-
-Instagram :
-contenu esthétique, visuel, rapide et engageant.
-
-TikTok :
-hook immédiat, rythme rapide, contenu naturel et dynamique.
-
-Facebook :
-clarté de l'offre, confiance et bénéfice concret.
-
-YouTube :
-rétention, progression narrative et conclusion forte.
-
-LinkedIn :
-ton professionnel, crédible et orienté valeur.
-
-STRUCTURE VIDÉO
-
-La campagne comporte EXACTEMENT 3 scènes.
-
-SCÈNE 1 :
-Hook visuel immédiat.
-La scène doit arrêter le défilement et susciter la curiosité.
-
-SCÈNE 2 :
-Montre clairement le problème, le besoin ou le désir du client.
-
-SCÈNE 3 :
-Présente le produit ou service comme solution.
-
-
-
-RÈGLES VISUELLES
-
-Chaque scène doit :
-- représenter UNE SEULE composition visuelle;
-- montrer un seul moment précis;
-- avoir un cadrage photographique unique;
-- être visuellement différente des autres scènes;
-- rester cohérente avec les autres scènes;
-- être réalisable par une IA de génération d'images;
-- décrire précisément l'action;
-- décrire précisément le décor;
-- décrire précisément le cadrage;
-- décrire l'éclairage et l'ambiance.
-
-INTERDIT :
-- collage;
-- mosaïque;
-- split-screen;
-- plusieurs plans dans une même image;
-- texte intégré dans l'image;
-- sous-titres dans l'image;
-- slogan écrit dans l'image;
-- CTA écrit dans l'image;
-- watermark;
-- logo inventé.
-
-CONTINUITÉ VISUELLE
-
-Si une personne apparaît dans plusieurs scènes, conserve :
-- la même personne;
-- le même visage;
-- le même âge approximatif;
-- la même coiffure;
-- les mêmes vêtements;
-- les mêmes accessoires.
-
-Si un produit apparaît dans plusieurs scènes, conserve :
-- le même produit;
-- la même forme;
-- les mêmes couleurs;
-- le même design;
-- les mêmes détails visibles.
-
-QUALITÉ MARKETING
-
-Évite :
-- les formulations génériques;
-- les clichés marketing;
-- les répétitions;
-- les promesses irréalistes;
-- les informations inventées;
-- les affirmations impossibles à justifier.
-
-Privilégie :
-- une proposition de valeur précise;
-- un bénéfice concret;
-- une accroche forte;
-- un langage naturel;
-- un appel à l'action précis;
-- une progression logique entre les scènes.
-
-NARRATION
-
-La narration doit :
-- correspondre aux 3 scènes;
-- être courte;
-- être naturelle;
-- être persuasive;
-- utiliser des phrases faciles à prononcer;
-- éviter le langage robotique;
-- être adaptée à une vidéo marketing courte.
-
-TEXTE DE PUBLICATION
-
-Le texte doit être prêt à copier-coller sur la plateforme choisie.
-
-Il doit :
-- commencer par une phrase attirant l'attention;
-- présenter clairement le bénéfice;
-- rester naturel;
-- être adapté au public cible;
-- être adapté à la plateforme;
-- terminer par un appel à l'action.
-
-HASHTAGS
-
-Produis entre 8 et 12 hashtags réellement pertinents.
-
-N'utilise pas de hashtags sans rapport avec l'offre.
-
-PROMPT VISUEL
-
-Crée un prompt visuel global professionnel destiné à maintenir la cohérence des images générées.
-
-Il doit préciser :
-- les sujets principaux;
-- le produit ou service;
-- l'environnement;
-- les personnages;
-- les vêtements si nécessaire;
-- les actions;
-- le cadrage;
-- les angles de caméra;
-- l'éclairage;
-- les couleurs;
-- l'ambiance;
-- le niveau de réalisme;
-- la continuité visuelle;
-- l'esthétique publicitaire premium;
-- le format vertical 9:16.
-- Utilise le format vertical 9:16 pour la composition, mais ne mentionne jamais "9:16", "format 9:16" ou les dimensions du format dans le texte des scènes destiné à l'utilisateur.
-FORMAT DE SORTIE OBLIGATOIRE
-
-Respecte EXACTEMENT les titres suivants.
-
-Toutes les sections doivent contenir du texte.
-
-Ne supprime aucune section.
-Ne renomme aucun titre.
-Ne rajoute aucune section.
-N'utilise pas de Markdown autour des titres.
-
-TITRE:
-[titre marketing spécifique]
-
-OBJECTIF:
-[objectif concret de la campagne]
-
-PUBLIC CIBLE:
-[public cible précis]
-
-ACCROCHE:
-[accroche courte et puissante]
-
-TEXTE PUBLICATION:
-[texte complet prêt à publier]
-
-HASHTAGS:
-[8 à 12 hashtags pertinents]
-
-SCÈNE 1:
-[description visuelle détaillée]
-
-SCÈNE 2:
-[description visuelle détaillée]
-
-SCÈNE 3:
-[description visuelle détaillée]
-
-
-NARRATION:
-[narration complète correspondant aux 3 scènes]
-
-APPEL À L'ACTION:
-[appel à l'action clair]
-
-PROMPT VISUEL:
-[prompt visuel professionnel assurant la continuité]
-
-STYLE:
-[direction artistique, ambiance, couleurs, éclairage, réalisme, esthétique publicitaire premium]
-`.trim();
-
-    console.log(
-      "VIRA SCENARIO REQUEST:",
-      safeIdea
+    const [algorithm, saltHex, hashHex] =
+      String(stored).split("$");
+
+    if (algorithm !== "scrypt") return false;
+
+    const derivedKey = await scrypt(
+      password,
+      Buffer.from(saltHex, "hex"),
+      64
     );
 
-    const response = await fetch(
-      "https://api.openai.com/v1/responses",
-      {
-        method: "POST",
+    const storedHash = Buffer.from(hashHex, "hex");
+    const candidate = Buffer.from(derivedKey);
 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            `Bearer ${OPENAI_API_KEY}`
-        },
-
-        body: JSON.stringify({
-          model: "gpt-5.4",
-          input: prompt
-        })
-      }
-    );
-
-    const data =
-      await response
-        .json()
-        .catch(() => ({}));
-
-    console.log(
-      "OPENAI SCENARIO STATUS:",
-      response.status
-    );
-
-    if (!response.ok) {
-      console.error(
-        "OPENAI SCENARIO ERROR:",
-        JSON.stringify(data)
-      );
-
-      return res
-        .status(response.status)
-        .json({
-          ok: false,
-          error:
-            data?.error?.message ||
-            "Erreur lors de la génération du scénario."
-        });
+    if (storedHash.length !== candidate.length) {
+      return false;
     }
 
-    let scenario =
-  extractOutputText(data);
-
-if (!scenario) {
-  return res.status(502).json({
-    ok: false,
-    error: "Aucun scénario reçu."
-  });
+    return crypto.timingSafeEqual(
+      storedHash,
+      candidate
+    );
+  } catch {
+    return false;
+  }
 }
 
-// Protection finale de la marque VIRA
-scenario = scenario
-  .replace(/\bintelligence artificielle\b/gi, "technologie")
-  .replace(/\bIA\b/gi, "")
-  .replace(/\bAI\b/gi, "")
-  .replace(/[ \t]{2,}/g, " ")
-  .trim();
+function setSessionCookie(res, token) {
+  const secure =
+    process.env.NODE_ENV === "production";
 
-const scenes =
-  extractScenes(scenario);
+  const maxAge =
+    SESSION_DAYS * 24 * 60 * 60;
 
-return res.json({
-  ok: true,
-  scenario,
-  scenes
-});
+  res.setHeader(
+    "Set-Cookie",
+    [
+      `${SESSION_COOKIE}=${encodeURIComponent(token)}`,
+      "HttpOnly",
+      "Path=/",
+      "SameSite=Lax",
+      secure ? "Secure" : "",
+      `Max-Age=${maxAge}`
+    ]
+      .filter(Boolean)
+      .join("; ")
+  );
+}
+
+function clearSessionCookie(res) {
+  const secure =
+    process.env.NODE_ENV === "production";
+
+  res.setHeader(
+    "Set-Cookie",
+    [
+      `${SESSION_COOKIE}=`,
+      "HttpOnly",
+      "Path=/",
+      "SameSite=Lax",
+      secure ? "Secure" : "",
+      "Max-Age=0"
+    ]
+      .filter(Boolean)
+      .join("; ")
+  );
+}
+
+async function createSession(userId, res) {
+  const token =
+    crypto.randomBytes(32).toString("hex");
+
+  const tokenHash = sessionHash(token);
+
+  await pool.query(
+    `
+      INSERT INTO vira_sessions
+      (user_id, token_hash, expires_at)
+      VALUES
+      ($1, $2, NOW() + INTERVAL '30 days')
+    `,
+    [userId, tokenHash]
+  );
+
+  setSessionCookie(res, token);
+}
+
+async function getCurrentUser(req) {
+  const cookies = parseCookies(req);
+  const token = cookies[SESSION_COOKIE];
+
+  if (!token) return null;
+
+  const result = await pool.query(
+    `
+      SELECT
+        u.id,
+        u.email,
+        u.created_at
+      FROM vira_sessions s
+      JOIN vira_users u
+        ON u.id = s.user_id
+      WHERE
+        s.token_hash = $1
+        AND s.expires_at > NOW()
+      LIMIT 1
+    `,
+    [sessionHash(token)]
+  );
+
+  return result.rows[0] || null;
+}
+
+async function requireAuth(req, res, next) {
+  try {
+    const user = await getCurrentUser(req);
+
+    if (!user) {
+      return res.status(401).json({
+        ok: false,
+        error: "Authentication required."
+      });
+    }
+
+    req.user = user;
+    next();
 
   } catch (error) {
-    console.error(
-      "VIRA SCENARIO ERROR:",
-      error
+    console.error("AUTH ERROR:", error);
+
+    res.status(500).json({
+      ok: false,
+      error: "Authentication error."
+    });
+  }
+}
+
+async function initDatabase() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS vira_users (
+      id BIGSERIAL PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMPTZ
+        NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS vira_sessions (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL
+        REFERENCES vira_users(id)
+        ON DELETE CASCADE,
+      token_hash TEXT UNIQUE NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ
+        NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS
+      vira_sessions_user_id_idx
+    ON vira_sessions(user_id)
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS
+      vira_sessions_expires_idx
+    ON vira_sessions(expires_at)
+  `);
+
+  console.log("VIRA database ready");
+}
+
+/* ================================
+   HEALTH
+================================ */
+
+app.get("/api/health", async (_req, res) => {
+  try {
+    await pool.query("SELECT 1");
+
+    res.json({
+      ok: true,
+      service: "VIRA backend",
+      database: true
+    });
+
+  } catch {
+    res.status(503).json({
+      ok: false,
+      service: "VIRA backend",
+      database: false
+    });
+  }
+});
+
+/* ================================
+   CREATE ACCOUNT
+================================ */
+
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const email =
+      normalizeEmail(req.body?.email);
+
+    const password =
+      String(req.body?.password || "");
+
+    if (
+      !email ||
+      !email.includes("@") ||
+      email.length > 254
+    ) {
+      return res.status(400).json({
+        ok: false,
+        error: "Adresse courriel invalide."
+      });
+    }
+
+    if (
+      password.length < 10 ||
+      password.length > 128
+    ) {
+      return res.status(400).json({
+        ok: false,
+        error:
+          "Le mot de passe doit contenir au moins 10 caractères."
+      });
+    }
+
+    const existing = await pool.query(
+      `
+        SELECT id
+        FROM vira_users
+        WHERE email = $1
+        LIMIT 1
+      `,
+      [email]
     );
+
+    if (existing.rowCount) {
+      return res.status(409).json({
+        ok: false,
+        error:
+          "Un compte existe déjà avec cette adresse."
+      });
+    }
+
+    const passwordHash =
+      await hashPassword(password);
+
+    const result = await pool.query(
+      `
+        INSERT INTO vira_users
+        (email, password_hash)
+        VALUES ($1, $2)
+        RETURNING id, email, created_at
+      `,
+      [email, passwordHash]
+    );
+
+    const user = result.rows[0];
+
+    await createSession(user.id, res);
+
+    return res.status(201).json({
+      ok: true,
+      user
+    });
+
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
 
     return res.status(500).json({
       ok: false,
-      error:
-        error?.message ||
-        "Erreur interne du serveur."
+      error: "Impossible de créer le compte."
     });
   }
 });
 
-// ======================================================
-// GÉNÉRATION D'UNE IMAGE
-// ======================================================
+/* ================================
+   LOGIN
+================================ */
 
-app.post("/api/images/generate", async (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   try {
-    if (!OPENAI_API_KEY) {
-      return res.status(503).json({
+    const email =
+      normalizeEmail(req.body?.email);
+
+    const password =
+      String(req.body?.password || "");
+
+    const result = await pool.query(
+      `
+        SELECT
+          id,
+          email,
+          password_hash,
+          created_at
+        FROM vira_users
+        WHERE email = $1
+        LIMIT 1
+      `,
+      [email]
+    );
+
+    const user = result.rows[0];
+
+    if (
+      !user ||
+      !(await verifyPassword(
+        password,
+        user.password_hash
+      ))
+    ) {
+      return res.status(401).json({
         ok: false,
         error:
-          "OPENAI_API_KEY n'est pas configurée."
+          "Adresse courriel ou mot de passe incorrect."
       });
     }
 
-    const {
-      prompt,
-      size = "1024x1536",
-      quality = "low"
-    } = req.body || {};
-
-    const safePrompt =
-      cleanText(prompt);
-
-    if (!safePrompt) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "Un prompt image est requis."
-      });
-    }
-
-    const finalPrompt = `
-${safePrompt}
-
-Create exactly ONE coherent advertising image.
-
-Requirements:
-- vertical advertising composition
-- one single moment
-- professional commercial photography
-- visually realistic
-- premium lighting
-- coherent subject
-- coherent product appearance
-
-Do NOT create:
-- collage
-- mosaic
-- split-screen
-- multiple panels
-- text
-- letters
-- subtitles
-- captions
-- slogans
-- watermarks
-- invented logos
-`.trim();
-
-    console.log(
-      "VIRA IMAGE REQUEST"
-    );
-
-    const response = await fetch(
-      "https://api.openai.com/v1/images/generations",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            `Bearer ${OPENAI_API_KEY}`
-        },
-
-        body: JSON.stringify({
-          model: "gpt-image-1",
-          prompt: finalPrompt,
-          size,
-          quality
-        })
-      }
-    );
-
-    const data =
-      await response
-        .json()
-        .catch(() => ({}));
-
-    console.log(
-      "OPENAI IMAGE STATUS:",
-      response.status
-    );
-
-    if (!response.ok) {
-      console.error(
-        "OPENAI IMAGE ERROR:",
-        JSON.stringify(data)
-      );
-
-      return res
-        .status(response.status)
-        .json({
-          ok: false,
-          error:
-            data?.error?.message ||
-            "Erreur lors de la génération de l'image."
-        });
-    }
-
-    const imageBase64 =
-      data?.data?.[0]?.b64_json;
-
-    const imageUrl =
-      data?.data?.[0]?.url;
-
-    if (!imageBase64 && !imageUrl) {
-      return res.status(502).json({
-        ok: false,
-        error:
-          "Aucune image reçue d'OpenAI."
-      });
-    }
-
-    const url =
-      imageBase64
-        ? `data:image/png;base64,${imageBase64}`
-        : imageUrl;
+    await createSession(user.id, res);
 
     return res.json({
       ok: true,
-      url,
-      image: {
-        url
+      user: {
+        id: user.id,
+        email: user.email,
+        created_at: user.created_at
       }
     });
 
   } catch (error) {
-    console.error(
-      "VIRA IMAGE ERROR:",
-      error
-    );
+    console.error("LOGIN ERROR:", error);
 
     return res.status(500).json({
       ok: false,
-      error:
-        error?.message ||
-        "Erreur interne de génération d'image."
+      error: "Impossible de se connecter."
     });
   }
 });
 
-// ======================================================
-// GÉNÉRATION VIDÉO RUNWAY
-// ======================================================
+/* ================================
+   CURRENT USER
+================================ */
 
-app.post("/api/video/generate", async (req, res) => {
+app.get("/api/auth/me", async (req, res) => {
   try {
-    const {
-      prompt,
-      images = []
-    } = req.body || {};
+    const user = await getCurrentUser(req);
 
-    const safePrompt =
-      cleanText(prompt);
-
-    if (!safePrompt) {
-      return res.status(400).json({
+    if (!user) {
+      return res.status(401).json({
         ok: false,
-        error:
-          "Un scénario est requis pour créer la vidéo."
-      });
-    }
-
-    if (!Array.isArray(images)) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "La liste des images est invalide."
-      });
-    }
-
-    const scenes =
-      extractScenes(safePrompt);
-
-    if (scenes.length !== 3) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "VIRA a besoin de exactement 3 scènes."
-      });
-    }
-
-    if (images.length !== 3) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "VIRA a besoin de exactement 3 images."
-      });
-    }
-
-    if (VIDEO_PROVIDER === "disabled") {
-      return res.json({
-        ok: true,
-        status: "prepared",
-        provider: "disabled",
-        message:
-          "Les 3 scènes et les 3 images sont prêtes."
-      });
-    }
-
-    if (VIDEO_PROVIDER !== "runway") {
-      return res.status(503).json({
-        ok: false,
-        error:
-          `Moteur vidéo inconnu : ${VIDEO_PROVIDER}`
-      });
-    }
-
-    if (!runway) {
-      return res.status(503).json({
-        ok: false,
-        error:
-          "Runway n'est pas configuré."
-      });
-    }
-
-    const clips = [];
-
-    for (let i = 0; i < 3; i++) {
-      const image =
-        cleanText(images[i]);
-
-      if (!image) {
-        return res.status(400).json({
-          ok: false,
-          error:
-            `Image ${i + 1} manquante.`
-        });
-      }
-
-      const task =
-        await runway.imageToVideo.create({
-          model: "gen4_turbo",
-          promptImage: image,
-          promptText:
-            scenes[i].text,
-          ratio: "720:1280",
-          duration: 5
-        });
-
-      clips.push({
-        scene: i + 1,
-        taskId: task.id,
-        status: "submitted"
+        user: null
       });
     }
 
     return res.json({
       ok: true,
-      provider: "runway",
-      status: "submitted",
-      clips
+      user
     });
 
   } catch (error) {
-    console.error(
-      "VIRA VIDEO ERROR:",
-      error
-    );
+    console.error("ME ERROR:", error);
 
     return res.status(500).json({
       ok: false,
-      error:
-        error?.message ||
-        "Erreur lors de la création vidéo."
+      error: "Impossible de vérifier la session."
     });
   }
 });
 
-// ======================================================
-// STATUT D'UNE VIDÉO RUNWAY
-// ======================================================
+/* ================================
+   LOGOUT
+================================ */
+
+app.post("/api/auth/logout", async (req, res) => {
+  try {
+    const cookies = parseCookies(req);
+    const token = cookies[SESSION_COOKIE];
+
+    if (token) {
+      await pool.query(
+        `
+          DELETE FROM vira_sessions
+          WHERE token_hash = $1
+        `,
+        [sessionHash(token)]
+      );
+    }
+
+    clearSessionCookie(res);
+
+    return res.json({
+      ok: true
+    });
+
+  } catch (error) {
+    console.error("LOGOUT ERROR:", error);
+
+    clearSessionCookie(res);
+
+    return res.json({
+      ok: true
+    });
+  }
+});
+
+/* ================================
+   PROTECTED TEST
+================================ */
 
 app.get(
-  "/api/video/:taskId/status",
-  async (req, res) => {
-    try {
-      if (!runway) {
-        return res.status(503).json({
-          ok: false,
-          error:
-            "Runway n'est pas configuré."
-        });
-      }
-
-      const taskId =
-        cleanText(req.params.taskId);
-
-      if (!taskId) {
-        return res.status(400).json({
-          ok: false,
-          error:
-            "Task ID manquant."
-        });
-      }
-
-      const task =
-        await runway.tasks.retrieve(
-          taskId
-        );
-
-      return res.json({
-        ok: true,
-        taskId: task.id,
-        status: task.status,
-        output:
-          Array.isArray(task.output)
-            ? task.output
-            : []
-      });
-
-    } catch (error) {
-      console.error(
-        "VIRA RUNWAY STATUS ERROR:",
-        error
-      );
-
-      return res.status(500).json({
-        ok: false,
-        error:
-          error?.message ||
-          "Impossible de vérifier la vidéo."
-      });
-    }
+  "/api/private-test",
+  requireAuth,
+  (req, res) => {
+    res.json({
+      ok: true,
+      message: "VIRA secure session active.",
+      user: req.user
+    });
   }
 );
 
-// ======================================================
-// GÉNÉRATION DE LA VOIX
-// ======================================================
+/* ================================
+   START SERVER
+================================ */
 
-app.post("/api/voice/generate", async (req, res) => {
+async function start() {
   try {
-    if (!OPENAI_API_KEY) {
-      return res.status(503).json({
-        ok: false,
-        error:
-          "OPENAI_API_KEY n'est pas configurée."
-      });
-    }
-
-    const text =
-      cleanText(req.body?.text);
-
-    if (!text) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "Un texte est requis pour générer la voix."
-      });
-    }
-
-    if (text.length > 4096) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "Le texte est trop long."
-      });
-    }
-
-    console.log(
-      "VIRA VOICE REQUEST"
-    );
-
-    const response = await fetch(
-      "https://api.openai.com/v1/audio/speech",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            `Bearer ${OPENAI_API_KEY}`
-        },
-
-        body: JSON.stringify({
-          model: "gpt-4o-mini-tts",
-          voice: "cedar",
-          input: text,
-          response_format: "mp3"
-        })
-      }
-    );
-
-    if (!response.ok) {
-      const errorData =
-        await response
-          .json()
-          .catch(() => ({}));
-
-      return res
-        .status(response.status)
-        .json({
-          ok: false,
-          error:
-            errorData?.error?.message ||
-            "Erreur lors de la génération de la voix."
-        });
-    }
-
-    const audioBuffer =
-      Buffer.from(
-        await response.arrayBuffer()
+    if (!process.env.DATABASE_URL) {
+      throw new Error(
+        "DATABASE_URL is not configured."
       );
+    }
 
-    res.set(
-      "Content-Type",
-      "audio/mpeg"
-    );
+    await initDatabase();
 
-    res.set(
-      "Content-Disposition",
-      'inline; filename="vira-voice.mp3"'
-    );
-
-    return res.send(
-      audioBuffer
-    );
+    app.listen(port, "0.0.0.0", () => {
+      console.log(
+        `VIRA backend running on port ${port}`
+      );
+    });
 
   } catch (error) {
     console.error(
-      "VIRA VOICE ERROR:",
+      "VIRA STARTUP ERROR:",
       error
     );
 
-    return res.status(500).json({
-      ok: false,
-      error:
-        error?.message ||
-        "Erreur interne de génération de voix."
-    });
+    process.exit(1);
   }
-});
+}
 
-// ======================================================
-// ERREUR 404 API
-// ======================================================
-
-app.use("/api", (req, res) => {
-  return res.status(404).json({
-    ok: false,
-    error: `Route introuvable : ${req.method} ${req.originalUrl}`
-  });
-});
-
-// ======================================================
-// DÉMARRAGE
-// ======================================================
-
-app.listen(port, "0.0.0.0", () => {
-  console.log(
-    `VIRA backend running on port ${port}`
-  );
-});
+start();
