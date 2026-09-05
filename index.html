@@ -1569,9 +1569,10 @@ ${els.tone.value || "Professionnel"}
 } catch (error) {
   console.error(error);
   setStatus(
-    els.scenarioStatus,
-    escapeHtml(error
-    });
+  els.scenarioStatus,
+  escapeHtml(error.message || "Erreur de génération du scénario."),
+  "error"
+);
 } finally {
   clearInterval(analysisProgressTimer);
   els.scenarioBtn.disabled = false;
