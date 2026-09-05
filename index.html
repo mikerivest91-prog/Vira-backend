@@ -2879,7 +2879,7 @@ localStorage.setItem("viraResumeCampaign", "true");
     if (status) { status.textContent = message; status.className = 'auth-status'; }
   }
   function busy(form, yes) {
-    form?.querySelectorAll('button,input').forEach(el => el.disabled = yes);
+    form?.querySelectorAll('button').forEach(el => el.disabled = yes);
   }
   function setStatus(message, success = false) {
     if (!status) return;
