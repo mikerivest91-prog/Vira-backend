@@ -1572,7 +1572,12 @@ ${els.tone.value || "Professionnel"}
     els.scenarioStatus,
     escapeHtml(error
     });
-
+} finally {
+  clearInterval(analysisProgressTimer);
+  els.scenarioBtn.disabled = false;
+  hideProgress();
+}
+});
     els.validateBtn.addEventListener("click", () => {
       if (!rawScenario || !isValidScenarioText(rawScenario)) {
         els.validateBtn.hidden = true;
