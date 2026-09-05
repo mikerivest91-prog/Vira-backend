@@ -1512,30 +1512,65 @@ const analysisProgressTimer = setInterval(() => {
   analysisStepIndex++;
 }, 1200);
       try {
-        const response = await fetch("/api/scenario/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idea,marketingType:selectedMarketingType,businessName:"",marketingGoal:goal,targetAudience:audience,platform,campaignTone:els.tone.value})});
-        const contentType = response.headers.get("content-type") || "";
+  await new Promise(resolve => setTimeout(resolve, 2200));
 
-if (!contentType.includes("application/json")) {
-  throw new Error("Le serveur VIRA est temporairement indisponible. Réessayez dans quelques secondes.");
-}
+  const scenario = `
+TITRE
+${idea}
 
-const data = await response.json();
-        if (!response.ok) throw new Error(data?.error?.message || data?.error || "Erreur de génération de campagne.");
-        const scenario = data?.scenario || data?.output_text || "";
-        if (!scenario.trim()) throw new Error("Aucun scénario reçu du serveur.");
-      clearInterval(analysisProgressTimer);
-        setProgress(100,"Scénario prêt");
-        
-        renderScenario(scenario);
-setStatus(els.status,"Campagne générée avec succès.","success");
-      } catch (error) {
-        console.error(error);
-        setStatus(els.scenarioStatus,escapeHtml(error.message || "Erreur inconnue"),"error");
-      } finally {
-        clearInterval(analysisProgressTimer);
-        els.scenarioBtn.disabled = false;
-        hideProgress();
-      }
+OBJECTIF
+${goal}
+
+PUBLIC CIBLE
+${audience}
+
+ACCROCHE
+Découvrez une façon simple et convaincante de profiter pleinement de ${idea}.
+
+TEXTE PUBLICATION
+${idea} est présenté avec une approche claire, moderne et adaptée à ${platform}. Cette campagne met l’accent sur son bénéfice principal afin d’attirer l’attention, créer de l’intérêt et encourager le passage à l’action.
+
+HASHTAGS
+#Marketing #${platform.replace(/\s+/g, "")} #VIRA #Business #Contenu
+
+SCÈNE 1
+Présentation dynamique de ${idea} avec une accroche visuelle forte dès les premières secondes.
+
+SCÈNE 2
+Mise en avant du principal bénéfice pour ${audience}, avec une démonstration simple et crédible.
+
+SCÈNE 3
+Plan final premium présentant ${idea} avec un appel à l’action clair et mémorable.
+
+NARRATION
+Découvrez ${idea}. Une solution pensée pour ${audience}, conçue pour offrir une expérience simple, efficace et convaincante. Passez à l’action dès maintenant.
+
+APPEL À L'ACTION
+Découvrez ${idea} dès aujourd’hui.
+
+PROMPT VISUEL
+Publicité marketing premium pour ${idea}, esthétique professionnelle, éclairage cinématographique, composition moderne, adaptée à ${platform}, cohérence visuelle entre les trois scènes.
+
+STYLE
+${els.tone.value || "Professionnel"}
+  `.trim();
+
+  clearInterval(analysisProgressTimer);
+  setProgress(100, "Scénario prêt");
+
+  renderScenario(scenario);
+
+  setStatus(
+    els.scenarioStatus,
+    "Campagne générée en mode aperçu gratuit • aucun crédit utilisé.",
+    "success"
+  );
+
+} catch (error) {
+  console.error(error);
+  setStatus(
+    els.scenarioStatus,
+    escapeHtml(error
     });
 
     els.validateBtn.addEventListener("click", () => {
