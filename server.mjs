@@ -253,6 +253,26 @@ async function initDatabase() {
     ON vira_sessions(expires_at)
   `);
 
+    await pool.query(`
+    CREATE TABLE IF NOT EXISTS vira_campaigns (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL
+        REFERENCES vira_users(id)
+        ON DELETE CASCADE,
+      title TEXT NOT NULL DEFAULT 'Nouvelle campagne',
+      status TEXT NOT NULL DEFAULT 'draft',
+      campaign_data JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS
+      vira_campaigns_user_id_idx
+    ON vira_campaigns(user_id)
+  `);
+
   console.log("VIRA database ready");
 }
 
