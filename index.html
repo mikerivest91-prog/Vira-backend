@@ -839,6 +839,36 @@ max-height:380px !important;
     margin-top:10px !important;
   }
     }
+    @media(max-width:520px){
+
+  .visual-strip{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:14px !important;
+    overflow-x:visible !important;
+  }
+
+  .visual-card{
+    width:100% !important;
+    max-width:100% !important;
+    flex:none !important;
+  }
+
+  .visual-frame{
+    width:100% !important;
+    max-width:100% !important;
+    aspect-ratio:9/16 !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+  }
+
+  .visual-frame img{
+    width:100% !important;
+    height:100% !important;
+    object-fit:cover !important;
+  }
+    }
   </style>
 </head>
 <body>
