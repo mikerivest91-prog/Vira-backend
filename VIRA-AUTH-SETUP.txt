@@ -1,0 +1,39 @@
+VIRA AUTH — PHASE 1 / Render
+
+Fichiers à remplacer
+1. Remplacer ton index.html par:
+   VIRA-Premium-International-v9-auth.html
+
+2. Remplacer ton server.mjs par:
+   server-auth-v1.mjs
+
+Dépendance Node à ajouter
+- Installer/ajouter le package:
+  pg
+
+Si ton package.json utilise npm, ajoute "pg" dans dependencies ou exécute:
+  npm install pg
+
+Variables Render à ajouter
+- DATABASE_URL = l'URL PostgreSQL de ta base Render
+- APP_ORIGIN = l'URL publique exacte de VIRA, par exemple https://ton-service.onrender.com
+- NODE_ENV = production
+- OPENAI_API_KEY = conserver ta variable existante
+
+Base de données
+- Le serveur crée automatiquement les tables vira_users et vira_sessions au démarrage.
+- Aucun mot de passe n'est stocké en clair.
+- Les sessions utilisent un cookie HttpOnly + Secure en production.
+- Les routes de génération sont maintenant protégées: connexion requise.
+
+Test gratuit recommandé
+1. Déployer sans générer d'image/vidéo.
+2. Ouvrir VIRA.
+3. Créer un compte avec un mot de passe de 10 caractères minimum.
+4. Fermer/réouvrir la page: la session doit rester active.
+5. Cliquer sur déconnexion: l'écran de connexion doit revenir.
+
+Important
+- Les campagnes sont encore stockées localement dans le navigateur pour cette phase.
+- La prochaine phase doit déplacer les campagnes dans PostgreSQL et les relier à user_id.
+- Ne pas tester la génération payante avant que connexion/déconnexion fonctionne.
