@@ -17,7 +17,7 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "2mb" }));
-app.use(express.static("public"));
+app.use(express.static("."));
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
