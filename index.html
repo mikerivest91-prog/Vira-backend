@@ -2777,7 +2777,8 @@ document.querySelectorAll(".saved-campaign").forEach((card) => {
   card.addEventListener("click", () => {
     const index = Number(card.dataset.campaignIndex);
     const campaign = campaigns[index];
-
+const campaignData = campaign.campaign_data || {};
+    
     if (!campaign) return;
 const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario || "");
     localStorage.setItem("viraTargetAudience", campaignData.audience || campaign.audience || parsedCampaign.target || "");
