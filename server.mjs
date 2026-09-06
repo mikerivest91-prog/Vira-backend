@@ -512,22 +512,216 @@ app.post("/api/auth/logout", async (req, res) => {
   }
 });
 
+/
+
 /* ================================
-   PROTECTED TEST
+   CAMPAIGNS
 ================================ */
 
-app.get(
-  "/api/private-test",
-  requireAuth,
-  (req, res) => {
-    res.json({
+app.get("/api/campaigns", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+        SELECT
+          id,
+          title,
+          status,
+          campaign_data,
+          created_at,
+          updated_at
+        FROM vira_campaigns
+        WHERE user_id = $1
+        ORDER BY updated_at DESC
+      `,
+      [req.user.id]
+    );
+
+    return res.json({
       ok: true,
-      message: "VIRA secure session active.",
-      user: req.user
+      campaigns: result.rows
+    });
+
+  } catch (error) {
+    console.error("CAMPAIGNS LIST ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: "Impossible de charger les campagnes."
     });
   }
-);
+});
+app.post("/api/campaigns", requireAuth, async (req, res) => {
+  try {
+    const title =
+      String(req.body?.title || "Nouvelle campagne")
+        .trim()
+        .slice(0, 160);
 
+    const status =
+      String(req.body?.status || "draft")
+        .trim()
+        .slice(0, 40);
+
+    const campaignData =
+      req.body?.campaignData &&
+      typeof req.body.campaignData === "object"
+        ? req.body.campaignData
+        : {};
+
+    const result = await pool.query(
+      `
+        INSERT INTO vira_campaigns
+          (user_id, title, status, campaign_data)
+        VALUES
+          ($1, $2, $3, $4::jsonb)
+        RETURNING
+          id,
+          title,
+          status,
+          campaign_data,
+          created_at,
+          updated_at
+      `,
+      [
+        req.user.id,
+        title || "Nouvelle campagne",
+        status || "draft",
+        JSON.stringify(campaignData)
+      ]
+    );
+
+    return res.status(201).json({
+      ok: true,
+      campaign: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("CAMPAIGN CREATE ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: "Impossible d'enregistrer la campagne."
+    });
+  }
+});
+
+app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
+  try {
+    const campaignId = Number(req.params.id);
+
+    if (!Number.isInteger(campaignId) || campaignId <= 0) {
+      return res.status(400).json({
+        ok: false,
+        error: "Campagne invalide."
+      });
+    }
+
+    const title =
+      String(req.body?.title || "Nouvelle campagne")
+        .trim()
+        .slice(0, 160);
+
+    const status =
+      String(req.body?.status || "draft")
+        .trim()
+        .slice(0, 40);
+
+    const campaignData =
+      req.body?.campaignData &&
+      typeof req.body.campaignData === "object"
+        ? req.body.campaignData
+        : {};
+
+    const result = await pool.query(
+      `
+        UPDATE vira_campaigns
+        SET
+          title = $1,
+          status = $2,
+          campaign_data = $3::jsonb,
+          updated_at = NOW()
+        WHERE id = $4
+          AND user_id = $5
+        RETURNING
+          id,
+          title,
+          status,
+          campaign_data,
+          created_at,
+          updated_at
+      `,
+      [
+        title || "Nouvelle campagne",
+        status || "draft",
+        JSON.stringify(campaignData),
+        campaignId,
+        req.user.id
+      ]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({
+        ok: false,
+        error: "Campagne introuvable."
+      });
+    }
+
+    return res.json({
+      ok: true,
+      campaign: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("CAMPAIGN UPDATE ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: "Impossible de mettre à jour la campagne."
+    });
+  }
+});
+app.delete("/api/campaigns/:id", requireAuth, async (req, res) => {
+  try {
+    const campaignId = Number(req.params.id);
+
+    if (!Number.isInteger(campaignId) || campaignId <= 0) {
+      return res.status(400).json({
+        ok: false,
+        error: "Campagne invalide."
+      });
+    }
+
+    const result = await pool.query(
+      `
+        DELETE FROM vira_campaigns
+        WHERE id = $1
+          AND user_id = $2
+        RETURNING id
+      `,
+      [campaignId, req.user.id]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({
+        ok: false,
+        error: "Campagne introuvable."
+      });
+    }
+
+    return res.json({
+      ok: true,
+      deletedId: result.rows[0].id
+    });
+
+  } catch (error) {
+    console.error("CAMPAIGN DELETE ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: "Impossible de supprimer la campagne."
+    });
+  }
+});
 /* ================================
    START SERVER
 ================================ */
