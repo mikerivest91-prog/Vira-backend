@@ -2312,6 +2312,28 @@ if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
     "viraCampaigns",
     JSON.stringify(savedCampaigns)
   );
+    fetch("/api/campaigns", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
+      status: "draft",
+      campaignData: {
+        scenario: rawScenario,
+        audience: els.audience.value.trim(),
+        goal: els.goal.value.trim(),
+        tone: els.tone.value,
+        platform: els.platform.value,
+        marketingType: selectedMarketingType,
+        createdAt: new Date().toISOString()
+      }
+    })
+  }).catch(error => {
+    console.error("SERVER CAMPAIGN SAVE ERROR:", error);
+  });
 }
       updateWorkflowState();
 
