@@ -1711,7 +1711,7 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
 
     let selectedMarketingType = localStorage.getItem("viraMarketingType") || "";
     let rawScenario = localStorage.getItem("viraScenario") || "";
-    let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
+let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
     let finalVideoUrl = "";
     let scenarioValidated = localStorage.getItem("viraScenarioValidated") === "true";
 let voiceReady = localStorage.getItem("viraVoiceReady") === "true";
