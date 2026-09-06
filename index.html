@@ -2791,7 +2791,7 @@ const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario 
   localStorage.removeItem("viraMarketingType");
     }
     localStorage.setItem("viraIdea", campaign.title || "");
-    localStorage.setItem("viraScenario", campaign.scenario);
+    localStorage.setItem("viraScenario", campaignData.scenario || campaign.scenario || "");
     localStorage.setItem("viraScenarioValidated", "true");
     localStorage.setItem("viraResumePrompt", campaign.title || "");
 localStorage.setItem("viraResumeCampaign", "true");
