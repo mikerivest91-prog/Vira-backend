@@ -2282,7 +2282,7 @@ ${els.tone.value || "Professionnel"}
   hideProgress();
 }
 });
-    els.validateBtn.addEventListener("click", () => {
+    els.validateBtn.addEventListener("click", async () => {
       if (!rawScenario || !isValidScenarioText(rawScenario)) {
         els.validateBtn.hidden = true;
         els.validateBtn.style.display = "none";
@@ -2312,7 +2312,7 @@ if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
     "viraCampaigns",
     JSON.stringify(savedCampaigns)
   );
-    fetch("/api/campaigns", {
+   const campaignResponse = await fetch("/api/campaigns", {
     method: "POST",
     credentials: "same-origin",
     headers: {
@@ -2331,10 +2331,13 @@ if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
         createdAt: new Date().toISOString()
       }
     })
-  }).catch(error => {
-    console.error("SERVER CAMPAIGN SAVE ERROR:", error);
-  });
-}
+});
+
+const campaignResult = await campaignResponse.json();
+if (campaignResponse.ok && campaignResult.campaign?.id) {
+  localStorage.setItem("viraCurrentCampaignId", campaignResult.campaign.id);
+}}
+      
       updateWorkflowState();
 
       setStatus(
