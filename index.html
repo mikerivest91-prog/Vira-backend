@@ -2305,6 +2305,7 @@ if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
     tone: els.tone.value,
     platform: els.platform.value,
     marketingType: selectedMarketingType,
+    generatedImages: generatedImages,
     createdAt: new Date().toISOString()
   });
 
@@ -2328,6 +2329,7 @@ if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
         tone: els.tone.value,
         platform: els.platform.value,
         marketingType: selectedMarketingType,
+        generatedImages: generatedImages,
         createdAt: new Date().toISOString()
       }
     })
@@ -2819,6 +2821,14 @@ const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario 
     }
     localStorage.setItem("viraIdea", campaign.title || "");
     localStorage.setItem("viraScenario", campaignData.scenario || campaign.scenario || "");
+    localStorage.setItem(
+  "viraGeneratedImages",
+  JSON.stringify(
+    Array.isArray(campaignData.generatedImages)
+      ? campaignData.generatedImages
+      : []
+  )
+);
     localStorage.setItem("viraScenarioValidated", "true");
     localStorage.setItem("viraResumePrompt", campaign.title || "");
 localStorage.setItem("viraResumeCampaign", "true");
