@@ -2779,13 +2779,13 @@ document.querySelectorAll(".saved-campaign").forEach((card) => {
     const campaign = campaigns[index];
 
     if (!campaign) return;
-const parsedCampaign = parseScenario(campaign.scenario || "");
-    localStorage.setItem("viraTargetAudience", campaign.audience || parsedCampaign.target || "");
-    localStorage.setItem("viraMarketingGoal", campaign.goal || parsedCampaign.objective || "");
-    localStorage.setItem("viraCampaignTone", campaign.tone || "Professionnel");
-    localStorage.setItem("viraPlatform", campaign.platform || "");
+const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario || "");
+    localStorage.setItem("viraTargetAudience", campaignData.audience || campaign.audience || parsedCampaign.target || "");
+    localStorage.setItem("viraMarketingGoal", campaignData.goal || campaign.goal || parsedCampaign.objective || "");
+    localStorage.setItem("viraCampaignTone", campaignData.tone || campaign.tone|| "Professionnel");
+    localStorage.setItem("viraPlatform", campaignData.platform || campaign.platform|| "");
     if (campaign.marketingType) {
-  localStorage.setItem("viraMarketingType", campaign.marketingType);
+  localStorage.setItem("viraMarketingType", campaignData.marketingType || campaign.marketingType);
 } else {
   localStorage.removeItem("viraMarketingType");
     }
@@ -2803,7 +2803,7 @@ localStorage.setItem("viraResumeCampaign", "true");
 
     const index = Number(button.dataset.campaignIndex);
     const campaign = campaigns[index];
-
+const campaignData = campaign.campaign_data || {};
     if (!campaign?.id) return;
 
     try {
