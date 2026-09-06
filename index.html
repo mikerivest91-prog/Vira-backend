@@ -2725,12 +2725,14 @@ els.navContent?.addEventListener("click", () => {
     </section>
   `;
 });
-    els.navCampaigns?.addEventListener("click", () => {
+els.navCampaigns?.addEventListener("click", async () => {
       document.querySelector(".mobile-nav .active")?.classList.remove("active");
 els.navCampaigns?.classList.add("active");
-      const campaigns = JSON.parse(
-  localStorage.getItem("viraCampaigns") || "[]"
-);
+      const response = await fetch("/api/campaigns", {
+  credentials: "same-origin"
+});
+const data = await response.json();
+const campaigns = data.campaigns || [];
       const campaignCount = campaigns.length;
       const campaignListHtml = campaigns.length
   ? campaigns.map((campaign,   index) => `
@@ -2796,18 +2798,32 @@ localStorage.setItem("viraResumeCampaign", "true");
   });
 });
       document.querySelectorAll(".campaign-delete").forEach((button) => {
-  button.addEventListener("click", (event) => {
+  button.addEventListener("click", async (event) => {
     event.stopPropagation();
 
     const index = Number(button.dataset.campaignIndex);
-    campaigns.splice(index, 1);
+    const campaign = campaigns[index];
 
-    localStorage.setItem(
-      "viraCampaigns",
-      JSON.stringify(campaigns)
-    );
+    if (!campaign?.id) return;
 
-    button.closest(".saved-campaign")?.remove();
+    try {
+      const response = await fetch(`/api/campaigns/${campaign.id}`, {
+        method: "DELETE",
+        credentials: "same-origin"
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Suppression impossible.");
+      }
+
+      campaigns.splice(index, 1);
+      button.closest(".saved-campaign")?.remove();
+
+    } catch (error) {
+      console.error("CAMPAIGN DELETE ERROR:", error);
+    }
   });
 });
 });
