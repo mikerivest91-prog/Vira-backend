@@ -2475,6 +2475,30 @@ els.voiceBtn.addEventListener("click", async () => {
           
         }
 localStorage.setItem("viraGeneratedImages", JSON.stringify(generatedImages));
+        const currentCampaignId = localStorage.getItem("viraCurrentCampaignId");
+
+if (currentCampaignId) {
+  await fetch(`/api/campaigns/${currentCampaignId}`, {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
+      status: "visuals_ready",
+      campaignData: {
+        scenario: rawScenario,
+        audience: els.audience.value.trim(),
+        goal: els.goal.value.trim(),
+        tone: els.tone.value,
+        platform: els.platform.value,
+        marketingType: selectedMarketingType,
+        generatedImages: generatedImages
+      }
+    })
+  });
+}
       } catch (error) {
         generatedImages = [];
         console.error(error);
