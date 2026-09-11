@@ -2062,6 +2062,9 @@ localStorage.removeItem("viraGeneratedImages");
       els.validateBtn.style.display = "flex";
       els.validateBtn.disabled = false;
       els.voiceBtn.style.display = "flex";
+      if (Array.isArray(generatedImages) && generatedImages.length) {
+  renderImages(generatedImages, d.scenes || []);
+}
     }
 
     function makeTestImage(scene, index) {
