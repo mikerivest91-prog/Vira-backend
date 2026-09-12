@@ -2996,23 +2996,61 @@ const campaignData = campaign.campaign_data || {};
   };
 
   const initials = (value) => String(value || 'V').trim().split(/\s+/).slice(0,2).map(v => v[0] || '').join('').toUpperCase() || 'V';
+   const ownerKey = "viraWorkspaceUserId";
+
+  function clearLocalWorkspace() {
+    Object.keys(localStorage)
+      .filter(key => key.startsWith("vira"))
+      .forEach(key => localStorage.removeItem(key));
+  }
+
+  window.addEventListener("storage", event => {
+    if (event.key === ownerKey || event.key === null) {
+      window.location.reload();
+    }
+  });
+
   function showApp(user) {
+    const userId = String(user.id);
+
+    if (localStorage.getItem(ownerKey) !== userId) {
+      clearLocalWorkspace();
+      localStorage.setItem(ownerKey, userId);
+      window.location.reload();
+      return;
+    }
+
     currentUser = user;
     document.body.classList.remove('auth-pending');
     gate.hidden = true;
     account?.classList.add('visible');
-    if (avatar) avatar.textContent = initials(user.displayName || user.email);
-    if (userName) userName.textContent = user.displayName || 'Compte VIRA';
-    if (userEmail) userEmail.textContent = user.email || '';
+
+    if (avatar) {
+      avatar.textContent = initials(user.displayName || user.email);
+    }
+    if (userName) {
+      userName.textContent = user.displayName || 'Compte VIRA';
+    }
+    if (userEmail) {
+      userEmail.textContent = user.email || '';
+    }
   }
+
   function showAuth(message = '') {
     currentUser = null;
     document.body.classList.add('auth-pending');
     gate.hidden = false;
+
+    clearLocalWorkspace();
+
     loading?.classList.remove('visible');
     if (interactive) interactive.hidden = false;
     account?.classList.remove('visible');
-    if (status) { status.textContent = message; status.className = 'auth-status'; }
+
+    if (status) {
+      status.textContent = message;
+      status.className = 'auth-status';
+    }
   }
   function busy(form, yes) {
     form?.querySelectorAll('button').forEach(el => el.disabled = yes);
