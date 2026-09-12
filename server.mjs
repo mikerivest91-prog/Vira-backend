@@ -726,6 +726,20 @@ app.delete("/api/campaigns/:id", requireAuth, async (req, res) => {
    START SERVER
 ================================ */
 
+/* ================================
+   VIDEO TEST — AUCUN CRÉDIT
+================================ */
+
+app.post("/api/video/test", requireAuth, async (req, res) => {
+  return res.json({
+    ok: true,
+    mode: "preview",
+    message: "Préparation vidéo VIRA réussie.",
+    videoUrl: null
+  });
+});
+
+
 async function start() {
   try {
     if (!process.env.DATABASE_URL) {
