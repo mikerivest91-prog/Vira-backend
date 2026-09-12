@@ -2175,11 +2175,38 @@ localStorage.removeItem("viraGeneratedImages");
       });
     });
 
-    els.prompt.addEventListener("input", () => { els.promptCount.textContent = els.prompt.value.length; saveForm(); updateBrain(); });
-    els.audience.addEventListener("input", () => { saveForm(); updateBrain(); });
-    els.goal.addEventListener("input", () => { saveForm(); updateBrain(); });
-    els.tone.addEventListener("change", () => { updateToneIcon(); saveForm(); });
-    els.platform.addEventListener("change", () => { updatePlatformIcon(); updatePlatformTip(); saveForm(); updateBrain(); });
+        els.prompt.addEventListener("input", () => {
+      resetGeneratedFlow();
+      els.promptCount.textContent = els.prompt.value.length;
+      saveForm();
+      updateBrain();
+    });
+
+    els.audience.addEventListener("input", () => {
+      resetGeneratedFlow();
+      saveForm();
+      updateBrain();
+    });
+
+    els.goal.addEventListener("input", () => {
+      resetGeneratedFlow();
+      saveForm();
+      updateBrain();
+    });
+
+    els.tone.addEventListener("change", () => {
+      resetGeneratedFlow();
+      updateToneIcon();
+      saveForm();
+    });
+
+    els.platform.addEventListener("change", () => {
+      resetGeneratedFlow();
+      updatePlatformIcon();
+      updatePlatformTip();
+      saveForm();
+      updateBrain();
+    });
     els.brainBtn.addEventListener("click", () => updateBrain(true));
 
     els.scenarioBtn.addEventListener("click", async () => {
