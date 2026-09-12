@@ -1518,7 +1518,35 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
         <div class="auth-account" id="authAccount" aria-label="Compte VIRA"><div class="auth-avatar" id="authAvatar">V</div><div class="auth-user-copy"><strong id="authUserName">Compte</strong><span id="authUserEmail"></span></div><button class="auth-logout" id="authLogout" type="button" aria-label="Se déconnecter"><svg viewBox="0 0 24 24"><path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"/><path d="m15 8 4 4-4 4M9 12h10"/></svg></button></div>
         <div class="credit-badge"><span class="credit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.5 2 5 13h6l-.5 9L19 10h-6l.5-8Z"/></svg></span><span id="creditCount">—</span><small>crédits</small></div>
       </header>
+<div style="display:flex;justify-content:flex-end;margin:0 0 18px">
+  <button id="newCampaignBtn" type="button"
+    style="padding:12px 18px;border:1px solid #a63bff;border-radius:12px;background:#171024;color:#fff;font-weight:800;cursor:pointer">
+    + Nouvelle campagne
+  </button>
+</div>
 
+<script>
+  document.getElementById("newCampaignBtn").addEventListener("click", () => {
+    [
+      "viraIdea",
+      "viraMarketingGoal",
+      "viraTargetAudience",
+      "viraPlatform",
+      "viraCampaignTone",
+      "viraMarketingType",
+      "viraScenario",
+      "viraScenarioValidated",
+      "viraGeneratedImages",
+      "viraVoiceReady",
+      "viraVideoReady",
+      "viraCurrentCampaignId",
+      "viraResumePrompt",
+      "viraResumeCampaign"
+    ].forEach(key => localStorage.removeItem(key));
+
+    window.location.reload();
+  });
+</script>
       <section class="welcome-block premium-welcome">
         <h1>Votre workspace marketing</h1>
         <p>Transformez une idée en campagne prête à publier, de la stratégie à l’export.</p>
