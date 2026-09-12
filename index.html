@@ -2659,27 +2659,29 @@ if (!finalVideoUrl) {
   }
 });
 
-    // Navigation secondaire : tant qu’une vue n’existe pas, on ne simule pas un faux écran.
+     // Les boutons mobiles possèdent déjà leur propre gestionnaire.
+    // Les liens desktop délèguent aux mêmes gestionnaires.
     [...document.querySelectorAll(".sidebar-link"), ...document.querySelectorAll(".mobile-nav button")].forEach(btn => {
+      if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings].includes(btn)) return;
+
       btn.addEventListener("click", () => {
         const label = btn.textContent.trim();
-        const isDashboard = /Tableau de bord|Accueil/i.test(label);
+        const target = /Tableau de bord|Accueil/i.test(label)
+          ? els.navHome
+          : label === "Campagnes" ? els.navCampaigns : null;
 
-        if (!isDashboard) {
-          setStatus(
-            els.scenarioStatus,
-            `${label} sera relié à sa vue dédiée avant le lancement.`,
-            "warning"
-          );
+        if (target) {
+          target.click();
           return;
         }
 
-        document.querySelectorAll(".sidebar-link, .mobile-nav button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        window.scrollTo({top:0,behavior:"smooth"});
+        setStatus(
+          els.scenarioStatus,
+          `${label} sera relié à sa vue dédiée avant le lancement.`,
+          "warning"
+        );
       });
     });
-
 
     const scoreMirror = document.getElementById("growthScoreMini");
     const scoreSource = document.getElementById("growthScoreNumber");
