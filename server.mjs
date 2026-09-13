@@ -753,6 +753,30 @@ app.post("/api/audio/test", requireAuth, async (req, res) => {
     audioUrl: null
   });
 });
+/* ================================
+   VIDEO PREPARE — AUCUN CRÉDIT
+================================ */
+
+app.post("/api/video/generate", requireAuth, async (req, res) => {
+  const images = Array.isArray(req.body?.images) ? req.body.images : [];
+
+  if (images.length !== 3) {
+    return res.status(400).json({
+      ok: false,
+      error: "VIRA exige exactement 3 visuels."
+    });
+  }
+
+  return res.json({
+    ok: true,
+    mode: "prepare",
+    clips: images.map((image, index) => ({
+      scene: index + 1,
+      image,
+      taskId: null
+    }))
+  });
+});
 app.post("/api/video/test", requireAuth, async (req, res) => {
   return res.json({
     ok: true,
