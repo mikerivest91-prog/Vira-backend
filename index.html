@@ -2457,6 +2457,22 @@ els.voiceBtn.addEventListener("click", async () => {
   setProgress(0, "Préparation de la voix");
 
   try {
+    const audioResponse = await fetch("/api/audio/test", {
+  method: "POST",
+  credentials: "same-origin",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    narration
+  })
+});
+
+const audioData = await audioResponse.json();
+
+if (!audioResponse.ok || !audioData.ok) {
+  throw new Error(audioData.error || "Erreur audio VIRA.");
+}
     const voiceSteps = [
       [25, "Analyse de la narration"],
       [50, "Préparation de la voix"],
