@@ -2175,14 +2175,14 @@ localStorage.removeItem("viraGeneratedImages");
       if (!start.ok) throw new Error(data?.error || "Impossible de lancer la vidéo.");
 
       const clips = Array.isArray(data.clips) ? data.clips : [];
-      if (clips.length !== 5) throw new Error("VIRA n’a pas reçu 5 clips vidéo.");
+      if (clips.length !== 3) throw new Error("VIRA n’a pas reçu 3 clips vidéo.");
       if (clips.some(c => !c.taskId)) {
         throw new Error("Les clips sont préparés, mais Runway est encore en mode PREPARE sur le serveur. Active RUNWAY_EXECUTION=generate pour produire la vraie vidéo.");
       }
 
       const videoUrls = [];
-      for (let i=0;i<5;i++) videoUrls.push(await waitForRunwayTask(clips[i].taskId, i+1));
-      setProgress(82, "Assemblage des 5 clips");
+      for (let i=0;i<3;i++) videoUrls.push(await waitForRunwayTask(clips[i].taskId, i+1));
+      setProgress(82, "Assemblage des 3 clips");
 
       const assemble = await fetch("/api/video/assemble", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({videoUrls})});
       if (!assemble.ok) {
