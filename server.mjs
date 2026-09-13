@@ -1,4 +1,8 @@
 import "dotenv/config";
+import OpenAI from "openai";
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 import express from "express";
 import cors from "cors";
 import crypto from "node:crypto";
@@ -737,7 +741,18 @@ app.delete("/api/campaigns/:id", requireAuth, async (req, res) => {
 /* ================================
    VIDEO TEST — AUCUN CRÉDIT
 ================================ */
+/* ================================
+   AUDIO TEST — AUCUN CRÉDIT
+================================ */
 
+app.post("/api/audio/test", requireAuth, async (req, res) => {
+  return res.json({
+    ok: true,
+    mode: "preview",
+    message: "Préparation audio VIRA réussie.",
+    audioUrl: null
+  });
+});
 app.post("/api/video/test", requireAuth, async (req, res) => {
   return res.json({
     ok: true,
