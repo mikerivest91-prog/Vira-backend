@@ -4,10 +4,18 @@ import cors from "cors";
 import crypto from "node:crypto";
 import { promisify } from "node:util";
 import pg from "pg";
-
+import ffmpeg from "fluent-ffmpeg";
+import ffmpegPath from "ffmpeg-static";
+import fs from "node:fs";
+import path from "node:path";
 const { Pool } = pg;
 const scrypt = promisify(crypto.scrypt);
+ffmpeg.setFfmpegPath(ffmpegPath);
+const VIDEO_TEMP_DIR = path.join(process.cwd(), "tmp", "videos");
 
+if (!fs.existsSync(VIDEO_TEMP_DIR)) {
+  fs.mkdirSync(VIDEO_TEMP_DIR, { recursive: true });
+}
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
