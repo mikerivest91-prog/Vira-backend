@@ -4,6 +4,7 @@ const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 import express from "express";
+import multer from "multer";
 import cors from "cors";
 import crypto from "node:crypto";
 import { promisify } from "node:util";
@@ -17,7 +18,13 @@ const { Pool } = pg;
 const scrypt = promisify(crypto.scrypt);
 ffmpeg.setFfmpegPath(ffmpegPath);
 const VIDEO_TEMP_DIR = path.join(process.cwd(), "tmp", "videos");
-
+const uploadVideoClips = multer({
+  dest: VIDEO_TEMP_DIR,
+  limits: {
+    fileSize: 100 * 1024 * 1024,
+    files: 3
+  }
+});
 if (!fs.existsSync(VIDEO_TEMP_DIR)) {
   fs.mkdirSync(VIDEO_TEMP_DIR, { recursive: true });
 }
@@ -31,7 +38,7 @@ app.use(cors({
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static("."));
-
+app.use("/videos", express.static(VIDEO_TEMP_DIR));
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl:
@@ -800,6 +807,30 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
     }
   });
 });
+app.post(
+  "/api/video/assemble",
+  requireAuth,
+  uploadVideoClips.array("clips", 3),
+  async (req, res) => {const files = req.files || [];
+
+if (files.length !== 3) {
+  return res.status(400).json({
+    ok: false,
+    error: "VIRA exige exactement 3 clips vidéo."
+  });
+}
+
+const clipPaths = files.map(file => path.resolve(file.path));
+ const outputPath = path.join(VIDEO_TEMP_DIR, `vira-final-${Date.now()}.mp4`);
+  const result = await assembleVideoClips(clipPaths, outputPath);
+                       return res.json({
+  ok: true,
+  message: "Vidéo finale assemblée avec succès.",
+  videoUrl: `/videos/${path.basename(outputPath)}`
+});
+  }
+);
+
 app.post("/api/video/test", requireAuth, async (req, res) => {
   const assemblerReady = typeof assembleVideoClips === "function";
   return res.json({
