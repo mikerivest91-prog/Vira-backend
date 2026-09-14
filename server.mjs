@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import { audioFile, wavDuration, prepareAudio, synthesizeAudio } from "./audio-service.mjs";
 import multer from "multer";
 import cors from "cors";
 import crypto from "node:crypto";
@@ -23,6 +24,16 @@ const uploadVideoClips = multer({
 });
 if (!fs.existsSync(VIDEO_TEMP_DIR)) {
   fs.mkdirSync(VIDEO_TEMP_DIR, { recursive: true });
+}
+const AUDIO_TEMP_DIR = path.join(process.cwd(), "tmp", "audio");
+fs.mkdirSync(AUDIO_TEMP_DIR, { recursive: true });
+const uploadAudio = multer({ dest: AUDIO_TEMP_DIR, limits: { fileSize: 15 * 1024 * 1024, files: 1 } });
+const audioJobs = new Set();
+async function withAudioJob(req, res, work) {
+  const key = String(req.user.id);
+  if (audioJobs.has(key) || audioJobs.size >= 2) return res.status(429).json({ ok:false, error:"Une préparation audio est en cours. Réessayez dans un instant." });
+  audioJobs.add(key);
+  try { return await work(); } finally { audioJobs.delete(key); }
 }
 const app = express();
 const port = Number(process.env.PORT || 10000);
@@ -758,6 +769,35 @@ app.post("/api/audio/test", requireAuth, async (req, res) => {
     audioUrl: null
   });
 });
+app.post("/api/audio/generate", requireAuth, async (req, res) => {
+  const text = String(req.body?.text || "").trim();
+  const gender = req.body?.gender;
+  if (!text || text.length > 800 || !["male", "female"].includes(gender)) {
+    return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
+  }
+  return withAudioJob(req,res,async () => {
+    try {return res.json({ok:true,mode:"free",...await synthesizeAudio(text,gender,AUDIO_TEMP_DIR,req.user.id)});}
+    catch(error){console.error("VOICE ERROR:",error);return res.status(422).json({ok:false,error:"Impossible de préparer la voix. Essayez un texte plus court (60 secondes maximum)."});}
+  });
+});
+app.post("/api/audio/upload", requireAuth, uploadAudio.single("audio"), async (req,res) => {
+  if (!req.file) return res.status(400).json({ok:false,error:"Choisissez ou enregistrez un fichier audio."});
+  try {
+    return await withAudioJob(req,res,async () => {
+      try {return res.json({ok:true,mode:"upload",...await prepareAudio(req.file.path,AUDIO_TEMP_DIR,req.user.id)});}
+      catch(error){console.error("AUDIO UPLOAD ERROR:",error);return res.status(422).json({ok:false,error:"Fichier audio invalide ou trop long. Durée maximale : 60 secondes."});}
+    });
+  } finally {await fs.promises.unlink(req.file.path).catch(()=>{});}
+});
+app.get("/api/audio/:id", requireAuth, async (req,res) => {
+  try {
+    const filename=audioFile(AUDIO_TEMP_DIR,req.user.id,req.params.id);
+    await fs.promises.access(filename);
+    res.setHeader("Cache-Control","private, no-store");
+    return res.sendFile(filename);
+  } catch {return res.status(404).json({ok:false,error:"Audio introuvable. Préparez à nouveau la narration."});}
+});
+
 /* ================================
    VIDEO PREPARE — AUCUN CRÉDIT
 ================================ */
@@ -805,8 +845,8 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
   });
 });
 // Uploaded clips and generated previews share the same final MP4 contract.
-async function publishVideo(clipPaths, prefix) {
-  const result = await assembleVideoClips(clipPaths);
+async function publishVideo(clipPaths, prefix, audioPath = null) {
+  const result = await assembleVideoClips(clipPaths, audioPath);
   try {
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
     await fs.promises.copyFile(result.outputPath, path.join(VIDEO_TEMP_DIR, filename));
@@ -850,11 +890,11 @@ function decodePreviewImage(source, index) {
   return { buffer, extension: match[1] === "jpeg" ? "jpg" : "png" };
 }
 
-function createPreviewClip(imagePath, clipPath) {
+function createPreviewClip(imagePath, clipPath, duration = 2) {
   return new Promise((resolve, reject) => {
     ffmpeg(imagePath, { timeout: 40 })
       .inputOptions(["-loop", "1"])
-      .duration(2)
+      .duration(duration)
       .videoCodec("libx264")
       .format("mp4")
       .outputOptions([
@@ -884,6 +924,11 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     return res.status(400).json({ ok: false, error: error.message });
   }
 
+  let audioPath = null, duration = 6;
+  if (req.body?.audioId) {
+    try { audioPath = audioFile(AUDIO_TEMP_DIR, req.user.id, req.body.audioId); duration = await wavDuration(audioPath); }
+    catch { return res.status(400).json({ok:false,error:"La narration a expiré ou est invalide. Préparez-la de nouveau."}); }
+  }
   const temporaryFiles = [];
   try {
     const jobId = crypto.randomUUID();
@@ -894,11 +939,11 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
       temporaryFiles.push(imagePath, clipPath);
       await fs.promises.writeFile(imagePath, decoded[i].buffer);
       // Keep the input until FFmpeg has actually finished reading it.
-      await createPreviewClip(imagePath, clipPath);
+      await createPreviewClip(imagePath, clipPath, Math.max(2,duration)/3);
       clips.push(clipPath);
     }
-    const videoUrl = await publishVideo(clips, "vira-free-final");
-    return res.json({ ok: true, mode: "free", videoUrl, audioUrl: null });
+    const videoUrl = await publishVideo(clips, "vira-free-final", audioPath);
+    return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration) });
   } catch (error) {
     console.error("FREE VIDEO ASSEMBLY ERROR:", error);
     return res.status(500).json({ ok: false, error: "Impossible de créer la vidéo gratuite. Réessayez dans un instant." });

@@ -1351,6 +1351,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* Keep the vertical MP4 within the viewport without changing the workspace. */
 #videoResult video.video-player{display:block;width:auto;max-width:100%;height:auto;max-height:70vh;margin:16px auto;object-fit:contain;background:#08070c}
+
+#voiceOptions[hidden],#voiceOptions [hidden]{display:none!important}#voiceOptions .field-group{margin:12px 0}#voiceOptions button{height:auto!important;min-height:46px!important;min-width:0!important;flex-direction:row!important;margin:10px 8px 10px 0;padding:12px 16px;font-size:14px!important}#voiceOptions p{font-size:13px;line-height:1.5}#voiceOptions textarea{min-height:120px;font-size:16px}#voiceOptions input{max-width:100%}
 </style>
 
 <style>
@@ -1848,7 +1850,8 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
 let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
     let finalVideoUrl = "";
     let scenarioValidated = localStorage.getItem("viraScenarioValidated") === "true";
-let voiceReady = localStorage.getItem("viraVoiceReady") === "true";
+let preparedAudioId = "";
+let voiceReady = false;
    let videoReady = localStorage.getItem("viraVideoReady") === "true";
 
     const marketingMeta = {
@@ -1982,7 +1985,8 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";
 
 els.visualBtn.disabled = !(hasScenario && scenarioValidated);
       els.voiceBtn.disabled = !(hasScenario && scenarioValidated && hasVisuals);
-      els.videoBtn.disabled = videoInProgress || !(hasScenario && scenarioValidated && hasVisuals && voiceReady);
+      els.videoBtn.disabled = videoInProgress || !(hasScenario && scenarioValidated && hasVisuals && voiceReady && preparedAudioId);
+      document.querySelectorAll("#voiceOptions button,#voiceOptions input,#voiceOptions select,#voiceOptions textarea").forEach(control => { if (videoInProgress) control.disabled=true; });
       els.downloadBtn.disabled = !videoReady;
       els.downloadBtn.classList.toggle("is-ready", videoReady);
 
@@ -2533,106 +2537,120 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
       );
     });
 
-els.voiceBtn.addEventListener("click", async () => {
-  if (!scenarioValidated || generatedImages.length !== 3) {
-    return setStatus(
-      els.status,
-      "Validez le scénario et générez les 3 visuels avant de préparer la voix.",
-      "warning"
-    );
-  }
-
-  const parsedScenario = parseScenario(rawScenario);
-  const narration =
-    (parsedScenario.narration || "")
-      .replace(/SC[ÈE]NE\s*\d+/gi, "")
-      .replace(/NARRATION\s*:?/gi, "")
-      .replace(/ACCROCHE\s*:?/gi, "")
-      .replace(/APPEL À L['’]ACTION\s*:?/gi, "")
-      .replace(/PROMPT VISUEL\s*:?/gi, "")
-      .replace(/STYLE\s*:?/gi, "")
-      .replace(/\s{2,}/g, " ")
-      .trim();
-
-  if (!narration) {
-    return setStatus(els.status,"Aucune narration valide trouvée.","warning");
-  }
-
-  els.voiceBtn.disabled = true;
-  setStatus(els.status,"Préparation de la narration…","loading");
-  setProgress(0, "Préparation de la voix");
-
-  try {
-    const audioResponse = await fetch("/api/audio/test", {
-  method: "POST",
-  credentials: "same-origin",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    narration
-  })
-});
-
-const audioData = await audioResponse.json();
-
-if (!audioResponse.ok || !audioData.ok) {
-  throw new Error(audioData.error || "Erreur audio VIRA.");
-}
-    const voiceSteps = [
-      [25, "Analyse de la narration"],
-      [50, "Préparation de la voix"],
-      [75, "Ajustement du rythme"],
-      [100, "Voix & Audio prêts"]
-    ];
-
-    for (const [progress, label] of voiceSteps) {
-      await new Promise(resolve => setTimeout(resolve, 260));
-      setProgress(progress, label);
+    let audioBusy = false;
+    let recorder = null;
+    let recordStream = null;
+    let recordTimer = null;
+    const voicePanel = document.createElement("div");
+    voicePanel.className = "campaign-section";
+    voicePanel.id = "voiceOptions";
+    voicePanel.hidden = true;
+    voicePanel.innerHTML = `<strong>Votre narration</strong>
+      <p>Voix automatique gratuite ou votre propre voix · 60 secondes maximum.</p>
+      <div class="field-group"><label for="voiceMode">Source de la voix</label><select id="voiceMode"><option value="auto">Voix automatique</option><option value="personal">Ma voix · enregistrer ou importer</option></select></div>
+      <div id="autoVoiceFields"><div class="field-group"><label for="voiceGender">Choix de la voix</label><select id="voiceGender"><option value="female">Femme</option><option value="male">Homme</option></select></div>
+      <div class="field-group"><label for="voiceNarration">Texte à lire</label><textarea id="voiceNarration" maxlength="800"></textarea></div>
+      <p>Voix de synthèse basique en français, sans crédits.</p><button class="action-card" id="prepareVoice" type="button">Créer la voix</button></div>
+      <div id="personalVoiceFields" hidden><div class="field-group"><label for="voiceFile">Importer un audio · MP3, WAV, M4A ou WebM · 15 Mo maximum</label><input id="voiceFile" type="file" accept="audio/*"></div><button class="action-card" id="recordVoice" type="button">Enregistrer ma voix</button><button class="action-card" id="stopVoice" type="button" hidden>Terminer l’enregistrement</button><p id="recordState" role="status"></p></div>
+      <audio id="voicePreview" controls preload="metadata" hidden style="width:100%;margin-top:14px"></audio><p id="voiceFeedback" role="status" aria-live="polite"></p>`;
+    els.voiceBtn.closest(".video-next-step").appendChild(voicePanel);
+    const voiceElement = id => document.getElementById(id);
+    function invalidateAudio() {
+      preparedAudioId = "";
+      voiceReady = false;
+      videoReady = false;
+      localStorage.removeItem("viraVoiceReady");
+      localStorage.removeItem("viraVideoReady");
+      clearFinalVideoUrl();
+      els.videoResult.innerHTML = "";
+      voiceElement("voicePreview").pause();
+      voiceElement("voicePreview").removeAttribute("src");
+      voiceElement("voicePreview").hidden = true;
+      updateWorkflowState();
     }
-
-    if ("speechSynthesis" in window) {
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(narration.trim().slice(0, 900));
-      const voices = speechSynthesis.getVoices();
-      const frenchVoice =
-        voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith("fr")) || voices[0];
-
-      if (frenchVoice) {
-        utterance.voice = frenchVoice;
-        utterance.lang = frenchVoice.lang;
-      } else {
-        utterance.lang = "fr-CA";
+    async function prepareVoiceRequest(url, body, json = false) {
+      if (audioBusy || videoInProgress) return;
+      invalidateAudio();
+      const scenarioAtStart = rawScenario;
+      audioBusy = true;
+      voicePanel.querySelectorAll("button,input,select,textarea").forEach(el => el.disabled = true);
+      voiceElement("voiceFeedback").textContent = "Préparation de votre audio…";
+      try {
+        const response = await fetch(url, { method:"POST", credentials:"same-origin", headers:json?{"Content-Type":"application/json"}:{}, body:json?JSON.stringify(body):body });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || "Impossible de préparer l’audio.");
+        if (rawScenario !== scenarioAtStart || !scenarioValidated || generatedImages.length !== 3) throw new Error("La campagne a changé. Préparez sa narration de nouveau.");
+        if (!/^[0-9a-f-]{36}$/.test(data.audioId) || data.audioUrl !== `/api/audio/${data.audioId}`) throw new Error("Réponse audio invalide.");
+        preparedAudioId = data.audioId;
+        voiceReady = true;
+        voiceElement("voicePreview").src = data.audioUrl;
+        voiceElement("voicePreview").hidden = false;
+        voiceElement("voiceFeedback").textContent = `Audio prêt · ${Math.ceil(data.duration)} secondes. Écoutez-le, puis cliquez sur Vidéo finale.`;
+        els.voiceBtn.querySelector("strong").textContent = "Voix prête";
+        setStatus(els.status,"Narration prête à être intégrée au MP4. Aucun crédit utilisé.","success");
+      } catch (error) { voiceElement("voiceFeedback").textContent = error.message; }
+      finally { audioBusy = false; voicePanel.querySelectorAll("button,input,select,textarea").forEach(el => el.disabled = false); updateWorkflowState(); }
+    }
+    els.voiceBtn.addEventListener("click", () => {
+      if (!scenarioValidated || generatedImages.length !== 3 || videoInProgress) return;
+      const narration = (parseScenario(rawScenario).narration || "").trim();
+      if (voicePanel.dataset.scenario !== rawScenario) {
+        invalidateAudio();
+        voiceElement("voiceNarration").value = narration.slice(0,800);
+        voicePanel.dataset.scenario = rawScenario;
+        voiceElement("voiceFeedback").textContent = narration.length > 800 ? "Texte limité à 800 caractères : ajustez votre narration avant de créer la voix." : "Choisissez votre voix et préparez l’audio.";
       }
-
-      utterance.rate = 0.95;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      speechSynthesis.speak(utterance);
+      voicePanel.hidden = false;
+      voicePanel.scrollIntoView({behavior:"smooth",block:"center"});
+    });
+    voiceElement("voiceMode").addEventListener("change", () => {
+      stopRecording(true);
+      invalidateAudio();
+      const automatic = voiceElement("voiceMode").value === "auto";
+      voiceElement("autoVoiceFields").hidden = !automatic;
+      voiceElement("personalVoiceFields").hidden = automatic;
+    });
+    for (const id of ["voiceGender","voiceNarration"]) voiceElement(id).addEventListener("input",invalidateAudio);
+    voiceElement("prepareVoice").addEventListener("click", () => {
+      const text = voiceElement("voiceNarration").value.trim();
+      if (!text) { voiceElement("voiceFeedback").textContent = "Ajoutez un texte à lire."; return; }
+      prepareVoiceRequest("/api/audio/generate",{text,gender:voiceElement("voiceGender").value},true);
+    });
+    function uploadNarration(file) {
+      if (!file || file.size > 15*1024*1024 || !file.size) { voiceElement("voiceFeedback").textContent="Choisissez un fichier audio non vide de moins de 15 Mo.";return; }
+      const form = new FormData(); form.append("audio",file,file.name||"narration.webm");
+      return prepareVoiceRequest("/api/audio/upload",form);
     }
+    voiceElement("voiceFile").addEventListener("change",event=>uploadNarration(event.target.files[0]));
+    function stopRecording(discard=false) {
+      if (recorder && recorder.state !== "inactive") { recorder.discard=discard;recorder.stop(); }
+      recordStream?.getTracks().forEach(track=>track.stop());
+      clearTimeout(recordTimer);
+      voiceElement("recordVoice").disabled=false;
+      voiceElement("stopVoice").hidden=true;
+    }
+    voiceElement("recordVoice").addEventListener("click",async()=>{
+      if (audioBusy || videoInProgress) return;
+      if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {voiceElement("recordState").textContent="L’enregistrement n’est pas disponible dans ce navigateur. Importez un fichier audio.";return;}
+      try {
+        invalidateAudio();
+        recordStream=await navigator.mediaDevices.getUserMedia({audio:true});
+        const chunks=[];
+        recorder=new MediaRecorder(recordStream);
+        const activeRecorder=recorder;
+        activeRecorder.ondataavailable=event=>{if(event.data.size)chunks.push(event.data);};
+        activeRecorder.onstop=()=>{recordStream?.getTracks().forEach(track=>track.stop());if(!activeRecorder.discard){voiceElement("recordState").textContent="Enregistrement terminé.";uploadNarration(new File(chunks,"narration.webm",{type:activeRecorder.mimeType}));}};
+        activeRecorder.onerror=()=>{stopRecording(true);voiceElement("recordState").textContent="Enregistrement interrompu. Réessayez ou importez un fichier.";};
+        recorder.start();
+        voiceElement("recordVoice").disabled=true;
+        voiceElement("stopVoice").hidden=false;
+        voiceElement("recordState").textContent="Enregistrement en cours… arrêt automatique après 60 secondes.";
+        recordTimer=setTimeout(()=>stopRecording(),59000);
+      } catch {voiceElement("recordState").textContent="Accès au microphone refusé ou indisponible. Vous pouvez importer un fichier audio.";}
+    });
+    voiceElement("stopVoice").addEventListener("click",()=>stopRecording());
+    window.addEventListener("pagehide",()=>stopRecording(true));
 
-    voiceReady = true;
-    localStorage.setItem("viraVoiceReady", "true");
-    els.voiceBtn.querySelector("strong").textContent = "Voix prête";
-    const voiceSubText = els.voiceBtn.querySelector(".action-copy span");
-    if (voiceSubText) voiceSubText.textContent = "Narration préparée • aperçu VIRA";
-
-    setStatus(
-      els.status,
-      FREE_VIDEO_MODE
-        ? "Voix & Audio prêts en mode aperçu. Aucun crédit utilisé."
-        : "Voix & Audio prêts.",
-      "success"
-    );
-  } catch (error) {
-    voiceReady = false;
-    localStorage.removeItem("viraVoiceReady");
-    setStatus(els.status,"Impossible de préparer l’aperçu audio.","error");
-  } finally {
-    updateWorkflowState();
-    hideProgress(900);
-  }
-});
 
     els.visualBtn.addEventListener("click", async () => {
       if (!scenarioValidated || !rawScenario) {
@@ -2712,7 +2730,7 @@ if (currentCampaignId) {
     });
 els.videoBtn.addEventListener("click", async () => {
   if (videoInProgress) return;
-  if (generatedImages.length !== 3 || !voiceReady) {
+  if (generatedImages.length !== 3 || !voiceReady || !preparedAudioId) {
     return setStatus(
       els.videoStatus,
       "Préparez les 3 visuels et la voix avant de créer la vidéo finale.",
@@ -2731,7 +2749,7 @@ els.videoBtn.addEventListener("click", async () => {
   try {
     if (FREE_VIDEO_MODE) {
         const images = await Promise.all(generatedImages.map(rasterizePreview));
-const payload = JSON.stringify({ images });
+const payload = JSON.stringify({ images, audioId: preparedAudioId });
 if (new Blob([payload]).size > 1900000) throw new Error("Les visuels dépassent la taille acceptée par le serveur.");
 const response = await fetch("/api/video/free-assemble", {
   method: "POST",
@@ -2770,10 +2788,10 @@ finalVideoUrl = prepared.videoUrl;
             <span class="campaign-heading-icon">${uiIcon("video")}</span>
             <span>Vidéo test prête</span>
           </h3>
-          <div class="meta">3 scènes · 6 secondes · mode test gratuit · sans audio</div>
+          <div class="meta">3 scènes · narration intégrée · mode test gratuit</div>
           <div class="campaign-section">
             <strong>✓ Votre vidéo est prête à télécharger</strong>
-            <p>Les trois visuels ont été assemblés en MP4. La narration écoutée dans le navigateur n’est pas intégrée à cette vidéo test.</p><video class="video-player" controls playsinline src="${finalVideoUrl}"></video>
+            <p>Les trois visuels et votre narration sont réunis dans ce MP4. La durée de la vidéo suit celle de votre audio.</p><video class="video-player" controls playsinline src="${finalVideoUrl}"></video>
           </div>
         </div>`;
 
@@ -2822,7 +2840,7 @@ localStorage.setItem(
 );
       setStatus(
         els.videoStatus,
-        "Vidéo test prête. Vous pouvez télécharger votre MP4 sans audio.",
+        "Vidéo prête avec votre narration. Vous pouvez télécharger le MP4 avec son.",
         "success"
       );
     } else {
@@ -2837,6 +2855,7 @@ localStorage.setItem(
     setStatus(els.videoStatus,escapeHtml(error.message || "Erreur de création vidéo"),"error");
   } finally {
     videoInProgress = false;
+    voicePanel.querySelectorAll("button,input,select,textarea").forEach(control=>control.disabled=false);
     updateWorkflowState();
     hideProgress(1200);
   }

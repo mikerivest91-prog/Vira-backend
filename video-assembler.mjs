@@ -9,7 +9,7 @@ const runFile = promisify(execFile);
 
 // Réservé aux fichiers locaux fournis par le serveur.
 // Ne pas transmettre directement des chemins reçus du navigateur.
-export async function assembleVideoClips(clipPaths) {
+export async function assembleVideoClips(clipPaths, audioPath = null) {
   if (!Array.isArray(clipPaths) || clipPaths.length !== 3) {
     throw new Error("L’assemblage exige exactement 3 clips.");
   }
@@ -30,6 +30,11 @@ export async function assembleVideoClips(clipPaths) {
     }
   }
 
+  if (audioPath) {
+    if (!path.isAbsolute(audioPath)) throw new Error("Audio local invalide.");
+    const audio = await stat(audioPath);
+    if (!audio.isFile() || !audio.size) throw new Error("Audio vide.");
+  }
   const directory = await mkdtemp(
     path.join(tmpdir(), "vira-assembly-")
   );
@@ -67,11 +72,15 @@ export async function assembleVideoClips(clipPaths) {
       );
     }
 
+    if (audioPath) {
+      args.push("-protocol_whitelist", "file,pipe", "-i", audioPath);
+
+    }
     args.push(
       "-filter_complex_threads", "1",
       "-filter_complex", filters.join(";"),
       "-map", "[outv]",
-      "-an",
+      ...(audioPath ? ["-map","3:a:0","-c:a","aac","-b:a","128k","-shortest"] : ["-an"]),
       "-c:v", "libx264",
       "-preset", "veryfast",
       "-crf", "23",
