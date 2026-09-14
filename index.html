@@ -1460,7 +1460,62 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
 .vira-topbar{gap:8px!important}.credit-badge{margin-left:auto}
 @media(max-width:759px){.vira-auth-gate{padding:14px}.auth-card{padding:18px;border-radius:19px}.auth-title{font-size:22px}.auth-brand{margin-bottom:15px}.auth-user-copy{display:none}.auth-account{padding:0 5px}.auth-avatar{width:29px;height:29px}.auth-logout{width:27px;height:27px}.credit-badge{margin-left:0!important}}
 </style>
+<style>
+.workflow-actions.campaign-start-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
 
+.workflow-actions.campaign-start-actions .action-card {
+  grid-column: auto !important;
+}
+
+.video-next-step {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(146, 74, 255, .28);
+}
+
+.video-next-step h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.video-next-step > p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.workflow-actions.video-final-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.workflow-actions.video-final-actions .action-card {
+  grid-column: auto !important;
+}
+
+.video-final-actions .action-copy strong {
+  font-size: 13px !important;
+}
+
+.video-final-actions .action-copy span {
+  font-size: 11px !important;
+}
+
+@media (max-width: 759px) {
+  .workflow-actions.video-final-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .workflow-actions.video-final-actions .action-card {
+    min-height: 76px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+}
+</style>
 </head>
 <body class="auth-pending">
 
@@ -1652,12 +1707,8 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
 
       <section class="glass-card stage">
         <div class="stage-head"><span class="stage-icon"><span class="stage-svg" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span></span><div><div class="stage-title">4. Créez votre campagne complète</div><p class="stage-help">Générez tous vos contenus marketing avec VIRA.</p></div></div>
-        <div class="workflow-actions">
-          <button id="scenario" class="action-card scenario-step" type="button"><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></span><span class="action-copy"><strong>Scénario & Copy</strong><span>Générez votre scénario et vos textes</span></span></button>
+<div class="workflow-actions campaign-start-actions">          <button id="scenario" class="action-card scenario-step" type="button"><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></span><span class="action-copy"><strong>Scénario & Copy</strong><span>Générez votre scénario et vos textes</span></span></button>
           <button id="generate" class="action-card visuals" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5.5 17 4.2-4 3.1 2.7 2.5-2.3 3.2 3.6"/><path d="M18.5 2.5v3M17 4h3"/></svg></span><span class="action-copy"><strong>Visuels</strong><span>Créez des visuels professionnels</span></span></button>
-          <button id="testVoice" class="action-card voice" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6.5 11a5.5 5.5 0 0 0 11 0M12 16.5V21M9 21h6"/><path d="M4 9v4M20 9v4"/></svg></span><span class="action-copy"><strong>Voix & Audio</strong><span>Ajoutez voix off et musique</span></span></button>
-          <button id="video" class="action-card video" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="14" rx="3"/><path d="m9 9 4.5 3L9 15Z"/><path d="m17 9 4-2v10l-4-2"/></svg></span><span class="action-copy"><strong>Vidéo finale</strong><span>Assemblez votre vidéo complète</span></span></button>
-          <button id="downloadVideo" class="action-card download-step" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></span><span class="action-copy"><strong>Télécharger</strong><span>Exportez votre vidéo finale</span></span></button>
         </div>
         <div class="test-badge premium-test-badge"><span class="premium-test-icon" aria-hidden="true"><svg viewBox="0 0 24 24">
 <path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/>
@@ -1677,8 +1728,60 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
 </button>
         <div id="scenarioStatus" class="status-box" aria-live="polite"></div><div id="scenarioResult" class="campaign-result"></div>
         <div id="progressWrap" class="progress-wrap"><div class="progress-meta"><span id="progressLabel">Préparation</span><strong id="progressPercent">0%</strong></div><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div></div>
-        <div id="status" class="status-box" aria-live="polite"></div><div id="result" class="visual-results"></div><div id="videoStatus" class="status-box" aria-live="polite"></div><div id="videoResult" class="video-result"></div>
-      </section>
+<div id="status" class="status-box" aria-live="polite"></div>
+<div id="result" class="visual-results"></div>
+
+<section class="video-next-step" aria-labelledby="videoNextTitle">
+  <h3 id="videoNextTitle">Après les visuels : préparez votre vidéo</h3>
+  <p>Validez votre scénario et créez les 3 visuels, puis préparez la voix pour activer « Vidéo finale ».</p>
+
+  <div class="workflow-actions video-final-actions">
+<button id="testVoice" class="action-card voice" type="button" disabled>
+  <span class="action-icon premium-action-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+      <rect x="9" y="3" width="6" height="11" rx="3"/>
+      <path d="M6.5 11a5.5 5.5 0 0 0 11 0M12 16.5V21M9 21h6"/>
+      <path d="M4 9v4M20 9v4"/>
+    </svg>
+  </span>
+  <span class="action-copy">
+    <strong>Voix & Audio</strong>
+    <span>Ajoutez voix off et musique</span>
+  </span>
+</button>
+
+<button id="video" class="action-card video" type="button" disabled>
+  <span class="action-icon premium-action-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+      <rect x="3" y="5" width="14" height="14" rx="3"/>
+      <path d="m9 9 4.5 3L9 15Z"/>
+      <path d="m17 9 4-2v10l-4-2"/>
+    </svg>
+  </span>
+  <span class="action-copy">
+    <strong>Vidéo finale</strong>
+    <span>Assemblez votre vidéo complète</span>
+  </span>
+</button>
+
+<button id="downloadVideo" class="action-card download-step" type="button" disabled>
+  <span class="action-icon premium-action-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 3v12"/>
+      <path d="m7 10 5 5 5-5"/>
+      <path d="M5 21h14"/>
+    </svg>
+  </span>
+  <span class="action-copy">
+    <strong>Télécharger</strong>
+    <span>Exportez votre vidéo finale</span>
+  </span>
+</button>    
+  </div>
+</section>
+
+<div id="videoStatus" class="status-box" aria-live="polite"></div>
+<div id="videoResult" class="video-result"></div>      </section>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Navigation principale">
