@@ -2725,6 +2725,30 @@ els.videoBtn.addEventListener("click", async () => {
 
   try {
     if (FREE_VIDEO_MODE) {
+            const response = await fetch("/api/video/generate", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          images: generatedImages
+        })
+      });
+
+      const prepared = await response.json();
+
+      if (!response.ok || !prepared.ok) {
+        throw new Error(prepared.error || "Préparation vidéo impossible.");
+      }
+
+      if (
+        prepared.mode !== "prepare" ||
+        !Array.isArray(prepared.clips) ||
+        prepared.clips.length !== 3
+      ) {
+        throw new Error("Le serveur n’a pas confirmé les 3 scènes préparées.");
+      }
       const steps = [
         [25,"Préparation des scènes"],
         [50,"Assemblage de la campagne"],
