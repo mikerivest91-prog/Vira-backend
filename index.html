@@ -1967,27 +1967,7 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";
         finalVideoUrl = "";
       }
     }
-async function createFinalVideo() {
-  const response = await fetch("/api/video/test", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      scenario: rawScenario,
-      images: generatedImages
-    })
-  });
 
-  const data = await response.json();
-
-  if (!response.ok || !data.ok) {
-    throw new Error(data.error || "Erreur vidéo VIRA.");
-  }
-
-  return data.videoUrl || null;
-}
     function updateWorkflowState() {
       const hasScenario = Boolean(rawScenario && isValidScenarioText(rawScenario));
       const hasVisuals = generatedImages.length === 3;
