@@ -835,7 +835,52 @@ return res.json({
 });
   }
 );
+app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
+  try {
+    const colors = ["blue", "red", "green"];
+    const clipPaths = [];
 
+    for (let i = 0; i < 3; i++) {
+      const clipPath = path.join(
+        VIDEO_TEMP_DIR,
+        `vira-free-${Date.now()}-${i + 1}.mp4`
+      );
+
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(`color=c=${colors[i]}:s=720x1280:d=2`)
+          .inputFormat("lavfi")
+          .videoCodec("libx264")
+          .outputOptions("-pix_fmt yuv420p")
+          .save(clipPath)
+          .on("end", resolve)
+          .on("error", reject);
+      });
+
+      clipPaths.push(clipPath);
+    }
+
+    const result = await assembleVideoClips(clipPaths);
+
+    const finalFilename = `vira-free-final-${Date.now()}.mp4`;
+    const finalPath = path.join(VIDEO_TEMP_DIR, finalFilename);
+
+    fs.copyFileSync(result.outputPath, finalPath);
+
+    return res.json({
+      ok: true,
+      mode: "free",
+      videoUrl: `/videos/${finalFilename}`
+    });
+  } catch (error) {
+    console.error("FREE VIDEO ASSEMBLY ERROR:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Impossible de créer la vidéo gratuite."
+    });
+  }
+});
 app.post("/api/video/test", requireAuth, async (req, res) => {
   const assemblerReady = typeof assembleVideoClips === "function";
   return res.json({
