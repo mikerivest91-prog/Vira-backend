@@ -940,19 +940,24 @@ fs.writeFileSync(imagePath, imageBuffer);
 imageFiles.push(imagePath);
 
 await new Promise((resolve, reject) => {
-ffmpeg(imagePath)    .inputOptions(["-loop 1"])
+  ffmpeg(imagePath)
+    .inputOptions(["-loop", "1"])
     .duration(2)
     .videoCodec("libx264")
+    .format("mp4")
     .outputOptions([
-      "-vf scale=720:1280",
-      "-pix_fmt yuv420p",
-      "-r 30"
+      "-vf", "scale=720:1280",
+      "-pix_fmt", "yuv420p",
+      "-r", "30",
+      "-movflags", "+faststart"
     ])
-    .save(clipPath)
+    .on("start", command => {
+      console.log("FREE CLIP FFMPEG:", command);
+    })
     .on("end", resolve)
-    .on("error", reject);
+    .on("error", reject)
+    .save(clipPath);
 });
-
 fs.unlinkSync(imagePath);
       clipPaths.push(clipPath);
     }
