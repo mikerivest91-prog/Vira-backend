@@ -1,8 +1,4 @@
 import "dotenv/config";
-import OpenAI from "openai";
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  : null;
 import express from "express";
 import multer from "multer";
 import cors from "cors";
@@ -37,7 +33,8 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "2mb" }));
-app.use(express.static("."));
+app.get("/", (_req, res) => res.sendFile(path.resolve("index.html")));
+app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
 app.use("/videos", express.static(VIDEO_TEMP_DIR));
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -68,7 +65,7 @@ function parseCookies(req) {
       const value = part.slice(index + 1).trim();
 
       if (key) {
-        cookies[key] = decodeURIComponent(value);
+        try { cookies[key] = decodeURIComponent(value); } catch { /* Ignore malformed cookies. */ }
       }
     });
 
@@ -807,183 +804,106 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
     }
   });
 });
+// Uploaded clips and generated previews share the same final MP4 contract.
+async function publishVideo(clipPaths, prefix) {
+  const result = await assembleVideoClips(clipPaths);
+  try {
+    const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
+    await fs.promises.copyFile(result.outputPath, path.join(VIDEO_TEMP_DIR, filename));
+    return `/videos/${filename}`;
+  } finally {
+    await result.cleanup();
+  }
+}
+
 app.post(
   "/api/video/assemble",
   requireAuth,
   uploadVideoClips.array("clips", 3),
-  async (req, res) => {const files = req.files || [];
-
-if (files.length !== 3) {
-  return res.status(400).json({
-    ok: false,
-    error: "VIRA exige exactement 3 clips vidéo."
-  });
-}
-
-const clipPaths = files.map(file => path.resolve(file.path));
-const result = await assembleVideoClips(clipPaths);
-
-const finalFilename = `vira-final-${Date.now()}.mp4`;
-const finalPath = path.join(VIDEO_TEMP_DIR, finalFilename);
-
-fs.copyFileSync(result.outputPath, finalPath);
-
-return res.json({
-  ok: true,
-  message: "Vidéo finale assemblée avec succès.",
-  videoUrl: `/videos/${finalFilename}`
-});
+  async (req, res) => {
+    const files = req.files || [];
+    try {
+      if (files.length !== 3) {
+        return res.status(400).json({ ok: false, error: "VIRA exige exactement 3 clips vidéo." });
+      }
+      const videoUrl = await publishVideo(files.map(file => path.resolve(file.path)), "vira-final");
+      return res.json({ ok: true, videoUrl });
+    } catch (error) {
+      console.error("VIDEO ASSEMBLY ERROR:", error);
+      return res.status(500).json({ ok: false, error: "Impossible d’assembler les clips vidéo." });
+    } finally {
+      await Promise.allSettled(files.map(file => fs.promises.unlink(file.path)));
+    }
   }
 );
+
+function decodePreviewImage(source, index) {
+  // The new index.html sends raster JPEGs, avoiding SVG decoder dependencies.
+  const match = typeof source === "string" && source.match(/^data:image\/(jpeg|png);base64,([A-Za-z0-9+/]+={0,2})$/);
+  if (!match) throw new Error(`Visuel ${index + 1} invalide : utilisez une image JPEG ou PNG.`);
+  const buffer = Buffer.from(match[2], "base64");
+  const jpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  const png = buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]));
+  if (!buffer.length || buffer.length > 1024 * 1024 || (match[1] === "jpeg" ? !jpeg : !png)) {
+    throw new Error(`Visuel ${index + 1} vide, trop volumineux ou invalide.`);
+  }
+  return { buffer, extension: match[1] === "jpeg" ? "jpg" : "png" };
+}
+
+function createPreviewClip(imagePath, clipPath) {
+  return new Promise((resolve, reject) => {
+    ffmpeg(imagePath, { timeout: 40 })
+      .inputOptions(["-loop", "1"])
+      .duration(2)
+      .videoCodec("libx264")
+      .format("mp4")
+      .outputOptions([
+        "-vf", "scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2,setsar=1",
+        "-pix_fmt", "yuv420p",
+        "-r", "30",
+        "-an",
+        "-preset", "veryfast",
+        "-threads", "2",
+        "-movflags", "+faststart"
+      ])
+      .on("end", resolve)
+      .on("error", reject)
+      .save(clipPath);
+  });
+}
+
 app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
+  const images = req.body?.images;
+  if (!Array.isArray(images) || images.length !== 3) {
+    return res.status(400).json({ ok: false, error: "VIRA exige exactement 3 visuels JPEG ou PNG." });
+  }
+  let decoded;
   try {
-let images = Array.isArray(req.body?.images) ? req.body.images : [];
+    decoded = images.map(decodePreviewImage);
+  } catch (error) {
+    return res.status(400).json({ ok: false, error: error.message });
+  }
 
-// MODE TEST GRATUIT : créer automatiquement 3 visuels de démonstration
-if (images.length === 0) {
-  images = [1, 2, 3].map((sceneNumber) => {
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
-        <defs>
-          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#24103f"/>
-            <stop offset="100%" stop-color="#090711"/>
-          </linearGradient>
-        </defs>
-
-        <rect width="720" height="1280" fill="url(#bg)"/>
-
-        <text
-          x="360"
-          y="560"
-          text-anchor="middle"
-          fill="#d45cff"
-          font-family="Arial"
-          font-size="52"
-          font-weight="700"
-        >
-          SCÈNE ${sceneNumber}
-        </text>
-
-        <text
-          x="360"
-          y="630"
-          text-anchor="middle"
-          fill="#ffffff"
-          font-family="Arial"
-          font-size="38"
-          font-weight="700"
-        >
-          VIRA PREMIUM
-        </text>
-
-        <text
-          x="360"
-          y="1180"
-          text-anchor="middle"
-          fill="#8d839d"
-          font-family="Arial"
-          font-size="22"
-        >
-          MODE TEST GRATUIT
-        </text>
-      </svg>
-    `;
-
-    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-  });
-}
-
-if (images.length !== 3) {
-  return res.status(400).json({
-    ok: false,
-    error: "VIRA doit recevoir exactement 3 visuels."
-  });
-}
-
-const imageFiles = [];    const clipPaths = [];
-
-    for (let i = 0; i < 3; i++) {
-      const clipPath = path.join(
-        VIDEO_TEMP_DIR,
-        `vira-free-${Date.now()}-${i + 1}.mp4`
-      );
-
-  const imageSource = String(images[i] || "");
-const commaIndex = imageSource.indexOf(",");
-
-if (!imageSource.startsWith("data:image/") || commaIndex === -1) {
-  throw new Error(`Visuel ${i + 1} invalide.`);
-}
-
-const meta = imageSource.slice(5, commaIndex);
-const payload = imageSource.slice(commaIndex + 1);
-const mime = meta.split(";")[0];
-const isBase64 = meta.includes(";base64");
-
-const extension =
-  mime.includes("svg") ? "svg" :
-  mime.includes("png") ? "png" :
-  mime.includes("jpeg") || mime.includes("jpg") ? "jpg" :
-  "img";
-
-const imagePath = path.join(
-  VIDEO_TEMP_DIR,
-  `vira-image-${Date.now()}-${i + 1}.${extension}`
-);
-
-const imageBuffer = isBase64
-  ? Buffer.from(payload, "base64")
-  : Buffer.from(decodeURIComponent(payload), "utf8");
-
-fs.writeFileSync(imagePath, imageBuffer);
-imageFiles.push(imagePath);
-
-await new Promise((resolve, reject) => {
-  ffmpeg(imagePath)
-    .inputOptions(["-loop", "1"])
-    .duration(2)
-    .videoCodec("libx264")
-    .format("mp4")
-    .outputOptions([
-      "-vf", "scale=720:1280",
-      "-pix_fmt", "yuv420p",
-      "-r", "30",
-      "-movflags", "+faststart"
-    ])
-.on("start", command => {
-  console.log("FREE CLIP FFMPEG:", command);
-})
-.on("end", resolve)
-.on("error", (err, stdout, stderr) => {
-  console.error("FREE CLIP ERROR:", err.message);
-  console.error("FREE CLIP STDERR:", stderr);
-  reject(err);
-})
-.save(clipPath);
-fs.unlinkSync(imagePath);
-      clipPaths.push(clipPath);
+  const temporaryFiles = [];
+  try {
+    const jobId = crypto.randomUUID();
+    const clips = [];
+    for (let i = 0; i < decoded.length; i++) {
+      const imagePath = path.join(VIDEO_TEMP_DIR, `vira-image-${jobId}-${i}.${decoded[i].extension}`);
+      const clipPath = path.join(VIDEO_TEMP_DIR, `vira-clip-${jobId}-${i}.mp4`);
+      temporaryFiles.push(imagePath, clipPath);
+      await fs.promises.writeFile(imagePath, decoded[i].buffer);
+      // Keep the input until FFmpeg has actually finished reading it.
+      await createPreviewClip(imagePath, clipPath);
+      clips.push(clipPath);
     }
-
-    const result = await assembleVideoClips(clipPaths);
-
-    const finalFilename = `vira-free-final-${Date.now()}.mp4`;
-    const finalPath = path.join(VIDEO_TEMP_DIR, finalFilename);
-
-    fs.copyFileSync(result.outputPath, finalPath);
-
-    return res.json({
-      ok: true,
-      mode: "free",
-      videoUrl: `/videos/${finalFilename}`
-    });
+    const videoUrl = await publishVideo(clips, "vira-free-final");
+    return res.json({ ok: true, mode: "free", videoUrl, audioUrl: null });
   } catch (error) {
     console.error("FREE VIDEO ASSEMBLY ERROR:", error);
-
-    return res.status(500).json({
-      ok: false,
-      error: error.message || "Impossible de créer la vidéo gratuite."
-    });
+    return res.status(500).json({ ok: false, error: "Impossible de créer la vidéo gratuite. Réessayez dans un instant." });
+  } finally {
+    await Promise.allSettled(temporaryFiles.map(file => fs.promises.unlink(file)));
   }
 });
 app.post("/api/video/test", requireAuth, async (req, res) => {
@@ -997,6 +917,20 @@ app.post("/api/video/test", requireAuth, async (req, res) => {
   });
 });
 
+
+// Keep API errors JSON, including malformed JSON and oversized uploads.
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+  console.error("REQUEST ERROR:", error);
+  const status = error.type === "entity.too.large" ? 413
+    : error instanceof multer.MulterError || error.type === "entity.parse.failed" ? 400 : 500;
+  return res.status(status).json({
+    ok: false,
+    error: status === 413 ? "Les fichiers dépassent la taille acceptée."
+      : status === 400 ? "Requête ou fichiers invalides."
+      : "Une erreur serveur est survenue."
+  });
+});
 
 async function start() {
   try {
