@@ -2280,9 +2280,29 @@ localStorage.removeItem("viraGeneratedImages");
     async function createFinalVideo() {
       const d = parseScenario(rawScenario);
       setProgress(8, "Préparation des 3 scènes");
-      const start = await fetch("/api/video/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:rawScenario,images:generatedImages})});
-      const data = await start.json();
-      if (!start.ok) throw new Error(data?.error || "Impossible de lancer la vidéo.");
+  const start = await fetch("/api/video/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    prompt: rawScenario,
+    images: generatedImages
+  })
+});
+
+const contentType = start.headers.get("content-type") || "";
+const rawResponse = await start.text();
+
+if (!contentType.includes("application/json")) {
+  throw new Error(
+    "La route /api/video/generate retourne du HTML au lieu de JSON."
+  );
+}
+
+const data = JSON.parse(rawResponse);
+
+if (!start.ok) {
+  throw new Error(data?.error || "Impossible de lancer la vidéo.");
+}
 
       const clips = Array.isArray(data.clips) ? data.clips : [];
       if (clips.length !== 3) throw new Error("VIRA n’a pas reçu 3 clips vidéo.");
