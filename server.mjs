@@ -758,23 +758,45 @@ app.post("/api/audio/test", requireAuth, async (req, res) => {
 ================================ */
 
 app.post("/api/video/generate", requireAuth, async (req, res) => {
-  const images = Array.isArray(req.body?.images) ? req.body.images : [];
+  const images = req.body?.images;
 
-  if (images.length !== 3) {
+  if (!Array.isArray(images) || images.length !== 3) {
     return res.status(400).json({
       ok: false,
       error: "VIRA exige exactement 3 visuels."
     });
   }
 
+  const validImages = images.every(image =>
+    typeof image === "string" && image.trim().length > 0
+  );
+
+  if (!validImages) {
+    return res.status(400).json({
+      ok: false,
+      error: "Chaque scène doit contenir un visuel."
+    });
+  }
+
+  // Préparation uniquement : aucun appel à Runway ou OpenAI.
+  const clips = images.map((image, index) => ({
+    scene: index + 1,
+    image: image.trim(),
+    taskId: null,
+    status: "prepared"
+  }));
+
   return res.json({
     ok: true,
     mode: "prepare",
-    clips: images.map((image, index) => ({
-      scene: index + 1,
-      image,
-      taskId: null
-    }))
+    paidGenerationEnabled: false,
+    videoUrl: null,
+    clips,
+    assembly: {
+      format: "mp4",
+      sceneOrder: clips.map(clip => clip.scene),
+      status: "awaiting_video_clips"
+    }
   });
 });
 app.post("/api/video/test", requireAuth, async (req, res) => {
