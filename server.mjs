@@ -801,9 +801,11 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
   });
 });
 app.post("/api/video/test", requireAuth, async (req, res) => {
+  const assemblerReady = typeof assembleVideoClips === "function";
   return res.json({
     ok: true,
     mode: "preview",
+    assemblerReady,
     message: "Préparation vidéo VIRA réussie.",
     videoUrl: null
   });
