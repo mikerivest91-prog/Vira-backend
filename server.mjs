@@ -900,7 +900,7 @@ if (images.length !== 3) {
     error: "VIRA doit recevoir exactement 3 visuels."
   });
 }
-}
+
 const imageFiles = [];    const clipPaths = [];
 
     for (let i = 0; i < 3; i++) {
@@ -940,8 +940,7 @@ fs.writeFileSync(imagePath, imageBuffer);
 imageFiles.push(imagePath);
 
 await new Promise((resolve, reject) => {
-  ffmpeg(framePath)
-    .inputOptions(["-loop 1"])
+ffmpeg(imagePath)    .inputOptions(["-loop 1"])
     .duration(2)
     .videoCodec("libx264")
     .outputOptions([
@@ -954,8 +953,7 @@ await new Promise((resolve, reject) => {
     .on("error", reject);
 });
 
-fs.unlinkSync(framePath);
-
+fs.unlinkSync(imagePath);
       clipPaths.push(clipPath);
     }
 
