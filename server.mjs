@@ -821,13 +821,13 @@ if (files.length !== 3) {
 }
 
 const clipPaths = files.map(file => path.resolve(file.path));
- const outputPath = path.join(VIDEO_TEMP_DIR, `vira-final-${Date.now()}.mp4`);
-  const result = await assembleVideoClips(clipPaths, outputPath);
-                       return res.json({
+const result = await assembleVideoClips(clipPaths);                       return res.json({
+  const finalFilename = `vira-final-${Date.now()}.mp4`;
+const finalPath = path.join(VIDEO_TEMP_DIR, finalFilename);
+fs.copyFileSync(result.outputPath, finalPath);
   ok: true,
   message: "Vidéo finale assemblée avec succès.",
-  videoUrl: `/videos/${path.basename(outputPath)}`
-});
+videoUrl: `/videos/${finalFilename}`});
   }
 );
 
