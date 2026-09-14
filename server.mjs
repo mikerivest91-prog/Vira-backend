@@ -952,10 +952,11 @@ await new Promise((resolve, reject) => {
       "-movflags", "+faststart"
     ])
     .on("start", command => {
-      console.log("FREE CLIP FFMPEG:", command);
-    })
-    .on("end", resolve)
-    .on("error", reject)
+      .on("error", (err, stdout, stderr) => {
+  console.error("FREE CLIP ERROR:", err.message);
+  console.error("FREE CLIP STDERR:", stderr);
+  reject(err);
+})
     .save(clipPath);
 });
 fs.unlinkSync(imagePath);
