@@ -837,13 +837,69 @@ return res.json({
 );
 app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
   try {
-    const images = Array.isArray(req.body?.images) ? req.body.images : [];
+let images = Array.isArray(req.body?.images) ? req.body.images : [];
+
+// MODE TEST GRATUIT : créer automatiquement 3 visuels de démonstration
+if (images.length === 0) {
+  images = [1, 2, 3].map((sceneNumber) => {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#24103f"/>
+            <stop offset="100%" stop-color="#090711"/>
+          </linearGradient>
+        </defs>
+
+        <rect width="720" height="1280" fill="url(#bg)"/>
+
+        <text
+          x="360"
+          y="560"
+          text-anchor="middle"
+          fill="#d45cff"
+          font-family="Arial"
+          font-size="52"
+          font-weight="700"
+        >
+          SCÈNE ${sceneNumber}
+        </text>
+
+        <text
+          x="360"
+          y="630"
+          text-anchor="middle"
+          fill="#ffffff"
+          font-family="Arial"
+          font-size="38"
+          font-weight="700"
+        >
+          VIRA PREMIUM
+        </text>
+
+        <text
+          x="360"
+          y="1180"
+          text-anchor="middle"
+          fill="#8d839d"
+          font-family="Arial"
+          font-size="22"
+        >
+          MODE TEST GRATUIT
+        </text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  });
+}
 
 if (images.length !== 3) {
   return res.status(400).json({
     ok: false,
     error: "VIRA doit recevoir exactement 3 visuels."
   });
+}
 }
 const imageFiles = [];    const clipPaths = [];
 
