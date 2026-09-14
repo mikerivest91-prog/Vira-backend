@@ -837,8 +837,15 @@ return res.json({
 );
 app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
   try {
-    const colors = ["blue", "red", "green"];
-    const clipPaths = [];
+    const images = Array.isArray(req.body?.images) ? req.body.images : [];
+
+if (images.length !== 3) {
+  return res.status(400).json({
+    ok: false,
+    error: "VIRA doit recevoir exactement 3 visuels."
+  });
+}
+const imageFiles = [];    const clipPaths = [];
 
     for (let i = 0; i < 3; i++) {
       const clipPath = path.join(
@@ -846,33 +853,35 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
         `vira-free-${Date.now()}-${i + 1}.mp4`
       );
 
-   const framePath = path.join(
-  VIDEO_TEMP_DIR,
-  `vira-free-frame-${Date.now()}-${i + 1}.ppm`
-);
+  const imageSource = String(images[i] || "");
+const commaIndex = imageSource.indexOf(",");
 
-const rgb =
-  colors[i] === "red"
-    ? [255, 0, 0]
-    : colors[i] === "green"
-    ? [0, 180, 0]
-    : [0, 80, 255];
-
-const pixels = Buffer.alloc(16 * 16 * 3);
-
-for (let p = 0; p < pixels.length; p += 3) {
-  pixels[p] = rgb[0];
-  pixels[p + 1] = rgb[1];
-  pixels[p + 2] = rgb[2];
+if (!imageSource.startsWith("data:image/") || commaIndex === -1) {
+  throw new Error(`Visuel ${i + 1} invalide.`);
 }
 
-fs.writeFileSync(
-  framePath,
-  Buffer.concat([
-    Buffer.from("P6\n16 16\n255\n"),
-    pixels
-  ])
+const meta = imageSource.slice(5, commaIndex);
+const payload = imageSource.slice(commaIndex + 1);
+const mime = meta.split(";")[0];
+const isBase64 = meta.includes(";base64");
+
+const extension =
+  mime.includes("svg") ? "svg" :
+  mime.includes("png") ? "png" :
+  mime.includes("jpeg") || mime.includes("jpg") ? "jpg" :
+  "img";
+
+const imagePath = path.join(
+  VIDEO_TEMP_DIR,
+  `vira-image-${Date.now()}-${i + 1}.${extension}`
 );
+
+const imageBuffer = isBase64
+  ? Buffer.from(payload, "base64")
+  : Buffer.from(decodeURIComponent(payload), "utf8");
+
+fs.writeFileSync(imagePath, imageBuffer);
+imageFiles.push(imagePath);
 
 await new Promise((resolve, reject) => {
   ffmpeg(framePath)
