@@ -846,16 +846,50 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
         `vira-free-${Date.now()}-${i + 1}.mp4`
       );
 
-      await new Promise((resolve, reject) => {
-        ffmpeg()
-          .input(`color=c=${colors[i]}:s=720x1280:d=2`)
-          .inputFormat("lavfi")
-          .videoCodec("libx264")
-          .outputOptions("-pix_fmt yuv420p")
-          .save(clipPath)
-          .on("end", resolve)
-          .on("error", reject);
-      });
+   const framePath = path.join(
+  VIDEO_TEMP_DIR,
+  `vira-free-frame-${Date.now()}-${i + 1}.ppm`
+);
+
+const rgb =
+  colors[i] === "red"
+    ? [255, 0, 0]
+    : colors[i] === "green"
+    ? [0, 180, 0]
+    : [0, 80, 255];
+
+const pixels = Buffer.alloc(16 * 16 * 3);
+
+for (let p = 0; p < pixels.length; p += 3) {
+  pixels[p] = rgb[0];
+  pixels[p + 1] = rgb[1];
+  pixels[p + 2] = rgb[2];
+}
+
+fs.writeFileSync(
+  framePath,
+  Buffer.concat([
+    Buffer.from("P6\n16 16\n255\n"),
+    pixels
+  ])
+);
+
+await new Promise((resolve, reject) => {
+  ffmpeg(framePath)
+    .inputOptions(["-loop 1"])
+    .duration(2)
+    .videoCodec("libx264")
+    .outputOptions([
+      "-vf scale=720:1280",
+      "-pix_fmt yuv420p",
+      "-r 30"
+    ])
+    .save(clipPath)
+    .on("end", resolve)
+    .on("error", reject);
+});
+
+fs.unlinkSync(framePath);
 
       clipPaths.push(clipPath);
     }
