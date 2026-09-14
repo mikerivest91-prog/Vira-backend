@@ -12,6 +12,7 @@ import ffmpeg from "fluent-ffmpeg";
 import ffmpegPath from "ffmpeg-static";
 import fs from "node:fs";
 import path from "node:path";
+import { assembleVideoClips } from "./video-assembler.mjs";
 const { Pool } = pg;
 const scrypt = promisify(crypto.scrypt);
 ffmpeg.setFfmpegPath(ffmpegPath);
