@@ -943,6 +943,8 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
       await createPreviewClip(imagePath, clipPath, Math.max(2,duration)/3);
       clips.push(clipPath);
     }
+    console.log("FREE-ASSEMBLE clips ready:", clips.length);
+console.log("FREE-ASSEMBLE before publishVideo");
     const videoUrl = await publishVideo(clips, "vira-free-final", audioPath);
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration) });
   } catch (error) {
