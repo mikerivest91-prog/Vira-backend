@@ -2262,9 +2262,22 @@ localStorage.removeItem("viraGeneratedImages");
     async function waitForRunwayTask(taskId, sceneNumber) {
       for (let attempt=0; attempt<90; attempt++) {
         await new Promise(r => setTimeout(r, 5000));
-        const r = await fetch(`/api/video/${encodeURIComponent(taskId)}/status`);
-        const d = await r.json();
-        if (!r.ok) throw new Error(d?.error || `Erreur vidéo scène ${sceneNumber}`);
+const r = await fetch(`/api/video/${encodeURIComponent(taskId)}/status`);
+
+const contentType = r.headers.get("content-type") || "";
+const rawStatus = await r.text();
+
+if (!contentType.includes("application/json")) {
+  throw new Error(
+    `La route statut vidéo retourne du HTML pour la scène ${sceneNumber}.`
+  );
+}
+
+const d = JSON.parse(rawStatus);
+
+if (!r.ok) {
+  throw new Error(d?.error || `Erreur vidéo scène ${sceneNumber}`);
+}
         const status = String(d.status || "").toUpperCase();
         if (["SUCCEEDED","COMPLETED","SUCCESS"].includes(status)) {
           const url = Array.isArray(d.output) ? d.output[0] : null;
