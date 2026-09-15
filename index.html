@@ -2265,8 +2265,7 @@ localStorage.removeItem("viraGeneratedImages");
     }
 
     function renderImages(images, scenes, test = false) {
-      els.result.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></h3><div class="meta">${images.length}/3 scènes ${test ? "• mode test gratuit" : "• générées par VIRA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></div>`;
-    }
+      els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/3 scènes ${test ? "• mode test gratuit" : "• générées par VIRA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
 
     async function generateRealImages(scenes, visualPrompt, style) {
       const images = [];
