@@ -1,5 +1,3 @@
-const fs = require("node:fs");
-
 let input = "";
 
 process.stdin.setEncoding("utf8");
@@ -21,24 +19,17 @@ process.stdin.on("end", async () => {
       throw new Error("Invalid text");
     }
 
-    const { EdgeTTS } = await import("edge-tts.js");
+    const { Communicate } = await import("edge-tts.js");
 
     const voice =
       gender === "female"
         ? "fr-CA-SylvieNeural"
         : "fr-CA-AntoineNeural";
 
-    const tts = new EdgeTTS(text, voice);
+    const communicate = new Communicate(text.trim(), voice);
 
-    await tts.ttsPromise;
+    await communicate.save(process.argv[2]);
 
-    const audio = tts.audio;
-
-    if (!audio || !audio.length) {
-      throw new Error("No audio generated");
-    }
-
-    fs.writeFileSync(process.argv[2], audio);
   } catch (error) {
     console.error(error?.message || error);
     process.exitCode = 1;
