@@ -1598,6 +1598,7 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
       "viraScenarioValidated",
       "viraGeneratedImages",
       "viraVoiceReady",
+      "viraPreparedAudioId",
       "viraVideoReady",
       "viraFinalVideoUrl",
       "viraCurrentCampaignId",
@@ -1851,9 +1852,8 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
 let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
     let finalVideoUrl = localStorage.getItem("viraFinalVideoUrl") || "";
     let scenarioValidated = localStorage.getItem("viraScenarioValidated") === "true";
-let preparedAudioId = "";
-let voiceReady = false;
-   let videoReady = localStorage.getItem("viraVideoReady") === "true";
+let preparedAudioId = localStorage.getItem("viraPreparedAudioId") || "";
+let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoReady = localStorage.getItem("viraVideoReady") === "true";
 
     const marketingMeta = {
       "🛍️ Vendre un produit": {
@@ -2104,6 +2104,7 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
       localStorage.removeItem("viraScenario");
 localStorage.removeItem("viraScenarioValidated");
 localStorage.removeItem("viraVoiceReady");
+      localStorage.removeItem("viraPreparedAudioId");
 localStorage.removeItem("viraVideoReady");
       localStorage.removeItem("viraFinalVideoUrl");
 localStorage.removeItem("viraGeneratedImages");
@@ -2607,6 +2608,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
     const voiceElement = id => document.getElementById(id);
     function invalidateAudio() {
       preparedAudioId = "";
+      localStorage.removeItem("viraPreparedAudioId");
       voiceReady = false;
       videoReady = false;
       localStorage.removeItem("viraVoiceReady");
@@ -2633,7 +2635,9 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
         if (rawScenario !== scenarioAtStart || !scenarioValidated || generatedImages.length !== 3) throw new Error("La campagne a changé. Préparez sa narration de nouveau.");
         if (!/^[0-9a-f-]{36}$/.test(data.audioId) || data.audioUrl !== `/api/audio/${data.audioId}`) throw new Error("Réponse audio invalide.");
         preparedAudioId = data.audioId;
+        localStorage.setItem("viraPreparedAudioId", preparedAudioId);
         voiceReady = true;
+        localStorage.setItem("viraVoiceReady", "true");
         voiceElement("voicePreview").src = data.audioUrl;
         voiceElement("voicePreview").hidden = false;
         voiceElement("voiceFeedback").textContent = `Audio prêt · ${Math.ceil(data.duration)} secondes. Écoutez-le, puis cliquez sur Vidéo finale.`;
