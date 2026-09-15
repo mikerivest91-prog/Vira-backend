@@ -1599,6 +1599,7 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
       "viraGeneratedImages",
       "viraVoiceReady",
       "viraVideoReady",
+      "viraFinalVideoUrl",
       "viraCurrentCampaignId",
       "viraResumePrompt",
       "viraResumeCampaign"
@@ -1848,7 +1849,7 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
     let selectedMarketingType = localStorage.getItem("viraMarketingType") || "";
     let rawScenario = localStorage.getItem("viraScenario") || "";
 let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
-    let finalVideoUrl = "";
+    let finalVideoUrl = localStorage.getItem("viraFinalVideoUrl") || "";
     let scenarioValidated = localStorage.getItem("viraScenarioValidated") === "true";
 let preparedAudioId = "";
 let voiceReady = false;
@@ -2104,6 +2105,7 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
 localStorage.removeItem("viraScenarioValidated");
 localStorage.removeItem("viraVoiceReady");
 localStorage.removeItem("viraVideoReady");
+      localStorage.removeItem("viraFinalVideoUrl");
 localStorage.removeItem("viraGeneratedImages");
       
       els.scenarioResult.innerHTML = "";
@@ -2609,6 +2611,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
       videoReady = false;
       localStorage.removeItem("viraVoiceReady");
       localStorage.removeItem("viraVideoReady");
+      localStorage.removeItem("viraFinalVideoUrl");
       clearFinalVideoUrl();
       els.videoResult.innerHTML = "";
       voiceElement("voicePreview").pause();
@@ -2853,6 +2856,7 @@ finalVideoUrl = prepared.videoUrl;
 
       videoReady = true;
       localStorage.setItem("viraVideoReady", "true");
+      localStorage.setItem("viraFinalVideoUrl", finalVideoUrl);
       const savedCampaigns = JSON.parse(
   localStorage.getItem("viraCampaigns") || "[]"
 );
@@ -3132,6 +3136,14 @@ const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario 
       : []
   )
 );
+    if (campaignData.videoUrl || campaign.videoUrl) {
+  localStorage.setItem(
+    "viraFinalVideoUrl",
+    campaignData.videoUrl || campaign.videoUrl
+  );
+} else {
+  localStorage.removeItem("viraFinalVideoUrl");
+}
     localStorage.setItem("viraScenarioValidated", "true");
     localStorage.setItem("viraResumePrompt", campaign.title || "");
 localStorage.setItem("viraResumeCampaign", "true");
