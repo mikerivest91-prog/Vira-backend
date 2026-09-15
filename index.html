@@ -1492,13 +1492,29 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
   font-size: 13px;
   line-height: 1.5;
 }
-
 .workflow-actions.video-final-actions {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
 }
 
 .workflow-actions.video-final-actions .action-card {
   grid-column: auto !important;
+  min-height: 82px !important;
+  padding: 14px 16px !important;
+  border-radius: 16px !important;
+  gap: 12px !important;
+}
+
+.video-final-actions .premium-action-icon {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  border-radius: 11px !important;
+}
+
+.video-final-actions .premium-action-icon svg {
+  width: 19px !important;
+  height: 19px !important;
 }
 
 .video-final-actions .action-copy strong {
@@ -1507,17 +1523,26 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
 
 .video-final-actions .action-copy span {
   font-size: 11px !important;
+  margin-top: 3px !important;
 }
 
 @media (max-width: 759px) {
   .workflow-actions.video-final-actions {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
   }
 
   .workflow-actions.video-final-actions .action-card {
-    min-height: 76px !important;
-    flex-direction: row !important;
+    min-height: 92px !important;
+    padding: 10px 6px !important;
+    flex-direction: column !important;
     align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .video-final-actions .action-copy span {
+    display: none !important;
   }
 }
 </style>
