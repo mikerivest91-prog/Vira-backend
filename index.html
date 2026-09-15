@@ -2877,6 +2877,7 @@ const completedCampaign = {
   platform: els.platform.value,
   marketingType: selectedMarketingType,
 image: generatedImages[0] || "",
+  videoUrl: finalVideoUrl || "",
   createdAt: existingCampaignIndex >= 0
     ? savedCampaigns[existingCampaignIndex].createdAt
     : new Date().toISOString(),
