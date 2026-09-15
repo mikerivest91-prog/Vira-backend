@@ -17,5 +17,7 @@
     "@runwayml/sdk": "^3.3.0",
     "multer": "^2.3.0",
     "pg": "^8.16.3",
-"mespeak": "2.0.2",
-"edge-tts.js": "^2.0.4"}
+    "mespeak": "2.0.2",
+    "edge-tts.js": "^2.0.4"
+  }
+}
