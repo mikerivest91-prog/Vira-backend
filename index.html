@@ -2338,9 +2338,24 @@ if (!start.ok) {
       const narration = d.narration.trim();
       if (narration) {
         setProgress(90, "Ajout de la narration");
-        const voice = await fetch("/api/voice/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:narration})});
-        if (voice.ok) {
-          const audioBlob = await voice.blob();
+     const voice = await fetch("/api/audio/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    text: narration,
+    gender: "female"
+  })
+});
+      if (voice.ok) {
+  const voiceData = await voice.json();
+
+  const audioResponse = await fetch(voiceData.audioUrl);
+
+  if (!audioResponse.ok) {
+    throw new Error("Impossible de récupérer la narration.");
+  }
+
+  const audioBlob = await audioResponse.blob();
           const fd = new FormData();
           fd.append("video", videoBlob, "vira-video.mp4");
           fd.append("audio", audioBlob, "vira-voice.mp3");
