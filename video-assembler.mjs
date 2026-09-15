@@ -76,18 +76,19 @@ export async function assembleVideoClips(clipPaths, audioPath = null) {
       args.push("-protocol_whitelist", "file,pipe", "-i", audioPath);
 
     }
-    args.push(
-      "-filter_complex_threads", "1",
-      "-filter_complex", filters.join(";"),
-      "-map", "[outv]",
-      ...(audioPath ? ["-map","3:a:0","-c:a","aac","-b:a","128k","-shortest"] : ["-an"]),
-      "-c:v", "libx264",
-      "-preset", "veryfast",
-      "-crf", "23",
-      "-threads", "2",
-      "-pix_fmt", "yuv420p",
-      "-movflags", "+faststart",
-      outputPath
+   args.push(
+  "-filter_complex_threads", "1",
+  "-filter_complex", filters.join(";"),
+  "-map", "[outv]",
+  ...(audioPath ? ["-map","3:a:0","-c:a","aac","-b:a","64k","-shortest"] : ["-an"]),
+  "-c:v", "libx264",
+  "-preset", "ultrafast",
+  "-crf", "30",
+  "-threads", "1",
+  "-pix_fmt", "yuv420p",
+  "-movflags", "+faststart",
+  outputPath
+);
     );
 
     await runFile(ffmpegPath, args, {
