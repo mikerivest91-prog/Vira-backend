@@ -2215,15 +2215,11 @@ localStorage.removeItem("viraGeneratedImages");
       els.scenarioResult.innerHTML = `
         <div class="result-ready"><strong>✓ Votre campagne est prête</strong><span>Stratégie, contenu et 3 scènes générés.</span></div>
         <h2>${escapeHtml(d.title || "Campagne VIRA")}</h2>
-        <div class="campaign-section"><strong>${campaignHeading("target","Objectif")}</strong><p>${escapeHtml(d.objective || els.goal.value)}</p></div>
-        <div class="campaign-section"><strong>${campaignHeading("audience","Public cible")}</strong><p>${escapeHtml(d.target || els.audience.value)}</p></div>
-        <div class="campaign-section"><strong>${campaignHeading("hook","Accroche")}</strong><p>${escapeHtml(d.hook)}</p></div>
-        <div class="campaign-section"><strong>${campaignHeading("copy","Texte de publication")}</strong><p>${escapeHtml(d.publication)}</p></div>
-        <div class="campaign-section"><strong>${campaignHeading("hashtag","Hashtags")}</strong><p>${escapeHtml(d.hashtags)}</p></div>
+<details class="campaign-section"><summary>${campaignHeading("target","Objectif")}</summary><p>${escapeHtml(d.objective || els.goal.value)}</p></details>       <details class="campaign-section"><summary>${campaignHeading("book","Public cible")}</summary><p>${escapeHtml(d.target || els.audience.value)}</p></details>
+<details class="campaign-section"><summary>${campaignHeading("copy","Texte de publication")}</summary><p>${escapeHtml(d.publication)}</p></details>        <div class="campaign-section"><strong>${campaignHeading("hashtag","Hashtags")}</strong><p>${escapeHtml(d.hashtags)}</p></div>
         <details class="campaign-section"><summary>${campaignHeading("scenes",`Scènes (${d.scenes.filter(Boolean).length}/3)`)}</summary>${d.scenes.map((s,i)=>`<div class="scene-item"><strong>Scène ${i+1}</strong><p>${escapeHtml(s || "Scène à compléter")}</p></div>`).join("")}</details>
         <details class="campaign-section"><summary>${campaignHeading("narration","Narration")}</summary><p>${escapeHtml(d.narration)}</p></details>
-        <div class="campaign-section"><strong>${campaignHeading("cta","Appel à l’action")}</strong><p>${escapeHtml(d.cta)}</p></div>
-        <details class="campaign-section"><summary>${campaignHeading("image","Prompt visuel")}</summary><p>${escapeHtml(d.visualPrompt)}</p></details>
+<details class="campaign-section"><summary>${campaignHeading("cta","Appel à l’action")}</summary><p>${escapeHtml(d.cta)}</p></details>        <details class="campaign-section"><summary>${campaignHeading("image","Prompt visuel")}</summary><p>${escapeHtml(d.visualPrompt)}</p></details>
         <details class="campaign-section"><summary>${campaignHeading("style","Style")}</summary><p>${escapeHtml(d.style)}</p></details>`;
       els.validateBtn.hidden = false;
       els.validateBtn.style.display = "flex";
