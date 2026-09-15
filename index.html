@@ -2806,8 +2806,16 @@ const response = await fetch("/api/video/free-assemble", {
   body: payload
 });
 
-const prepared = await response.json();
+const contentType = response.headers.get("content-type") || "";
+const rawResponse = await response.text();
 
+if (!contentType.includes("application/json")) {
+  throw new Error(
+    "La route /api/video/free-assemble retourne du HTML au lieu de JSON."
+  );
+}
+
+const prepared = JSON.parse(rawResponse);
 if (!response.ok || !prepared.ok || !prepared.videoUrl) {
   throw new Error(
     prepared.error || "Création de la vidéo gratuite impossible."
