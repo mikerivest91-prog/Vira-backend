@@ -2903,6 +2903,36 @@ localStorage.setItem(
   "viraCampaigns",
   JSON.stringify(savedCampaigns)
 );
+      const currentCampaignId = localStorage.getItem("viraCurrentCampaignId");
+
+if (currentCampaignId) {
+  const updateResponse = await fetch(`/api/campaigns/${currentCampaignId}`, {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title: completedCampaign.title,
+      status: "completed",
+      campaignData: {
+        scenario: completedCampaign.scenario,
+        audience: completedCampaign.audience,
+        goal: completedCampaign.goal,
+        tone: completedCampaign.tone,
+        platform: completedCampaign.platform,
+        marketingType: completedCampaign.marketingType,
+        generatedImages: generatedImages,
+        videoUrl: finalVideoUrl,
+        completedAt: completedCampaign.completedAt
+      }
+    })
+  });
+
+  if (!updateResponse.ok) {
+    console.error("Impossible de sauvegarder la vidéo finale dans la campagne.");
+  }
+}
       setStatus(
         els.videoStatus,
         "Vidéo prête avec votre narration. Vous pouvez télécharger le MP4 avec son.",
