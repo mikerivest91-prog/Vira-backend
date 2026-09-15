@@ -913,6 +913,7 @@ function createPreviewClip(imagePath, clipPath, duration = 2) {
 }
 
 app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
+  console.log("FREE-ASSEMBLE ROUTE REACHED");
   const images = req.body?.images;
   if (!Array.isArray(images) || images.length !== 3) {
     return res.status(400).json({ ok: false, error: "VIRA exige exactement 3 visuels JPEG ou PNG." });
