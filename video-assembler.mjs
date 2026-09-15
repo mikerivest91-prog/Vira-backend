@@ -88,7 +88,6 @@ export async function assembleVideoClips(clipPaths, audioPath = null) {
   "-pix_fmt", "yuv420p",
   "-movflags", "+faststart",
   outputPath
-);
     );
 
     await runFile(ffmpegPath, args, {
