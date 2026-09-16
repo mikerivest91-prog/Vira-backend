@@ -1628,6 +1628,26 @@ html,body{font-family:var(--vira-ui-font)!important}
 .vira-auth-gate,.vira-auth-gate :where(h1,h2,h3,p,span,div,a,label,strong,small,button,input,textarea,select){font-family:var(--vira-ui-font)!important}
 button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 </style>
+<style id="vira-campaign-brief">
+#scenarioResult .brief-header{padding:2px 0 16px}
+#scenarioResult .brief-ready{color:#8ce0b6;font-size:12px;font-weight:600}
+#scenarioResult .brief-header h2{font-size:21px!important;line-height:1.35;letter-spacing:-.025em;margin:10px 0 7px!important;overflow-wrap:anywhere}
+#scenarioResult .brief-header>p{font-size:13px;color:#aab5c6;margin:0;line-height:1.6}
+#scenarioResult .brief-group{padding:0!important;margin:8px 0 0!important;border-radius:12px!important}
+#scenarioResult .brief-group>summary{display:flex;align-items:center;gap:10px;min-height:60px;padding:14px 16px;list-style:none;font-size:14px!important;font-weight:600;cursor:pointer}
+#scenarioResult .brief-group>summary::-webkit-details-marker{display:none}
+#scenarioResult .brief-group>summary::after{content:"+";font-size:20px;color:#a7b1c3;margin-left:6px;font-weight:400}
+#scenarioResult .brief-group[open]>summary::after{content:"−"}
+#scenarioResult .brief-group>summary:hover{background:#ffffff03;border-radius:12px}
+#scenarioResult .brief-group>summary:focus-visible{outline:2px solid #b899ff;outline-offset:3px;border-radius:12px}
+#scenarioResult .brief-hint{margin-left:auto;font-size:12px;color:#9eabc0;font-weight:400}
+#scenarioResult .brief-body{padding:0 18px 18px}
+#scenarioResult .brief-field{padding:15px 0;border-top:1px solid #ffffff0b}
+#scenarioResult .brief-field:last-child{padding-bottom:0}
+#scenarioResult .brief-field h4{font-size:12px;line-height:1.4;color:#c5b6ec;margin:0 0 7px;font-weight:600}
+#scenarioResult .brief-field p{font-size:14px!important;line-height:1.7!important;color:#c4cddb!important;margin:0;white-space:pre-line;overflow-wrap:anywhere}
+@media(max-width:600px){#scenarioResult .brief-header h2{font-size:18px!important}#scenarioResult .brief-hint{font-size:10px}#scenarioResult .brief-group>summary{padding:12px;gap:7px;font-size:13px!important}#scenarioResult .brief-body{padding:0 14px 14px}}
+</style>
 </head>
 <body class="auth-pending">
 
@@ -2294,15 +2314,20 @@ localStorage.removeItem("viraGeneratedImages");
       rawScenario = sanitizeBrandText(text.trim());
       localStorage.setItem("viraScenario", rawScenario);
       const d = parseScenario(rawScenario);
+      const fullTitle = d.title || "Campagne VIRA";
+      const shortTitle = fullTitle.length > 64 ? fullTitle.slice(0, 61).replace(/\s+\S*$/, "") + "…" : fullTitle;
+      const field = (label, value) => `<div class="brief-field"><h4>${label}</h4><p>${escapeHtml(value || "À compléter")}</p></div>`;
       els.scenarioResult.innerHTML = `
-        <div class="result-ready"><strong>✓ Votre campagne est prête</strong><span>Stratégie, contenu et 3 scènes générés.</span></div>
-        <h2>${escapeHtml(d.title || "Campagne VIRA")}</h2>
-<details class="campaign-section"><summary>${campaignHeading("target","Objectif")}</summary><p>${escapeHtml(d.objective || els.goal.value)}</p></details>       <details class="campaign-section"><summary>${campaignHeading("book","Public cible")}</summary><p>${escapeHtml(d.target || els.audience.value)}</p></details>
-<details class="campaign-section"><summary>${campaignHeading("copy","Texte de publication")}</summary><p>${escapeHtml(d.publication)}</p></details>      <details class="campaign-section"><summary>${campaignHeading("hashtag","Hashtags")}</summary><p>${escapeHtml(d.hashtags)}</p></details>
-        <details class="campaign-section"><summary>${campaignHeading("scenes",`Scènes (${d.scenes.filter(Boolean).length}/3)`)}</summary>${d.scenes.map((s,i)=>`<div class="scene-item"><strong>Scène ${i+1}</strong><p>${escapeHtml(s || "Scène à compléter")}</p></div>`).join("")}</details>
-        <details class="campaign-section"><summary>${campaignHeading("narration","Narration")}</summary><p>${escapeHtml(d.narration)}</p></details>
-<details class="campaign-section"><summary>${campaignHeading("cta","Appel à l’action")}</summary><p>${escapeHtml(d.cta)}</p></details>        <details class="campaign-section"><summary>${campaignHeading("image","Prompt visuel")}</summary><p>${escapeHtml(d.visualPrompt)}</p></details>
-        <details class="campaign-section"><summary>${campaignHeading("style","Style")}</summary><p>${escapeHtml(d.style)}</p></details>`;
+        <header class="brief-header"><span class="brief-ready">✓ Campagne prête</span><h2>${escapeHtml(shortTitle)}</h2><p>Votre stratégie et vos contenus, réunis en trois étapes.</p></header>
+        <details class="campaign-section brief-group"><summary>${campaignHeading("target","Stratégie")}<span class="brief-hint">Objectif & audience</span></summary><div class="brief-body">
+          ${field("Titre complet", fullTitle)}${field("Objectif",d.objective || els.goal.value)}${field("Public cible",d.target || els.audience.value)}
+        </div></details>
+        <details class="campaign-section brief-group"><summary>${campaignHeading("copy","Contenu")}<span class="brief-hint">Publication & message</span></summary><div class="brief-body">
+          ${field("Texte de publication",d.publication)}${field("Hashtags",d.hashtags)}${field("Appel à l’action",d.cta)}
+        </div></details>
+        <details class="campaign-section brief-group"><summary>${campaignHeading("scenes","Production")}<span class="brief-hint">${d.scenes.filter(Boolean).length}/3 scènes · narration</span></summary><div class="brief-body">
+          ${d.scenes.map((scene,i)=>field(`Scène ${i+1}`,scene)).join("")}${field("Narration",d.narration)}${field("Prompt visuel",d.visualPrompt)}${field("Style",d.style)}
+        </div></details>`;
       els.validateBtn.hidden = false;
       els.validateBtn.style.display = "flex";
       els.validateBtn.disabled = false;
