@@ -245,6 +245,17 @@ async function requireAuth(req, res, next) {
   }
 }
 
+// Administrative access is controlled by the server environment, never by the browser.
+const ADMIN_EMAIL = normalizeEmail(process.env.ADMIN_EMAIL || "");
+async function requireAdmin(req, res, next) {
+  return requireAuth(req, res, () => {
+    if (!ADMIN_EMAIL || normalizeEmail(req.user.email) !== ADMIN_EMAIL) {
+      return res.status(403).json({ ok: false, error: "Accès administrateur requis." });
+    }
+    return next();
+  });
+}
+
 async function initDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS vira_users (
@@ -545,6 +556,29 @@ app.post("/api/auth/logout", async (req, res) => {
 /* ================================
    CAMPAIGNS
 ================================ */
+
+/* ================================
+   ADMIN OVERVIEW
+================================ */
+app.get("/api/admin/overview", requireAdmin, async (_req, res) => {
+  try {
+    const [users, campaigns, recentUsers, recentCampaigns] = await Promise.all([
+      pool.query("SELECT COUNT(*)::int AS count FROM vira_users"),
+      pool.query("SELECT COUNT(*)::int AS count FROM vira_campaigns"),
+      pool.query("SELECT COUNT(*)::int AS count FROM vira_users WHERE created_at >= NOW() - INTERVAL '30 days'"),
+      pool.query("SELECT COUNT(*)::int AS count FROM vira_campaigns WHERE created_at >= NOW() - INTERVAL '30 days'")
+    ]);
+    return res.json({ ok: true, stats: {
+      totalUsers: users.rows[0].count,
+      totalCampaigns: campaigns.rows[0].count,
+      newUsers30d: recentUsers.rows[0].count,
+      newCampaigns30d: recentCampaigns.rows[0].count
+    }});
+  } catch (error) {
+    console.error("ADMIN OVERVIEW ERROR:", error);
+    return res.status(500).json({ ok: false, error: "Impossible de charger les statistiques." });
+  }
+});
 
 app.get("/api/campaigns", requireAuth, async (req, res) => {
   try {
