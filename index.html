@@ -1044,6 +1044,10 @@ body::before{
   display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important;
 }
 
+@media (min-width:900px){
+  .visual-strip{grid-template-columns:repeat(3,minmax(0,240px))!important;justify-content:center!important;}
+}
+
 /* Campaigns: one unified professional card model */
 .box{padding:20px!important}
 .section-head h2{font-size:28px!important;letter-spacing:-.035em!important}
@@ -1765,7 +1769,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
   </button>
 </div>
 <section id="billingSummary" aria-label="Abonnement VIRA" style="margin:0 0 24px;padding:18px 20px;border:1px solid rgba(139,107,255,.35);border-radius:16px;background:linear-gradient(120deg,rgba(52,25,95,.28),rgba(9,12,20,.92));display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">
-  <div><div style="color:#c8aaff;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase">VIRA Starter</div><strong style="display:block;margin-top:5px;font-size:20px">29,99 $ CA <span style="font-size:12px;color:#9da9bc;font-weight:600">par mois</span></strong><div style="margin-top:5px;color:#aeb5c5;font-size:11px">4 vidéos · 12 images IA · 30 secondes par vidéo</div></div>
+  <div><div style="color:#c8aaff;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase">VIRA Starter</div><strong style="display:block;margin-top:5px;font-size:20px">29,99 $ CA <span style="font-size:12px;color:#9da9bc;font-weight:600">par mois</span></strong><div style="margin-top:5px;color:#aeb5c5;font-size:11px">4 vidéos · 16 images IA · 30 secondes par vidéo</div></div>
   <a href="/abonnement-test" style="display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border:1px solid #946dff;border-radius:10px;background:#241346;color:#f2eaff;text-decoration:none;font-weight:800;font-size:12px">Gérer mon abonnement</a>
 </section>
 
@@ -1898,8 +1902,8 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 
       <section class="glass-card stage">
         <div class="stage-head"><span class="stage-icon"><span class="stage-svg" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span></span><div><div class="stage-title">4. Créez votre campagne complète</div><p class="stage-help">Générez tous vos contenus marketing avec VIRA.</p></div></div>
-<div class="workflow-actions campaign-start-actions">          <button id="scenario" class="action-card scenario-step" type="button"><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></span><span class="action-copy"><strong>Scénario & Copy</strong><span>Générez votre scénario et vos textes</span></span></button>
-          <button id="generate" class="action-card visuals" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5.5 17 4.2-4 3.1 2.7 2.5-2.3 3.2 3.6"/><path d="M18.5 2.5v3M17 4h3"/></svg></span><span class="action-copy"><strong>Visuels</strong><span>Créez des visuels professionnels</span></span></button>
+<div class="workflow-actions campaign-start-actions">          <button id="scenario" class="action-card scenario-step" type="button"><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></span><span class="action-copy"><strong>Générer la campagne</strong><span>Scénario, textes et structure en une étape</span></span></button>
+          <button id="generate" class="action-card visuals" type="button" disabled><span class="action-icon premium-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5.5 17 4.2-4 3.1-2.3 2.5-2.3 3.2 3.6"/><path d="M18.5 2.5v3M17 4h3"/></svg></span><span class="action-copy"><strong>Ajouter les visuels</strong><span>Créez les visuels professionnels</span></span></button>
         </div>
         <div class="test-badge premium-test-badge"><span class="premium-test-icon" aria-hidden="true"><svg viewBox="0 0 24 24">
 <path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/>
@@ -1924,7 +1928,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 
 <section class="video-next-step" aria-labelledby="videoNextTitle">
   <h3 id="videoNextTitle">Après les visuels : préparez votre vidéo</h3>
-  <p>Validez votre scénario et créez les 3 visuels, puis préparez la voix pour activer « Vidéo finale ».</p>
+  <p>Validez votre scénario et créez les 4 visuels, puis préparez la voix pour activer « Vidéo finale ».</p>
 
   <div class="workflow-actions video-final-actions">
 <button id="testVoice" class="action-card voice" type="button" disabled>
@@ -2162,7 +2166,7 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoR
     let videoInProgress = false;
     function updateWorkflowState() {
       const hasScenario = Boolean(rawScenario && isValidScenarioText(rawScenario));
-      const hasVisuals = generatedImages.length === 3;
+      const hasVisuals = generatedImages.length === 4;
 
       els.visualBtn.style.display = "flex";
       els.voiceBtn.style.display = "flex";
@@ -2321,7 +2325,7 @@ localStorage.removeItem("viraGeneratedImages");
 
     function parseScenario(text) {
       const clean = text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "").replace(/SCENE/gi, "SCÈNE").trim();
-      const headers = ["TITRE","OBJECTIF","PUBLIC CIBLE","ACCROCHE","TEXTE PUBLICATION","HASHTAGS","SCÈNE 1","SCÈNE 2","SCÈNE 3","NARRATION","APPEL À L'ACTION","APPEL À L’ACTION","PROMPT VISUEL","STYLE"];
+      const headers = ["TITRE","OBJECTIF","PUBLIC CIBLE","ACCROCHE","TEXTE PUBLICATION","HASHTAGS","SCÈNE 1","SCÈNE 2","SCÈNE 3","SCÈNE 4","NARRATION","APPEL À L'ACTION","APPEL À L’ACTION","PROMPT VISUEL","STYLE"];
       const data = {
         title: extractSection(clean,"TITRE",headers),
         objective: extractSection(clean,"OBJECTIF",headers),
@@ -2335,7 +2339,7 @@ localStorage.removeItem("viraGeneratedImages");
         style: extractSection(clean,"STYLE",headers),
         scenes: []
       };
-      for (let i=1;i<=3;i++) data.scenes.push(extractSection(clean,`SCÈNE ${i}`,headers));
+      for (let i=1;i<=4;i++) data.scenes.push(extractSection(clean,`SCÈNE ${i}`,headers));
       return data;
     }
 
@@ -2382,11 +2386,14 @@ localStorage.removeItem("viraGeneratedImages");
         <details class="campaign-section brief-group"><summary>${campaignHeading("copy","Contenu")}<span class="brief-hint">Publication & message</span></summary><div class="brief-body">
           ${field("Texte de publication",d.publication)}${field("Hashtags",d.hashtags)}${field("Appel à l’action",d.cta)}
         </div></details>
-        <details class="campaign-section brief-group"><summary>${campaignHeading("scenes","Production")}<span class="brief-hint">${d.scenes.filter(Boolean).length}/3 scènes · narration</span></summary><div class="brief-body">
+        <details class="campaign-section brief-group"><summary>${campaignHeading("scenes","Production")}<span class="brief-hint">${d.scenes.filter(Boolean).length}/4 scènes · narration</span></summary><div class="brief-body">
           ${d.scenes.map((scene,i)=>field(`Scène ${i+1}`,scene)).join("")}${field("Narration",d.narration)}${field("Prompt visuel",d.visualPrompt)}${field("Style",d.style)}
         </div></details>`;
-      els.validateBtn.hidden = false;
-      els.validateBtn.style.display = "flex";
+      // Le scénario est validé automatiquement : un seul clic suffit.
+      scenarioValidated = true;
+      localStorage.setItem("viraScenarioValidated", "true");
+      els.validateBtn.hidden = true;
+      els.validateBtn.style.display = "none";
       els.validateBtn.disabled = false;
       els.voiceBtn.style.display = "flex";
       if (Array.isArray(generatedImages) && generatedImages.length) {
@@ -2429,7 +2436,7 @@ localStorage.removeItem("viraGeneratedImages");
     }
 
     function renderImages(images, scenes, test = false) {
-      els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title" style="cursor:pointer;"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/3 scènes ${test ? "• mode test gratuit" : "• générées par VIRA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
+      els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title" style="cursor:pointer;"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/4 scènes ${test ? "• mode test gratuit" : "• générées par VIRA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
 
     }
 
@@ -2440,7 +2447,7 @@ localStorage.removeItem("viraGeneratedImages");
         <div class="studio-export-body">
           <video class="video-player" controls playsinline preload="metadata" aria-label="Aperçu de votre vidéo" src="${url}"></video>
           <div class="studio-export-copy"><span class="studio-ready" role="status">✓ Vidéo prête</span><h3>Votre vidéo finale</h3><p>Trois scènes, votre narration.<br>Votre campagne est prête à être partagée.</p>
-            <div class="studio-specs"><span>MP4</span><span>3 scènes</span><span>Narration intégrée</span></div>
+            <div class="studio-specs"><span>MP4</span><span>4 scènes</span><span>Narration intégrée</span></div>
             <a class="studio-download" href="${url}" download="VIRA-campagne-final.mp4"><span aria-hidden="true">↓</span> Télécharger la vidéo</a>
             <small>${preview ? "Mode test gratuit · Aucun crédit vidéo utilisé." : "Votre export est prêt."}</small>
           </div>
@@ -2450,7 +2457,7 @@ localStorage.removeItem("viraGeneratedImages");
 
     async function generateRealImages(scenes, visualPrompt, style) {
       const images = [];
-      for (let i=0;i<5;i++) {
+      for (let i=0;i<4;i++) {
         setProgress(15 + i*14, `Création du visuel ${i+1}/5`);
         const prompt = `${visualPrompt || "Professional premium marketing visual"}. Scene ${i+1}: ${scenes[i]}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Maintain visual continuity with the other scenes. No text or typography in the image.`;
         const response = await fetch("/api/images/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,size:"1024x1536",quality:"low"})});
@@ -2496,7 +2503,7 @@ if (!r.ok) {
 
     async function createFinalVideo() {
       const d = parseScenario(rawScenario);
-      setProgress(8, "Préparation des 3 scènes");
+      setProgress(8, "Préparation des 4 scènes");
   const start = await fetch("/api/video/generate", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -2522,14 +2529,14 @@ if (!start.ok) {
 }
 
       const clips = Array.isArray(data.clips) ? data.clips : [];
-      if (clips.length !== 3) throw new Error("VIRA n’a pas reçu 3 clips vidéo.");
+      if (clips.length !== 4) throw new Error("VIRA n’a pas reçu 4 clips vidéo.");
       if (clips.some(c => !c.taskId)) {
         throw new Error("Les clips sont préparés, mais Runway est encore en mode PREPARE sur le serveur. Active RUNWAY_EXECUTION=generate pour produire la vraie vidéo.");
       }
 
       const videoUrls = [];
-      for (let i=0;i<3;i++) videoUrls.push(await waitForRunwayTask(clips[i].taskId, i+1));
-      setProgress(82, "Assemblage des 3 clips");
+      for (let i=0;i<4;i++) videoUrls.push(await waitForRunwayTask(clips[i].taskId, i+1));
+      setProgress(82, "Assemblage des 4 clips");
 
       const assemble = await fetch("/api/video/assemble", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({videoUrls})});
       if (!assemble.ok) {
@@ -2668,31 +2675,34 @@ PUBLIC CIBLE
 ${audience}
 
 ACCROCHE
-Découvrez une façon simple et convaincante de profiter pleinement de ${idea}.
+Une solution claire et efficace pour obtenir de meilleurs résultats avec ${idea}.
 
 TEXTE PUBLICATION
-${idea} est présenté avec une approche claire, moderne et adaptée à ${platform}. Cette campagne met l’accent sur son bénéfice principal afin d’attirer l’attention, créer de l’intérêt et encourager le passage à l’action.
+Découvrez ${idea}, une solution conçue pour aider ${audience} à atteindre ses objectifs plus rapidement. Une approche simple, moderne et adaptée à ${platform}, avec un bénéfice concret dès la première utilisation.
 
 HASHTAGS
 #Marketing #${platform.replace(/\s+/g, "")} #VIRA #Business #Contenu
 
 SCÈNE 1
-Présentation dynamique de ${idea} avec une accroche visuelle forte dès les premières secondes.
+Ouverture dynamique : ${idea} apparaît dès les premières secondes avec une promesse claire.
 
 SCÈNE 2
-Mise en avant du principal bénéfice pour ${audience}, avec une démonstration simple et crédible.
+Démonstration du bénéfice principal pour ${audience}, avec une preuve visuelle simple et crédible.
 
 SCÈNE 3
-Plan final premium présentant ${idea} avec un appel à l’action clair et mémorable.
+Mise en valeur du résultat obtenu et de la différence apportée par ${idea}.
+
+SCÈNE 4
+Conclusion élégante : présentation de ${idea} et appel à l’action direct et mémorable.
 
 NARRATION
-Découvrez ${idea}. Une solution pensée pour ${audience}, conçue pour offrir une expérience simple, efficace et convaincante. Passez à l’action dès maintenant.
+Découvrez ${idea}, une solution pensée pour ${audience}. Profitez d’une expérience simple, efficace et conçue pour produire des résultats. Commencez dès aujourd’hui.
 
 APPEL À L'ACTION
-Découvrez ${idea} dès aujourd’hui.
+Essayez ${idea} dès aujourd’hui et passez à la prochaine étape.
 
 PROMPT VISUEL
-Publicité marketing premium pour ${idea}, esthétique professionnelle, éclairage cinématographique, composition moderne, adaptée à ${platform}, cohérence visuelle entre les trois scènes.
+Publicité marketing premium pour ${idea}, esthétique professionnelle, éclairage cinématographique, composition moderne, adaptée à ${platform}, cohérence visuelle entre les quatre scènes.
 
 STYLE
 ${els.tone.value || "Professionnel"}
@@ -2702,6 +2712,9 @@ ${els.tone.value || "Professionnel"}
   setProgress(100, "Scénario prêt");
 
   renderScenario(scenario);
+  scenarioValidated = true;
+  localStorage.setItem("viraScenarioValidated", "true");
+  updateWorkflowState();
 
   setStatus(
     els.scenarioStatus,
@@ -2833,7 +2846,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
         const response = await fetch(url, { method:"POST", credentials:"same-origin", headers:json?{"Content-Type":"application/json"}:{}, body:json?JSON.stringify(body):body });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || "Impossible de préparer l’audio.");
-        if (rawScenario !== scenarioAtStart || !scenarioValidated || generatedImages.length !== 3) throw new Error("La campagne a changé. Préparez sa narration de nouveau.");
+        if (rawScenario !== scenarioAtStart || !scenarioValidated || generatedImages.length !== 4) throw new Error("La campagne a changé. Préparez sa narration de nouveau.");
         if (!/^[0-9a-f-]{36}$/.test(data.audioId) || data.audioUrl !== `/api/audio/${data.audioId}`) throw new Error("Réponse audio invalide.");
         preparedAudioId = data.audioId;
         localStorage.setItem("viraPreparedAudioId", preparedAudioId);
@@ -2848,7 +2861,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
       finally { audioBusy = false; voicePanel.querySelectorAll("button,input,select,textarea").forEach(el => el.disabled = false); updateWorkflowState(); }
     }
     els.voiceBtn.addEventListener("click", () => {
-      if (!scenarioValidated || generatedImages.length !== 3 || videoInProgress) return;
+      if (!scenarioValidated || generatedImages.length !== 4 || videoInProgress) return;
       const narration = (parseScenario(rawScenario).narration || "").trim();
       if (voicePanel.dataset.scenario !== rawScenario) {
         invalidateAudio();
@@ -2915,8 +2928,8 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
 
       const d = parseScenario(rawScenario);
       const scenes = d.scenes.filter(Boolean);
-      if (scenes.length !== 3) {
-        return setStatus(els.status,`VIRA a besoin de 3 scènes. Scènes détectées : ${scenes.length}.`,"warning");
+      if (scenes.length !== 4) {
+        return setStatus(els.status,`VIRA a besoin de 4 scènes. Scènes détectées : ${scenes.length}.`,"warning");
       }
 
       els.visualBtn.disabled = true;
@@ -2934,7 +2947,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
             [25,"Préparation des scènes"],
             [50,"Création des visuels"],
             [75,"Harmonisation de la campagne"],
-            [100,"3 visuels prêts"]
+            [100,"4 visuels prêts"]
           ];
           for (const [progress,label] of visualSteps) {
             await new Promise(r=>setTimeout(r,260));
@@ -2942,12 +2955,20 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
           }
           generatedImages = scenes.map(makeTestImage);
           renderImages(generatedImages, scenes, true);
-          setStatus(els.status,"3 visuels Premium préparés en mode aperçu. Aucun crédit image utilisé.","success");
+          setStatus(els.status,"4 visuels Premium préparés en mode aperçu. Aucun crédit image utilisé.","success");
         } else {
+          const quota = await fetch("/api/images/reserve", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity: scenes.length })
+          });
+          const quotaData = await quota.json().catch(() => ({}));
+          if (!quota.ok) throw new Error(quotaData?.error || "Limite mensuelle d’images atteinte.");
           generatedImages = await generateRealImages(scenes,d.visualPrompt,d.style);
-          setProgress(100,"3 visuels prêts");
+          setProgress(100,"4 visuels prêts");
           renderImages(generatedImages,scenes,false);
-          setStatus(els.status,"3 visuels générés avec succès.","success");
+          setStatus(els.status,"4 visuels générés avec succès.","success");
           
         }
 localStorage.setItem("viraGeneratedImages", JSON.stringify(generatedImages));
@@ -2986,10 +3007,10 @@ if (currentCampaignId) {
     });
 els.videoBtn.addEventListener("click", async () => {
   if (videoInProgress) return;
-  if (generatedImages.length !== 3 || !voiceReady || !preparedAudioId) {
+  if (generatedImages.length !== 4 || !voiceReady || !preparedAudioId) {
     return setStatus(
       els.videoStatus,
-      "Préparez les 3 visuels et la voix avant de créer la vidéo finale.",
+      "Préparez les 4 visuels et la voix avant de créer la vidéo finale.",
       "warning"
     );
   }
