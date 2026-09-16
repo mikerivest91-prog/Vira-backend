@@ -3644,6 +3644,19 @@ const campaignData = campaign.campaign_data || {};
 </style>
 <style>
 /* Compact storyboard: two scenes per row on every screen. */
+/* Consistent, readable typography for campaign controls. */
+.main .stage :is(button,input,textarea,select,label,.choice-title,.stage-title,.stage-help){
+  font-family:"Segoe UI",Arial,sans-serif!important;
+  text-shadow:none!important;
+  -webkit-text-stroke:0!important;
+  letter-spacing:normal!important;
+}
+.main .stage .choice-title{font-size:15px!important;font-weight:600!important;line-height:1.45!important;}
+.main .stage .stage-title{font-size:18px!important;font-weight:600!important;line-height:1.4!important;}
+.main .stage label{font-size:13px!important;font-weight:600!important;line-height:1.5!important;color:#cbd5e1!important;}
+.main .stage :is(input,textarea,select){font-size:16px!important;font-weight:400!important;line-height:1.6!important;color:#e2e8f0!important;}
+.main .stage .stage-help{font-size:13px!important;font-weight:400!important;line-height:1.6!important;}
+.main .stage :is(input,textarea)::placeholder{color:#8995a7!important;opacity:1!important;}
 /* Keep desktop navigation visible while the campaign scrolls. */
 @media(min-width:1000px){
   .app-shell{grid-template-columns:220px minmax(0,1fr)!important;}
