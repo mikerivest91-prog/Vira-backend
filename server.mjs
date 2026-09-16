@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import { createTestBilling } from "./stripe-billing.mjs";
 import { audioFile, wavDuration, prepareAudio, synthesizeAudio } from "./audio-service.mjs";
 import multer from "multer";
 import cors from "cors";
@@ -43,6 +44,7 @@ app.use(cors({
   credentials: true
 }));
 
+app.post("/api/stripe/webhook", express.raw({ type: "application/json", limit: "1mb" }), (req, res) => billing.webhook(req, res));
 app.use(express.json({ limit: "2mb" }));
 app.get("/", (_req, res) => res.sendFile(path.resolve("index.html")));
 app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
@@ -255,6 +257,8 @@ async function requireAdmin(req, res, next) {
     return next();
   });
 }
+
+const billing = createTestBilling({ app, pool, requireAdmin });
 
 async function initDatabase() {
   await pool.query(`
@@ -1023,6 +1027,7 @@ async function start() {
     }
 
     await initDatabase();
+    await billing.init();
 
     app.listen(port, "0.0.0.0", () => {
       console.log(
