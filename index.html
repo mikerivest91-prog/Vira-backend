@@ -1620,6 +1620,14 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
  .studio-export-copy h3{font-size:22px}
 }
 </style>
+<style id="vira-unified-typography">
+/* Use one locally available sans-serif family throughout the interface. */
+:root{--vira-ui-font:"Segoe UI",Inter,-apple-system,BlinkMacSystemFont,Arial,sans-serif}
+html,body{font-family:var(--vira-ui-font)!important}
+.app-shell,.app-shell :where(h1,h2,h3,h4,h5,h6,p,span,div,a,label,strong,small,summary,li,button,input,textarea,select,option),
+.vira-auth-gate,.vira-auth-gate :where(h1,h2,h3,p,span,div,a,label,strong,small,button,input,textarea,select){font-family:var(--vira-ui-font)!important}
+button,input,textarea,select{font-family:var(--vira-ui-font)!important}
+</style>
 </head>
 <body class="auth-pending">
 
