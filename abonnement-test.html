@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Abonnement de test · VIRA</title>
+<style>body{margin:0;background:#080a10;color:#f6f4ff;font:16px/1.6 'Segoe UI',sans-serif}main{max-width:580px;margin:8vh auto;padding:28px}section{background:#10131e;border:1px solid #303047;border-radius:22px;padding:28px}a{color:#c8b4ff}h1{font-size:30px;line-height:1.2}p{color:#bfc1d0}.badge{color:#c9acff;font-weight:600}button{padding:13px 20px;border:1px solid #66508f;border-radius:10px;background:#7944de;color:white;font:inherit;cursor:pointer;margin:6px 6px 6px 0}button.secondary{background:transparent}button:disabled{opacity:.5;cursor:wait}#status{min-height:52px}small{color:#a6a6bd}</style></head>
+<body><main><a href="/">← Retour à VIRA</a><section><span class="badge">Essai administrateur · Aucun paiement réel</span><h1>VIRA Starter</h1><p>10 $ CA par mois · Tarif provisoire pour tester le parcours d’abonnement.</p><p id="status" role="status" aria-live="polite">Vérification de la configuration…</p><button id="checkout" disabled>Tester l’abonnement</button><button id="portal" class="secondary" disabled>Gérer mon abonnement</button><p><small>Les essais ne modifient pas vos crédits ni vos fonctionnalités VIRA.</small></p></section></main>
+<script>
+const statusNode=document.getElementById('status');
+const checkout=document.getElementById('checkout');
+const portal=document.getElementById('portal');
+const labels={active:'Actif',trialing:'Période d’essai',past_due:'Paiement en retard',unpaid:'Impayé',canceled:'Annulé',incomplete:'Paiement à terminer',incomplete_expired:'Essai expiré',paused:'Suspendu'};
+async function request(path,method='GET'){
+ const response=await fetch(path,{method,credentials:'same-origin',headers:{'Content-Type':'application/json'}});
+ const data=await response.json();if(!response.ok)throw new Error(data.error||'Une erreur est survenue.');return data;
+}
+async function refresh(){
+ try{const data=await request('/api/billing/status');
+ const sub=data.subscriptions.find(s=>!['canceled','incomplete_expired'].includes(s.status));
+ statusNode.textContent=sub?'Abonnement de test : '+(labels[sub.status]||sub.status)+(sub.cancel_at_period_end?' · Annulation prévue à la fin de la période.':'.'):'Prêt pour un essai. Aucun abonnement en cours.';
+ checkout.disabled=Boolean(sub);portal.disabled=false;
+ }catch(error){statusNode.textContent=error.message;}
+}
+async function go(path){checkout.disabled=true;portal.disabled=true;
+ try{const data=await request(path,'POST');const target=new URL(data.url);
+ if(target.protocol!=='https:'||!['checkout.stripe.com','billing.stripe.com'].includes(target.hostname))throw new Error('Lien Stripe invalide.');location.assign(target.href);
+ }catch(error){await refresh();statusNode.textContent=error.message;}
+}
+checkout.addEventListener('click',()=>go('/api/billing/checkout'));
+portal.addEventListener('click',()=>go('/api/billing/portal'));
+refresh();
+</script></body></html>
