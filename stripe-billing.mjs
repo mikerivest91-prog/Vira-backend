@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 
 // This integration intentionally supports test mode only. It grants no paid credits.
 export function createTestBilling({ app, pool, requireAdmin, env = process.env, client }) {
+  const PLAN_LIMITS = Object.freeze({ videos: 4, images: 12, secondsPerVideo: 30 });
   const origin = "https://vira-backend-im5s.onrender.com";
   const key = env.STRIPE_SECRET_KEY || "";
   const priceId = env.STRIPE_PRICE_ID || "";
@@ -30,7 +31,7 @@ export function createTestBilling({ app, pool, requireAdmin, env = process.env, 
   }
   async function price() {
     const p = await stripe.prices.retrieve(priceId);
-    if (p.livemode || !p.active || p.type !== "recurring" || p.currency !== "cad" || p.unit_amount !== 1000 || p.recurring?.interval !== "month" || p.recurring?.interval_count !== 1) throw new Error("Unexpected test price");
+    if (p.livemode || !p.active || p.type !== "recurring" || p.currency !== "cad" || p.unit_amount !== 2999 || p.recurring?.interval !== "month" || p.recurring?.interval_count !== 1) throw new Error("Unexpected test price");
     return p;
   }
   async function subscriptions(customer) {
@@ -50,7 +51,7 @@ export function createTestBilling({ app, pool, requireAdmin, env = process.env, 
       const { rows } = await db.query("SELECT customer_id FROM vira_test_billing WHERE user_id=$1", [req.user.id]);
       return rows[0] ? sync(db, rows[0].customer_id) : [];
     });
-    res.json({ ok: true, mode: "test", subscriptions: result });
+    res.json({ ok: true, mode: "test", subscriptions: result, planLimits: PLAN_LIMITS });
   }));
   app.post("/api/billing/checkout", requireAdmin, route(async (req, res) => {
     await price();
