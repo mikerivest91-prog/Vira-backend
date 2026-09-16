@@ -1546,6 +1546,60 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
   }
 }
 </style>
+
+<style id="vira-studio-polish">
+/* Compact production workspace; media files retain their original resolution. */
+.video-next-step{margin-top:24px!important;padding-top:20px!important}
+.video-next-step>h3{font-size:17px!important;letter-spacing:-.025em;margin:0 0 6px!important}
+.video-next-step>p{font-size:12px!important;color:#929caf!important;line-height:1.6}
+.video-final-actions{gap:10px!important}
+.video-final-actions .action-card{min-height:86px!important;padding:16px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:12px!important;text-align:left!important;border-radius:14px!important}
+.video-final-actions .action-icon{width:36px!important;height:36px!important;flex:0 0 36px;margin:0!important}
+.video-final-actions .action-copy strong{font-size:13px!important}
+.video-final-actions .action-copy>span{font-size:11px!important;line-height:1.5}
+#voiceOptions{padding:20px!important;border-radius:16px!important;margin-top:14px!important;display:grid;grid-template-columns:minmax(160px,240px) minmax(0,1fr);gap:8px 24px}
+#voiceOptions>strong{font-size:15px!important;grid-column:1/-1}
+#voiceOptions>p{grid-column:1/-1;margin:0 0 8px;color:#939db0;font-size:12px}
+#voiceOptions .field-group{margin:8px 0!important;min-width:0}
+#voiceOptions label{font-size:11px!important;color:#aab3c4!important}
+#voiceOptions select{height:42px!important;font-size:13px!important;border-radius:9px!important}
+#voiceOptions textarea{min-height:88px!important;height:88px;font-size:13px!important;line-height:1.6;padding:12px!important;border-radius:10px!important}
+#voiceOptions button{min-height:40px!important;font-size:12px!important;padding:10px 16px!important;border-radius:9px!important}
+#voiceOptions #prepareVoice{background:#8b5cf6!important;color:white!important;border:1px solid #a78bfa!important}
+#voiceOptions #voicePreview{grid-column:2;height:38px;margin-top:4px!important;color-scheme:dark}
+#voiceOptions #voiceFeedback{grid-column:2;font-size:11px;line-height:1.6;margin:0}
+#voiceOptions #autoVoiceFields>p{font-size:11px;margin:6px 0;color:#8994a8}
+#videoResult .studio-export{padding:24px!important;max-width:920px!important;margin:18px auto 0!important;border-radius:18px!important;background:linear-gradient(130deg,#101522,#0a0e17)!important;box-shadow:0 16px 50px #00000020}
+.studio-export-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:18px;border-bottom:1px solid #ffffff0c}
+.studio-eyebrow{font-size:10px;letter-spacing:.16em;color:#a997d0;font-weight:700;text-transform:uppercase}
+.studio-export h3{font-size:20px;letter-spacing:-.035em;margin:7px 0 0;color:#f2f3f9}
+.studio-ready{font-size:11px;color:#9ce6c3;background:#15382b66;border:1px solid #75d6a82b;border-radius:30px;padding:7px 10px;white-space:nowrap}
+.studio-export-body{display:grid;grid-template-columns:225px minmax(0,1fr);gap:36px;align-items:center;padding-top:20px}
+#videoResult .studio-export video.video-player{width:225px;height:400px;max-height:400px;max-width:100%;margin:0;border-radius:12px;object-fit:contain;background:#050609;box-shadow:0 8px 30px #0005}
+.studio-export-copy{max-width:380px;min-width:0}
+.studio-export-copy h4{font-size:23px;letter-spacing:-.035em;line-height:1.2;margin:0 0 12px;color:#f1f3f9}
+.studio-export-copy p{font-size:13px;line-height:1.7;color:#9aa5b7;margin:0 0 20px}
+.studio-specs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.studio-specs span{font-size:11px;padding:7px 10px;background:#ffffff04;border:1px solid #ffffff10;border-radius:7px;color:#c1c8d5}
+.studio-download{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 20px;border:1px solid #b69aff55;border-radius:10px;background:linear-gradient(135deg,#945bf0,#7445cf);color:#fff;text-decoration:none;font-size:13px;font-weight:700;box-shadow:0 4px 18px #7c3aed25;transition:filter .15s,transform .15s}
+.studio-download:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.studio-download:focus-visible{outline:2px solid #ded1ff;outline-offset:4px}
+.studio-export-copy small{display:block;font-size:11px;color:#7f8b9d;line-height:1.6;margin-top:12px}
+@media(max-width:759px){
+ #voiceOptions{grid-template-columns:1fr;padding:16px!important;gap:4px}
+ #voiceOptions #voicePreview,#voiceOptions #voiceFeedback{grid-column:1}
+ .video-final-actions .action-card{padding:12px!important;gap:8px!important;min-height:76px!important}
+ #videoResult .studio-export{padding:16px!important}
+ .studio-export-body{grid-template-columns:1fr;gap:22px}
+ #videoResult .studio-export video.video-player{width:180px;height:320px;max-height:320px;margin:0 auto}
+ .studio-export-copy{max-width:none}
+ .studio-export-copy h4{font-size:20px}
+ .studio-export-copy p{margin-bottom:14px}
+ .studio-specs{margin-bottom:18px}
+ .studio-download{width:100%;box-sizing:border-box}
+ .studio-export h3{font-size:17px}
+}
+</style>
 </head>
 <body class="auth-pending">
 
@@ -2269,6 +2323,21 @@ localStorage.removeItem("viraGeneratedImages");
 
     }
 
+    function renderFinalVideo(preview = false) {
+      const url = escapeHtml(finalVideoUrl);
+      els.videoResult.innerHTML = `<section class="results-panel studio-export" aria-label="Votre vidéo finale">
+        <header class="studio-export-head"><div><span class="studio-eyebrow">VIRA · Studio</span><h3>Votre vidéo finale</h3></div><span class="studio-ready">✓ Prête</span></header>
+        <div class="studio-export-body">
+          <video class="video-player" controls playsinline preload="metadata" aria-label="Aperçu de votre vidéo" src="${url}"></video>
+          <div class="studio-export-copy"><h4>Votre campagne prend vie.</h4><p>Vos trois scènes et votre narration, réunies dans une vidéo prête à télécharger.</p>
+            <div class="studio-specs"><span>MP4</span><span>3 scènes</span><span>Narration intégrée</span></div>
+            <a class="studio-download" href="${url}" download="VIRA-campagne-final.mp4"><span aria-hidden="true">↓</span> Télécharger la vidéo</a>
+            <small>${preview ? "Mode test gratuit · Aucun crédit vidéo utilisé." : "Votre export est prêt."}<br>Utilisez le plein écran du lecteur pour agrandir l’aperçu.</small>
+          </div>
+        </div>
+      </section>`;
+    }
+
     async function generateRealImages(scenes, visualPrompt, style) {
       const images = [];
       for (let i=0;i<5;i++) {
@@ -2867,18 +2936,7 @@ finalVideoUrl = prepared.videoUrl;
         setProgress(progress,label);
       }
 
-      els.videoResult.innerHTML = `
-        <div class="results-panel">
-          <h3 class="results-title">
-            <span class="campaign-heading-icon">${uiIcon("video")}</span>
-            <span>Vidéo test prête</span>
-          </h3>
-          <div class="meta">3 scènes · narration intégrée · mode test gratuit</div>
-          <div class="campaign-section">
-            <strong>✓ Votre vidéo est prête à télécharger</strong>
-            <p>Les trois visuels et votre narration sont réunis dans ce MP4. La durée de la vidéo suit celle de votre audio.</p><video class="video-player" controls playsinline src="${finalVideoUrl}"></video>
-          </div>
-        </div>`;
+      renderFinalVideo(true);
 
       videoReady = true;
       localStorage.setItem("viraVideoReady", "true");
@@ -2963,7 +3021,7 @@ if (currentCampaignId) {
     } else {
       finalVideoUrl = await createFinalVideo();
       videoReady = Boolean(finalVideoUrl);
-      els.videoResult.innerHTML = `<div class="results-panel"><h3 class="results-title"><span class="campaign-heading-icon">${uiIcon("video")}</span><span>Vidéo finale VIRA</span></h3><div class="meta">3 scènes assemblées avec narration</div><video class="video-player" controls playsinline src="${finalVideoUrl}"></video></div>`;
+      renderFinalVideo(false);
       setStatus(els.videoStatus,"Vidéo finale créée avec succès.","success");
     }
   } catch (error) {
