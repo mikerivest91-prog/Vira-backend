@@ -3644,9 +3644,16 @@ const campaignData = campaign.campaign_data || {};
 </style>
 <style>
 /* Compact storyboard: two scenes per row on every screen. */
+.visual-collapse.results-panel{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:532px!important;
+  margin:16px 0!important;
+  padding:18px!important;
+}
 .visual-strip{
-  grid-template-columns:repeat(2,minmax(0,240px))!important;
-  justify-content:center!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  justify-content:stretch!important;
   gap:12px!important;
 }
 .visual-strip .visual-frame{aspect-ratio:16 / 9!important;height:auto!important;min-height:0!important;}
