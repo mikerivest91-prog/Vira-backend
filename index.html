@@ -3647,7 +3647,7 @@ const campaignData = campaign.campaign_data || {};
 .visual-collapse.results-panel{
   box-sizing:border-box!important;
   width:100%!important;
-  max-width:532px!important;
+  max-width:none!important;
   margin:16px 0!important;
   padding:18px!important;
 }
@@ -3657,6 +3657,10 @@ const campaignData = campaign.campaign_data || {};
   gap:12px!important;
 }
 .visual-strip .visual-frame{aspect-ratio:16 / 9!important;height:auto!important;min-height:0!important;}
+@media(min-width:900px){
+  .visual-strip .visual-card{display:grid!important;grid-template-columns:minmax(0,180px) minmax(0,1fr)!important;align-items:center!important;gap:14px!important;padding:12px!important;}
+  .visual-strip .visual-caption{font-size:13px!important;line-height:1.55!important;margin:0!important;-webkit-line-clamp:4!important;overflow-wrap:anywhere!important;}
+}
 @media(max-width:600px){
   .visual-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}
 }
