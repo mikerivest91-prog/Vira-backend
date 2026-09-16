@@ -1648,6 +1648,18 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 #scenarioResult .brief-field p{font-size:14px!important;line-height:1.7!important;color:#c4cddb!important;margin:0;white-space:pre-line;overflow-wrap:anywhere}
 @media(max-width:600px){#scenarioResult .brief-header h2{font-size:18px!important}#scenarioResult .brief-hint{font-size:10px}#scenarioResult .brief-group>summary{padding:12px;gap:7px;font-size:13px!important}#scenarioResult .brief-body{padding:0 14px 14px}}
 </style>
+<style id="vira-brief-final-polish">
+#scenarioResult,#scenarioResult :where(p,h2,h4,summary,span,div),#validateScenario,#validateScenario *{font-family:"Segoe UI",Arial,sans-serif!important}
+#validateScenario.vira-validate{width:100%!important;max-width:980px!important;min-height:64px!important;height:auto!important;margin:16px auto!important;padding:12px 18px!important;gap:12px!important;border-radius:12px!important}
+#validateScenario .vira-validate-mark{width:32px!important;height:32px!important;flex:0 0 32px!important;border-radius:9px!important}
+#validateScenario .vira-validate-arrow{width:28px!important;height:28px!important}
+#validateScenario .action-copy strong{font-size:13px!important}
+#validateScenario .action-copy span{font-size:11px!important;line-height:1.5!important}
+#validateScenario:disabled{opacity:.8!important}
+#scenarioResult .brief-field p{max-width:78ch}
+#scenarioResult .brief-group>summary{user-select:none}
+@media(max-width:600px){#validateScenario.vira-validate{padding:12px!important}#scenarioResult .brief-field p{font-size:13px!important}}
+</style>
 </head>
 <body class="auth-pending">
 
