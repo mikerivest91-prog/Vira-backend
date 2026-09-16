@@ -1759,6 +1759,10 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
     style="padding:12px 18px;border:1px solid #a63bff;border-radius:12px;background:#171024;color:#fff;font-weight:800;cursor:pointer">
     + Nouvelle campagne
   </button>
+  <button id="adminDashboardBtn" type="button" hidden
+    style="margin-left:10px;padding:12px 18px;border:1px solid #8b6bff;border-radius:12px;background:#101629;color:#d8caff;font-weight:800;cursor:pointer">
+    Tableau admin
+  </button>
 </div>
 
 <script>
@@ -3574,5 +3578,43 @@ const campaignData = campaign.campaign_data || {};
 })();
 </script>
 
+<script>
+(() => {
+  const adminEmail = "mikerivest91@gmail.com";
+  const button = document.getElementById("adminDashboardBtn");
+  if (!button) return;
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+  fetch("/api/auth/me", { credentials: "same-origin" })
+    .then(response => response.ok ? response.json() : null)
+    .then(data => {
+      if (!data?.user || String(data.user.email).toLowerCase() !== adminEmail) return;
+      button.hidden = false;
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          const response = await fetch("/api/admin/overview", { credentials: "same-origin" });
+          const data = await response.json();
+          if (!response.ok || !data.ok) throw new Error(data.error || "Accès refusé.");
+          const stats = data.stats;
+          document.querySelector("main").innerHTML = `<section class="box admin-dashboard" aria-label="Tableau de bord administrateur">
+            <div class="section-head"><div><span class="eyebrow">VIRA ADMIN</span><h2>Vue d’ensemble</h2><p>Suivez la croissance de votre espace VIRA.</p></div></div>
+            <div class="admin-stats">
+              <article><span>Utilisateurs inscrits</span><strong>${esc(stats.totalUsers)}</strong></article>
+              <article><span>Campagnes créées</span><strong>${esc(stats.totalCampaigns)}</strong></article>
+              <article><span>Nouveaux utilisateurs · 30 jours</span><strong>${esc(stats.newUsers30d)}</strong></article>
+              <article><span>Nouvelles campagnes · 30 jours</span><strong>${esc(stats.newCampaigns30d)}</strong></article>
+            </div>
+            <div class="admin-note">Les paiements et abonnements seront ajoutés quand la facturation sera activée.</div>
+          </section>`;
+        } catch (error) { alert(error.message); }
+        finally { button.disabled = false; }
+      });
+    })
+    .catch(() => {});
+})();
+</script>
+<style>
+.admin-dashboard{padding:28px!important}.admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}.admin-stats article{padding:18px;border:1px solid #ffffff12;border-radius:14px;background:#0d121d}.admin-stats span{display:block;color:#9da9bc;font-size:12px;line-height:1.5}.admin-stats strong{display:block;margin-top:12px;font-size:30px;color:#f2f4f9}.admin-note{margin-top:18px;color:#9da9bc;font-size:12px;line-height:1.6}@media(max-width:759px){.admin-dashboard{padding:18px!important}.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-stats strong{font-size:24px}}
+</style>
 </body>
 </html>
