@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 // This integration intentionally supports test mode only. It grants no paid credits.
 export function createTestBilling({ app, pool, requireAdmin, env = process.env, client }) {
-  const PLAN_LIMITS = Object.freeze({ videos: 4, images: 12, secondsPerVideo: 30 });
+  const PLAN_LIMITS = Object.freeze({ videos: 4, images: 16, secondsPerVideo: 30 });
   const origin = "https://vira-backend-im5s.onrender.com";
   const key = env.STRIPE_SECRET_KEY || "";
   const priceId = env.STRIPE_PRICE_ID || "";
