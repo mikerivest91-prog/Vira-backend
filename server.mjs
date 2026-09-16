@@ -316,7 +316,30 @@ async function initDatabase() {
     ON vira_campaigns(user_id)
   `);
 
+  await pool.query(`CREATE TABLE IF NOT EXISTS vira_video_usage (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES vira_users(id) ON DELETE CASCADE,
+    period_start DATE NOT NULL DEFAULT DATE_TRUNC('month', NOW())::date,
+    status TEXT NOT NULL DEFAULT 'processing',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS vira_video_usage_user_period_idx ON vira_video_usage(user_id, period_start)`);
+
   console.log("VIRA database ready");
+}
+
+async function reserveVideoSlot(userId) {
+  const db = await pool.connect();
+  try {
+    await db.query("BEGIN");
+    await db.query("SELECT pg_advisory_xact_lock(91343, $1::integer)", [userId]);
+    const { rows } = await db.query("SELECT COUNT(*)::int AS count FROM vira_video_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date", [userId]);
+    if (rows[0].count >= 4) { await db.query("ROLLBACK"); return { ok:false }; }
+    const inserted = await db.query("INSERT INTO vira_video_usage(user_id) VALUES($1) RETURNING id", [userId]);
+    await db.query("COMMIT");
+    return { ok:true, id: inserted.rows[0].id };
+  } catch (error) { await db.query("ROLLBACK").catch(()=>{}); throw error; }
+  finally { db.release(); }
 }
 
 /* ================================
@@ -956,6 +979,8 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
   if (!Array.isArray(images) || images.length !== 3) {
     return res.status(400).json({ ok: false, error: "VIRA exige exactement 3 visuels JPEG ou PNG." });
   }
+  const usage = await reserveVideoSlot(req.user.id);
+  if (!usage.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter." });
   let decoded;
   try {
     decoded = images.map(decodePreviewImage);
@@ -984,8 +1009,10 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
     const videoUrl = await publishVideo(clips, "vira-free-final", audioPath);
-    return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration) });
+    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
+    return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: 4 } });
   } catch (error) {
+    await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
     console.error("FREE VIDEO ASSEMBLY ERROR:", error);
     return res.status(500).json({ ok: false, error: "Impossible de créer la vidéo gratuite. Réessayez dans un instant." });
   } finally {
