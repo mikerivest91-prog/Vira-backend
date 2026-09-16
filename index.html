@@ -2447,7 +2447,7 @@ localStorage.removeItem("viraGeneratedImages");
         
         <div class="studio-export-body">
           <video class="video-player" controls playsinline preload="metadata" aria-label="Aperçu de votre vidéo" src="${url}"></video>
-          <div class="studio-export-copy"><span class="studio-ready" role="status">✓ Vidéo prête</span><h3>Votre vidéo finale</h3><p>Trois scènes, votre narration.<br>Votre campagne est prête à être partagée.</p>
+          <div class="studio-export-copy"><span class="studio-ready" role="status">✓ Vidéo prête</span><h3>Votre vidéo finale</h3><p>Quatre scènes, votre narration.<br>Votre campagne est prête à être partagée.</p>
             <div class="studio-specs"><span>MP4</span><span>4 scènes</span><span>Narration intégrée</span></div>
             <a class="studio-download" href="${url}" download="VIRA-campagne-final.mp4"><span aria-hidden="true">↓</span> Télécharger la vidéo</a>
             <small>${preview ? "Mode test gratuit · Aucun crédit vidéo utilisé." : "Votre export est prêt."}</small>
@@ -2459,7 +2459,7 @@ localStorage.removeItem("viraGeneratedImages");
     async function generateRealImages(scenes, visualPrompt, style) {
       const images = [];
       for (let i=0;i<4;i++) {
-        setProgress(15 + i*14, `Création du visuel ${i+1}/5`);
+        setProgress(15 + i*14, `Création du visuel ${i+1}/4`);
         const prompt = `${visualPrompt || "Professional premium marketing visual"}. Scene ${i+1}: ${scenes[i]}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Maintain visual continuity with the other scenes. No text or typography in the image.`;
         const response = await fetch("/api/images/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,size:"1024x1536",quality:"low"})});
         const data = await response.json();
@@ -2497,7 +2497,7 @@ if (!r.ok) {
           return url;
         }
         if (["FAILED","CANCELED","CANCELLED"].includes(status)) throw new Error(`La scène ${sceneNumber} a échoué.`);
-        setProgress(30 + Math.min(48, attempt*.7), `Vidéo scène ${sceneNumber}/5 • ${d.status || "en cours"}`);
+        setProgress(30 + Math.min(48, attempt*.7), `Vidéo scène ${sceneNumber}/4 • ${d.status || "en cours"}`);
       }
       throw new Error(`La scène ${sceneNumber} prend trop de temps.`);
     }
