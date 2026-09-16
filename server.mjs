@@ -338,16 +338,16 @@ async function initDatabase() {
 }
 
 async function reserveImageSlots(userId, quantity = 1) {
-  const count = Math.max(1, Math.min(12, Number.parseInt(quantity, 10) || 1));
+  const count = Math.max(1, Math.min(16, Number.parseInt(quantity, 10) || 1));
   const db = await pool.connect();
   try {
     await db.query("BEGIN");
     await db.query("SELECT pg_advisory_xact_lock(91344, $1::integer)", [userId]);
     const { rows } = await db.query("SELECT COALESCE(SUM(quantity),0)::int AS count FROM vira_image_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date", [userId]);
-    if (rows[0].count + count > 12) { await db.query("ROLLBACK"); return { ok:false, used: rows[0].count, limit:12 }; }
+    if (rows[0].count + count > 16) { await db.query("ROLLBACK"); return { ok:false, used: rows[0].count, limit:16 }; }
     await db.query("INSERT INTO vira_image_usage(user_id, quantity) VALUES($1,$2)", [userId, count]);
     await db.query("COMMIT");
-    return { ok:true, used: rows[0].count + count, limit:12 };
+    return { ok:true, used: rows[0].count + count, limit:16 };
   } catch (error) { await db.query("ROLLBACK").catch(()=>{}); throw error; }
   finally { db.release(); }
 }
@@ -890,10 +890,10 @@ app.get("/api/audio/:id", requireAuth, async (req,res) => {
 app.post("/api/video/generate", requireAuth, async (req, res) => {
   const images = req.body?.images;
 
-  if (!Array.isArray(images) || images.length !== 3) {
+  if (!Array.isArray(images) || images.length !== 4) {
     return res.status(400).json({
       ok: false,
-      error: "VIRA exige exactement 3 visuels."
+      error: "VIRA exige exactement 4 visuels."
     });
   }
 
@@ -944,12 +944,12 @@ async function publishVideo(clipPaths, prefix, audioPath = null) {
 app.post(
   "/api/video/assemble",
   requireAuth,
-  uploadVideoClips.array("clips", 3),
+  uploadVideoClips.array("clips", 4),
   async (req, res) => {
     const files = req.files || [];
     try {
-      if (files.length !== 3) {
-        return res.status(400).json({ ok: false, error: "VIRA exige exactement 3 clips vidéo." });
+      if (files.length !== 4) {
+        return res.status(400).json({ ok: false, error: "VIRA exige exactement 4 clips vidéo." });
       }
       const videoUrl = await publishVideo(files.map(file => path.resolve(file.path)), "vira-final");
       return res.json({ ok: true, videoUrl });
@@ -1000,8 +1000,8 @@ function createPreviewClip(imagePath, clipPath, duration = 2) {
 app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
   console.log("FREE-ASSEMBLE ROUTE REACHED");
   const images = req.body?.images;
-  if (!Array.isArray(images) || images.length !== 3) {
-    return res.status(400).json({ ok: false, error: "VIRA exige exactement 3 visuels JPEG ou PNG." });
+  if (!Array.isArray(images) || images.length !== 4) {
+    return res.status(400).json({ ok: false, error: "VIRA exige exactement 4 visuels JPEG ou PNG." });
   }
   const usage = await reserveVideoSlot(req.user.id);
   if (!usage.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter." });
@@ -1027,7 +1027,7 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
       temporaryFiles.push(imagePath, clipPath);
       await fs.promises.writeFile(imagePath, decoded[i].buffer);
       // Keep the input until FFmpeg has actually finished reading it.
-      await createPreviewClip(imagePath, clipPath, Math.max(2,duration)/3);
+      await createPreviewClip(imagePath, clipPath, Math.max(2,duration)/4);
       clips.push(clipPath);
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
@@ -1048,7 +1048,7 @@ console.log("FREE-ASSEMBLE before publishVideo");
 app.post("/api/images/reserve", requireAuth, async (req, res) => {
   try {
     const result = await reserveImageSlots(req.user.id, req.body?.quantity);
-    if (!result.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 12 images IA maximum par mois avec VIRA Starter.", ...result });
+    if (!result.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 16 images IA maximum par mois avec VIRA Starter.", ...result });
     res.json(result);
   } catch (error) {
     console.error("image usage reservation error", error);
