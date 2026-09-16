@@ -325,7 +325,31 @@ async function initDatabase() {
   )`);
   await pool.query(`CREATE INDEX IF NOT EXISTS vira_video_usage_user_period_idx ON vira_video_usage(user_id, period_start)`);
 
+  await pool.query(`CREATE TABLE IF NOT EXISTS vira_image_usage (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES vira_users(id) ON DELETE CASCADE,
+    period_start DATE NOT NULL DEFAULT DATE_TRUNC('month', NOW())::date,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS vira_image_usage_user_period_idx ON vira_image_usage(user_id, period_start)`);
+
   console.log("VIRA database ready");
+}
+
+async function reserveImageSlots(userId, quantity = 1) {
+  const count = Math.max(1, Math.min(12, Number.parseInt(quantity, 10) || 1));
+  const db = await pool.connect();
+  try {
+    await db.query("BEGIN");
+    await db.query("SELECT pg_advisory_xact_lock(91344, $1::integer)", [userId]);
+    const { rows } = await db.query("SELECT COALESCE(SUM(quantity),0)::int AS count FROM vira_image_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date", [userId]);
+    if (rows[0].count + count > 12) { await db.query("ROLLBACK"); return { ok:false, used: rows[0].count, limit:12 }; }
+    await db.query("INSERT INTO vira_image_usage(user_id, quantity) VALUES($1,$2)", [userId, count]);
+    await db.query("COMMIT");
+    return { ok:true, used: rows[0].count + count, limit:12 };
+  } catch (error) { await db.query("ROLLBACK").catch(()=>{}); throw error; }
+  finally { db.release(); }
 }
 
 async function reserveVideoSlot(userId) {
@@ -1017,6 +1041,18 @@ console.log("FREE-ASSEMBLE before publishVideo");
     return res.status(500).json({ ok: false, error: "Impossible de créer la vidéo gratuite. Réessayez dans un instant." });
   } finally {
     await Promise.allSettled(temporaryFiles.map(file => fs.promises.unlink(file)));
+  }
+});
+
+// Reserve image-generation units before any paid AI image request.
+app.post("/api/images/reserve", requireAuth, async (req, res) => {
+  try {
+    const result = await reserveImageSlots(req.user.id, req.body?.quantity);
+    if (!result.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 12 images IA maximum par mois avec VIRA Starter.", ...result });
+    res.json(result);
+  } catch (error) {
+    console.error("image usage reservation error", error);
+    res.status(500).json({ ok:false, error:"Impossible de vérifier la limite d’images." });
   }
 });
 app.post("/api/video/test", requireAuth, async (req, res) => {
