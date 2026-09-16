@@ -1599,6 +1599,26 @@ body.auth-pending .app-shell{opacity:0;pointer-events:none;user-select:none}
  .studio-download{width:100%;box-sizing:border-box}
  .studio-export h3{font-size:17px}
 }
+
+/* One export card, with the preview and primary action as the focus. */
+.stage:has(.studio-export){border:0!important;background:transparent!important;box-shadow:none!important}
+#videoResult{border:0!important;background:transparent!important;padding:0!important;box-shadow:none!important}
+#videoResult .studio-export{max-width:760px!important;padding:24px!important;margin:20px auto 0!important;box-shadow:none!important;background:#0e131d!important;border:1px solid #ffffff12!important}
+.studio-export-body{grid-template-columns:202px minmax(0,1fr);gap:30px;padding-top:0}
+#videoResult .studio-export video.video-player{width:202px;height:360px;max-height:360px;box-shadow:none}
+.studio-export-copy .studio-ready{display:inline-block;background:transparent;border:0;padding:0;color:#8ce0b6;font-size:12px;margin-bottom:14px}
+.studio-export-copy h3{font-size:25px;line-height:1.2;letter-spacing:-.035em;margin:0 0 14px}
+.studio-export-copy p{font-size:14px;color:#b2bdce;line-height:1.65;margin-bottom:18px}
+.studio-specs{gap:0;margin-bottom:24px}
+.studio-specs span{font-size:12px;color:#b2bdce;padding:0;background:transparent;border:0;border-radius:0}
+.studio-specs span+span::before{content:"·";padding:0 8px;color:#78859b}
+.studio-export-copy small{font-size:12px;color:#a1adc0;margin-top:14px}
+@media(max-width:759px){
+ #videoResult .studio-export{padding:20px!important}
+ .studio-export-body{grid-template-columns:1fr;gap:24px}
+ #videoResult .studio-export video.video-player{width:180px;height:320px;max-height:320px}
+ .studio-export-copy h3{font-size:22px}
+}
 </style>
 </head>
 <body class="auth-pending">
@@ -2326,13 +2346,13 @@ localStorage.removeItem("viraGeneratedImages");
     function renderFinalVideo(preview = false) {
       const url = escapeHtml(finalVideoUrl);
       els.videoResult.innerHTML = `<section class="results-panel studio-export" aria-label="Votre vidéo finale">
-        <header class="studio-export-head"><div><span class="studio-eyebrow">VIRA · Studio</span><h3>Votre vidéo finale</h3></div><span class="studio-ready">✓ Prête</span></header>
+        
         <div class="studio-export-body">
           <video class="video-player" controls playsinline preload="metadata" aria-label="Aperçu de votre vidéo" src="${url}"></video>
-          <div class="studio-export-copy"><h4>Votre campagne prend vie.</h4><p>Vos trois scènes et votre narration, réunies dans une vidéo prête à télécharger.</p>
+          <div class="studio-export-copy"><span class="studio-ready" role="status">✓ Vidéo prête</span><h3>Votre vidéo finale</h3><p>Trois scènes, votre narration.<br>Votre campagne est prête à être partagée.</p>
             <div class="studio-specs"><span>MP4</span><span>3 scènes</span><span>Narration intégrée</span></div>
             <a class="studio-download" href="${url}" download="VIRA-campagne-final.mp4"><span aria-hidden="true">↓</span> Télécharger la vidéo</a>
-            <small>${preview ? "Mode test gratuit · Aucun crédit vidéo utilisé." : "Votre export est prêt."}<br>Utilisez le plein écran du lecteur pour agrandir l’aperçu.</small>
+            <small>${preview ? "Mode test gratuit · Aucun crédit vidéo utilisé." : "Votre export est prêt."}</small>
           </div>
         </div>
       </section>`;
@@ -3015,14 +3035,14 @@ if (currentCampaignId) {
 }
       setStatus(
         els.videoStatus,
-        "Vidéo prête avec votre narration. Vous pouvez télécharger le MP4 avec son.",
+        "",
         "success"
       );
     } else {
       finalVideoUrl = await createFinalVideo();
       videoReady = Boolean(finalVideoUrl);
       renderFinalVideo(false);
-      setStatus(els.videoStatus,"Vidéo finale créée avec succès.","success");
+      setStatus(els.videoStatus,"");
     }
   } catch (error) {
     videoReady = false;
