@@ -3642,5 +3642,17 @@ const campaignData = campaign.campaign_data || {};
 <style>
 .admin-dashboard{padding:28px!important}.admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}.admin-stats article{padding:18px;border:1px solid #ffffff12;border-radius:14px;background:#0d121d}.admin-stats span{display:block;color:#9da9bc;font-size:12px;line-height:1.5}.admin-stats strong{display:block;margin-top:12px;font-size:30px;color:#f2f4f9}.admin-note{margin-top:18px;color:#9da9bc;font-size:12px;line-height:1.6}@media(max-width:759px){.admin-dashboard{padding:18px!important}.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-stats strong{font-size:24px}}
 </style>
+<style>
+/* Compact storyboard: two scenes per row on every screen. */
+.visual-strip{
+  grid-template-columns:repeat(2,minmax(0,240px))!important;
+  justify-content:center!important;
+  gap:12px!important;
+}
+.visual-strip .visual-frame{aspect-ratio:16 / 9!important;height:auto!important;min-height:0!important;}
+@media(max-width:600px){
+  .visual-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}
+}
+</style>
 </body>
 </html>
