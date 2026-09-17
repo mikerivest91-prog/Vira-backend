@@ -1045,6 +1045,16 @@ console.log("FREE-ASSEMBLE before publishVideo");
 });
 
 // Reserve image-generation units before any paid AI image request.
+app.get("/api/usage", requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT
+      (SELECT COUNT(*)::int FROM vira_video_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date) AS videos,
+      (SELECT COALESCE(SUM(quantity),0)::int FROM vira_image_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date) AS images`, [req.user.id]);
+    res.json({ videos: { remaining: Math.max(0, 4 - rows[0].videos) }, images: { remaining: Math.max(0, 16 - rows[0].images) } });
+  } catch (error) {
+    res.status(500).json({ error: "Utilisation indisponible" });
+  }
+});
 app.post("/api/images/reserve", requireAuth, async (req, res) => {
   try {
     const result = await reserveImageSlots(req.user.id, req.body?.quantity);
