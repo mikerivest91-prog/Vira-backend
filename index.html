@@ -1819,6 +1819,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
           </div>
         </div>
 
+        <details class="brain-details"><summary>Comment fonctionne VIRA Brain ?</summary>
         <div class="vb-flow" aria-label="VIRA Brain workflow">
           <div class="vb-flow-step"><strong>01</strong>Offre</div>
           <div class="vb-flow-step"><strong>02</strong>Audience</div>
@@ -1843,6 +1844,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
           </article>
         </div>
 
+        </details>
         <div class="vb-footer">
           <a class="vb-cta" href="#campaignBuilder">Créer ma campagne <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
@@ -1870,7 +1872,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
           <div class="field-group with-icon"><label for="platform">Plateforme principale</label><div class="field-icon" id="platformPremiumIcon"></div><select id="platform"><option value="">Choisir une plateforme</option><option value="Instagram">Instagram</option><option value="Facebook">Facebook</option><option value="TikTok">TikTok</option><option value="YouTube">YouTube</option><option value="LinkedIn">LinkedIn</option></select></div>
         </div>
         <div id="platformTip" class="platform-tip"></div>
-        <button id="brainAnalyzeBtn" class="primary-cta brain-run" type="button"><span class="brain-run-main"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><span>Analyser ma campagne</span></span><small>Obtenez votre Growth Score et des recommandations personnalisées</small></button>
+        <button id="brainAnalyzeBtn" class="primary-cta brain-run" type="button"><span class="brain-run-main"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><span>Analyser ma campagne</span></span><small>Vérifiez votre brief et découvrez les prochaines actions</small></button>
       </section>
 
       <section class="glass-card stage">
@@ -1882,8 +1884,8 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 <circle cx="24" cy="11" r="1"/><circle cx="25" cy="17" r="1"/><circle cx="22" cy="22" r="1"/>
 </svg></span><span>3. VIRA Brain</span></div><p class="stage-help">Analyse de croissance</p></div></div>
         <div class="brain-layout">
-          <div class="score-panel"><div><div class="eyebrow">GROWTH SCORE</div><div class="score-big"><span id="growthScoreNumber">60</span><span>/100</span></div><div class="score-note" id="growthScoreNote">Score indicatif basé sur votre brief</div></div><div class="score-ring" id="growthScoreCircle"><div><strong id="growthScoreMini">60</strong><small>/100</small></div></div></div>
-          <div class="brain-message"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><div>Votre projet a un fort potentiel sur votre marché. En appliquant les recommandations de VIRA Brain, vous pouvez accélérer l’acquisition de clients et maximiser vos résultats rapidement.</div></div>
+          <div class="score-panel"><div><div class="eyebrow">COMPLÉTUDE DU BRIEF</div><div class="score-big"><span id="growthScoreNumber">60</span><span>/100</span></div><div class="score-note" id="growthScoreNote">Score indicatif basé sur votre brief</div></div><div class="score-ring" id="growthScoreCircle"><div><strong id="growthScoreMini">60</strong><small>/100</small></div></div></div>
+          <div class="brain-message"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><div>Cet indicateur mesure les informations renseignées dans votre brief. Il ne prédit pas les ventes ni les performances de votre campagne.</div></div>
           <div class="brain-insights">
             <div class="insight-box opportunity"><div class="insight-title green"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><span>OPPORTUNITÉS DÉTECTÉES</span></div><div class="brain-insight" id="brainOpportunity">Choisissez un objectif pour lancer l’analyse.</div></div>
             <div class="insight-box action"><div class="insight-title blue"><span class="premium-inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 3h8v8"/><path d="M21 3l-9 9"/><path d="M11 5H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-5"/></svg></span>ACTIONS RECOMMANDÉES</div><div class="brain-insight" id="brainRecommendedAction">VIRA vous proposera l’action prioritaire à réaliser.</div></div>
@@ -2158,10 +2160,17 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoR
     function updateWorkflowState() {
       const hasScenario = Boolean(rawScenario && isValidScenarioText(rawScenario));
       const hasVisuals = generatedImages.length === 4;
+      els.visualBtn.hidden = !hasScenario;
+      els.voiceBtn.hidden = !hasVisuals;
+      els.videoBtn.hidden = !voiceReady;
+      els.downloadBtn.hidden = !videoReady;
 
-      els.visualBtn.style.display = "flex";
-      els.voiceBtn.style.display = "flex";
-      els.videoBtn.style.display = "flex";
+      els.visualBtn.style.display = hasScenario ? "flex" : "none";
+      els.voiceBtn.style.display = hasVisuals ? "flex" : "none";
+      const nextStep = document.querySelector(".video-next-step");
+      if (nextStep) nextStep.hidden = !hasVisuals;
+      els.videoBtn.style.display = voiceReady ? "flex" : "none";
+      els.downloadBtn.style.display = videoReady ? "flex" : "none";
 
 els.visualBtn.disabled = !(hasScenario && scenarioValidated);
       els.voiceBtn.disabled = !(hasScenario && scenarioValidated && hasVisuals);
@@ -2187,24 +2196,24 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
 
     function updateBrain(animated = false) {
       const meta = marketingMeta[selectedMarketingType];
-      let score = meta?.score || 60;
+      let score = 0;
       const prompt = els.prompt.value.trim();
       const audience = els.audience.value.trim();
       const goal = els.goal.value.trim();
       const platform = els.platform.value;
 
-      if (prompt.length >= 20) score += 4;
-      if (audience.length >= 5) score += 4;
-      if (goal.length >= 5) score += 4;
-      if (platform) score += 3;
+      if (prompt.length >= 20) score += 40;
+      if (audience.length >= 5) score += 25;
+      if (goal.length >= 5) score += 25;
+      if (platform) score += 10;
       score = Math.min(score, 100);
 
       const render = () => {
-        els.score.textContent = score;
+        els.score.textContent = score ? score : "—";
         els.scoreCircle.style.setProperty("--score-deg", `${score * 3.6}deg`);
         if (els.scoreNote) {
           els.scoreNote.textContent =
-            score >= 85 ? "Brief très complet • fort potentiel à tester" :
+            score >= 85 ? "Brief complet • prêt à être testé" :
             score >= 70 ? "Brief solide • quelques optimisations possibles" :
             "Score indicatif • complétez votre brief pour l’affiner";
         }
@@ -2214,11 +2223,11 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
 
       if (animated) {
         els.brainBtn.disabled = true;
-        els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("loading")}</span><span>Analyse...</span></span><small>VIRA évalue votre potentiel de croissance</small>`;
+        els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("loading")}</span><span>Analyse...</span></span><small>VIRA vérifie les informations de votre brief</small>`;
         setTimeout(() => {
           render();
           els.brainBtn.disabled = false;
-          els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("hook")}</span><span>Analyser ma campagne</span></span><small>Obtenez votre Growth Score et des recommandations personnalisées</small>`;
+          els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("hook")}</span><span>Analyser ma campagne</span></span><small>Vérifiez votre brief et découvrez les prochaines actions</small>`;
         }, 550);
       } else render();
     }
@@ -3202,8 +3211,10 @@ if (!finalVideoUrl) {
     [...document.querySelectorAll(".sidebar-link"), ...document.querySelectorAll(".mobile-nav button")].forEach(btn => {
       if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings].includes(btn)) return;
 
+      btn.dataset.navigationLabel = btn.textContent.trim();
       btn.addEventListener("click", () => {
-        const label = btn.textContent.trim();
+        document.querySelectorAll(".sidebar-link").forEach(item => item.classList.toggle("active", item === btn));
+        const label = btn.dataset.navigationLabel || btn.textContent.trim();
         const target = /Tableau de bord|Accueil/i.test(label)
           ? els.navHome
           : label === "Campagnes" ? els.navCampaigns
@@ -3232,13 +3243,6 @@ if (!finalVideoUrl) {
     }
 
     restoreForm();
-    const savedCredits = localStorage.getItem("viraCredits");
-    if (savedCredits) {
-      els.creditCount.textContent = savedCredits;
-      if (els.sidebarCreditCount) els.sidebarCreditCount.textContent = savedCredits;
-    } else if (els.sidebarCreditCount) {
-      els.sidebarCreditCount.textContent = els.creditCount.textContent;
-    }
 
     if (rawScenario && isValidScenarioText(rawScenario)) {
       renderScenario(rawScenario);
@@ -3306,6 +3310,7 @@ els.navCampaigns?.classList.add("active");
   credentials: "same-origin"
 });
 const data = await response.json();
+if (!response.ok) { alert(data.error || "Impossible de charger les campagnes."); return; }
 const campaigns = data.campaigns || [];
       const campaignCount = campaigns.length;
       const campaignListHtml = campaigns.length
@@ -3318,10 +3323,10 @@ const campaigns = data.campaigns || [];
           : `<div class="campaign-thumb campaign-thumb-placeholder" aria-hidden="true"><span class="campaign-placeholder-mark">V</span><span>VIRA</span></div>`}
       </div>
       <div class="campaign-card-info">
-        <strong>${campaign.title || "Campagne Marketing"}</strong>
-      <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : "✓ Scénario validé"}</span><p class="campaign-description">${(() => { const text = String(campaign.scenario || "").replace(/\*\*/g, ""); const objective = text.match(/OBJECTIF\s*:?\s*([\s\S]*?)(?=\n\s*(?:PUBLIC CIBLE|ACCROCHE|TEXTE PUBLICATION|HASHTAGS|SC[ÈE]NE\s*1|NARRATION|APPEL À L['’]ACTION|PROMPT VISUEL|STYLE)\s*:?|$)/i)?.[1] || text; const clean = objective.replace(/^\s*(?:TITRE|OBJECTIF)\s*:?\s*/i, "").trim(); return escapeHtml(clean.slice(0, 132)) + (clean.length > 132 ? "…" : ""); })()}</p>
-        <p>${new Date(campaign.created_at || campaign.createdAt).toLocaleDateString("fr-CA")}</p>
-        <span class="campaign-resume"><span aria-hidden="true">▶</span> Reprendre la campagne</span>
+        <strong data-user-content title="${escapeHtml(campaign.title || "Campagne Marketing")}">${escapeHtml(campaign.title || "Campagne Marketing")}</strong>
+      <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : campaign.status === "visuals_ready" ? "Visuels prêts" : "Brouillon"}</span><p class="campaign-description">${(() => { const text = String(campaign.scenario || "").replace(/\*\*/g, ""); const objective = text.match(/OBJECTIF\s*:?\s*([\s\S]*?)(?=\n\s*(?:PUBLIC CIBLE|ACCROCHE|TEXTE PUBLICATION|HASHTAGS|SC[ÈE]NE\s*1|NARRATION|APPEL À L['’]ACTION|PROMPT VISUEL|STYLE)\s*:?|$)/i)?.[1] || text; const clean = objective.replace(/^\s*(?:TITRE|OBJECTIF)\s*:?\s*/i, "").trim(); return escapeHtml(clean.slice(0, 132)) + (clean.length > 132 ? "…" : ""); })()}</p>
+        <p>${new Date(campaign.created_at || campaign.createdAt).toLocaleDateString(document.documentElement.lang === "en" ? "en-CA" : "fr-CA", { timeZone: "UTC" })}</p>
+        <button type="button" class="campaign-resume">Ouvrir la campagne <span aria-hidden="true">→</span></button>
 <button class="campaign-delete" data-campaign-index="${index}" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v5M14 11v5"/></svg><span>Supprimer</span></button>
       </div>
       </div>
@@ -3344,16 +3349,16 @@ const campaigns = data.campaigns || [];
         </div>
       </div>
 
-      ${campaignListHtml}
+      <div class="campaign-list">${campaignListHtml}</div>
     </section>
   `;
+window.scrollTo(0, 0);
 document.querySelectorAll(".saved-campaign").forEach((card) => {
   card.addEventListener("click", () => {
     const index = Number(card.dataset.campaignIndex);
     const campaign = campaigns[index];
+if (!campaign) return;
 const campaignData = campaign.campaign_data || {};
-    
-    if (!campaign) return;
 const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario || "");
     localStorage.setItem("viraTargetAudience", campaignData.audience || campaign.audience || parsedCampaign.target || "");
     localStorage.setItem("viraMarketingGoal", campaignData.goal || campaign.goal || parsedCampaign.objective || "");
@@ -3396,6 +3401,7 @@ localStorage.setItem("viraResumeCampaign", "true");
     const campaign = campaigns[index];
 const campaignData = campaign.campaign_data || {};
     if (!campaign?.id) return;
+    if (!confirm(document.documentElement.lang === "en" ? "Delete this campaign permanently?" : "Supprimer définitivement cette campagne ?")) return;
 
     try {
       const response = await fetch(`/api/campaigns/${campaign.id}`, {
@@ -3409,7 +3415,10 @@ const campaignData = campaign.campaign_data || {};
         throw new Error(data.error || "Suppression impossible.");
       }
 
-      campaigns.splice(index, 1);
+      // Keep indices stable for the other cards.
+      campaigns[index] = null;
+      const count = document.querySelector(".campaign-count");
+      if (count) count.textContent = campaigns.filter(Boolean).length;
       button.closest(".saved-campaign")?.remove();
 
     } catch (error) {
@@ -3687,14 +3696,16 @@ const campaignData = campaign.campaign_data || {};
 <style>.vira-language{display:flex;align-items:center;gap:8px;font:13px "Segoe UI",sans-serif;color:#b9c4d6}.vira-language select{background:#121622;color:#eef2ff;border:1px solid #3a4157;border-radius:8px;padding:8px;cursor:pointer}.vb-top{grid-template-columns:1fr!important}@media(max-width:650px){.vira-language span{display:none}.vira-topbar{flex-wrap:wrap}}</style>
 <script id="vira-language-script">
 (()=>{
-const translations=new Map([["Tableau de bord","Dashboard"],["Campagnes","Campaigns"],["Bibliothèque","Library"],["Calendrier","Calendar"],["Statistiques","Analytics"],["Crédits disponibles","Available credits"],["Solde de votre espace","Workspace balance"],["crédits","credits"],["Paramètres","Settings"],["Compte","Account"],["Compte VIRA","VIRA account"],["Se déconnecter","Sign out"],["+ Nouvelle campagne","+ New campaign"],["Tableau admin","Admin dashboard"],["par mois","per month"],["4 vidéos · 16 images IA · 30 secondes par vidéo","4 videos · 16 AI images · 30 seconds per video"],["Gérer mon abonnement","Manage subscription"],["Votre espace marketing","Your marketing workspace"],["Transformez une idée en campagne prête à publier, de la stratégie à l’export.","Turn an idea into a campaign ready to publish, from strategy to export."],["· Une entreprise VIRA Brain","· A VIRA Brain company"],["Disponible en français et en anglais","Available in French and English"],["Le moteur stratégique derrière vos campagnes.","The strategic engine behind your campaigns."],["VIRA Brain transforme les informations de votre entreprise en une stratégie marketing structurée, puis guide la création, le test et l’amélioration de vos campagnes.","VIRA Brain turns your business information into a structured marketing strategy, then guides campaign creation, testing and improvement."],["Des idées claires.","Clear ideas."],["Des résultats concrets.","Tangible results."],["Offre","Offer"],["Objectif","Goal"],["Stratégie","Strategy"],["Contenus","Content"],["Preuve","Evidence"],["Comprendre","Understand"],["Tester","Test"],["Prouver","Validate"],["Analyse l’offre, l’audience, l’objectif et le contexte pour structurer une direction claire.","Analyze your offer, audience, goal and context to establish a clear direction."],["Prépare plusieurs angles et variantes afin de comparer les stratégies plutôt que de dépendre d’une seule hypothèse.","Prepare different angles and variations to compare strategies and test assumptions."],["Relie progressivement les recommandations aux résultats mesurés pour expliquer ce qui fonctionne et pourquoi.","Connect recommendations with measured results to understand what works and why."],["Plateforme professionnelle","Professional platform"],["Sécurité intégrée","Built-in security"],["Vous gardez le contrôle","You stay in control"],["Créer ma campagne","Create my campaign"],["1. Objectif marketing","1. Marketing goal"],["Choisissez votre objectif principal","Choose your primary goal"],["Lancement","Product"],["de produit","launch"],["Notoriété","Brand"],["de marque","awareness"],["Génération","Lead"],["de leads","generation"],["Promo /","Promotion /"],["Vente spéciale","Special offer"],["2. Informations","2. Campaign details"],["Plus vous êtes précis, meilleure sera l’analyse.","More detail helps us provide a better analysis."],["Description de votre produit ou service","Describe your product or service"],["Audience cible","Target audience"],["Objectif principal","Primary goal"],["Ton de la campagne","Campaign tone"],["Professionnel","Professional"],["Dynamique","Dynamic"],["Amical","Friendly"],["Inspirant","Inspiring"],["Plateforme principale","Primary platform"],["Choisir une plateforme","Choose a platform"],["Analyser ma campagne","Analyze my campaign"],["Obtenez votre Growth Score et des recommandations personnalisées","Get your growth score and personalized recommendations"],["Score indicatif basé sur votre brief","Indicative score based on your brief"],["OPPORTUNITÉS DÉTECTÉES","IDENTIFIED OPPORTUNITIES"],["ACTIONS RECOMMANDÉES","RECOMMENDED ACTIONS"],["Choisissez un objectif pour lancer l’analyse.","Choose a goal to start the analysis."],["VIRA vous proposera l’action prioritaire à réaliser.","VIRA will suggest your next priority action."],["4. Créez votre campagne complète","4. Create your complete campaign"],["Générez tous vos contenus marketing avec VIRA.","Generate your marketing content with VIRA."],["Générer la campagne","Generate campaign"],["Scénario, textes et structure en une étape","Script, copy and structure in one step"],["Ajouter les visuels","Add visuals"],["Créez les visuels professionnels","Create professional visuals"],["Mode aperçu actif • aucune consommation de crédits","Preview mode • no credits used"],["Préparation","Preparing"],["Après les visuels : préparez votre vidéo","Next: prepare your video"],["Validez votre scénario et créez les 4 visuels, puis préparez la voix pour activer « Vidéo finale ».","Approve your script and create all 4 visuals, then prepare the voiceover to unlock the final video."],["Voix & Audio","Voice & Audio"],["Ajoutez voix off et musique","Add voiceover and music"],["Vidéo finale","Final video"],["Assemblez votre vidéo complète","Assemble your complete video"],["Télécharger","Download"],["Exportez votre vidéo finale","Export your final video"],["Accueil","Home"],["Réglages","Settings"],["Visuels de campagne","Campaign visuals"],["Contenu","Content"],["Production","Production"],["Objectif & audience","Goal & audience"],["Publication & message","Post & message"],["Votre stratégie et vos contenus, réunis en trois étapes.","Your strategy and content in three steps."],["✓ Campagne prête","✓ Campaign ready"],["Verrouillé","Locked"],["VERROUILLÉ","LOCKED"],["Scénario validé","Script approved"],["Titre complet","Full title"],["Public cible","Target audience"],["Texte de publication","Post copy"],["Appel à l’action","Call to action"],["Narration","Voiceover"],["Prompt visuel","Visual prompt"],["Ex : Une application pour créer des campagnes complètes en quelques secondes.","E.g. An app for creating complete campaigns in seconds."],["PME, entrepreneurs, créateurs, agences.","Small businesses, entrepreneurs, creators, agencies."],["Obtenir plus de clients et augmenter les conversions.","Attract more customers and increase conversions."]]);
+const translations=new Map([["Tableau de bord","Dashboard"],["Campagnes","Campaigns"],["Bibliothèque","Library"],["Calendrier","Calendar"],["Statistiques","Analytics"],["Crédits disponibles","Available credits"],["Solde de votre espace","Workspace balance"],["crédits","credits"],["Paramètres","Settings"],["Compte","Account"],["Compte VIRA","VIRA account"],["Se déconnecter","Sign out"],["+ Nouvelle campagne","+ New campaign"],["Tableau admin","Admin dashboard"],["par mois","per month"],["4 vidéos · 16 images IA · 30 secondes par vidéo","4 videos · 16 AI images · 30 seconds per video"],["Gérer mon abonnement","Manage subscription"],["Votre espace marketing","Your marketing workspace"],["Transformez une idée en campagne prête à publier, de la stratégie à l’export.","Turn an idea into a campaign ready to publish, from strategy to export."],["· Une entreprise VIRA Brain","· A VIRA Brain company"],["Disponible en français et en anglais","Available in French and English"],["Le moteur stratégique derrière vos campagnes.","The strategic engine behind your campaigns."],["VIRA Brain transforme les informations de votre entreprise en une stratégie marketing structurée, puis guide la création, le test et l’amélioration de vos campagnes.","VIRA Brain turns your business information into a structured marketing strategy, then guides campaign creation, testing and improvement."],["Des idées claires.","Clear ideas."],["Des résultats concrets.","Tangible results."],["Offre","Offer"],["Objectif","Goal"],["Stratégie","Strategy"],["Contenus","Content"],["Preuve","Evidence"],["Comprendre","Understand"],["Tester","Test"],["Prouver","Validate"],["Analyse l’offre, l’audience, l’objectif et le contexte pour structurer une direction claire.","Analyze your offer, audience, goal and context to establish a clear direction."],["Prépare plusieurs angles et variantes afin de comparer les stratégies plutôt que de dépendre d’une seule hypothèse.","Prepare different angles and variations to compare strategies and test assumptions."],["Relie progressivement les recommandations aux résultats mesurés pour expliquer ce qui fonctionne et pourquoi.","Connect recommendations with measured results to understand what works and why."],["Plateforme professionnelle","Professional platform"],["Sécurité intégrée","Built-in security"],["Vous gardez le contrôle","You stay in control"],["Créer ma campagne","Create my campaign"],["1. Objectif marketing","1. Marketing goal"],["Choisissez votre objectif principal","Choose your primary goal"],["Lancement","Product"],["de produit","launch"],["Notoriété","Brand"],["de marque","awareness"],["Génération","Lead"],["de leads","generation"],["Promo /","Promotion /"],["Vente spéciale","Special offer"],["2. Informations","2. Campaign details"],["Plus vous êtes précis, meilleure sera l’analyse.","More detail helps us provide a better analysis."],["Description de votre produit ou service","Describe your product or service"],["Audience cible","Target audience"],["Objectif principal","Primary goal"],["Ton de la campagne","Campaign tone"],["Professionnel","Professional"],["Dynamique","Dynamic"],["Amical","Friendly"],["Inspirant","Inspiring"],["Plateforme principale","Primary platform"],["Choisir une plateforme","Choose a platform"],["Analyser ma campagne","Analyze my campaign"],["Vérifiez votre brief et découvrez les prochaines actions","Get your growth score and personalized recommendations"],["Score indicatif basé sur votre brief","Indicative score based on your brief"],["OPPORTUNITÉS DÉTECTÉES","IDENTIFIED OPPORTUNITIES"],["ACTIONS RECOMMANDÉES","RECOMMENDED ACTIONS"],["Choisissez un objectif pour lancer l’analyse.","Choose a goal to start the analysis."],["VIRA vous proposera l’action prioritaire à réaliser.","VIRA will suggest your next priority action."],["4. Créez votre campagne complète","4. Create your complete campaign"],["Générez tous vos contenus marketing avec VIRA.","Generate your marketing content with VIRA."],["Générer la campagne","Generate campaign"],["Scénario, textes et structure en une étape","Script, copy and structure in one step"],["Ajouter les visuels","Add visuals"],["Créez les visuels professionnels","Create professional visuals"],["Mode aperçu actif • aucune consommation de crédits","Preview mode • no credits used"],["Préparation","Preparing"],["Après les visuels : préparez votre vidéo","Next: prepare your video"],["Validez votre scénario et créez les 4 visuels, puis préparez la voix pour activer « Vidéo finale ».","Approve your script and create all 4 visuals, then prepare the voiceover to unlock the final video."],["Voix & Audio","Voice & Audio"],["Ajoutez voix off et musique","Add voiceover and music"],["Vidéo finale","Final video"],["Assemblez votre vidéo complète","Assemble your complete video"],["Télécharger","Download"],["Exportez votre vidéo finale","Export your final video"],["Accueil","Home"],["Réglages","Settings"],["Visuels de campagne","Campaign visuals"],["Contenu","Content"],["Production","Production"],["Objectif & audience","Goal & audience"],["Publication & message","Post & message"],["Votre stratégie et vos contenus, réunis en trois étapes.","Your strategy and content in three steps."],["✓ Campagne prête","✓ Campaign ready"],["Verrouillé","Locked"],["VERROUILLÉ","LOCKED"],["Scénario validé","Script approved"],["Titre complet","Full title"],["Public cible","Target audience"],["Texte de publication","Post copy"],["Appel à l’action","Call to action"],["Narration","Voiceover"],["Prompt visuel","Visual prompt"],["Ex : Une application pour créer des campagnes complètes en quelques secondes.","E.g. An app for creating complete campaigns in seconds."],["PME, entrepreneurs, créateurs, agences.","Small businesses, entrepreneurs, creators, agencies."],["Obtenir plus de clients et augmenter les conversions.","Attract more customers and increase conversions."]]);
+for(const [fr,en] of [["Comment fonctionne VIRA Brain ?","How does VIRA Brain work?"],["COMPLÉTUDE DU BRIEF","BRIEF COMPLETENESS"],["Analyse de croissance","Brief analysis"],["Score indicatif • complétez votre brief pour l’affiner","Complete your brief to refine this score"],["Brief complet • prêt à être testé","Complete brief • ready to test"],["Brief solide • quelques optimisations possibles","Solid brief • some details can be improved"],["Cet indicateur mesure les informations renseignées dans votre brief. Il ne prédit pas les ventes ni les performances de votre campagne.","This score measures the information provided in your brief. It does not predict sales or campaign performance."],["→ VIRA vous proposera l’action prioritaire à réaliser.","→ VIRA will suggest your next priority action."],["Vérifiez votre brief et découvrez les prochaines actions","Review your brief and discover your next steps"],["VIRA vérifie les informations de votre brief","VIRA is checking your brief"],["Analyse...","Analyzing..."],["Mes campagnes","My campaigns"],["Retrouvez, reprenez et gérez vos campagnes marketing.","Find, resume and manage your marketing campaigns."],["Ouvrir la campagne","Open campaign"],["Supprimer","Delete"],["✓ Terminée","✓ Completed"],["✓ Scénario validé","✓ Script approved"],["VIRA WORKSPACE","VIRA WORKSPACE"],["Aucune campagne sauvegardée pour le moment.","No saved campaigns yet."],["Vos futures campagnes apparaîtront ici.","Your campaigns will appear here."],["Mes contenus","My content"],["Retrouvez tous les contenus créés dans vos campagnes.","Find all the content created for your campaigns."],["Aucun contenu sauvegardé pour le moment.","No saved content yet."],["Vos scénarios, textes, visuels et vidéos apparaîtront ici.","Your scripts, copy, visuals and videos will appear here."],["Compte & préférences","Account & preferences"],["Les paramètres de votre espace VIRA apparaîtront ici.","Your VIRA workspace settings will appear here."],["Gérez votre compte, vos préférences et votre utilisation de VIRA.","Manage your account, preferences and VIRA usage."]]) translations.set(fr,en);
+translations.set("Brouillon","Draft");translations.set("Visuels prêts","Visuals ready");
 const originals=new WeakMap();
 let language='fr';try{language=localStorage.getItem('viraLanguage')==='en'?'en':'fr'}catch{}
 const picker=document.getElementById('viraLanguage');
 function translate(root){
  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;
  while(node=walker.nextNode()){
-  if(node.parentElement.closest('script,style,textarea,#viraLanguage,[contenteditable="true"]'))continue;
+  if(node.parentElement.closest('script,style,textarea,[data-user-content],#viraLanguage,[contenteditable="true"]'))continue;
   const current=node.nodeValue;
   const saved=originals.get(node);
   const source=saved&&current===saved.rendered?saved.source:current;
@@ -3719,5 +3730,30 @@ picker.addEventListener('change',()=>{language=picker.value;try{localStorage.set
 })();
 </script>
 
+<style id="vira-refinements">
+.main :is(button,a,input,select,textarea,strong,h1,h2,h3){font-family:"Segoe UI",Arial,sans-serif!important;text-shadow:none!important;-webkit-text-stroke:0!important}
+.main button,.main a{font-weight:600!important}.main h1{font-size:30px!important}.vb-copy h2{font-size:25px!important;line-height:1.3!important}.vb-hero{padding:22px!important}.vb-tagline,.vb-company-strip{display:none!important}.vb-copy p{font-size:14px!important;line-height:1.65!important}.brain-details summary{cursor:pointer;color:#c1a6ff;padding:14px 0;font-size:14px}.vb-footer{margin-top:4px!important;padding-top:12px!important}.main .box> .section-head{margin-bottom:20px}.main .box h2{font-size:26px!important}.campaign-list{display:grid;gap:12px}.campaign-section.saved-campaign{margin:0!important;padding:16px!important}.campaign-card-content{grid-template-columns:64px minmax(0,1fr)!important;align-items:center!important;gap:16px!important}.campaign-thumb{width:64px!important;height:64px!important}.campaign-thumb-placeholder>span:last-child{display:none}.campaign-card-info{grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"title status" "date date" "actions actions"!important;row-gap:8px!important}.campaign-card-info>strong{font-size:15px!important;font-weight:600!important;line-height:1.5!important;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.campaign-description{display:none!important}.campaign-card-info>p:not(.campaign-description){font-size:12px!important;margin:0!important}.campaign-status{font-size:11px!important;font-weight:500!important}.campaign-resume,.campaign-delete{margin:0!important;font-size:13px!important;height:36px!important;font-weight:500!important;cursor:pointer}.campaign-delete{background:transparent!important;border-color:transparent!important}.campaign-resume:focus-visible,.campaign-delete:focus-visible,.brain-details summary:focus-visible{outline:2px solid #bc9aff;outline-offset:3px}.video-next-step[hidden]{display:none!important}.quota-label{font-size:12px;color:#aebbd0}.quota-values{font-size:13px;line-height:1.7;color:#e3e9f4}.credit-badge{white-space:normal!important}.main .action-card{min-height:90px!important}.main .action-card strong{font-size:15px!important}.main .action-card span{font-size:13px}
+@media(max-width:650px){.campaign-card-content{grid-template-columns:1fr!important}.campaign-media{display:none!important}.campaign-card-info{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"title" "status" "date" "actions"!important}.campaign-card-info>.campaign-status{justify-self:start!important}.campaign-resume,.campaign-delete{max-width:49%!important;padding:0 8px!important;font-size:12px!important}.main h1{font-size:25px!important}.vb-copy h2{font-size:21px!important}}
+</style>
+<script>
+(()=>{const boxes=[document.querySelector('.credit-badge'),document.querySelector('.sidebar-credits')].filter(Boolean);const fallback=document.getElementById('sidebarCreditCount')?.parentElement;if(fallback&&!boxes.includes(fallback))boxes.push(fallback);
+function show(data){const en=document.documentElement.lang==='en';for(const el of boxes)el.innerHTML=data?'<span class="quota-values">'+data.videos.remaining+'/4 '+(en?'videos':'vidéos')+' · '+data.images.remaining+'/16 '+(en?'AI images':'images IA')+'</span>':'<span class="quota-label">'+(en?'Usage unavailable':'Utilisation indisponible')+'</span>';}
+let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{usage=d;show(d)}).catch(()=>show());new MutationObserver(()=>show(usage)).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});})();
+</script>
+<style>html[lang="en"] .action-card:disabled::after,html[lang="en"] .action-card:disabled::before{content:"Locked"}</style>
+<style>
+#generate[hidden],#testVoice[hidden],#video[hidden],#downloadVideo[hidden]{display:none!important}
+.saved-campaign .campaign-card-content:has(.campaign-thumb){grid-template-columns:64px minmax(0,1fr)!important;align-items:center!important}
+.saved-campaign .campaign-card-content .campaign-thumb{width:64px!important;height:64px!important;min-height:0!important}
+.saved-campaign .campaign-card-info .campaign-resume{display:inline-flex!important;align-items:center!important;gap:8px!important}
+@media(max-width:650px){.saved-campaign .campaign-card-content:has(.campaign-thumb){grid-template-columns:minmax(0,1fr)!important}}
+</style>
+<style>
+@media(max-width:650px){
+.saved-campaign .campaign-card-info:has(.campaign-resume){grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"title title" "status status" "date date" "resume delete"!important;gap:10px!important}
+.saved-campaign .campaign-card-info>.campaign-resume{grid-area:resume!important;width:auto!important;max-width:none!important;justify-self:start!important;white-space:nowrap!important}
+.saved-campaign .campaign-card-info>.campaign-delete{grid-area:delete!important;width:auto!important;max-width:none!important;justify-self:end!important;white-space:nowrap!important}
+}
+</style>
 </body>
 </html>
