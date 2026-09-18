@@ -3211,8 +3211,7 @@ if (!finalVideoUrl) {
      // Les boutons mobiles possèdent déjà leur propre gestionnaire.
     // Les liens desktop délèguent aux mêmes gestionnaires.
     [...document.querySelectorAll(".sidebar-link"), ...document.querySelectorAll(".mobile-nav button")].forEach(btn => {
-      if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings].includes(btn)) return;
-
+if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStats].includes(btn)) return;
       btn.dataset.navigationLabel = btn.textContent.trim();
       btn.addEventListener("click", () => {
         document.querySelectorAll(".sidebar-link").forEach(item => item.classList.toggle("active", item === btn));
