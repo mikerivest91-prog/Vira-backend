@@ -3428,6 +3428,7 @@ const campaignData = campaign.campaign_data || {};
     }
   });
 });
+}); // Fin du gestionnaire Campagnes ; Statistiques est enregistré au démarrage.
 els.navStats?.addEventListener("click", async () => {
   document.querySelectorAll(".sidebar-link").forEach(item => {
     item.classList.toggle("active", item === els.navStats);
