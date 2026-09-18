@@ -1705,9 +1705,9 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 <style>
 .library-text{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6;color:#cbd5e1}
 .library-images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.library-scene{margin:0;min-width:0;display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);align-items:center;gap:14px;padding:12px;border:1px solid #ffffff12;border-radius:14px;background:#080b12}
-.library-scene a{display:block;min-width:0}.library-images img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;border-radius:10px;background:#05070c}
-.library-scene figcaption{min-width:0}.library-scene strong{font-size:11px;color:#b89bff}.library-scene p{font-size:13px;line-height:1.55;overflow-wrap:anywhere;color:#cbd5e1}
+.library-scene{margin:0;min-width:0;display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);align-items:center;gap:14px;padding:12px;border:1px solid #ffffff12;border-radius:14px;background:#080b12}
+.library-scene a{display:block;min-width:0;position:relative;overflow:hidden;border-radius:13px}.library-images img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:13px;background:#05070c}
+.library-scene figcaption{min-width:0}.library-scene .library-scene-number{position:absolute;top:6px;left:6px;padding:4px 6px;border-radius:7px;background:rgba(0,0,0,.65);color:#fff;font-size:8px;font-weight:700}.library-scene p{margin:0!important;font-size:13px!important;line-height:1.55!important;overflow-wrap:anywhere;color:#9f96a7;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .library-card h3{overflow-wrap:anywhere}.library-card video{max-height:480px}.library-card summary{padding:12px 0;cursor:pointer}
 @media(max-width:900px){.library-scene{grid-template-columns:minmax(0,1fr);align-items:start;padding:10px;gap:8px}}
 @media(max-width:600px){.library-images{gap:8px}.library-scene p{font-size:12px}}
@@ -3314,7 +3314,7 @@ els.navContent?.addEventListener("click", async () => {
         '<h3 data-user-content>' + escapeHtml(campaign.title || "Campagne") + '</h3>' +
         (scenario.trim() ? '<details><summary>Scénario et textes</summary><pre data-user-content class="library-text">' + escapeHtml(scenario) + '</pre></details>' : '') +
         (images.length ? '<h4>Visuels (' + images.length + ')</h4><div class="library-images">' + images.map(({url, index}) =>
-          '<figure class="library-scene"><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le visuel ' + (index + 1) + '"><img loading="lazy" src="' + escapeHtml(url) + '" alt="Visuel ' + (index + 1) + '"></a><figcaption><strong>SCÈNE ' + (index + 1) + '</strong><p data-user-content>' + escapeHtml(scenes[index] || "Description non disponible pour cette scène.") + '</p></figcaption></figure>'
+          '<figure class="library-scene"><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le visuel ' + (index + 1) + '"><img loading="lazy" src="' + escapeHtml(url) + '" alt="Visuel ' + (index + 1) + '"><span class="library-scene-number">SCÈNE ' + (index + 1) + '</span></a><figcaption><p data-user-content>' + escapeHtml(scenes[index] || "Description non disponible pour cette scène.") + '</p></figcaption></figure>'
         ).join('') + '</div>' : '') +
         (video ? '<h4>Vidéo finale</h4><video controls preload="none" class="video-player" src="' + escapeHtml(video) + '"></video><a class="download-link" href="' + escapeHtml(video) + '" target="_blank" rel="noopener noreferrer" download>Télécharger la vidéo</a>' : '') +
         '</article>';
