@@ -1742,7 +1742,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
         <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M9 4a4 4 0 0 0-4 4v1a4 4 0 0 0 0 6v1a4 4 0 0 0 4 4"/><path d="M15 4a4 4 0 0 1 4 4v1a4 4 0 0 1 0 6v1a4 4 0 0 1-4 4"/><path d="M9 4c0 2 1 3 3 3s3-1 3-3M9 20c0-2 1-3 3-3s3 1 3 3M12 7v10"/></svg></span>VIRA Brain</button>
         <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span>Bibliothèque</button>
         <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M6 3v3M18 3v3M4 8h16M5 5h14a2 2 0 0 1 2 2v12H3V7a2 2 0 0 1 2-2Z"/></svg></span>Calendrier</button>
-        <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M4 18V6M4 18h16"/><path d="m7 14 4-4 3 2 5-6"/></svg></span>Statistiques</button>
+        <button id="navStats" class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M4 18V6M4 18h16"/><path d="m7 14 4-4 3 2 5-6"/></svg></span>Statistiques</button>
       </nav>
       <div class="pro-plan">
         <div class="pro-plan-top"><strong>Crédits disponibles</strong><span>VIRA</span></div>
@@ -2005,9 +2005,11 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
       voiceBtn: $("testVoice"),
       visualBtn: $("generate"),
       videoBtn: $("video"),
-      downloadBtn: $("downloadVideo"),
+     downloadBtn: $("downloadVideo"),
+navStats: $("navStats"),
       navHome: $("navHome"),
       navCampaigns: $("navCampaigns"),
+      
       navSettings: $("navSettings"),
       navContent: $("navContent"),
       status: $("status"),
@@ -3218,6 +3220,7 @@ if (!finalVideoUrl) {
         const target = /Tableau de bord|Accueil/i.test(label)
           ? els.navHome
           : label === "Campagnes" ? els.navCampaigns
+          : label === "Statistiques" ? els.navStats
           : label === "Bibliothèque" ? els.navContent
           : label === "Paramètres" ? els.navSettings : null;
 
@@ -3426,7 +3429,114 @@ const campaignData = campaign.campaign_data || {};
     }
   });
 });
+els.navStats?.addEventListener("click", async () => {
+  document.querySelectorAll(".sidebar-link").forEach(item => {
+    item.classList.toggle("active", item === els.navStats);
+  });
+
+  try {
+    const response = await fetch("/api/campaigns", {
+      credentials: "same-origin"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Impossible de charger les statistiques.");
+    }
+
+    const campaigns = data.campaigns || [];
+    const total = campaigns.length;
+
+    const completed = campaigns.filter(c =>
+      c.status === "completed"
+    ).length;
+
+    const visualsReady = campaigns.filter(c =>
+      c.status === "visuals_ready"
+    ).length;
+
+    const drafts = campaigns.filter(c =>
+      c.status !== "completed" &&
+      c.status !== "visuals_ready"
+    ).length;
+
+    const completionRate = total
+      ? Math.round((completed / total) * 100)
+      : 0;
+
+    document.querySelector("main").innerHTML = `
+      <section class="box">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">VIRA WORKSPACE</span>
+            <h2>Statistiques</h2>
+            <p>Suivez l'activité et la progression de vos campagnes marketing.</p>
+          </div>
+        </div>
+
+        <div class="campaign-section">
+          <strong>Vue d'ensemble</strong>
+
+          <div style="
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+            gap:16px;
+            margin-top:18px;
+          ">
+            <div class="campaign-card">
+              <span class="eyebrow">CAMPAGNES</span>
+              <h2>${total}</h2>
+              <p>Campagnes créées</p>
+            </div>
+
+            <div class="campaign-card">
+              <span class="eyebrow">TERMINÉES</span>
+              <h2>${completed}</h2>
+              <p>Campagnes terminées</p>
+            </div>
+
+            <div class="campaign-card">
+              <span class="eyebrow">VISUELS</span>
+              <h2>${visualsReady}</h2>
+              <p>Visuels prêts</p>
+            </div>
+
+            <div class="campaign-card">
+              <span class="eyebrow">EN COURS</span>
+              <h2>${drafts}</h2>
+              <p>Campagnes en cours</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="campaign-section" style="margin-top:18px;">
+          <strong>Taux de complétion</strong>
+          <h2 style="margin:14px 0 4px;">${completionRate}%</h2>
+          <p>${completed} campagne${completed === 1 ? "" : "s"} terminée${completed === 1 ? "" : "s"} sur ${total}.</p>
+        </div>
+      </section>
+    `;
+
+    window.scrollTo(0, 0);
+
+  } catch (error) {
+    console.error("STATS ERROR:", error);
+
+    document.querySelector("main").innerHTML = `
+      <section class="box">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">VIRA WORKSPACE</span>
+            <h2>Statistiques</h2>
+            <p>Impossible de charger les statistiques pour le moment.</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
 });
+    
  if (localStorage.getItem("viraResumeCampaign") === "true") {
   localStorage.removeItem("viraResumeCampaign");
   els.prompt.value = localStorage.getItem("viraResumePrompt") || "";
