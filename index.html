@@ -1702,6 +1702,9 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
  .form-grid.two{gap:14px!important}
 }
 </style>
+<style>
+.library-text{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6;color:#cbd5e1}.library-images{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}.library-images img{display:block;width:100%;height:180px;object-fit:contain;border-radius:12px;background:#080b12}.library-card h3{overflow-wrap:anywhere}.library-card video{max-height:480px}.library-card summary{padding:12px 0;cursor:pointer}
+</style>
 </head>
 <body class="auth-pending">
 
@@ -3263,26 +3266,50 @@ els.navHome?.addEventListener("click", () => {
   window.location.reload();
 });
 
-els.navContent?.addEventListener("click", () => {
+els.navContent?.addEventListener("click", async () => {
   document.querySelector(".mobile-nav .active")?.classList.remove("active");
   els.navContent?.classList.add("active");
-
-  document.querySelector("main").innerHTML = `
-    <section class="box">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow">VIRA WORKSPACE</span>
-          <h2>Mes contenus</h2>
-          <p>Retrouvez tous les contenus créés dans vos campagnes.</p>
-        </div>
-      </div>
-
-      <div class="campaign-section">
-        <strong>Aucun contenu sauvegardé pour le moment.</strong>
-        <p>Vos scénarios, textes, visuels et vidéos apparaîtront ici.</p>
-      </div>
-    </section>
-  `;
+  const main = document.querySelector("main");
+  main.innerHTML = '<section class="box library-view"><span class="eyebrow">VIRA WORKSPACE</span><h2>Mes contenus</h2><p role="status">Chargement des contenus…</p></section>';
+  const view = main.querySelector(".library-view");
+  const mediaUrl = (value, image = false) => {
+    if (typeof value !== "string" || !value.trim()) return "";
+    if (image && /^data:image\/(?:png|jpeg|webp|gif|svg\+xml);/i.test(value)) return value;
+    try {
+      const url = new URL(value, window.location.href);
+      return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+    } catch { return ""; }
+  };
+  try {
+    const response = await fetch("/api/campaigns", { credentials: "same-origin" });
+    if (!response.ok) throw new Error("Impossible de charger les contenus.");
+    const data = await response.json();
+    if (!Array.isArray(data.campaigns)) throw new Error("Réponse invalide.");
+    if (!view.isConnected) return;
+    const cards = data.campaigns.map(campaign => {
+      const saved = campaign.campaign_data || {};
+      const scenario = String(saved.scenario || campaign.scenario || "");
+      const images = [...new Set((Array.isArray(saved.generatedImages) ? saved.generatedImages : [campaign.image])
+        .map(value => mediaUrl(value, true)).filter(Boolean))];
+      const video = mediaUrl(saved.videoUrl || campaign.videoUrl);
+      if (!scenario.trim() && !images.length && !video) return "";
+      return '<article class="campaign-section library-card">' +
+        '<h3 data-user-content>' + escapeHtml(campaign.title || "Campagne") + '</h3>' +
+        (scenario.trim() ? '<details><summary>Scénario et textes</summary><pre data-user-content class="library-text">' + escapeHtml(scenario) + '</pre></details>' : '') +
+        (images.length ? '<h4>Visuels (' + images.length + ')</h4><div class="library-images">' + images.map((url, index) =>
+          '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le visuel ' + (index + 1) + '"><img loading="lazy" src="' + escapeHtml(url) + '" alt="Visuel ' + (index + 1) + '"></a>'
+        ).join('') + '</div>' : '') +
+        (video ? '<h4>Vidéo finale</h4><video controls preload="none" class="video-player" src="' + escapeHtml(video) + '"></video><a class="download-link" href="' + escapeHtml(video) + '" target="_blank" rel="noopener noreferrer" download>Télécharger la vidéo</a>' : '') +
+        '</article>';
+    }).filter(Boolean);
+    view.innerHTML = '<span class="eyebrow">VIRA WORKSPACE</span><h2>Mes contenus</h2><p>Retrouvez les textes, visuels et vidéos de vos campagnes sauvegardées.</p>' +
+      (cards.length ? '<div class="campaign-list">' + cards.join('') + '</div>' : '<p>Aucun contenu sauvegardé pour le moment.</p>');
+    window.scrollTo(0, 0);
+  } catch (error) {
+    if (!view.isConnected) return;
+    view.innerHTML = '<h2>Mes contenus</h2><p role="alert">Impossible de charger les contenus pour le moment.</p><button type="button">Réessayer</button>';
+    view.querySelector("button").addEventListener("click", () => els.navContent.click());
+  }
 });
     els.navSettings?.addEventListener("click", () => {
   document.querySelector(".mobile-nav .active")?.classList.remove("active");
