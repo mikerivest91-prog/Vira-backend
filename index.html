@@ -1703,7 +1703,14 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 }
 </style>
 <style>
-.library-text{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6;color:#cbd5e1}.library-images{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}.library-images img{display:block;width:100%;height:180px;object-fit:contain;border-radius:12px;background:#080b12}.library-card h3{overflow-wrap:anywhere}.library-card video{max-height:480px}.library-card summary{padding:12px 0;cursor:pointer}
+.library-text{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6;color:#cbd5e1}
+.library-images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.library-scene{margin:0;min-width:0;display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);align-items:center;gap:14px;padding:12px;border:1px solid #ffffff12;border-radius:14px;background:#080b12}
+.library-scene a{display:block;min-width:0}.library-images img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;border-radius:10px;background:#05070c}
+.library-scene figcaption{min-width:0}.library-scene strong{font-size:11px;color:#b89bff}.library-scene p{font-size:13px;line-height:1.55;overflow-wrap:anywhere;color:#cbd5e1}
+.library-card h3{overflow-wrap:anywhere}.library-card video{max-height:480px}.library-card summary{padding:12px 0;cursor:pointer}
+@media(max-width:900px){.library-scene{grid-template-columns:minmax(0,1fr);align-items:start;padding:10px;gap:8px}}
+@media(max-width:600px){.library-images{gap:8px}.library-scene p{font-size:12px}}
 </style>
 </head>
 <body class="auth-pending">
@@ -2980,7 +2987,7 @@ localStorage.setItem("viraGeneratedImages", JSON.stringify(generatedImages));
         const currentCampaignId = localStorage.getItem("viraCurrentCampaignId");
 
 if (currentCampaignId) {
-  await fetch(`/api/campaigns/${currentCampaignId}`, {
+  const visualsResponse = await fetch(`/api/campaigns/${currentCampaignId}`, {
     method: "PUT",
     credentials: "same-origin",
     headers: {
@@ -3000,6 +3007,11 @@ if (currentCampaignId) {
       }
     })
   });
+  if (!visualsResponse.ok) {
+    setStatus(els.status, "Visuels prêts sur cet appareil, mais leur sauvegarde a échoué. La Bibliothèque conserve la dernière version enregistrée.", "warning");
+  }
+} else {
+  setStatus(els.status, "Visuels prêts sur cet appareil, mais aucune campagne sauvegardée n’est associée. Validez et sauvegardez la campagne pour les retrouver dans la Bibliothèque.", "warning");
 }
       } catch (error) {
         generatedImages = [];
@@ -3217,7 +3229,6 @@ if (!finalVideoUrl) {
 if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStats].includes(btn)) return;
       btn.dataset.navigationLabel = btn.textContent.trim();
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".sidebar-link").forEach(item => item.classList.toggle("active", item === btn));
         const label = btn.dataset.navigationLabel || btn.textContent.trim();
         const target = /Tableau de bord|Accueil/i.test(label)
           ? els.navHome
@@ -3227,6 +3238,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
           : label === "Paramètres" ? els.navSettings : null;
 
         if (target) {
+          document.querySelectorAll(".sidebar-link").forEach(item => item.classList.toggle("active", item === btn));
           target.click();
           return;
         }
@@ -3269,6 +3281,9 @@ els.navHome?.addEventListener("click", () => {
 els.navContent?.addEventListener("click", async () => {
   document.querySelector(".mobile-nav .active")?.classList.remove("active");
   els.navContent?.classList.add("active");
+  document.querySelectorAll(".sidebar-link").forEach(item => {
+    item.classList.toggle("active", item.dataset.navigationLabel === "Bibliothèque");
+  });
   const main = document.querySelector("main");
   main.innerHTML = '<section class="box library-view"><span class="eyebrow">VIRA WORKSPACE</span><h2>Mes contenus</h2><p role="status">Chargement des contenus…</p></section>';
   const view = main.querySelector(".library-view");
@@ -3289,15 +3304,17 @@ els.navContent?.addEventListener("click", async () => {
     const cards = data.campaigns.map(campaign => {
       const saved = campaign.campaign_data || {};
       const scenario = String(saved.scenario || campaign.scenario || "");
-      const images = [...new Set((Array.isArray(saved.generatedImages) ? saved.generatedImages : [campaign.image])
-        .map(value => mediaUrl(value, true)).filter(Boolean))];
+      const scenes = parseScenario(scenario).scenes || [];
+      const images = (Array.isArray(saved.generatedImages) ? saved.generatedImages : [campaign.image])
+        .map((value, index) => ({ url: mediaUrl(value, true), index }))
+        .filter(image => image.url);
       const video = mediaUrl(saved.videoUrl || campaign.videoUrl);
       if (!scenario.trim() && !images.length && !video) return "";
       return '<article class="campaign-section library-card">' +
         '<h3 data-user-content>' + escapeHtml(campaign.title || "Campagne") + '</h3>' +
         (scenario.trim() ? '<details><summary>Scénario et textes</summary><pre data-user-content class="library-text">' + escapeHtml(scenario) + '</pre></details>' : '') +
-        (images.length ? '<h4>Visuels (' + images.length + ')</h4><div class="library-images">' + images.map((url, index) =>
-          '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le visuel ' + (index + 1) + '"><img loading="lazy" src="' + escapeHtml(url) + '" alt="Visuel ' + (index + 1) + '"></a>'
+        (images.length ? '<h4>Visuels (' + images.length + ')</h4><div class="library-images">' + images.map(({url, index}) =>
+          '<figure class="library-scene"><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le visuel ' + (index + 1) + '"><img loading="lazy" src="' + escapeHtml(url) + '" alt="Visuel ' + (index + 1) + '"></a><figcaption><strong>SCÈNE ' + (index + 1) + '</strong><p data-user-content>' + escapeHtml(scenes[index] || "Description non disponible pour cette scène.") + '</p></figcaption></figure>'
         ).join('') + '</div>' : '') +
         (video ? '<h4>Vidéo finale</h4><video controls preload="none" class="video-player" src="' + escapeHtml(video) + '"></video><a class="download-link" href="' + escapeHtml(video) + '" target="_blank" rel="noopener noreferrer" download>Télécharger la vidéo</a>' : '') +
         '</article>';
@@ -3388,6 +3405,8 @@ document.querySelectorAll(".saved-campaign").forEach((card) => {
     const campaign = campaigns[index];
 if (!campaign) return;
 const campaignData = campaign.campaign_data || {};
+if (campaign.id) localStorage.setItem("viraCurrentCampaignId", String(campaign.id));
+else localStorage.removeItem("viraCurrentCampaignId");
 const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario || "");
     localStorage.setItem("viraTargetAudience", campaignData.audience || campaign.audience || parsedCampaign.target || "");
     localStorage.setItem("viraMarketingGoal", campaignData.goal || campaign.goal || parsedCampaign.objective || "");
