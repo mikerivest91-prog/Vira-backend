@@ -2042,7 +2042,7 @@ navStats: $("navStats"),
       scoreNote: $("growthScoreNote")
     };
 
-    let selectedMarketingType = localStorage.getItem("viraMarketingType") || "";
+    let selectedMarketingType = "";
     let rawScenario = localStorage.getItem("viraScenario") || "";
 let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
     let finalVideoUrl = localStorage.getItem("viraFinalVideoUrl") || "";
@@ -2204,6 +2204,11 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
       }
     }
 
+    function validMarketingType(value) {
+      return typeof value === "string" && Object.prototype.hasOwnProperty.call(marketingMeta, value)
+        ? value : "";
+    }
+
     function currentChoice() {
       return document.querySelector(".marketing-choice.active");
     }
@@ -2239,7 +2244,8 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
         els.brainBtn.disabled = true;
         els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("loading")}</span><span>Analyse...</span></span><small>VIRA vérifie les informations de votre brief</small>`;
         setTimeout(() => {
-          render();
+          // Read the latest brief: fields may change while the animation runs.
+          updateBrain();
           els.brainBtn.disabled = false;
           els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("hook")}</span><span>Analyser ma campagne</span></span><small>Vérifiez votre brief et découvrez les prochaines actions</small>`;
         }, 550);
@@ -2273,9 +2279,12 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
       localStorage.setItem("viraPlatform", els.platform.value);
       localStorage.setItem("viraCampaignTone", els.tone.value);
       if (selectedMarketingType) localStorage.setItem("viraMarketingType", selectedMarketingType);
+      else localStorage.removeItem("viraMarketingType");
     }
 
     function restoreForm() {
+      selectedMarketingType = validMarketingType(localStorage.getItem("viraMarketingType"));
+      if (!selectedMarketingType) localStorage.removeItem("viraMarketingType");
       els.prompt.value = localStorage.getItem("viraIdea") || "";
       els.goal.value = localStorage.getItem("viraMarketingGoal") || "";
       els.audience.value = localStorage.getItem("viraTargetAudience") || "";
@@ -3542,8 +3551,11 @@ const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario 
     localStorage.setItem("viraMarketingGoal", campaignData.goal || campaign.goal || parsedCampaign.objective || "");
     localStorage.setItem("viraCampaignTone", campaignData.tone || campaign.tone|| "Professionnel");
     localStorage.setItem("viraPlatform", campaignData.platform || campaign.platform|| "");
-    if (campaign.marketingType) {
-  localStorage.setItem("viraMarketingType", campaignData.marketingType || campaign.marketingType);
+    // API campaigns store the type inside campaign_data; older records used the root.
+    const restoredMarketingType = validMarketingType(campaignData.marketingType)
+      || validMarketingType(campaign.marketingType);
+    if (restoredMarketingType) {
+  localStorage.setItem("viraMarketingType", restoredMarketingType);
 } else {
   localStorage.removeItem("viraMarketingType");
     }
