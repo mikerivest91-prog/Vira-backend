@@ -3293,13 +3293,96 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
         </div>
       </div>
 
-      <div class="campaign-section">
-        <strong>Aucune publication planifiée pour le moment.</strong>
-        <p>Le formulaire de planification sera ajouté à la prochaine étape.</p>
-      </div>
+  <form id="calendarForm" class="campaign-section">
+  <div class="form-grid two">
+    <div class="field-group">
+      <label for="calendarCampaign">Campagne</label>
+      <select id="calendarCampaign" required disabled>
+        <option value="">Chargement des campagnes…</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label for="calendarDate">Date et heure de publication</label>
+      <input id="calendarDate" type="datetime-local" required>
+    </div>
+
+    <div class="field-group">
+      <label for="calendarPlatform">Plateforme</label>
+      <select id="calendarPlatform" required>
+        <option value="">Choisir une plateforme</option>
+        <option value="Instagram">Instagram</option>
+        <option value="Facebook">Facebook</option>
+        <option value="TikTok">TikTok</option>
+        <option value="YouTube">YouTube</option>
+        <option value="LinkedIn">LinkedIn</option>
+      </select>
+    </div>
+  </div>
+
+  <p>La publication sur le réseau social restera manuelle.</p>
+
+  <button id="calendarSubmit" class="primary-cta"
+          type="submit" disabled>
+    Planifier la publication
+  </button>
+</form>
+
+<div id="calendarStatus" role="status"></div>
+<div id="calendarList" class="campaign-list"></div>
     </section>
   `;
+const calendarForm = document.getElementById("calendarForm");
+const campaignSelect = document.getElementById("calendarCampaign");
+const calendarStatus = document.getElementById("calendarStatus");
 
+// La sauvegarde sera branchée à la prochaine étape.
+calendarForm.addEventListener("submit", event => {
+  event.preventDefault();
+});
+
+fetch("/api/campaigns", { credentials: "same-origin" })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Impossible de charger les campagnes.");
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (!calendarForm.isConnected) return;
+    if (!Array.isArray(data.campaigns)) {
+      throw new Error("La liste des campagnes est invalide.");
+    }
+
+    campaignSelect.replaceChildren(
+      new Option("Choisir une campagne", "")
+    );
+
+    data.campaigns.forEach(campaign => {
+      campaignSelect.add(
+        new Option(
+          campaign.title || "Campagne sans titre",
+          String(campaign.id)
+        )
+      );
+    });
+
+    campaignSelect.disabled = data.campaigns.length === 0;
+
+    if (!data.campaigns.length) {
+      calendarStatus.textContent =
+        "Créez et sauvegardez une campagne pour pouvoir la planifier.";
+    }
+  })
+  .catch(error => {
+    if (!calendarForm.isConnected) return;
+
+    campaignSelect.replaceChildren(
+      new Option("Chargement impossible", "")
+    );
+    campaignSelect.disabled = true;
+    calendarStatus.textContent = error.message;
+  });
   window.scrollTo(0, 0);
 });
 els.navHome?.addEventListener("click", () => {
