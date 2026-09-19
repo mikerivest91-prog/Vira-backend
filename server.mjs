@@ -315,7 +315,28 @@ async function initDatabase() {
       vira_campaigns_user_id_idx
     ON vira_campaigns(user_id)
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS vira_calendar_events (
+      id BIGSERIAL PRIMARY KEY,
+      campaign_id BIGINT NOT NULL
+        REFERENCES vira_campaigns(id)
+        ON DELETE CASCADE,
+      scheduled_at TIMESTAMPTZ NOT NULL,
+      platform TEXT NOT NULL
+        CHECK (platform IN (
+          'Instagram', 'Facebook', 'TikTok',
+          'YouTube', 'LinkedIn'
+        )),
+      status TEXT NOT NULL DEFAULT 'planned'
+        CHECK (status IN ('planned', 'published')),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
 
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS vira_calendar_events_campaign_date_idx
+    ON vira_calendar_events(campaign_id, scheduled_at)
+  `);
   await pool.query(`CREATE TABLE IF NOT EXISTS vira_video_usage (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES vira_users(id) ON DELETE CASCADE,
@@ -630,7 +651,37 @@ app.get("/api/admin/overview", requireAdmin, async (_req, res) => {
     return res.status(500).json({ ok: false, error: "Impossible de charger les statistiques." });
   }
 });
+app.get("/api/calendar", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+        SELECT
+          e.id,
+          e.campaign_id,
+          c.title AS campaign_title,
+          e.scheduled_at,
+          e.platform,
+          e.status
+        FROM vira_calendar_events AS e
+        JOIN vira_campaigns AS c ON c.id = e.campaign_id
+        WHERE c.user_id = $1
+        ORDER BY e.scheduled_at ASC, e.id ASC
+      `,
+      [req.user.id]
+    );
 
+    return res.json({
+      ok: true,
+      events: result.rows
+    });
+  } catch (error) {
+    console.error("CALENDAR LIST ERROR:", error);
+
+    return res.status(500).json({
+      error: "Impossible de charger le calendrier."
+    });
+  }
+});
 app.get("/api/campaigns", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
