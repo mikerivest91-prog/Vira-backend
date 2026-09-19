@@ -3711,7 +3711,60 @@ els.navStats?.addEventListener("click", async () => {
     `;
   }
 });
+
     
+    els.navCalendar?.addEventListener("click", async () => {
+  document.querySelectorAll(".sidebar-link").forEach(item => {
+    item.classList.toggle("active", item === els.navCalendar);
+  });
+
+  try {
+    const response = await fetch("/api/calendar", {
+      credentials: "same-origin"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Impossible de charger le calendrier.");
+    }
+
+    const events = data.events || [];
+
+    document.querySelector("main").innerHTML = `
+      <section class="box">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">VIRA WORKSPACE</span>
+            <h2>Calendrier</h2>
+            <p>Planifiez et suivez vos campagnes marketing.</p>
+          </div>
+        </div>
+
+        <div class="campaign-section">
+          <strong>${events.length} événement${events.length === 1 ? "" : "s"} planifié${events.length === 1 ? "" : "s"}</strong>
+          <p>${events.length ? "Vos campagnes planifiées apparaissent ici." : "Aucun événement planifié pour le moment."}</p>
+        </div>
+      </section>
+    `;
+
+    window.scrollTo(0, 0);
+  } catch (error) {
+    console.error("CALENDAR ERROR:", error);
+
+    document.querySelector("main").innerHTML = `
+      <section class="box">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">VIRA WORKSPACE</span>
+            <h2>Calendrier</h2>
+            <p>Impossible de charger le calendrier pour le moment.</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+});
  if (localStorage.getItem("viraResumeCampaign") === "true") {
   localStorage.removeItem("viraResumeCampaign");
   els.prompt.value = localStorage.getItem("viraResumePrompt") || "";
