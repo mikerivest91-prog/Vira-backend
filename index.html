@@ -3304,7 +3304,16 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
 
     <div class="field-group">
       <label for="calendarDate">Date et heure de publication</label>
-      <input id="calendarDate" type="datetime-local" required>
+     <input
+  id="calendarDate"
+  type="datetime-local"
+  aria-describedby="calendarDateHelp"
+  style="color-scheme: dark;"
+  required
+>
+<small id="calendarDateHelp" style="color:#9da9bc;">
+  Choisissez la date et l’heure locale de publication.
+</small>
     </div>
 
     <div class="field-group">
@@ -3322,10 +3331,19 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
 
   <p>La publication sur le réseau social restera manuelle.</p>
 
-  <button id="calendarSubmit" class="primary-cta"
-          type="submit" disabled>
-    Planifier la publication
+<div style="display:flex;justify-content:flex-end;margin-top:18px;">
+  <button
+    id="calendarSubmit"
+    class="primary-cta"
+    type="submit"
+    style="width:auto;min-height:44px;padding:0 22px;
+           font-size:14px;border-radius:10px;
+           opacity:0.45;cursor:not-allowed;box-shadow:none;"
+    disabled
+  >
+    Planifier
   </button>
+</div>
 </form>
 
 <div id="calendarStatus" role="status"></div>
