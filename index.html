@@ -1751,7 +1751,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
         <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6"/></svg></span>Campagnes</button>
         <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M9 4a4 4 0 0 0-4 4v1a4 4 0 0 0 0 6v1a4 4 0 0 0 4 4"/><path d="M15 4a4 4 0 0 1 4 4v1a4 4 0 0 1 0 6v1a4 4 0 0 1-4 4"/><path d="M9 4c0 2 1 3 3 3s3-1 3-3M9 20c0-2 1-3 3-3s3 1 3 3M12 7v10"/></svg></span>VIRA Brain</button>
         <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span>Bibliothèque</button>
-        <button class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M6 3v3M18 3v3M4 8h16M5 5h14a2 2 0 0 1 2 2v12H3V7a2 2 0 0 1 2-2Z"/></svg></span>Calendrier</button>
+        <button id="navCalendar" class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M6 3v3M18 3v3M4 8h16M5 5h14a2 2 0 0 1 2 2v12H3V7a2 2 0 0 1 2-2Z"/></svg></span>Calendrier</button>
         <button id="navStats" class="sidebar-link" type="button"><span class="sidebar-ico"><svg viewBox="0 0 24 24"><path d="M4 18V6M4 18h16"/><path d="m7 14 4-4 3 2 5-6"/></svg></span>Statistiques</button>
       </nav>
       <div class="pro-plan">
@@ -2017,6 +2017,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
       videoBtn: $("video"),
      downloadBtn: $("downloadVideo"),
 navStats: $("navStats"),
+      navCalendar: $("navCalendar"),
       navHome: $("navHome"),
       navCampaigns: $("navCampaigns"),
       
@@ -3226,8 +3227,7 @@ if (!finalVideoUrl) {
      // Les boutons mobiles possèdent déjà leur propre gestionnaire.
     // Les liens desktop délèguent aux mêmes gestionnaires.
     [...document.querySelectorAll(".sidebar-link"), ...document.querySelectorAll(".mobile-nav button")].forEach(btn => {
-if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStats].includes(btn)) return;
-      btn.dataset.navigationLabel = btn.textContent.trim();
+if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStats, els.navCalendar].includes(btn)) return;      btn.dataset.navigationLabel = btn.textContent.trim();
       btn.addEventListener("click", () => {
         const label = btn.dataset.navigationLabel || btn.textContent.trim();
         const target = /Tableau de bord|Accueil/i.test(label)
@@ -3274,6 +3274,34 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
       els.validateBtn.disabled = false;
       updateWorkflowState();
     }
+    els.navCalendar?.addEventListener("click", () => {
+  document.querySelectorAll(".sidebar-link").forEach(item => {
+    item.classList.toggle("active", item === els.navCalendar);
+  });
+
+  document.querySelectorAll(".mobile-nav button").forEach(item => {
+    item.classList.remove("active");
+  });
+
+  document.querySelector("main").innerHTML = `
+    <section class="box">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">VIRA WORKSPACE</span>
+          <h2>Calendrier</h2>
+          <p>Organisez les prochaines publications de vos campagnes.</p>
+        </div>
+      </div>
+
+      <div class="campaign-section">
+        <strong>Aucune publication planifiée pour le moment.</strong>
+        <p>Le formulaire de planification sera ajouté à la prochaine étape.</p>
+      </div>
+    </section>
+  `;
+
+  window.scrollTo(0, 0);
+});
 els.navHome?.addEventListener("click", () => {
   window.location.reload();
 });
