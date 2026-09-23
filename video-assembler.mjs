@@ -9,9 +9,13 @@ const runFile = promisify(execFile);
 
 // Réservé aux fichiers locaux fournis par le serveur.
 // Ne pas transmettre directement des chemins reçus du navigateur.
-export async function assembleVideoClips(clipPaths, audioPath = null) {
+export async function assembleVideoClips(clipPaths, audioPath = null, transition = null) {
   if (!Array.isArray(clipPaths) || clipPaths.length !== 4) {
     throw new Error("L’assemblage exige exactement 4 clips.");
+  }
+
+  if (transition && (!Number.isFinite(transition.fade) || !Number.isFinite(transition.clipDuration) || transition.fade <= 0 || transition.fade >= transition.clipDuration)) {
+    throw new Error("Durée de transition invalide.");
   }
 
   if (!ffmpegPath) {
@@ -54,9 +58,16 @@ export async function assembleVideoClips(clipPaths, audioPath = null) {
       `settb=AVTB,setpts=PTS-STARTPTS[v${index}]`
     );
 
-    filters.push(
-      "[v0][v1][v2][v3]concat=n=4:v=1:a=0[outv]"
-    );
+    if (transition) {
+      for (let i = 1; i < 4; i++) {
+        const from = i === 1 ? "v0" : "mix" + (i - 1);
+        const to = i === 3 ? "outv" : "mix" + i;
+        const offset = (i * (transition.clipDuration - transition.fade)).toFixed(6);
+        filters.push(`[${from}][v${i}]xfade=transition=fade:duration=${transition.fade}:offset=${offset}[${to}]`);
+      }
+    } else {
+      filters.push("[v0][v1][v2][v3]concat=n=4:v=1:a=0[outv]");
+    }
 
     const args = [
       "-hide_banner",
@@ -83,7 +94,7 @@ export async function assembleVideoClips(clipPaths, audioPath = null) {
   ...(audioPath ? ["-map","4:a:0","-c:a","aac","-b:a","64k","-shortest"] : ["-an"]),
   "-c:v", "libx264",
   "-preset", "ultrafast",
-  "-crf", "30",
+  "-crf", "23",
   "-threads", "1",
   "-pix_fmt", "yuv420p",
   "-movflags", "+faststart",

@@ -981,8 +981,8 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
   });
 });
 // Uploaded clips and generated previews share the same final MP4 contract.
-async function publishVideo(clipPaths, prefix, audioPath = null) {
-  const result = await assembleVideoClips(clipPaths, audioPath);
+async function publishVideo(clipPaths, prefix, audioPath = null, transition = null) {
+  const result = await assembleVideoClips(clipPaths, audioPath, transition);
   try {
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
     await fs.promises.copyFile(result.outputPath, path.join(VIDEO_TEMP_DIR, filename));
@@ -1026,7 +1026,9 @@ function decodePreviewImage(source, index) {
   return { buffer, extension: match[1] === "jpeg" ? "jpg" : "png" };
 }
 
-function createPreviewClip(imagePath, clipPath, duration = 2) {
+function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0) {
+  const frames = Math.max(1, Math.ceil(duration * 30));
+  const zoom = sceneIndex % 2 === 0 ? `1+0.035*on/${frames}` : `1.035-0.035*on/${frames}`;
   return new Promise((resolve, reject) => {
     ffmpeg(imagePath, { timeout: 40 })
       .inputOptions(["-loop", "1"])
@@ -1034,7 +1036,7 @@ function createPreviewClip(imagePath, clipPath, duration = 2) {
       .videoCodec("libx264")
       .format("mp4")
       .outputOptions([
-        "-vf", "scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2,setsar=1",
+        "-vf", `scale=1440:2560:force_original_aspect_ratio=decrease,pad=1440:2560:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z=\'${zoom}\':x=\'iw/2-iw/zoom/2\':y=\'ih/2-ih/zoom/2\':d=1:s=720x1280:fps=30`,
         "-pix_fmt", "yuv420p",
         "-r", "30",
         "-an",
@@ -1068,6 +1070,8 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
   }
   const usage = await reserveVideoSlot(req.user.id);
   if (!usage.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter." });
+  // Three short dissolves overlap the clips without shortening the narration.
+  const transition = { fade: 0.3, clipDuration: Math.ceil(((Math.max(2, duration) + 0.9) / 4) * 30) / 30 };
   const temporaryFiles = [];
   try {
     const jobId = crypto.randomUUID();
@@ -1078,12 +1082,12 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
       temporaryFiles.push(imagePath, clipPath);
       await fs.promises.writeFile(imagePath, decoded[i].buffer);
       // Keep the input until FFmpeg has actually finished reading it.
-      await createPreviewClip(imagePath, clipPath, Math.max(2,duration)/4);
+      await createPreviewClip(imagePath, clipPath, transition.clipDuration, i);
       clips.push(clipPath);
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
-    const videoUrl = await publishVideo(clips, "vira-free-final", audioPath);
+    const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition);
     await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: 4 } });
   } catch (error) {
