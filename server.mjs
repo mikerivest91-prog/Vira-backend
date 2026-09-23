@@ -1,3 +1,4 @@
+import { prepareClip, readClip, fitClips, clipPath } from "./clip-service.mjs";
 import "dotenv/config";
 import express from "express";
 import { createTestBilling } from "./stripe-billing.mjs";
@@ -20,7 +21,7 @@ const uploadVideoClips = multer({
   dest: VIDEO_TEMP_DIR,
   limits: {
     fileSize: 100 * 1024 * 1024,
-    files: 3
+    files: 4
   }
 });
 if (!fs.existsSync(VIDEO_TEMP_DIR)) {
@@ -36,6 +37,18 @@ async function withAudioJob(req, res, work) {
   audioJobs.add(key);
   try { return await work(); } finally { audioJobs.delete(key); }
 }
+
+const CLIP_TEMP_DIR = path.join(process.cwd(), "tmp", "clips");
+fs.mkdirSync(CLIP_TEMP_DIR, { recursive: true });
+const uploadClip = multer({ dest: CLIP_TEMP_DIR, limits:{ fileSize:30*1024*1024, files:1, fields:2 } });
+const clipJobs = new Set();
+async function withClipJob(req,res,work) {
+  const key=String(req.user.id);
+  if (clipJobs.has(key) || clipJobs.size >= 2) return res.status(429).json({ok:false,error:"Un traitement vidéo est en cours. Réessayez dans un instant."});
+  clipJobs.add(key);
+  try { return await work(); } finally { clipJobs.delete(key); }
+}
+
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
@@ -1012,6 +1025,50 @@ app.post(
     }
   }
 );
+
+
+app.post("/api/video/import-clip", requireAuth, uploadClip.single("clip"), async (req,res) => {
+  if (!req.file) return res.status(400).json({ok:false,error:"Choisissez un clip vidéo."});
+  try {
+    return await withClipJob(req,res,async()=>{
+      try { return res.json({ok:true,clip:await prepareClip(req.file.path,CLIP_TEMP_DIR,req.user.id)}); }
+      catch(error) { console.error("CLIP IMPORT ERROR:",error); return res.status(422).json({ok:false,error:"Clip illisible ou durée invalide. Utilisez un MP4, MOV ou WebM de 1 à 30 secondes."}); }
+    });
+  } finally { await fs.promises.unlink(req.file.path).catch(()=>{}); }
+});
+app.get("/api/video/clips/:id", requireAuth, async (req,res)=>{
+  try {
+    const file=clipPath(CLIP_TEMP_DIR,req.user.id,req.params.id);
+    await fs.promises.access(file);
+    res.setHeader("Cache-Control","private, no-store");
+    return res.sendFile(file);
+  } catch { return res.status(404).json({ok:false,error:"Clip indisponible. Importez-le de nouveau."}); }
+});
+app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
+  const ids=req.body?.clipIds;
+  if (!Array.isArray(ids) || ids.length !== 4 || !req.body?.audioId) return res.status(400).json({ok:false,error:"Préparez quatre clips et une narration."});
+  return withClipJob(req,res,async()=>{
+    let clips, audioPath, duration;
+    try {
+      clips=await Promise.all(ids.map(id=>readClip(CLIP_TEMP_DIR,req.user.id,id)));
+      audioPath=audioFile(AUDIO_TEMP_DIR,req.user.id,req.body.audioId);
+      duration=await wavDuration(audioPath);
+    } catch { return res.status(400).json({ok:false,error:"Un clip ou la narration a expiré. Importez les clips ou préparez la voix de nouveau."}); }
+    const usage=await reserveVideoSlot(req.user.id);
+    if (!usage.ok) return res.status(429).json({ok:false,error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter."});
+    let fitted;
+    try {
+      fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
+      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition);
+      await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
+      return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:4}});
+    } catch(error) {
+      await pool.query("DELETE FROM vira_video_usage WHERE id=$1",[usage.id]).catch(()=>{});
+      console.error("CLIP ASSEMBLY ERROR:",error);
+      return res.status(500).json({ok:false,error:"Impossible d’assembler les clips. Réessayez dans un instant."});
+    } finally { if(fitted) await fitted.cleanup(); }
+  });
+});
 
 function decodePreviewImage(source, index) {
   // The new index.html sends raster JPEGs, avoiding SVG decoder dependencies.

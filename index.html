@@ -1797,6 +1797,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
       "viraScenario",
       "viraScenarioValidated",
       "viraGeneratedImages",
+      "viraSourceClips",
       "viraVoiceReady",
       "viraPreparedAudioId",
       "viraVideoReady",
@@ -2045,6 +2046,12 @@ navStats: $("navStats"),
     let selectedMarketingType = "";
     let rawScenario = localStorage.getItem("viraScenario") || "";
 let generatedImages = JSON.parse(localStorage.getItem("viraGeneratedImages") || "[]");
+    function validSourceClips(value) {
+      return Array.isArray(value) && value.length===4 && value.every(c=>c && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(c.id) && Number.isFinite(c.duration) && c.duration>=1 && c.duration<=30.1)
+        ? value.map(c=>({id:c.id,duration:c.duration,url:`/api/video/clips/${c.id}`,thumbnail:typeof c.thumbnail==="string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(c.thumbnail) ? c.thumbnail : ""})) : [];
+    }
+    let sourceClips = [];
+    try { sourceClips=validSourceClips(JSON.parse(localStorage.getItem("viraSourceClips") || "[]")); } catch {}
     let finalVideoUrl = localStorage.getItem("viraFinalVideoUrl") || "";
     let scenarioValidated = localStorage.getItem("viraScenarioValidated") === "true";
 let preparedAudioId = localStorage.getItem("viraPreparedAudioId") || "";
@@ -2318,6 +2325,8 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
       preparedAudioId = "";
       rawScenario = "";
       generatedImages = [];
+      sourceClips = [];
+      localStorage.removeItem("viraSourceClips");
       scenarioValidated = false;
       voiceReady = false;
       videoReady = false;
@@ -2469,6 +2478,10 @@ localStorage.removeItem("viraGeneratedImages");
     }
 
     function renderImages(images, scenes, test = false) {
+      if(sourceClips.length===4) {
+        els.result.innerHTML = `<details class="results-panel visual-collapse" open><summary class="results-title">Clips de campagne · 4 scènes</summary><div class="visual-strip">${sourceClips.map((clip,i)=>`<div class="visual-card"><div class="visual-frame"><video controls muted playsinline preload="metadata" src="${escapeHtml(clip.url)}" aria-label="Clip de la scène ${i+1}" style="width:100%;height:100%;object-fit:contain"></video></div><div class="visual-caption">Scène ${i+1} · ${clip.duration.toFixed(1)} s</div></div>`).join("")}</div></details>`;
+        return;
+      }
       els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title" style="cursor:pointer;"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/4 scènes ${test ? "• mode test gratuit" : "• images de campagne"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
 
     }
@@ -2925,7 +2938,8 @@ ${els.tone.value || "Professionnel"}
     importPanel.className = "campaign-section";
     importPanel.hidden = true;
     importPanel.innerHTML = `<div class="photo-editor-header"><div><span class="photo-editor-kicker">VISUELS DE CAMPAGNE</span><h3>Donnez vie à votre histoire</h3><p>Une image par scène, dans l’ordre de votre vidéo.</p></div><span class="photo-editor-count" id="photoEditorCount">0 / 4 images</span></div>
-      <div class="photo-scene-grid">${[0,1,2,3].map(i => `<article class="photo-scene-card" id="photoSceneCard${i}">
+      <div class="media-mode-tabs" role="group" aria-label="Type de visuels"><button id="sceneModePhotos" type="button" data-media-mode="photos" aria-pressed="true">Photos</button><button id="sceneModeClips" type="button" data-media-mode="clips" aria-pressed="false">Clips vidéo</button></div>
+      <div id="photoModeContent"><div class="photo-scene-grid">${[0,1,2,3].map(i => `<article class="photo-scene-card" id="photoSceneCard${i}">
         <div class="photo-scene-heading"><span>0${i+1}</span><strong>Scène ${i+1}</strong><span class="photo-scene-ready" aria-label="Image ajoutée" hidden>✓</span></div>
         <label class="photo-scene-frame" for="scenePhoto${i}">
           <input id="scenePhoto${i}" aria-label="Importer une image pour la scène ${i+1}" type="file" accept="image/jpeg,image/png,image/webp">
@@ -2935,10 +2949,21 @@ ${els.tone.value || "Professionnel"}
         <button class="photo-replace" id="replaceScenePhoto${i}" type="button">Choisir une image ↗</button>
       </article>`).join("")}</div>
       <div class="photo-editor-footer"><div><strong>Vos images, votre campagne.</strong><span>JPG, PNG ou WebP · 10 Mo max. · Import gratuit</span></div><button id="applyScenePhotos" type="button" disabled>Utiliser ces 4 images →</button></div>
-      <p id="photoImportStatus" role="status" aria-live="polite"></p>`;
+      <p id="photoImportStatus" role="status" aria-live="polite"></p></div>
+      <div id="clipModeContent" hidden>
+        <p class="clip-import-help">Importez quatre vidéos avec de vraies actions. MP4, MOV ou WebM · 1 à 30 secondes · 30 Mo max. par clip.</p>
+        <div class="photo-scene-grid">${[0,1,2,3].map(i=>`<article class="photo-scene-card" id="clipSceneCard${i}"><div class="photo-scene-heading"><span>0${i+1}</span><strong>Scène ${i+1}</strong><span id="clipDuration${i}" class="clip-duration"></span></div>
+          <div class="photo-scene-frame"><span class="photo-scene-empty"><span class="photo-upload-icon" aria-hidden="true">${uiIcon("video")}</span><strong>Ajouter un clip</strong><span>Une action par scène</span></span><video id="sceneClipPreview${i}" controls muted playsinline preload="metadata" aria-label="Aperçu du clip de la scène ${i+1}" hidden></video></div>
+          <input id="sceneClip${i}" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" hidden>
+          <button id="replaceSceneClip${i}" class="photo-replace" type="button" aria-label="Importer un clip pour la scène ${i+1}">Choisir un clip ↗</button></article>`).join("")}</div>
+        <div class="photo-editor-footer"><div><strong>De vraies actions, votre narration.</strong><span>Le son des clips est remplacé par votre voix.<br>Les clips sont coupés ou répétés pour suivre sa durée.</span></div><button id="applySceneClips" type="button" disabled>Utiliser ces 4 clips →</button></div>
+        <p id="clipImportStatus" role="status" aria-live="polite"></p>
+      </div>`;
     els.result.before(importPanel);
     let draftPhotos = [];
     let importingPhotos = false;
+    let editingMediaMode = "photos";
+    let draftClips = [];
     const importStatus = document.getElementById("photoImportStatus");
     const applyPhotos = document.getElementById("applyScenePhotos");
     function refreshPhotoImports() {
@@ -2955,7 +2980,7 @@ ${els.tone.value || "Professionnel"}
         if (draftPhotos[i]) preview.src = draftPhotos[i];
         else preview.removeAttribute("src");
       }
-      document.getElementById("photoEditorCount").textContent = draftPhotos.filter(Boolean).length + " / 4 images";
+      if (editingMediaMode === "photos") document.getElementById("photoEditorCount").textContent = draftPhotos.filter(Boolean).length + " / 4 images";
       applyPhotos.disabled = importingPhotos || draftPhotos.filter(Boolean).length !== 4;
     }
     for (let i=0;i<4;i++) document.getElementById("replaceScenePhoto"+i).addEventListener("click",()=>document.getElementById("scenePhoto"+i).click());
@@ -3009,12 +3034,92 @@ ${els.tone.value || "Professionnel"}
         ++flowRevision;
         invalidateAudio();
         generatedImages=images;
+        sourceClips=[];
+        localStorage.removeItem("viraSourceClips");
         localStorage.setItem("viraGeneratedImages",JSON.stringify(images));
         renderImages(images,parseScenario(rawScenario).scenes);
         importPanel.hidden=true;
         setStatus(els.status,"Vos 4 images sont sauvegardées. Préparez maintenant la voix. Aucun crédit image utilisé.","success");
       } catch(error) { importStatus.textContent=error.message; }
       finally { visualsInProgress=false; importingPhotos=false; importPanel.querySelectorAll("input").forEach(input=>input.disabled=false); refreshPhotoImports(); updateWorkflowState(); }
+    });
+
+
+    const clipStatus = document.getElementById("clipImportStatus");
+    const applyClips = document.getElementById("applySceneClips");
+    function refreshClipImports() {
+      for (let i=0;i<4;i++) {
+        const clip=draftClips[i], preview=document.getElementById("sceneClipPreview"+i);
+        document.getElementById("clipSceneCard"+i).classList.toggle("has-photo",Boolean(clip));
+        preview.hidden=!clip;
+        if (clip && preview.getAttribute("src")!==clip.url) preview.src=clip.url;
+        if (!clip) { preview.pause(); preview.removeAttribute("src"); }
+        document.getElementById("clipDuration"+i).textContent=clip ? clip.duration.toFixed(1)+" s" : "";
+        const button=document.getElementById("replaceSceneClip"+i);
+        button.disabled=importingPhotos;
+        button.textContent=clip ? "Remplacer le clip ↗" : "Choisir un clip ↗";
+        button.setAttribute("aria-label",(clip ? "Remplacer le clip de la scène " : "Importer un clip pour la scène ")+(i+1));
+      }
+      if(editingMediaMode==="clips") document.getElementById("photoEditorCount").textContent=draftClips.filter(Boolean).length+" / 4 clips";
+      applyClips.disabled=importingPhotos || draftClips.filter(Boolean).length!==4;
+      importPanel.querySelectorAll("[data-media-mode]").forEach(button=>button.disabled=importingPhotos);
+    }
+    function showMediaMode(mode) {
+      editingMediaMode=mode;
+      document.getElementById("photoModeContent").hidden=mode!=="photos";
+      document.getElementById("clipModeContent").hidden=mode!=="clips";
+      importPanel.querySelector(".photo-editor-header p").textContent=mode==="clips" ? "Quatre clips, dans l’ordre de votre vidéo." : "Une image par scène, dans l’ordre de votre vidéo.";
+      importPanel.querySelectorAll("[data-media-mode]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.mediaMode===mode)));
+      if(mode!=="clips") importPanel.querySelectorAll("video").forEach(video=>video.pause());
+      refreshPhotoImports(); refreshClipImports();
+    }
+    importPanel.querySelectorAll("[data-media-mode]").forEach(button=>button.addEventListener("click",()=>{if(!importingPhotos)showMediaMode(button.dataset.mediaMode)}));
+    for (let i=0;i<4;i++) {
+      document.getElementById("replaceSceneClip"+i).addEventListener("click",()=>document.getElementById("sceneClip"+i).click());
+      document.getElementById("sceneClip"+i).addEventListener("change",async event=>{
+        const file=event.target.files[0];
+        if(!file || importingPhotos || videoInProgress) return;
+        if(!/\.(mp4|mov|webm)$/i.test(file.name) || !file.size || file.size>30*1024*1024) {
+          clipStatus.textContent="Choisissez un MP4, MOV ou WebM non vide de 30 Mo maximum.";event.target.value="";return;
+        }
+        importingPhotos=true;visualsInProgress=true;refreshClipImports();updateWorkflowState();
+        clipStatus.textContent="Import et préparation du clip "+(i+1)+"…";
+        try {
+          const body=new FormData();body.append("clip",file);
+          const response=await fetch("/api/video/import-clip",{method:"POST",credentials:"same-origin",body});
+          const data=await response.json().catch(()=>({}));
+          if(!response.ok || !data.ok) throw new Error(data.error || "Import impossible. Réessayez.");
+          const validated=validSourceClips([data.clip,data.clip,data.clip,data.clip]);
+          if(!validated.length || !validated[0].thumbnail) throw new Error("Réponse vidéo invalide.");
+          draftClips[i]=validated[0];
+          clipStatus.textContent=draftClips.filter(Boolean).length===4 ? "Les quatre clips sont prêts à être utilisés." : "Clip prêt. Importez les autres scènes.";
+        } catch(error) { clipStatus.textContent=error.message; }
+        finally {event.target.value="";importingPhotos=false;visualsInProgress=false;refreshClipImports();updateWorkflowState();}
+      });
+    }
+    applyClips.addEventListener("click",async()=>{
+      if(importingPhotos || videoInProgress || !scenarioValidated || draftClips.filter(Boolean).length!==4) return;
+      const id=localStorage.getItem("viraCurrentCampaignId");
+      if(!id) {clipStatus.textContent="Générez et sauvegardez d’abord le scénario.";return;}
+      importingPhotos=true;visualsInProgress=true;refreshClipImports();updateWorkflowState();
+      clipStatus.textContent="Sauvegarde des quatre clips…";
+      try {
+        const clips=validSourceClips(draftClips), images=clips.map(c=>c.thumbnail);
+        const response=await fetch(`/api/campaigns/${encodeURIComponent(id)}`,{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({title:els.prompt.value.trim() || "Campagne Marketing",status:"visuals_ready",campaignData:{
+            scenario:rawScenario,audience:els.audience.value.trim(),goal:els.goal.value.trim(),tone:els.tone.value,
+            platform:els.platform.value,marketingType:selectedMarketingType,generatedImages:images,sourceClips:clips
+          }})});
+        if(!response.ok) throw new Error("La sauvegarde a échoué. Vos clips sont conservés : réessayez.");
+        ++flowRevision; invalidateAudio();
+        sourceClips=clips;generatedImages=images;
+        localStorage.setItem("viraSourceClips",JSON.stringify(clips));
+        localStorage.setItem("viraGeneratedImages",JSON.stringify(images));
+        renderImages(images,parseScenario(rawScenario).scenes);
+        importPanel.hidden=true;importPanel.querySelectorAll("video").forEach(video=>video.pause());
+        setStatus(els.status,"Vos quatre clips sont sauvegardés. Préparez la narration, puis la vidéo finale.","success");
+      } catch(error) {clipStatus.textContent=error.message;}
+      finally {importingPhotos=false;visualsInProgress=false;refreshClipImports();updateWorkflowState();}
     });
 
     els.visualBtn.addEventListener("click", async () => {
@@ -3031,6 +3136,8 @@ ${els.tone.value || "Professionnel"}
       if (visualsInProgress || videoInProgress) return;
       if (FREE_VISUAL_MODE) {
         draftPhotos = generatedImages.length===4 ? generatedImages.slice() : [];
+        draftClips = sourceClips.slice();
+        showMediaMode(sourceClips.length===4 ? "clips" : "photos");
         importStatus.textContent = "Import gratuit : vos images remplacent les visuels de test.";
         refreshPhotoImports();
         importPanel.hidden=false;
@@ -3145,10 +3252,11 @@ els.videoBtn.addEventListener("click", async () => {
 
   try {
     if (FREE_VIDEO_MODE) {
-        const images = await Promise.all(generatedImages.map(rasterizePreview));
-const payload = JSON.stringify({ images, audioId: preparedAudioId });
+        const usingClips=sourceClips.length===4;
+        const images = usingClips ? [] : await Promise.all(generatedImages.map(rasterizePreview));
+const payload = JSON.stringify(usingClips ? {clipIds:sourceClips.map(c=>c.id),audioId:preparedAudioId} : { images, audioId: preparedAudioId });
 if (new Blob([payload]).size > 1900000) throw new Error("Les visuels dépassent la taille acceptée par le serveur.");
-const response = await fetch("/api/video/free-assemble", {
+const response = await fetch(usingClips ? "/api/video/assemble-clips" : "/api/video/free-assemble", {
   method: "POST",
   credentials: "same-origin",
   headers: { "Content-Type": "application/json" },
@@ -3160,7 +3268,7 @@ const rawResponse = await response.text();
 
 if (!contentType.includes("application/json")) {
   throw new Error(
-    "La route /api/video/free-assemble retourne du HTML au lieu de JSON."
+    "Le serveur n’a pas pu préparer la vidéo. Réessayez dans un instant."
   );
 }
 
@@ -3256,6 +3364,7 @@ if (currentCampaignId) {
         platform: completedCampaign.platform,
         marketingType: completedCampaign.marketingType,
         generatedImages: generatedImages,
+        sourceClips,
         videoUrl: finalVideoUrl,
         completedAt: completedCampaign.completedAt
       }
@@ -3645,6 +3754,8 @@ else localStorage.removeItem("viraCurrentCampaignId");
 localStorage.removeItem("viraPreparedAudioId");
 localStorage.removeItem("viraVoiceReady");
 localStorage.removeItem("viraVideoReady");
+const restoredClips=validSourceClips(campaignData.sourceClips);
+localStorage.setItem("viraSourceClips",JSON.stringify(restoredClips));
 const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario || "");
     localStorage.setItem("viraTargetAudience", campaignData.audience || campaign.audience || parsedCampaign.target || "");
     localStorage.setItem("viraMarketingGoal", campaignData.goal || campaign.goal || parsedCampaign.objective || "");
@@ -4250,6 +4361,18 @@ let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.
 #imageImportPanel #photoImportStatus{color:#a7b4c9;font-size:12px!important;line-height:1.5!important;margin:12px 0 0!important}
 @media(max-width:900px){#imageImportPanel .photo-scene-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:550px){#imageImportPanel{padding:16px!important}#imageImportPanel .photo-editor-header{align-items:flex-start;gap:10px}#imageImportPanel h3{font-size:19px!important}#imageImportPanel .photo-editor-count{padding:6px 8px;font-size:10px}#imageImportPanel .photo-scene-grid{gap:10px}#imageImportPanel .photo-scene-frame{margin:0 7px}#imageImportPanel .photo-scene-heading{padding:10px}#imageImportPanel .photo-replace{font-size:11px!important;padding:10px}#imageImportPanel .photo-editor-footer{flex-direction:column;align-items:stretch;gap:14px}#imageImportPanel #applyScenePhotos{width:100%}}
+</style>
+
+<style id="clip-import-design">
+#imageImportPanel .media-mode-tabs{display:flex;gap:6px;background:#080d16;border:1px solid #283042;border-radius:10px;padding:4px;width:fit-content;margin-bottom:20px}
+#imageImportPanel .media-mode-tabs button{border:0;border-radius:7px;background:transparent;color:#a3adc1;padding:10px 18px;font-size:13px;cursor:pointer}
+#imageImportPanel .media-mode-tabs button[aria-pressed="true"]{background:#342349;color:#eadcff}
+#imageImportPanel .clip-import-help{font-size:12px;line-height:1.6;color:#a5b1c4;margin:0 0 18px}
+#imageImportPanel .photo-scene-frame video{width:100%;height:100%;object-fit:contain;background:#070a10}
+#imageImportPanel .clip-duration{margin-left:auto;font-size:10px;color:#b6a6d5;white-space:nowrap}
+#imageImportPanel #applySceneClips{flex-shrink:0;min-height:44px;padding:12px 18px;border:1px solid #a17cec;border-radius:9px;background:#8250db;color:#fff;font-size:13px!important;font-weight:600!important;cursor:pointer}
+#imageImportPanel #clipImportStatus{font-size:12px!important;color:#b8c5d9;margin:12px 0 0}
+@media(max-width:550px){#imageImportPanel #applySceneClips{width:100%}}
 </style>
 </body>
 </html>
