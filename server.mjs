@@ -1187,7 +1187,44 @@ app.post("/api/video/test", requireAuth, async (req, res) => {
   });
 });
 
+app.post("/api/brain/analyze", requireAuth, async (req, res) => {
+  const { campaign } = req.body || {};
 
+  if (!campaign) {
+    return res.status(400).json({ error: "Campagne manquante." });
+  }
+
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "gpt-5-mini",
+      input: `Analyse cette campagne marketing comme un expert SaaS.
+Retourne uniquement :
+1. Forces
+2. Faiblesses
+3. Opportunités
+4. Actions prioritaires
+
+Campagne :
+${JSON.stringify(campaign)}`
+    })
+  });
+
+  const data = await response.json();
+  const analysis = data.output?.flatMap(item => item.content || [])
+  .filter(item => item.type === "output_text")
+  .map(item => item.text)
+  .join("\n") || data.output_text || "";
+
+res.status(response.ok ? 200 : 502).json({
+  ok: response.ok,
+  analysis
+});
+});
 // Keep API errors JSON, including malformed JSON and oversized uploads.
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
