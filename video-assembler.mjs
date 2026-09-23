@@ -57,15 +57,17 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
 "setsar=1,format=yuv420p,settb=AVTB,setpts=PTS-STARTPTS," +
 `fps=30[v${index}]`    );
 
-    if (transition) {
-      for (let i = 1; i < 4; i++) {
-        const from = i === 1 ? "v0" : "mix" + (i - 1);
-        const to = i === 3 ? "outv" : "mix" + i;
-        const offset = (i * (transition.clipDuration - transition.fade)).toFixed(6);
-        filters.push(
-  `[${from}][v${i}]xfade=transition=fade:duration=${transition.fade}:offset=${offset},fps=30[${to}]`
-);
-    } else {
+if (transition) {
+  for (let i = 1; i < 4; i++) {
+    const from = i === 1 ? "v0" : "mix" + (i - 1);
+    const to = i === 3 ? "outv" : "mix" + i;
+    const offset = (i * (transition.clipDuration - transition.fade)).toFixed(6);
+
+    filters.push(
+      `[${from}][v${i}]xfade=transition=fade:duration=${transition.fade}:offset=${offset},fps=30[${to}]`
+    );
+  }
+} else {
       filters.push("[v0][v1][v2][v3]concat=n=4:v=1:a=0[outv]");
     }
 
