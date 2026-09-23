@@ -2226,45 +2226,42 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
       return document.querySelector(".marketing-choice.active");
     }
 
-    function updateBrain(animated = false) {
-      const meta = marketingMeta[selectedMarketingType];
-      let score = 0;
-      const prompt = els.prompt.value.trim();
-      const audience = els.audience.value.trim();
-      const goal = els.goal.value.trim();
-      const platform = els.platform.value;
+  const campaign = {
+    offer: els.prompt.value.trim(),
+    audience: els.audience.value.trim(),
+    goal: els.goal.value.trim(),
+    platform: els.platform.value,
+    marketingType: selectedMarketingType,
+    scenario: rawScenario
+  };
 
-      if (prompt.length >= 20) score += 40;
-      if (audience.length >= 5) score += 25;
-      if (goal.length >= 5) score += 25;
-      if (platform) score += 10;
-      score = Math.min(score, 100);
+  els.score.textContent = "—";
+  els.scoreNote.textContent = "Analyse stratégique en cours…";
+  els.opportunity.textContent = "VIRA Brain analyse votre campagne…";
 
-      const render = () => {
-        els.score.textContent = score ? score : "—";
-        els.scoreCircle.style.setProperty("--score-deg", `${score * 3.6}deg`);
-        if (els.scoreNote) {
-          els.scoreNote.textContent =
-            score >= 85 ? "Brief complet • prêt à être testé" :
-            score >= 70 ? "Brief solide • quelques optimisations possibles" :
-            "Score indicatif • complétez votre brief pour l’affiner";
-        }
-        els.opportunity.textContent = meta?.opportunity?.replace(/^✦\s*/, "") || "Choisissez un objectif pour lancer l’analyse.";
-        els.recommended.textContent = meta?.action || "→ VIRA vous proposera l’action prioritaire à réaliser.";
-      };
+  try {
+    const response = await fetch("/api/brain/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ campaign })
+    });
 
-      if (animated) {
-        els.brainBtn.disabled = true;
-        els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("loading")}</span><span>Analyse...</span></span><small>VIRA vérifie les informations de votre brief</small>`;
-        setTimeout(() => {
-          // Read the latest brief: fields may change while the animation runs.
-          updateBrain();
-          els.brainBtn.disabled = false;
-          els.brainBtn.innerHTML = `<span class="brain-run-main"><span class="ui-spark">${uiIcon("hook")}</span><span>Analyser ma campagne</span></span><small>Vérifiez votre brief et découvrez les prochaines actions</small>`;
-        }, 550);
-      } else render();
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error("Analyse indisponible.");
     }
 
+    els.opportunity.textContent = data.analysis;
+    els.scoreNote.textContent =
+      "Analyse stratégique basée sur votre campagne";
+  } catch (error) {
+    els.opportunity.textContent =
+      "L’analyse Brain est temporairement indisponible.";
+    els.scoreNote.textContent = "";
+  }
+    }
     function updateToneIcon() { els.toneIcon.innerHTML = icons[els.tone.value] || icons.Professionnel; }
     function updatePlatformIcon() { els.platformIcon.innerHTML = icons[els.platform.value] || icons.globe; }
 
