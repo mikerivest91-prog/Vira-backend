@@ -2194,7 +2194,7 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoR
 
 els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
       els.voiceBtn.disabled = busy || !(hasScenario && scenarioValidated && hasVisuals);
-      els.videoBtn.disabled = videoInProgress || !(hasScenario && scenarioValidated && hasVisuals && voiceReady && preparedAudioId);
+      els.videoBtn.disabled = busy || !(hasScenario && scenarioValidated && hasVisuals && voiceReady && preparedAudioId);
       document.querySelectorAll("#voiceOptions button,#voiceOptions input,#voiceOptions select,#voiceOptions textarea").forEach(control => { if (videoInProgress) control.disabled=true; });
       els.downloadBtn.disabled = !videoReady;
       els.downloadBtn.classList.toggle("is-ready", videoReady);
@@ -2313,6 +2313,8 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
     let flowRevision = 0;
     function resetGeneratedFlow() {
       flowRevision++;
+      const photoPanel = document.getElementById("imageImportPanel");
+      if (photoPanel) photoPanel.hidden = true;
       preparedAudioId = "";
       rawScenario = "";
       generatedImages = [];
@@ -2449,7 +2451,8 @@ localStorage.removeItem("viraGeneratedImages");
 
     // Convert the existing preview artwork to the raster format accepted by FFmpeg.
     async function rasterizePreview(source) {
-      if (typeof source !== "string" || !source.startsWith("data:image/")) throw new Error("Visuel de test invalide.");
+      if (typeof source !== "string" || !source.startsWith("data:image/")) throw new Error("Visuel invalide.");
+      if (source.startsWith("data:image/jpeg;base64,") && source.length <= 300000) return source;
       const image = new Image();
       await new Promise((resolve, reject) => {
         image.onload = resolve;
@@ -2466,7 +2469,7 @@ localStorage.removeItem("viraGeneratedImages");
     }
 
     function renderImages(images, scenes, test = false) {
-      els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title" style="cursor:pointer;"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/4 scènes ${test ? "• mode test gratuit" : "• générées par VIRA"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
+      els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title" style="cursor:pointer;"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/4 scènes ${test ? "• mode test gratuit" : "• images de campagne"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
 
     }
 
@@ -2915,6 +2918,89 @@ ${els.tone.value || "Professionnel"}
     window.addEventListener("pagehide",()=>stopRecording(true));
 
 
+
+    // Local photo import: no image-generation API or image credits.
+    const importPanel = document.createElement("section");
+    importPanel.id = "imageImportPanel";
+    importPanel.className = "campaign-section";
+    importPanel.hidden = true;
+    importPanel.innerHTML = `<strong>Vos images · 4 scènes</strong>
+      <p>Choisissez une photo par scène. JPG, PNG ou WebP, 10 Mo maximum par image. Les photos sont ajustées au format vertical sans être coupées.</p>
+      <div class="form-grid two">${[0,1,2,3].map(i => `<div class="field-group"><label for="scenePhoto${i}">Scène ${i+1}</label><input id="scenePhoto${i}" type="file" accept="image/jpeg,image/png,image/webp"><img id="scenePhotoPreview${i}" alt="Image de la scène ${i+1}" hidden style="width:100%;max-height:180px;object-fit:contain"></div>`).join("")}</div>
+      <button id="applyScenePhotos" class="primary-cta" type="button" disabled>Utiliser ces 4 images</button>
+      <p id="photoImportStatus" role="status" aria-live="polite"></p>`;
+    els.result.before(importPanel);
+    let draftPhotos = [];
+    let importingPhotos = false;
+    const importStatus = document.getElementById("photoImportStatus");
+    const applyPhotos = document.getElementById("applyScenePhotos");
+    function refreshPhotoImports() {
+      for (let i=0;i<4;i++) {
+        const preview = document.getElementById("scenePhotoPreview"+i);
+        preview.hidden = !draftPhotos[i];
+        if (draftPhotos[i]) preview.src = draftPhotos[i];
+        else preview.removeAttribute("src");
+      }
+      applyPhotos.disabled = importingPhotos || draftPhotos.filter(Boolean).length !== 4;
+    }
+    async function preparePhoto(file) {
+      if (!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error("Choisissez une image JPG, PNG ou WebP.");
+      if (!file.size || file.size > 10*1024*1024) throw new Error("Chaque image doit faire moins de 10 Mo.");
+      const url = URL.createObjectURL(file);
+      try {
+        const photo = new Image();
+        await new Promise((resolve,reject) => { photo.onload=resolve; photo.onerror=()=>reject(new Error("Cette image est illisible.")); photo.src=url; });
+        const canvas = document.createElement("canvas");
+        canvas.width=720; canvas.height=1280;
+        const context=canvas.getContext("2d");
+        context.fillStyle="#08070c"; context.fillRect(0,0,720,1280);
+        const scale=Math.min(720/photo.naturalWidth,1280/photo.naturalHeight);
+        const width=photo.naturalWidth*scale, height=photo.naturalHeight*scale;
+        context.drawImage(photo,(720-width)/2,(1280-height)/2,width,height);
+        for (const quality of [0.85,0.7,0.55,0.4,0.25]) {
+          const result=canvas.toDataURL("image/jpeg",quality);
+          if(result.length<=300000) return result;
+        }
+        throw new Error("Cette image est trop complexe. Choisissez une photo plus simple.");
+      } finally { URL.revokeObjectURL(url); }
+    }
+    for (let i=0;i<4;i++) document.getElementById("scenePhoto"+i).addEventListener("change",async event => {
+      const file=event.target.files[0]; if(!file || importingPhotos) return;
+      importingPhotos=true;
+      importPanel.querySelectorAll("input").forEach(input=>input.disabled=true);
+      refreshPhotoImports(); importStatus.textContent="Préparation de la photo…";
+      try { draftPhotos[i]=await preparePhoto(file); importStatus.textContent="Photo prête. Vous pouvez choisir les autres scènes."; }
+      catch(error) { importStatus.textContent=error.message; }
+      finally { event.target.value=""; importingPhotos=false; importPanel.querySelectorAll("input").forEach(input=>input.disabled=false); refreshPhotoImports(); }
+    });
+    applyPhotos.addEventListener("click",async () => {
+      if(importingPhotos || visualsInProgress || videoInProgress || !scenarioValidated || draftPhotos.filter(Boolean).length!==4) return;
+      const id=localStorage.getItem("viraCurrentCampaignId");
+      if(!id) { importStatus.textContent="Sauvegardez d’abord la campagne en générant son scénario."; return; }
+      visualsInProgress=true; importingPhotos=true;
+      importPanel.querySelectorAll("input").forEach(input=>input.disabled=true);
+      refreshPhotoImports(); updateWorkflowState(); importStatus.textContent="Sauvegarde des images…";
+      try {
+        const images=draftPhotos.slice();
+        const response=await fetch(`/api/campaigns/${encodeURIComponent(id)}`,{
+          method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({title:els.prompt.value.trim() || "Campagne Marketing",status:"visuals_ready",campaignData:{
+            scenario:rawScenario,audience:els.audience.value.trim(),goal:els.goal.value.trim(),tone:els.tone.value,
+            platform:els.platform.value,marketingType:selectedMarketingType,generatedImages:images
+          }})
+        });
+        if(!response.ok) throw new Error("La sauvegarde a échoué. Vos choix sont conservés : réessayez.");
+        ++flowRevision;
+        invalidateAudio();
+        generatedImages=images;
+        localStorage.setItem("viraGeneratedImages",JSON.stringify(images));
+        renderImages(images,parseScenario(rawScenario).scenes);
+        importPanel.hidden=true;
+        setStatus(els.status,"Vos 4 images sont sauvegardées. Préparez maintenant la voix. Aucun crédit image utilisé.","success");
+      } catch(error) { importStatus.textContent=error.message; }
+      finally { visualsInProgress=false; importingPhotos=false; importPanel.querySelectorAll("input").forEach(input=>input.disabled=false); refreshPhotoImports(); updateWorkflowState(); }
+    });
+
     els.visualBtn.addEventListener("click", async () => {
       if (!scenarioValidated || !rawScenario) {
         return setStatus(els.status,"Validez d’abord le scénario.","warning");
@@ -2927,6 +3013,14 @@ ${els.tone.value || "Professionnel"}
       }
 
       if (visualsInProgress || videoInProgress) return;
+      if (FREE_VISUAL_MODE) {
+        draftPhotos = generatedImages.length===4 ? generatedImages.slice() : [];
+        importStatus.textContent = "Import gratuit : vos images remplacent les visuels de test.";
+        refreshPhotoImports();
+        importPanel.hidden=false;
+        importPanel.scrollIntoView({behavior:"smooth",block:"center"});
+        return;
+      }
       visualsInProgress = true;
       const revision = ++flowRevision;
       invalidateAudio();
