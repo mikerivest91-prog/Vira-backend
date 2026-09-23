@@ -1054,8 +1054,6 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
   if (!Array.isArray(images) || images.length !== 4) {
     return res.status(400).json({ ok: false, error: "VIRA exige exactement 4 visuels JPEG ou PNG." });
   }
-  const usage = await reserveVideoSlot(req.user.id);
-  if (!usage.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter." });
   let decoded;
   try {
     decoded = images.map(decodePreviewImage);
@@ -1068,6 +1066,8 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     try { audioPath = audioFile(AUDIO_TEMP_DIR, req.user.id, req.body.audioId); duration = await wavDuration(audioPath); }
     catch { return res.status(400).json({ok:false,error:"La narration a expiré ou est invalide. Préparez-la de nouveau."}); }
   }
+  const usage = await reserveVideoSlot(req.user.id);
+  if (!usage.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter." });
   const temporaryFiles = [];
   try {
     const jobId = crypto.randomUUID();

@@ -2171,7 +2171,13 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoR
     }
 
     let videoInProgress = false;
+    let scenarioInProgress = false;
+    let visualsInProgress = false;
     function updateWorkflowState() {
+      const busy = scenarioInProgress || visualsInProgress || videoInProgress;
+      document.querySelectorAll(".marketing-choice").forEach(button => { button.disabled = busy; });
+      [els.prompt, els.audience, els.goal, els.tone, els.platform].forEach(field => { field.disabled = busy; });
+      els.scenarioBtn.disabled = busy;
       const hasScenario = Boolean(rawScenario && isValidScenarioText(rawScenario));
       const hasVisuals = generatedImages.length === 4;
       els.visualBtn.hidden = !hasScenario;
@@ -2186,8 +2192,8 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoR
       els.videoBtn.style.display = voiceReady ? "flex" : "none";
       els.downloadBtn.style.display = videoReady ? "flex" : "none";
 
-els.visualBtn.disabled = !(hasScenario && scenarioValidated);
-      els.voiceBtn.disabled = !(hasScenario && scenarioValidated && hasVisuals);
+els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
+      els.voiceBtn.disabled = busy || !(hasScenario && scenarioValidated && hasVisuals);
       els.videoBtn.disabled = videoInProgress || !(hasScenario && scenarioValidated && hasVisuals && voiceReady && preparedAudioId);
       document.querySelectorAll("#voiceOptions button,#voiceOptions input,#voiceOptions select,#voiceOptions textarea").forEach(control => { if (videoInProgress) control.disabled=true; });
       els.downloadBtn.disabled = !videoReady;
@@ -2304,7 +2310,10 @@ els.visualBtn.disabled = !(hasScenario && scenarioValidated);
       updateBrain();
     }
 
+    let flowRevision = 0;
     function resetGeneratedFlow() {
+      flowRevision++;
+      preparedAudioId = "";
       rawScenario = "";
       generatedImages = [];
       scenarioValidated = false;
@@ -2412,9 +2421,7 @@ localStorage.removeItem("viraGeneratedImages");
         <details class="campaign-section brief-group"><summary>${campaignHeading("scenes","Production")}<span class="brief-hint">${d.scenes.filter(Boolean).length}/4 scènes · narration</span></summary><div class="brief-body">
           ${d.scenes.map((scene,i)=>field(`Scène ${i+1}`,scene)).join("")}${field("Narration",d.narration)}${field("Prompt visuel",d.visualPrompt)}${field("Style",d.style)}
         </div></details>`;
-      // Le scénario est validé automatiquement : un seul clic suffit.
-      scenarioValidated = true;
-      localStorage.setItem("viraScenarioValidated", "true");
+      // Rendering must not validate an unsaved draft.
       els.validateBtn.hidden = true;
       els.validateBtn.style.display = "none";
       els.validateBtn.disabled = false;
@@ -2472,7 +2479,7 @@ localStorage.removeItem("viraGeneratedImages");
           <div class="studio-export-copy"><span class="studio-ready" role="status">✓ Vidéo prête</span><h3>Votre vidéo finale</h3><p>Quatre scènes, votre narration.<br>Votre campagne est prête à être partagée.</p>
             <div class="studio-specs"><span>MP4</span><span>4 scènes</span><span>Narration intégrée</span></div>
             <a class="studio-download" href="${url}" download="VIRA-campagne-final.mp4"><span aria-hidden="true">↓</span> Télécharger la vidéo</a>
-            <small>${preview ? "Mode test gratuit · Aucun crédit vidéo utilisé." : "Votre export est prêt."}</small>
+            <small>${preview ? "Vidéo décomptée du quota mensuel." : "Votre export est prêt."}</small>
           </div>
         </div>
       </section>`;
@@ -2659,7 +2666,10 @@ if (!start.ok) {
       if (!audience || !goal || !platform) return setStatus(els.scenarioStatus,"Complétez l’audience, l’objectif principal et la plateforme.","warning");
 
       saveForm();
-      els.scenarioBtn.disabled = true;
+      resetGeneratedFlow();
+      const revision = flowRevision;
+      scenarioInProgress = true;
+      updateWorkflowState();
       els.scenarioResult.innerHTML = "";
       setStatus(els.scenarioStatus,`<div class="loader"><div class="loader-star">✦</div><div><strong>VIRA prépare votre campagne</strong><br><span style="color:#938d9f">Analyse de l’offre, de l’audience et de la plateforme…</span></div><div class="loader-dots"><i></i><i></i><i></i></div></div>`);
  setProgress(0, "Démarrage de l’analyse");
@@ -2734,7 +2744,9 @@ ${els.tone.value || "Professionnel"}
   clearInterval(analysisProgressTimer);
   setProgress(100, "Scénario prêt");
 
+  if (revision !== flowRevision) return;
   renderScenario(scenario);
+  await saveCampaignDraft();
   scenarioValidated = true;
   localStorage.setItem("viraScenarioValidated", "true");
   updateWorkflowState();
@@ -2754,76 +2766,34 @@ ${els.tone.value || "Professionnel"}
   );
 } finally {
   clearInterval(analysisProgressTimer);
-  els.scenarioBtn.disabled = false;
+  scenarioInProgress = false;
+  updateWorkflowState();
   hideProgress();
 }
 });
-    els.validateBtn.addEventListener("click", async () => {
-      if (!rawScenario || !isValidScenarioText(rawScenario)) {
-        els.validateBtn.hidden = true;
-        els.validateBtn.style.display = "none";
-        return setStatus(els.scenarioStatus,"Générez d’abord un scénario avant de le valider.","warning");
+    async function saveCampaignDraft() {
+      const id = localStorage.getItem("viraCurrentCampaignId");
+      const response = await fetch(id ? `/api/campaigns/${encodeURIComponent(id)}` : "/api/campaigns", {
+        method: id ? "PUT" : "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: els.prompt.value.trim() || "Campagne Marketing",
+          status: "draft",
+          campaignData: {
+            scenario: rawScenario, audience: els.audience.value.trim(),
+            goal: els.goal.value.trim(), tone: els.tone.value,
+            platform: els.platform.value, marketingType: selectedMarketingType,
+            generatedImages
+          }
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || !data.campaign?.id) {
+        throw new Error(data.error || "La sauvegarde a échoué. Relancez la génération pour réessayer.");
       }
-
-      scenarioValidated = true;
-      localStorage.setItem("viraScenarioValidated", "true");
-      const savedCampaigns = JSON.parse(
-  localStorage.getItem("viraCampaigns") || "[]"
-);
-
-if (!savedCampaigns.some(campaign => campaign.scenario === rawScenario)) {
-  savedCampaigns.unshift({
-    id: Date.now(),
-  title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
-    scenario: rawScenario,
-    audience: els.audience.value.trim(),
-    goal: els.goal.value.trim(),
-    tone: els.tone.value,
-    platform: els.platform.value,
-    marketingType: selectedMarketingType,
-    generatedImages: generatedImages,
-    createdAt: new Date().toISOString()
-  });
-
-  localStorage.setItem(
-    "viraCampaigns",
-    JSON.stringify(savedCampaigns)
-  );
-   const campaignResponse = await fetch("/api/campaigns", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
-      status: "draft",
-      campaignData: {
-        scenario: rawScenario,
-        audience: els.audience.value.trim(),
-        goal: els.goal.value.trim(),
-        tone: els.tone.value,
-        platform: els.platform.value,
-        marketingType: selectedMarketingType,
-        generatedImages: generatedImages,
-        createdAt: new Date().toISOString()
-      }
-    })
-});
-
-const campaignResult = await campaignResponse.json();
-if (campaignResponse.ok && campaignResult.campaign?.id) {
-  localStorage.setItem("viraCurrentCampaignId", campaignResult.campaign.id);
-}}
-      
-      updateWorkflowState();
-
-      setStatus(
-        els.scenarioStatus,
-        "Scénario validé avec succès. La création des visuels est maintenant disponible.",
-        "success"
-      );
-    });
+      localStorage.setItem("viraCurrentCampaignId", String(data.campaign.id));
+    }
 
     let audioBusy = false;
     let recorder = null;
@@ -2862,6 +2832,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
       if (audioBusy || videoInProgress) return;
       invalidateAudio();
       const scenarioAtStart = rawScenario;
+      const revision = flowRevision;
       audioBusy = true;
       voicePanel.querySelectorAll("button,input,select,textarea").forEach(el => el.disabled = true);
       voiceElement("voiceFeedback").textContent = "Préparation de votre audio…";
@@ -2869,7 +2840,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
         const response = await fetch(url, { method:"POST", credentials:"same-origin", headers:json?{"Content-Type":"application/json"}:{}, body:json?JSON.stringify(body):body });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || "Impossible de préparer l’audio.");
-        if (rawScenario !== scenarioAtStart || !scenarioValidated || generatedImages.length !== 4) throw new Error("La campagne a changé. Préparez sa narration de nouveau.");
+        if (revision !== flowRevision || rawScenario !== scenarioAtStart || !scenarioValidated || generatedImages.length !== 4) throw new Error("La campagne a changé. Préparez sa narration de nouveau.");
         if (!/^[0-9a-f-]{36}$/.test(data.audioId) || data.audioUrl !== `/api/audio/${data.audioId}`) throw new Error("Réponse audio invalide.");
         preparedAudioId = data.audioId;
         localStorage.setItem("viraPreparedAudioId", preparedAudioId);
@@ -2955,6 +2926,12 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
         return setStatus(els.status,`VIRA a besoin de 4 scènes. Scènes détectées : ${scenes.length}.`,"warning");
       }
 
+      if (visualsInProgress || videoInProgress) return;
+      visualsInProgress = true;
+      const revision = ++flowRevision;
+      invalidateAudio();
+      generatedImages = [];
+      localStorage.removeItem("viraGeneratedImages");
       els.visualBtn.disabled = true;
       els.result.innerHTML = "";
       els.videoResult.innerHTML = "";
@@ -2976,6 +2953,7 @@ if (campaignResponse.ok && campaignResult.campaign?.id) {
             await new Promise(r=>setTimeout(r,260));
             setProgress(progress,label);
           }
+          if (revision !== flowRevision) return;
           generatedImages = scenes.map(makeTestImage);
           renderImages(generatedImages, scenes, true);
           setStatus(els.status,"4 visuels Premium préparés en mode aperçu. Aucun crédit image utilisé.","success");
@@ -3029,6 +3007,7 @@ if (currentCampaignId) {
         console.error(error);
         setStatus(els.status,escapeHtml(error.message || "Erreur de génération des visuels"),"error");
       } finally {
+        visualsInProgress = false;
         updateWorkflowState();
         hideProgress(900);
       }
@@ -3045,7 +3024,10 @@ els.videoBtn.addEventListener("click", async () => {
 
   videoInProgress = true;
   els.videoBtn.disabled = true;
+  const revision = flowRevision;
   videoReady = false;
+  localStorage.removeItem("viraVideoReady");
+  localStorage.removeItem("viraFinalVideoUrl");
   clearFinalVideoUrl();
   els.videoResult.innerHTML = "";
   updateWorkflowState();
@@ -3082,6 +3064,7 @@ if (!response.ok || !prepared.ok || !prepared.videoUrl) {
 if (typeof prepared.videoUrl !== "string" || !/^\/videos\/[a-zA-Z0-9_-]+\.mp4$/.test(prepared.videoUrl)) {
   throw new Error("Adresse de la vidéo invalide.");
 }
+if (revision !== flowRevision) return;
 finalVideoUrl = prepared.videoUrl;
       const steps = [
         [25,"Préparation des scènes"],
@@ -3095,6 +3078,7 @@ finalVideoUrl = prepared.videoUrl;
         setProgress(progress,label);
       }
 
+      if (revision !== flowRevision) return;
       renderFinalVideo(true);
 
       videoReady = true;
@@ -3270,6 +3254,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
     }
 
     restoreForm();
+    if (videoReady && finalVideoUrl) renderFinalVideo(FREE_VIDEO_MODE);
 
     if (rawScenario && isValidScenarioText(rawScenario)) {
       renderScenario(rawScenario);
@@ -3546,6 +3531,10 @@ if (!campaign) return;
 const campaignData = campaign.campaign_data || {};
 if (campaign.id) localStorage.setItem("viraCurrentCampaignId", String(campaign.id));
 else localStorage.removeItem("viraCurrentCampaignId");
+// Never carry another campaign\u2019s narration or ready flags into this one.
+localStorage.removeItem("viraPreparedAudioId");
+localStorage.removeItem("viraVoiceReady");
+localStorage.removeItem("viraVideoReady");
 const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario || "");
     localStorage.setItem("viraTargetAudience", campaignData.audience || campaign.audience || parsedCampaign.target || "");
     localStorage.setItem("viraMarketingGoal", campaignData.goal || campaign.goal || parsedCampaign.objective || "");
@@ -3574,6 +3563,7 @@ const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario 
     "viraFinalVideoUrl",
     campaignData.videoUrl || campaign.videoUrl
   );
+  localStorage.setItem("viraVideoReady", "true");
 } else {
   localStorage.removeItem("viraFinalVideoUrl");
 }
