@@ -1712,6 +1712,12 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 @media(max-width:900px){.library-scene{grid-template-columns:minmax(0,1fr);align-items:start;padding:10px;gap:8px}}
 @media(max-width:600px){.library-images{gap:8px}.library-scene p{font-size:12px}}
 </style>
+<style id="brain-analysis-layout">
+.brain-insight{white-space:pre-wrap;font-size:14px!important;line-height:1.75!important;overflow-wrap:anywhere}
+.brain-layout .score-big{white-space:normal!important;line-height:1.3!important}
+.brain-layout .score-note{font-size:12px!important;line-height:1.5!important}
+.brain-layout .brain-insights{grid-template-columns:1fr!important}
+</style>
 </head>
 <body class="auth-pending">
 
@@ -1895,8 +1901,8 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 <circle cx="24" cy="11" r="1"/><circle cx="25" cy="17" r="1"/><circle cx="22" cy="22" r="1"/>
 </svg></span><span>3. VIRA Brain</span></div><p class="stage-help">Analyse de croissance</p></div></div>
         <div class="brain-layout">
-          <div class="score-panel"><div><div class="eyebrow">COMPLÉTUDE DU BRIEF</div><div class="score-big"><span id="growthScoreNumber">60</span><span>/100</span></div><div class="score-note" id="growthScoreNote">Score indicatif basé sur votre brief</div></div><div class="score-ring" id="growthScoreCircle"><div><strong id="growthScoreMini">60</strong><small>/100</small></div></div></div>
-          <div class="brain-message"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><div>Cet indicateur mesure les informations renseignées dans votre brief. Il ne prédit pas les ventes ni les performances de votre campagne.</div></div>
+          <div class="score-panel"><div><div class="eyebrow">DIAGNOSTIC DE CAMPAGNE</div><div class="score-big"><span id="growthScoreNumber">À analyser</span></div><div class="score-note" id="growthScoreNote">Une analyse argumentée de votre campagne, sans note artificielle.</div></div><div id="growthScoreCircle" hidden></div></div>
+          <div class="brain-message"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><div>Brain examine votre offre, votre audience, votre objectif et votre scénario. Ses recommandations sont des pistes à tester, pas une prédiction de ventes.</div></div>
           <div class="brain-insights">
             <div class="insight-box opportunity"><div class="insight-title green"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><span>OPPORTUNITÉS DÉTECTÉES</span></div><div class="brain-insight" id="brainOpportunity">Choisissez un objectif pour lancer l’analyse.</div></div>
             <div class="insight-box action"><div class="insight-title blue"><span class="premium-inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 3h8v8"/><path d="M21 3l-9 9"/><path d="M11 5H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-5"/></svg></span>ACTIONS RECOMMANDÉES</div><div class="brain-insight" id="brainRecommendedAction">VIRA vous proposera l’action prioritaire à réaliser.</div></div>
@@ -2226,41 +2232,68 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
       return document.querySelector(".marketing-choice.active");
     }
 
-  const campaign = {
-    offer: els.prompt.value.trim(),
-    audience: els.audience.value.trim(),
-    goal: els.goal.value.trim(),
-    platform: els.platform.value,
-    marketingType: selectedMarketingType,
-    scenario: rawScenario
-  };
-
-  els.score.textContent = "—";
-  els.scoreNote.textContent = "Analyse stratégique en cours…";
-  els.opportunity.textContent = "VIRA Brain analyse votre campagne…";
-
-  try {
-    const response = await fetch("/api/brain/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ campaign })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-      throw new Error("Analyse indisponible.");
+    let brainPending = false;
+    let brainRevision = 0;
+    function brainCampaign() {
+      return { offer: els.prompt.value.trim(), audience: els.audience.value.trim(),
+        goal: els.goal.value.trim(), platform: els.platform.value, tone: els.tone.value,
+        marketingType: selectedMarketingType, scenario: rawScenario };
     }
-
-    els.opportunity.textContent = data.analysis;
-    els.scoreNote.textContent =
-      "Analyse stratégique basée sur votre campagne";
-  } catch (error) {
-    els.opportunity.textContent =
-      "L’analyse Brain est temporairement indisponible.";
-    els.scoreNote.textContent = "";
-  }
+    function updateBrain(run = false) {
+      if (run === true) return runBrainAnalysis();
+      brainRevision++;
+      els.score.textContent = "À analyser";
+      els.scoreNote.textContent = "Lancez une analyse après avoir renseigné votre campagne.";
+      els.opportunity.textContent = "Votre diagnostic apparaîtra ici.";
+      els.recommended.textContent = "Brain identifie les points à améliorer et propose des corrections concrètes.";
+    }
+    async function runBrainAnalysis() {
+      if (brainPending) return;
+      const campaign = brainCampaign();
+      if (!campaign.offer || !campaign.audience || !campaign.goal || !campaign.platform) {
+        els.scoreNote.textContent = "Renseignez votre offre, votre audience, votre objectif et votre plateforme.";
+        return;
+      }
+      const revision = brainRevision;
+      const snapshot = JSON.stringify(campaign);
+      const buttonHtml = els.brainBtn.innerHTML;
+      brainPending = true;
+      els.brainBtn.disabled = true;
+      els.brainBtn.textContent = "Analyse en cours…";
+      els.score.textContent = "Analyse en cours";
+      els.scoreNote.textContent = "Lecture de votre brief et de votre scénario…";
+      els.opportunity.textContent = "";
+      els.recommended.textContent = "";
+      try {
+        const response = await fetch("/api/brain/analyze", {
+          method: "POST", credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: snapshot ? JSON.stringify({ campaign }) : "",
+          signal: AbortSignal.timeout(65000)
+        });
+        const data = await response.json();
+        if (revision !== brainRevision || snapshot !== JSON.stringify(brainCampaign())) {
+          updateBrain();
+          els.scoreNote.textContent = "Votre campagne a changé. Relancez l’analyse pour cette version.";
+          return;
+        }
+        if (!response.ok || !data.ok || typeof data.analysis !== "string" || !data.analysis.trim()) {
+          throw new Error(data.error || "Analyse indisponible. Réessayez dans un instant.");
+        }
+        els.score.textContent = "Analyse terminée";
+        els.scoreNote.textContent = "Diagnostic IA de cette version de votre campagne.";
+        els.opportunity.textContent = data.analysis;
+        els.recommended.textContent = "Appliquez les actions prioritaires du diagnostic, puis testez votre campagne. Les résultats restent à mesurer.";
+      } catch (error) {
+        if (revision !== brainRevision) return;
+        els.score.textContent = "Analyse indisponible";
+        els.scoreNote.textContent = error.name === "TimeoutError" ? "Le délai est dépassé. Vous pouvez réessayer." : error.message;
+        els.opportunity.textContent = "Aucune analyse n’a été produite.";
+      } finally {
+        brainPending = false;
+        els.brainBtn.disabled = false;
+        els.brainBtn.innerHTML = buttonHtml;
+      }
     }
     function updateToneIcon() { els.toneIcon.innerHTML = icons[els.tone.value] || icons.Professionnel; }
     function updatePlatformIcon() { els.platformIcon.innerHTML = icons[els.platform.value] || icons.globe; }
@@ -4373,3 +4406,4 @@ let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.
 </style>
 </body>
 </html>
+
