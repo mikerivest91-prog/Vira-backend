@@ -1900,13 +1900,14 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 <circle cx="8" cy="11" r="1"/><circle cx="7" cy="17" r="1"/><circle cx="10" cy="22" r="1"/>
 <circle cx="24" cy="11" r="1"/><circle cx="25" cy="17" r="1"/><circle cx="22" cy="22" r="1"/>
 </svg></span><span>3. VIRA Brain</span></div><p class="stage-help">Analyse de croissance</p></div></div>
-        <div class="brain-layout">
-          <div class="score-panel"><div><div class="eyebrow">DIAGNOSTIC DE CAMPAGNE</div><div class="score-big"><span id="growthScoreNumber">À analyser</span></div><div class="score-note" id="growthScoreNote">Une analyse argumentée de votre campagne, sans note artificielle.</div></div><div id="growthScoreCircle" hidden></div></div>
-          <div class="brain-message"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><div>Brain examine votre offre, votre audience, votre objectif et votre scénario. Ses recommandations sont des pistes à tester, pas une prédiction de ventes.</div></div>
-          <div class="brain-insights">
-            <div class="insight-box opportunity"><div class="insight-title green"><span class="ui-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2Z"/></svg></span><span>OPPORTUNITÉS DÉTECTÉES</span></div><div class="brain-insight" id="brainOpportunity">Choisissez un objectif pour lancer l’analyse.</div></div>
-            <div class="insight-box action"><div class="insight-title blue"><span class="premium-inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 3h8v8"/><path d="M21 3l-9 9"/><path d="M11 5H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-5"/></svg></span>ACTIONS RECOMMANDÉES</div><div class="brain-insight" id="brainRecommendedAction">VIRA vous proposera l’action prioritaire à réaliser.</div></div>
-          </div>
+        <div class="brain-workspace" data-state="idle">
+          <div class="brain-status-row"><span class="brain-status-dot" aria-hidden="true"></span><span id="growthScoreNumber" role="status">À analyser</span><span class="brain-label">Analyse IA</span></div>
+          <p id="growthScoreNote" class="brain-status-note">Lancez une analyse après avoir renseigné votre campagne.</p>
+          <div id="growthScoreCircle" hidden></div>
+          <div class="brain-empty"><h3>Un regard stratégique sur votre campagne</h3><p>Identifiez ce qui fonctionne, les points à préciser et les prochaines actions à tester.</p><div class="brain-topics"><span>Votre offre</span><span>Votre audience</span><span>Votre message</span><span>Votre objectif</span></div></div>
+          <div id="brainOpportunity" class="brain-report" aria-live="polite"></div>
+          <p id="brainRecommendedAction" class="brain-report-note"></p>
+          <div class="brain-footnote">Basé sur votre brief et votre scénario · Recommandations à valider par vos résultats.</div>
         </div>
       </section>
 
@@ -2239,9 +2240,35 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
         goal: els.goal.value.trim(), platform: els.platform.value, tone: els.tone.value,
         marketingType: selectedMarketingType, scenario: rawScenario };
     }
+    function setBrainState(state) {
+      document.querySelector('#brain .brain-workspace').dataset.state = state;
+    }
+    function renderBrainReport(text) {
+      const report = els.opportunity;
+      report.replaceChildren();
+      let section = null;
+      for (const raw of text.split('\n')) {
+        const line = raw.trim();
+        if (!line) continue;
+        const clean = line.replace(/^[#*\s\d.)-]+/, '').replace(/[*:]+$/, '').trim();
+        if (/^(Forces|Faiblesses|Opportunités|Actions prioritaires)$/i.test(clean)) {
+          section = document.createElement('section');
+          section.className = 'brain-report-section';
+          const heading = document.createElement('h3');
+          heading.textContent = clean;
+          section.append(heading);
+          report.append(section);
+        } else {
+          const p = document.createElement('p');
+          p.textContent = line.replace(/\*\*/g, '');
+          (section || report).append(p);
+        }
+      }
+    }
     function updateBrain(run = false) {
       if (run === true) return runBrainAnalysis();
       brainRevision++;
+      setBrainState('idle');
       els.score.textContent = "À analyser";
       els.scoreNote.textContent = "Lancez une analyse après avoir renseigné votre campagne.";
       els.opportunity.textContent = "Votre diagnostic apparaîtra ici.";
@@ -2258,6 +2285,7 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
       const snapshot = JSON.stringify(campaign);
       const buttonHtml = els.brainBtn.innerHTML;
       brainPending = true;
+      setBrainState('loading');
       els.brainBtn.disabled = true;
       els.brainBtn.textContent = "Analyse en cours…";
       els.score.textContent = "Analyse en cours";
@@ -2282,11 +2310,13 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
         }
         els.score.textContent = "Analyse terminée";
         els.scoreNote.textContent = "Diagnostic IA de cette version de votre campagne.";
-        els.opportunity.textContent = data.analysis;
+        renderBrainReport(data.analysis);
+        setBrainState('complete');
         els.recommended.textContent = "Appliquez les actions prioritaires du diagnostic, puis testez votre campagne. Les résultats restent à mesurer.";
       } catch (error) {
         if (revision !== brainRevision) return;
         els.score.textContent = "Analyse indisponible";
+        setBrainState('error');
         els.scoreNote.textContent = error.name === "TimeoutError" ? "Le délai est dépassé. Vous pouvez réessayer." : error.message;
         els.opportunity.textContent = "Aucune analyse n’a été produite.";
       } finally {
@@ -4403,6 +4433,40 @@ let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.
 #imageImportPanel #applySceneClips{flex-shrink:0;min-height:44px;padding:12px 18px;border:1px solid #a17cec;border-radius:9px;background:#8250db;color:#fff;font-size:13px!important;font-weight:600!important;cursor:pointer}
 #imageImportPanel #clipImportStatus{font-size:12px!important;color:#b8c5d9;margin:12px 0 0}
 @media(max-width:550px){#imageImportPanel #applySceneClips{width:100%}}
+</style>
+<style id="brain-professional-design">
+#brain{padding:26px!important}
+#brain .stage-title,#brain .stage-title span{font-weight:600!important;letter-spacing:normal!important}
+#brain .stage-help{font-weight:400!important;font-size:14px!important;color:#94a0b4!important}
+#brain .brain-workspace{margin-top:22px;border-top:1px solid #252b38;padding-top:20px}
+#brain .brain-workspace *{letter-spacing:normal!important}
+#brain .brain-status-row{display:flex;align-items:center;gap:9px}
+#brain #growthScoreNumber{font:500 14px/1.5 Arial,sans-serif!important;color:#dce2ee!important}
+#brain .brain-status-dot{width:7px;height:7px;border-radius:50%;background:#8490a7}
+#brain .brain-label{margin-left:auto;font-size:11px;font-weight:400;color:#b7a3d9;border:1px solid #403250;border-radius:6px;padding:3px 8px}
+#brain #growthScoreNote{font:400 13px/1.6 Arial,sans-serif!important;color:#94a0b4!important;margin:8px 0 0!important}
+#brain .brain-empty{padding:28px 0 26px}
+#brain .brain-empty h3{font:500 20px/1.4 Arial,sans-serif!important;color:#e5e9f2!important;margin:0 0 10px!important}
+#brain .brain-empty p{font:400 14px/1.7 Arial,sans-serif!important;color:#9da9bd!important;margin:0;max-width:640px}
+#brain .brain-topics{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+#brain .brain-topics span{font:400 12px/1.5 Arial,sans-serif!important;color:#a5b0c2;background:#141923;border:1px solid #272e3b;border-radius:6px;padding:6px 10px}
+#brain .brain-report{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px;white-space:normal}
+#brain .brain-report-section{border:1px solid #2b3240;background:#10151e;border-radius:12px;padding:20px;min-width:0}
+#brain .brain-report h3{font:500 15px/1.5 Arial,sans-serif!important;color:#d8c8ef!important;margin:0 0 14px!important}
+#brain .brain-report p{font:400 14px/1.8 Arial,sans-serif!important;color:#b8c2d3!important;margin:0 0 12px!important;overflow-wrap:anywhere}
+#brain .brain-report-note,#brain .brain-footnote{font:400 12px/1.7 Arial,sans-serif!important;color:#8693a8!important;margin-top:18px}
+#brain .brain-footnote{border-top:1px solid #252b38;padding-top:14px}
+#brain [data-state="idle"] .brain-report,#brain [data-state="idle"] .brain-report-note,#brain [data-state="loading"] .brain-report,#brain [data-state="loading"] .brain-report-note{display:none}
+#brain [data-state="complete"] .brain-empty,#brain [data-state="error"] .brain-empty{display:none}
+#brain [data-state="loading"] .brain-status-dot{background:#b39add;animation:brain-pulse 1.2s ease-in-out infinite}
+#brain [data-state="complete"] .brain-status-dot{background:#84bca8}
+#brain [data-state="error"] .brain-status-dot{background:#d9a175}
+#brainAnalyzeBtn,#brainAnalyzeBtn *{font-weight:500!important;letter-spacing:normal!important}
+#brainAnalyzeBtn{min-height:52px!important;box-shadow:none!important;border-radius:10px!important;background:#7951ce!important}
+#brainAnalyzeBtn small{font-weight:400!important;opacity:.8}
+@keyframes brain-pulse{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){#brain .brain-status-dot{animation:none!important}}
+@media(max-width:650px){#brain{padding:18px!important}#brain .brain-report{grid-template-columns:1fr}#brain .brain-report-section{padding:16px}#brain .brain-empty h3{font-size:18px!important}}
 </style>
 </body>
 </html>
