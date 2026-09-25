@@ -4468,6 +4468,97 @@ let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.
 @media(prefers-reduced-motion:reduce){#brain .brain-status-dot{animation:none!important}}
 @media(max-width:650px){#brain{padding:18px!important}#brain .brain-report{grid-template-columns:1fr}#brain .brain-report-section{padding:16px}#brain .brain-empty h3{font-size:18px!important}}
 </style>
+  <style id="vira-typography">
+/* Police commune */
+body,
+button,
+input,
+textarea,
+select {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+
+/* Texte courant */
+body {
+  font-weight: 400 !important;
+  line-height: 1.6;
+}
+
+/* Titres des sections */
+.stage-title,
+.stage-title span,
+.vira-brain-title,
+.vira-brain-title span {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  letter-spacing: normal !important;
+}
+
+/* Titres des cartes */
+.action-card strong,
+.action-copy strong {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  letter-spacing: normal !important;
+}
+
+/* Descriptions */
+.stage-help,
+.action-copy > span,
+.visual-caption {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  letter-spacing: normal !important;
+}
+
+/* Navigation */
+.nav-item,
+.nav-item span {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+}
+
+/* Boutons */
+button,
+button strong,
+button b {
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+}
+
+/* Petites indications */
+.test-badge,
+.test-badge span,
+.premium-test-badge,
+.premium-test-badge span {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+}
+
+/* Brain : même police que le reste */
+#brain .brain-workspace,
+#brain .brain-workspace * {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+
+/* Téléphone */
+@media (max-width: 650px) {
+  .stage-title,
+  .stage-title span {
+    font-size: 19px !important;
+  }
+
+  .action-card strong,
+  .action-copy strong {
+    font-size: 16px !important;
+  }
+}
+</style>
 </body>
 </html>
 
