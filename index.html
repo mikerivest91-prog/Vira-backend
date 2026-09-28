@@ -3592,7 +3592,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
         if (active.length !== plans.length) writeViraPlans(active);
         let month = new Date(); month = new Date(month.getFullYear(), month.getMonth(),1);
         let editing = null;
-        body.innerHTML = `<form class="campaign-section" id="viraPlanForm"><h3 id="viraPlanHeading">Planifier une campagne</h3><div class="form-grid two"><div class="field-group"><label for="viraPlanCampaign">Campagne</label><select id="viraPlanCampaign" required></select></div><div class="field-group"><label for="viraPlanDate">Date et heure locales</label><input id="viraPlanDate" type="datetime-local" required step="60" aria-describedby="viraPlanZone"></div></div><p id="viraPlanZone"></p><div class="vira-plan-actions"><button class="vira-plan-button" type="submit" id="viraPlanSave">Planifier</button><button class="vira-calendar-button" type="button" id="viraPlanCancel" hidden>Annuler la modification</button></div></form><div class="vira-month-toolbar"><button class="vira-calendar-button" id="viraPrevMonth" type="button" aria-label="Mois précédent">←</button><h3 id="viraMonthTitle" aria-live="polite"></h3><button class="vira-calendar-button" id="viraNextMonth" type="button" aria-label="Mois suivant">→</button><button class="vira-calendar-button" id="viraToday" type="button">Aujourd’hui</button></div><div class="vira-month-grid" id="viraMonthGrid"></div><h3 id="viraPlanCount"></h3><div id="viraPlanList" class="campaign-list"></div>`;
+        body.innerHTML = `<form class="campaign-section" id="viraPlanForm"><h3 id="viraPlanHeading">Planifier une campagne</h3><div class="form-grid two"><div class="field-group"><label for="viraPlanCampaign">Campagne</label><select id="viraPlanCampaign" required></select></div><div class="field-group"><label for="viraPlanDate">Date et heure locales</label><input id="viraPlanDate" type="datetime-local" required step="60" aria-describedby="viraPlanZone"></div></div><p id="viraPlanZone"></p><div class="vira-plan-actions"><button class="vira-plan-button" type="submit" id="viraPlanSave"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18"/></svg>Planifier</button><button class="vira-calendar-button" type="button" id="viraPlanCancel" hidden>Annuler la modification</button></div></form><div class="vira-month-toolbar"><button class="vira-calendar-button" id="viraPrevMonth" type="button" aria-label="Mois précédent">←</button><h3 id="viraMonthTitle" aria-live="polite"></h3><button class="vira-calendar-button" id="viraNextMonth" type="button" aria-label="Mois suivant">→</button><button class="vira-calendar-button" id="viraToday" type="button">Aujourd’hui</button></div><div class="vira-month-grid" id="viraMonthGrid"></div><h3 id="viraPlanCount"></h3><div id="viraPlanList" class="campaign-list"></div>`;
         const form = body.querySelector("form");
         const select = body.querySelector("#viraPlanCampaign");
         const date = body.querySelector("#viraPlanDate");
@@ -3779,15 +3779,15 @@ const campaigns = data.campaigns || [];
       <div class="campaign-media">
         ${campaign.image
           ? `<img class="campaign-thumb" src="${campaign.image}" alt="Aperçu de ${escapeHtml(campaign.title || "Campagne")}">`
-          : `<div class="campaign-thumb campaign-thumb-placeholder" aria-hidden="true"><span class="campaign-placeholder-mark">V</span><span>VIRA</span></div>`}
+          : `<div class="campaign-thumb campaign-thumb-placeholder" aria-hidden="true"><svg class="campaign-document-icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div>`}
       </div>
       <div class="campaign-card-info">
         <strong data-user-content title="${escapeHtml(campaign.title || "Campagne Marketing")}">${escapeHtml(campaign.title || "Campagne Marketing")}</strong>
-      <span class="campaign-status">${campaign.status === "completed" ? "✓ Terminée" : campaign.status === "visuals_ready" ? "Visuels prêts" : "Brouillon"}</span><p class="campaign-description">${(() => { const text = String(campaign.scenario || "").replace(/\*\*/g, ""); const objective = text.match(/OBJECTIF\s*:?\s*([\s\S]*?)(?=\n\s*(?:PUBLIC CIBLE|ACCROCHE|TEXTE PUBLICATION|HASHTAGS|SC[ÈE]NE\s*1|NARRATION|APPEL À L['’]ACTION|PROMPT VISUEL|STYLE)\s*:?|$)/i)?.[1] || text; const clean = objective.replace(/^\s*(?:TITRE|OBJECTIF)\s*:?\s*/i, "").trim(); return escapeHtml(clean.slice(0, 132)) + (clean.length > 132 ? "…" : ""); })()}</p>
+      <span class="campaign-status" data-status="${campaign.status === "completed" ? "completed" : campaign.status === "visuals_ready" ? "visuals_ready" : "draft"}">${campaign.status === "completed" ? "✓ Terminée" : campaign.status === "visuals_ready" ? "Visuels prêts" : "Brouillon"}</span><p class="campaign-description">${(() => { const text = String(campaign.scenario || "").replace(/\*\*/g, ""); const objective = text.match(/OBJECTIF\s*:?\s*([\s\S]*?)(?=\n\s*(?:PUBLIC CIBLE|ACCROCHE|TEXTE PUBLICATION|HASHTAGS|SC[ÈE]NE\s*1|NARRATION|APPEL À L['’]ACTION|PROMPT VISUEL|STYLE)\s*:?|$)/i)?.[1] || text; const clean = objective.replace(/^\s*(?:TITRE|OBJECTIF)\s*:?\s*/i, "").trim(); return escapeHtml(clean.slice(0, 132)) + (clean.length > 132 ? "…" : ""); })()}</p>
         <p>${new Date(campaign.created_at || campaign.createdAt).toLocaleDateString(document.documentElement.lang === "en" ? "en-CA" : "fr-CA", { timeZone: "UTC" })}</p>
         <div class="vira-campaign-actions"><button type="button" class="campaign-resume">Ouvrir la campagne <span aria-hidden="true">→</span></button>
-<button type="button" class="vira-plan-button" data-campaign-index="${index}">Planifier</button>
-<button class="campaign-delete" data-campaign-index="${index}" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v5M14 11v5"/></svg><span>Supprimer</span></button></div>
+<button type="button" class="vira-plan-button" data-campaign-index="${index}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18"/></svg>Planifier</button>
+<details class="campaign-more"><summary aria-label="Autres actions">⋯</summary><div class="campaign-menu"><button class="campaign-delete" data-campaign-index="${index}" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v5M14 11v5"/></svg><span>Supprimer</span></button></div></details></div>
       </div>
       </div>
       </div>
@@ -4968,6 +4968,103 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
 })();
 
 </script>
-</body>
+<style>body .main .saved-campaign .vira-campaign-actions{justify-content:flex-end!important;gap:10px!important;border-top:1px solid #edf0f5;padding-top:18px!important;margin-top:10px!important}
+body .main .saved-campaign .vira-campaign-actions>button{min-height:44px!important;height:44px!important;padding:0 18px!important;border-radius:9px!important;font:600 14px/1.2 system-ui,sans-serif!important;flex:0 0 auto!important;width:auto!important;box-shadow:0 1px 2px #18203b0a!important;transition:background .15s,border-color .15s!important}
+body .main .saved-campaign .vira-campaign-actions>.campaign-resume{background:#ece8fa!important;border:1px solid #b9a9df!important;color:#443078!important}
+body .main .saved-campaign .vira-campaign-actions>.campaign-resume:hover{background:#e0d8f5!important;border-color:#8971bc!important}
+body .main .saved-campaign .vira-campaign-actions>.vira-plan-button{background:#f7f8fb!important;border:1px solid #bcc5d4!important;color:#344259!important}
+body .main .saved-campaign .vira-campaign-actions>.vira-plan-button:hover{background:#eaf0f7!important;border-color:#8594aa!important}
+.campaign-more{position:relative;flex:0 0 44px;cursor:default}
+.campaign-more summary{display:flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border:1px solid #c4ccda;border-radius:9px;background:#fff;color:#42516a;font:700 24px/1 system-ui;cursor:pointer;list-style:none}
+.campaign-more summary::-webkit-details-marker{display:none}
+.campaign-more summary:hover,.campaign-more[open] summary{background:#edf0f6}
+.campaign-menu{position:absolute;right:0;top:51px;z-index:30;width:204px;padding:6px;border:1px solid #e1e5ed;border-radius:10px;background:#fff;box-shadow:0 8px 24px #18203b24}
+body .main .saved-campaign .campaign-menu>.campaign-delete{position:static!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;transform:none!important;width:100%!important;height:42px!important;margin:0!important;padding:0 12px!important;border:0!important;border-radius:6px!important;background:white!important;color:#a62f40!important;font:600 14px system-ui!important}
+body .main .saved-campaign .campaign-menu>.campaign-delete:hover{background:#fff0f2!important}
+body .main .saved-campaign:has(.campaign-more[open]){overflow:visible!important;position:relative;z-index:5}
+.vira-campaign-actions :is(button,summary):focus-visible{outline:3px solid #927aca!important;outline-offset:3px!important}
+@media(max-width:650px){body .main .saved-campaign .vira-campaign-actions{justify-content:flex-start!important;gap:8px!important}body .main .saved-campaign .vira-campaign-actions>.campaign-resume{flex:1 1 100%!important}body .main .saved-campaign .vira-campaign-actions>.vira-plan-button{flex:1 1 auto!important}}
+body .main .saved-campaign:not(#unused) .vira-campaign-actions>.vira-plan-button{background:#f7f8fb!important;border:1px solid #bcc5d4!important;color:#344259!important}
+body .main .saved-campaign:not(#unused) .vira-campaign-actions>.vira-plan-button:hover{background:#eaf0f7!important;border-color:#8594aa!important}
+body .main .saved-campaign .campaign-thumb-placeholder{background:#f3f5f9!important;border:1px solid #e1e6ef!important;box-shadow:none!important;color:#61718b!important;border-radius:12px!important}
+body .main .saved-campaign .campaign-document-icon{display:block!important;color:#61718b!important;filter:none!important}
+</style><script>(()=>{
+ document.addEventListener('click',event=>{
+  const menu=event.target.closest('.campaign-more');
+  document.querySelectorAll('.campaign-more[open]').forEach(item=>{if(item!==menu)item.open=false});
+  if(menu && !event.target.closest('.campaign-delete'))event.stopPropagation();
+ },true);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.campaign-more[open]').forEach(item=>{item.open=false;item.querySelector('summary').focus()})});
+})();
+</script><style>/* Shared VIRA components. All application views use the same visual contract. */
+:root{--ui-bg:#f5f6f8;--ui-surface:#fff;--ui-text:#253047;--ui-muted:#59677b;--ui-border:#dde3eb;--ui-accent:#594580;--ui-tint:#f0ecf7;--ui-radius:12px}
+body:not(#legacy-theme){font-family:"Segoe UI",Arial,sans-serif!important;color:var(--ui-text)!important;background:var(--ui-bg)!important}
+body:not(#legacy-theme) .app-shell,body:not(#legacy-theme) .main{background:var(--ui-bg)!important}
+body:not(#legacy-theme) .main :is(.box,.stage,.campaign-section,.vh-panel,.vh-stat,.vs-summary,.vs-preview-empty,.vs-export-empty){background:var(--ui-surface)!important;border:1px solid var(--ui-border)!important;border-radius:var(--ui-radius)!important;box-shadow:none!important}
+body:not(#legacy-theme) .main>.box{max-width:1240px!important;margin:0 auto!important;background:transparent!important;border:0!important;padding:8px 0!important}
+body:not(#legacy-theme) .main :is(h1,h2,h3,h4){color:var(--ui-text)!important;letter-spacing:-.025em!important}
+body:not(#legacy-theme) .main :is(p,small){color:var(--ui-muted)!important;line-height:1.65!important}
+body:not(#legacy-theme) .main .section-head{padding:0 0 22px!important;margin-bottom:4px!important}
+body:not(#legacy-theme) .main .section-head h2{font-size:28px!important;font-weight:650!important}
+body:not(#legacy-theme) .main .eyebrow{color:#746883!important;font-size:10px!important;letter-spacing:1.4px!important}
+body:not(#legacy-theme) .pro-sidebar{border-color:var(--ui-border)!important;background:white!important}
+body:not(#legacy-theme) .sidebar-link{border:1px solid transparent!important;border-radius:8px!important;min-height:44px!important;font-size:13px!important;color:#536177!important;transition:background .15s}
+body:not(#legacy-theme) .sidebar-link.active{color:#594580!important;background:var(--ui-tint)!important;border-color:#e4ddef!important;font-weight:600!important}
+body:not(#legacy-theme) .sidebar-link:hover{background:#f3f4f7!important}
+body:not(#legacy-theme) :is(.pro-plan,.auth-account,.credit-badge){box-shadow:none!important;border:1px solid var(--ui-border)!important;border-radius:10px!important;background:#fff!important}
+body:not(#legacy-theme) .main :is(input,select,textarea){border:1px solid #bac4d2!important;background:white!important;color:var(--ui-text)!important;border-radius:8px!important}
+body:not(#legacy-theme) .main :is(button,a.download-link):not(.sidebar-link):not(.marketing-choice):not(.action-card):not(.vh-link):not(.vira-day-event):not([role=tab]){font-size:13px!important;font-weight:600!important;line-height:1.4!important;box-shadow:none!important;text-shadow:none!important;border-radius:8px!important;min-height:42px}
+/* Actions: tinted primary, neutral secondary; no neon or gradient fills. */
+body:not(#legacy-theme):not(#legacy-buttons) .main :is(.primary-cta,.vira-plan-button,.vb-cta,.studio-download,.vh-create,#newCampaignBtn,#brainAnalyzeBtn,#vsNext,.photo-replace,.download-link){background:var(--ui-tint)!important;background-image:none!important;border:1px solid #b6a7cf!important;color:#49376e!important;box-shadow:none!important;padding:10px 16px!important}
+body:not(#legacy-theme):not(#legacy-buttons) .main :is(.primary-cta,.studio-download,#newCampaignBtn,#brainAnalyzeBtn) :is(span,strong,small,p){color:#49376e!important}
+body:not(#legacy-theme):not(#legacy-buttons) .main :is(.vira-calendar-button,.vs-export-link,.vs-export-empty button,.vs-footer button,.media-mode-tabs button){background:#f8f9fb!important;border:1px solid #bac4d2!important;color:#35445b!important;padding:10px 14px!important}
+body:not(#legacy-theme):not(#legacy-buttons) .main :is(button,a.download-link):hover:not(:disabled):not(.marketing-choice):not(.action-card):not([role=tab]){filter:brightness(.97)}
+body:not(#legacy-theme) :is(button,summary,a,input,select,textarea):focus-visible{outline:3px solid #947ab7!important;outline-offset:3px!important}
+body:not(#legacy-theme) .main button:disabled{opacity:.5!important;cursor:not-allowed!important;filter:none!important}
+body:not(#legacy-theme) .main :is(.stage-icon,.choice-icon,.action-icon,.premium-action-icon,.campaign-heading-icon){background:#f3f4f8!important;border:1px solid #e0e4ec!important;border-radius:8px!important;box-shadow:none!important;color:#66748a!important;filter:none!important}
+body:not(#legacy-theme) .main :is(.stage-icon,.choice-icon,.action-icon,.premium-action-icon,.campaign-heading-icon) svg{stroke:currentColor!important;color:#66748a!important;filter:none!important}
+body:not(#legacy-theme) .main :is(.campaign-status,.brief-ready,.studio-ready){font-size:12px!important;font-weight:500!important;border-radius:6px!important;background:#edf6f0!important;color:#296147!important;border:1px solid #d5e8dc!important;padding:4px 8px!important}
+body:not(#legacy-theme) .main .saved-campaign{padding:20px!important;transition:border-color .15s!important}
+body:not(#legacy-theme) .main .saved-campaign:hover{border-color:#b9c4d4!important;transform:none!important;box-shadow:none!important}
+body:not(#legacy-theme) .main .saved-campaign .campaign-card-info>strong{font-size:15px!important;line-height:1.5!important}
+body:not(#legacy-theme) .main .campaign-count{font-size:13px!important;background:#eaeef4!important;border-color:#dce3ee!important;color:#536177!important}
+body:not(#legacy-theme) .main .vh-heading h1{font-size:28px!important}
+body:not(#legacy-theme) .main .vh-stat{padding:20px!important}
+body:not(#legacy-theme) .main .vh-stat strong{font-size:30px!important;font-variant-numeric:tabular-nums}
+body:not(#legacy-theme) .main .vh-stat span{font-size:12px!important;min-height:0!important;color:#59677b!important}
+body:not(#legacy-theme) .main .vh-panel-head{background:#fafbfc!important;padding:16px 20px!important}
+body:not(#legacy-theme) .main .vh-panel-head h2{font-size:16px!important}
+body:not(#legacy-theme) .main .vh-actions{gap:8px!important}
+body:not(#legacy-theme):not(#legacy-buttons) .main .vh-actions .vira-plan-button{background:#f8f9fb!important;border-color:#bac4d2!important;color:#35445b!important}
+body:not(#legacy-theme) .main .library-card{margin-top:16px!important;padding:22px!important}
+body:not(#legacy-theme) .main .library-card summary{padding:12px 0!important;color:#49376e!important;font-size:14px!important;cursor:pointer}
+body:not(#legacy-theme) .main .library-text{white-space:pre-wrap!important;overflow-wrap:anywhere!important;font:14px/1.7 "Segoe UI",sans-serif!important;padding:16px!important;background:#f7f8fa!important;border:1px solid var(--ui-border)!important;border-radius:8px!important;color:var(--ui-text)!important}
+body:not(#legacy-theme) .main .library-scene{background:white!important;border:1px solid var(--ui-border)!important;border-radius:10px!important;overflow:hidden!important;box-shadow:none!important}
+body:not(#legacy-theme) .main .campaign-card{padding:20px!important;background:#f8f9fb!important;border:1px solid var(--ui-border)!important;border-radius:10px!important;color:var(--ui-text)!important}
+body:not(#legacy-theme) .main .vira-day{border-color:var(--ui-border)!important;border-radius:8px!important;background:#fff!important}
+body:not(#legacy-theme) .main .vira-day-today{background:#f3eff8!important;border-color:#9a84b7!important}
+body:not(#legacy-theme) .main .vira-day-event{background:#eee8f6!important;border:1px solid #d5c9e4!important;color:#49376e!important;border-radius:5px!important;font-size:12px!important;min-height:30px!important}
+body:not(#legacy-theme) .main .vs-steps button{font-size:13px!important}
+body:not(#legacy-theme) .main .vs-steps button[aria-selected=true]{color:#594580!important;border-color:#796198!important}
+body:not(#legacy-theme) .main .vs-local{background:#edf0f5!important;color:#59677b!important;border-radius:6px!important}
+body:not(#legacy-theme) .main .marketing-choice.active,body:not(#legacy-theme) .main .marketing-choice.selected{background:#f2eef7!important;border-color:#b7a5d0!important}
+body:not(#legacy-theme) .main .action-card:hover{background:#f8f6fb!important;border-color:#b7a5d0!important}
+body:not(#legacy-theme) .main #platformTip{background:#f6f7fa!important;border-color:#dce2eb!important;color:#536177!important}
+body:not(#legacy-theme) .vira-auth-gate .auth-submit{background:#ede8f5!important;border:1px solid #b6a7cf!important;color:#49376e!important;border-radius:8px!important;box-shadow:none!important}
+body:not(#legacy-theme) .mobile-nav{box-shadow:0 -2px 12px #25304706!important;border-color:var(--ui-border)!important;border-radius:14px!important}
+@media(max-width:650px){body:not(#legacy-theme) .main .section-head h2,body:not(#legacy-theme) .main .vh-heading h1{font-size:24px!important}body:not(#legacy-theme) .main .vh-stats{grid-template-columns:1fr!important;gap:8px!important}body:not(#legacy-theme) .main .vh-stat{padding:12px 16px!important;display:flex;align-items:center;justify-content:space-between}body:not(#legacy-theme) .main .vh-stat strong{font-size:24px!important;margin:0!important}body:not(#legacy-theme) .main .saved-campaign{padding:16px!important}body:not(#legacy-theme) .main .library-card{padding:16px!important}}
+@media(prefers-reduced-motion:reduce){body *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+/* Final semantic variants and empty views. */
+body:not(#legacy-theme):not(#legacy-buttons):not(#legacy-priority) .main :is(.vh-actions,.vira-campaign-actions) .vira-plan-button{background:#f7f8fb!important;border-color:#bac4d2!important;color:#35445b!important}
+body:not(#legacy-theme):not(#legacy-buttons):not(#legacy-priority) .main .vh-actions .vira-calendar-button{background:var(--ui-tint)!important;border-color:#b6a7cf!important;color:#49376e!important}
+body:not(#legacy-theme) .main .campaign-status[data-status=draft]{background:#edf0f5!important;border-color:#dce2eb!important;color:#536177!important}
+body:not(#legacy-theme) .main .campaign-status[data-status=visuals_ready]{background:#edf3fa!important;border-color:#d5e2f1!important;color:#3c6187!important}
+body:not(#legacy-theme) .main .library-view>p:last-child:not(:first-of-type){padding:30px!important;background:white!important;border:1px dashed #cdd5e2!important;border-radius:12px!important;margin-top:24px!important}
+body:not(#legacy-theme) .main .library-view>h2{font-size:28px!important;margin:10px 0!important}
+body:not(#legacy-theme) .main .library-view>p{font-size:14px!important}
+body:not(#legacy-theme) .auth-avatar{background:#ede8f5!important;color:#594580!important;box-shadow:none!important;border:1px solid #ddd3eb!important}
+body:not(#legacy-theme) .main #scenarioResult .brief-field h4{color:#594580!important}
+body:not(#legacy-theme) .main .vh-link{color:#594580!important}
+</style></body>
 </html>
 
