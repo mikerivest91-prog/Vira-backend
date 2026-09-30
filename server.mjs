@@ -262,6 +262,12 @@ async function requireAuth(req, res, next) {
 
 // Administrative access is controlled by the server environment, never by the browser.
 const ADMIN_EMAIL = normalizeEmail(process.env.ADMIN_EMAIL || "");
+// Explicitly enabled, bounded allowance for owner video assembly tests only.
+// Identity comes from requireAuth, never from request body or browser storage.
+function videoQuotaFor(user) {
+  const ownerTesting = process.env.OWNER_VIDEO_TEST_MODE === "true" && Boolean(ADMIN_EMAIL) && normalizeEmail(user?.email || "") === ADMIN_EMAIL;
+  return { limit: ownerTesting ? 100 : 4, ownerTesting };
+}
 async function requireAdmin(req, res, next) {
   return requireAuth(req, res, () => {
     if (!ADMIN_EMAIL || normalizeEmail(req.user.email) !== ADMIN_EMAIL) {
@@ -386,16 +392,18 @@ async function reserveImageSlots(userId, quantity = 1) {
   finally { db.release(); }
 }
 
-async function reserveVideoSlot(userId) {
+async function reserveVideoSlot(user) {
+  const userId = user.id;
+  const quota = videoQuotaFor(user);
   const db = await pool.connect();
   try {
     await db.query("BEGIN");
     await db.query("SELECT pg_advisory_xact_lock(91343, $1::integer)", [userId]);
     const { rows } = await db.query("SELECT COUNT(*)::int AS count FROM vira_video_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date", [userId]);
-    if (rows[0].count >= 4) { await db.query("ROLLBACK"); return { ok:false }; }
+    if (rows[0].count >= quota.limit) { await db.query("ROLLBACK"); return { ok:false, ...quota }; }
     const inserted = await db.query("INSERT INTO vira_video_usage(user_id) VALUES($1) RETURNING id", [userId]);
     await db.query("COMMIT");
-    return { ok:true, id: inserted.rows[0].id };
+    return { ok:true, id: inserted.rows[0].id, ...quota };
   } catch (error) { await db.query("ROLLBACK").catch(()=>{}); throw error; }
   finally { db.release(); }
 }
@@ -1054,14 +1062,14 @@ app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
       audioPath=audioFile(AUDIO_TEMP_DIR,req.user.id,req.body.audioId);
       duration=await wavDuration(audioPath);
     } catch { return res.status(400).json({ok:false,error:"Un clip ou la narration a expiré. Importez les clips ou préparez la voix de nouveau."}); }
-    const usage=await reserveVideoSlot(req.user.id);
-    if (!usage.ok) return res.status(429).json({ok:false,error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter."});
+    const usage=await reserveVideoSlot(req.user);
+    if (!usage.ok) return res.status(429).json({ok:false,error:`Limite atteinte : ${usage.limit} vidéos maximum par mois${usage.ownerTesting ? " en mode test propriétaire" : " avec VIRA Starter"}.`});
     let fitted;
     try {
       fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
       const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition);
       await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
-      return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:4}});
+      return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:usage.limit,ownerTesting:usage.ownerTesting}});
     } catch(error) {
       await pool.query("DELETE FROM vira_video_usage WHERE id=$1",[usage.id]).catch(()=>{});
       console.error("CLIP ASSEMBLY ERROR:",error);
@@ -1125,8 +1133,8 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     try { audioPath = audioFile(AUDIO_TEMP_DIR, req.user.id, req.body.audioId); duration = await wavDuration(audioPath); }
     catch { return res.status(400).json({ok:false,error:"La narration a expiré ou est invalide. Préparez-la de nouveau."}); }
   }
-  const usage = await reserveVideoSlot(req.user.id);
-  if (!usage.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 4 vidéos maximum par mois avec VIRA Starter." });
+  const usage = await reserveVideoSlot(req.user);
+  if (!usage.ok) return res.status(429).json({ ok:false, error:`Limite atteinte : ${usage.limit} vidéos maximum par mois${usage.ownerTesting ? " en mode test propriétaire" : " avec VIRA Starter"}.` });
   // Three short dissolves overlap the clips without shortening the narration.
   const transition = { fade: 0.3, clipDuration: Math.ceil(((Math.max(2, duration) + 0.9) / 4) * 30) / 30 };
   const temporaryFiles = [];
@@ -1145,7 +1153,7 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
 const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, null);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
-    return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: 4 } });
+    return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
     console.error("FREE VIDEO ASSEMBLY ERROR:", error);
@@ -1161,7 +1169,8 @@ app.get("/api/usage", requireAuth, async (req, res) => {
     const { rows } = await pool.query(`SELECT
       (SELECT COUNT(*)::int FROM vira_video_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date) AS videos,
       (SELECT COALESCE(SUM(quantity),0)::int FROM vira_image_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date) AS images`, [req.user.id]);
-    res.json({ videos: { remaining: Math.max(0, 4 - rows[0].videos) }, images: { remaining: Math.max(0, 16 - rows[0].images) } });
+    const quota = videoQuotaFor(req.user);
+    res.json({ videos: { remaining: Math.max(0, quota.limit - rows[0].videos), limit: quota.limit, ownerTesting: quota.ownerTesting }, images: { remaining: Math.max(0, 16 - rows[0].images), limit: 16 } });
   } catch (error) {
     res.status(500).json({ error: "Utilisation indisponible" });
   }
