@@ -1156,8 +1156,11 @@ const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, null); 
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
-    console.error("FREE VIDEO ASSEMBLY ERROR:", error);
-    return res.status(500).json({ ok: false, error: "Impossible de créer la vidéo gratuite. Réessayez dans un instant." });
+    console.error("FREE VIDEO ASSEMBLY ERROR:", error?.stack || error);
+    const message = usage.ownerTesting && error?.message
+      ? `Test vidéo : ${String(error.message).slice(0, 220)}`
+      : "Impossible de créer la vidéo gratuite. Réessayez dans un instant.";
+    return res.status(500).json({ ok: false, error: message });
   } finally {
     await Promise.allSettled(temporaryFiles.map(file => fs.promises.unlink(file)));
   }
