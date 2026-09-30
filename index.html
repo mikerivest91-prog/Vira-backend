@@ -3692,76 +3692,37 @@ els.navHome?.addEventListener("click", () => {
 });
 
 els.navContent?.addEventListener("click", async () => {
-  document.querySelector(".mobile-nav .active")?.classList.remove("active");
-  els.navContent?.classList.add("active");
-  document.querySelectorAll(".sidebar-link").forEach(item => {
-    item.classList.toggle("active", item.dataset.navigationLabel === "Bibliothèque");
-  });
-  const main = document.querySelector("main");
-  main.innerHTML = '<section class="box library-view"><span class="eyebrow">VIRA WORKSPACE</span><h2>Mes contenus</h2><p role="status">Chargement des contenus…</p></section>';
-  const view = main.querySelector(".library-view");
-  const mediaUrl = (value, image = false) => {
-    if (typeof value !== "string" || !value.trim()) return "";
-    if (image && /^data:image\/(?:png|jpeg|webp|gif|svg\+xml);/i.test(value)) return value;
-    try {
-      const url = new URL(value, window.location.href);
-      return ["http:", "https:"].includes(url.protocol) ? url.href : "";
-    } catch { return ""; }
-  };
-  try {
-    const response = await fetch("/api/campaigns", { credentials: "same-origin" });
-    if (!response.ok) throw new Error("Impossible de charger les contenus.");
-    const data = await response.json();
-    if (!Array.isArray(data.campaigns)) throw new Error("Réponse invalide.");
-    if (!view.isConnected) return;
-    const cards = data.campaigns.map(campaign => {
-      const saved = campaign.campaign_data || {};
-      const scenario = String(saved.scenario || campaign.scenario || "");
-      const scenes = parseScenario(scenario).scenes || [];
-      const images = (Array.isArray(saved.generatedImages) ? saved.generatedImages : [campaign.image])
-        .map((value, index) => ({ url: mediaUrl(value, true), index }))
-        .filter(image => image.url);
-      const video = mediaUrl(saved.videoUrl || campaign.videoUrl);
-      if (!scenario.trim() && !images.length && !video) return "";
-      return '<article class="campaign-section library-card">' +
-        '<h3 data-user-content>' + escapeHtml(campaign.title || "Campagne") + '</h3>' +
-        (scenario.trim() ? '<details><summary>Scénario et textes</summary><pre data-user-content class="library-text">' + escapeHtml(scenario) + '</pre></details>' : '') +
-        (images.length ? '<h4>Visuels (' + images.length + ')</h4><div class="library-images">' + images.map(({url, index}) =>
-          '<figure class="library-scene"><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le visuel ' + (index + 1) + '"><img loading="lazy" src="' + escapeHtml(url) + '" alt="Visuel ' + (index + 1) + '"><span class="library-scene-number">SCÈNE ' + (index + 1) + '</span></a><figcaption><p data-user-content>' + escapeHtml(scenes[index] || "Description non disponible pour cette scène.") + '</p></figcaption></figure>'
-        ).join('') + '</div>' : '') +
-        (video ? '<h4>Vidéo finale</h4><video controls preload="none" class="video-player" src="' + escapeHtml(video) + '"></video><a class="download-link" href="' + escapeHtml(video) + '" target="_blank" rel="noopener noreferrer" download>Télécharger la vidéo</a>' : '') +
-        '</article>';
-    }).filter(Boolean);
-    view.innerHTML = '<span class="eyebrow">VIRA WORKSPACE</span><h2>Mes contenus</h2><p>Retrouvez les textes, visuels et vidéos de vos campagnes sauvegardées.</p>' +
-      (cards.length ? '<div class="campaign-list">' + cards.join('') + '</div>' : '<p>Aucun contenu sauvegardé pour le moment.</p>');
-    window.scrollTo(0, 0);
-  } catch (error) {
-    if (!view.isConnected) return;
-    view.innerHTML = '<h2>Mes contenus</h2><p role="alert">Impossible de charger les contenus pour le moment.</p><button type="button">Réessayer</button>';
-    view.querySelector("button").addEventListener("click", () => els.navContent.click());
+ const main=document.querySelector('main');
+ const en=()=>document.documentElement.lang==='en';const t=(fr,eng)=>en()?eng:fr;
+ const make=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node};
+ const root=make('section','vr-library');main.replaceChildren(root);
+ const header=make('header','vr-page-head');header.append(make('span','vr-kicker',t('ESPACE DE TRAVAIL','WORKSPACE')),make('h1','',t('Bibliothèque','Library')),make('p','',t('Vos textes, images et vidéos, réunis par campagne.','Your copy, images and videos, organized by campaign.')));root.append(header);
+ const state=make('p','vr-empty',t('Chargement de vos contenus…','Loading your content…'));state.setAttribute('role','status');root.append(state);
+ document.querySelectorAll('.sidebar-link').forEach(n=>n.classList.toggle('active',n.dataset.navigationLabel==='Bibliothèque'));
+ document.querySelector('.mobile-nav .active')?.classList.remove('active');els.navContent.classList.add('active');window.scrollTo(0,0);
+ const safeUrl=(value,image=false)=>{if(typeof value!=='string')return '';if(image&&/^data:image\/(png|jpeg|webp|gif|svg\+xml);/i.test(value))return value;try{const u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:''}catch{return ''}};
+ const isPreview=value=>{try{if(!value.startsWith('data:'))return false;const comma=value.indexOf(',');const data=value.slice(comma+1);const decoded=value.slice(0,comma).includes(';base64')?atob(data):decodeURIComponent(data);return decoded.includes('VIRA PREMIUM')&&decoded.includes('MODE TEST GRATUIT')}catch{return false}};
+ function viewImage(url,label){const dialog=make('dialog','vr-lightbox');const top=make('div','vr-dialog-head');top.append(make('h2','',label));const close=make('button','vr-button','×');close.setAttribute('aria-label',t('Fermer l’aperçu','Close preview'));close.onclick=()=>dialog.close();top.append(close);const image=make('img');image.src=url;image.alt=label;dialog.append(top,image);document.body.append(dialog);dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});dialog.addEventListener('close',()=>dialog.remove(),{once:true});dialog.showModal();}
+ try{
+  const response=await fetch('/api/campaigns',{credentials:'same-origin'});if(!response.ok)throw Error();const data=await response.json();if(!Array.isArray(data.campaigns))throw Error();if(!root.isConnected)return;state.remove();
+  const entries=data.campaigns.map(c=>{const d=c.campaign_data||{};return {c,scenario:String(d.scenario||c.scenario||''),images:(Array.isArray(d.generatedImages)?d.generatedImages:[c.image]).map((src,i)=>({src:safeUrl(src,true),i})).filter(i=>i.src),video:safeUrl(d.videoUrl||c.videoUrl)}}).filter(e=>e.scenario.trim()||e.images.length||e.video);
+  const tools=make('div','vr-toolbar');const label=make('label','vr-search');label.append(make('span','',t('Rechercher une campagne','Search campaigns')));const search=make('input');search.type='search';search.placeholder=t('Nom ou contenu de la campagne…','Campaign name or content…');label.append(search);const filterLabel=make('label','vr-filter');filterLabel.append(make('span','',t('Type de contenu','Content type')));const select=make('select');[['all',t('Tous les contenus','All content')],['images',t('Avec images','With images')],['video',t('Avec vidéo','With video')],['text',t('Avec textes','With copy')]].forEach(([v,l])=>{const o=make('option','',l);o.value=v;select.append(o)});filterLabel.append(select);tools.append(label,filterLabel);root.append(tools);
+  const count=make('p','vr-count');count.setAttribute('role','status');root.append(count);const list=make('div','vr-library-list');root.append(list);
+  function render(){list.replaceChildren();const q=search.value.trim().toLocaleLowerCase();const found=entries.filter(e=>(String(e.c.title||'')+' '+e.scenario).toLocaleLowerCase().includes(q)&&(select.value==='all'||select.value==='images'&&e.images.length||select.value==='video'&&e.video||select.value==='text'&&e.scenario.trim()));count.textContent=found.length+' '+t('campagne(s)','campaign(s)');if(!found.length){list.append(make('div','vr-empty',entries.length?t('Aucun résultat. Modifiez votre recherche ou le filtre.','No results. Change your search or filter.'):t('Votre bibliothèque est vide. Les contenus enregistrés de vos campagnes apparaîtront ici.','Your library is empty. Saved campaign content will appear here.')));return}
+   found.forEach(({c,scenario,images,video})=>{
+    const card=make('article','vr-library-card');const heading=make('header','vr-card-head');const title=make('h2','vr-title',c.title||t('Campagne sans titre','Untitled campaign'));title.dataset.userContent='';heading.append(title);const meta=make('p','vr-meta',[images.length+' '+t('image(s)','image(s)'),video?t('1 vidéo','1 video'):null,scenario?t('Textes disponibles','Copy available'):null].filter(Boolean).join(' · '));heading.append(meta);card.append(heading);
+    const brief=make('details','vr-details');brief.append(make('summary','',t('Lire le brief complet','Read full brief')));const full=make('p','',c.title||'');full.dataset.userContent='';brief.append(full);card.append(brief);
+    if(images.length){const gallery=make('div','vr-gallery');const scenes=parseScenario(scenario).scenes||[];images.forEach(({src,i})=>{const figure=make('figure','vr-media');const button=make('button','vr-preview');button.type='button';button.setAttribute('aria-label',t('Agrandir le visuel ','Enlarge image ')+(i+1));const img=make('img');img.src=src;img.alt=t('Visuel ','Image ')+(i+1);img.loading='lazy';button.append(img);button.onclick=()=>viewImage(src,img.alt);img.onerror=()=>{button.disabled=true;button.replaceChildren(make('span','vr-media-error',t('Image indisponible','Image unavailable')))};figure.append(button);const caption=make('figcaption');const row=make('div','vr-media-meta');row.append(make('strong','',t('Scène ','Scene ')+(i+1)));const link=make('a','vr-text-link',t('Ouvrir','Open'));link.href=src;link.target='_blank';link.rel='noopener noreferrer';row.append(link);caption.append(row);if(isPreview(src))caption.append(make('span','vr-preview-badge',t('Aperçu de test · à remplacer','Test preview · replace before publishing')));if(scenes[i]){const details=make('details','vr-details');details.append(make('summary','',t('Description de la scène','Scene description')));const p=make('p','',scenes[i]);p.dataset.userContent='';details.append(p);caption.append(details)}figure.append(caption);gallery.append(figure)});card.append(gallery)}
+    if(scenario.trim()){const text=make('details','vr-details vr-copy');text.append(make('summary','',t('Scénario et textes','Script and copy')));const pre=make('pre','',scenario);pre.dataset.userContent='';text.append(pre);card.append(text)}
+    if(video){const wrap=make('section','vr-video');wrap.append(make('h3','',t('Vidéo enregistrée','Saved video')));const player=make('video');player.controls=true;player.preload='metadata';player.src=video;const status=make('p','vr-meta',t('Chargement de la vidéo…','Loading video…'));status.setAttribute('role','status');player.onloadedmetadata=()=>status.textContent=t('Vidéo disponible','Video available');player.onerror=()=>status.textContent=t('Impossible de charger cette vidéo. Le fichier est peut-être indisponible.','Unable to load this video. The file may be unavailable.');const a=make('a','vr-button',t('Ouvrir la vidéo','Open video'));a.href=video;a.target='_blank';a.rel='noopener noreferrer';wrap.append(player,status,a);card.append(wrap)}
+    list.append(card);
+   });
   }
+  search.addEventListener('input',render);select.addEventListener('change',render);render();
+ }catch{if(!root.isConnected)return;state.textContent=t('Impossible de charger la bibliothèque. Vos contenus sont conservés.','Unable to load the library. Your content is preserved.');const retry=make('button','vr-button',t('Réessayer','Try again'));retry.onclick=()=>els.navContent.click();root.append(retry)}
 });
-    els.navSettings?.addEventListener("click", () => {
-  document.querySelector(".mobile-nav .active")?.classList.remove("active");
-  els.navSettings?.classList.add("active");
 
-  document.querySelector("main").innerHTML = `
-    <section class="box">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow">VIRA WORKSPACE</span>
-          <h2>Réglages</h2>
-          <p>Gérez votre compte, vos préférences et votre utilisation de VIRA.</p>
-        </div>
-      </div>
-
-      <div class="campaign-section">
-        <strong>Compte & préférences</strong>
-        <p>Les paramètres de votre espace VIRA apparaîtront ici.</p>
-      </div>
-    </section>
-  `;
-});
+els.navSettings?.addEventListener("click", () => window.viraSettings());
 els.navCampaigns?.addEventListener("click", async () => {
       document.querySelector(".mobile-nav .active")?.classList.remove("active");
 els.navCampaigns?.classList.add("active");
@@ -3813,6 +3774,7 @@ const campaigns = data.campaigns || [];
     </section>
   `;
 window.scrollTo(0, 0);
+window.viraCampaignTools?.();
 document.querySelectorAll(".vira-plan-button").forEach(button => {
   button.addEventListener("click", event => {
     event.stopPropagation();
@@ -3820,7 +3782,7 @@ document.querySelectorAll(".vira-plan-button").forEach(button => {
   });
 });
 document.querySelectorAll(".saved-campaign").forEach((card) => {
-  card.addEventListener("click", () => {
+  card.addEventListener("click", (event) => { if(!event.target.closest(".campaign-resume"))return;
     const index = Number(card.dataset.campaignIndex);
     const campaign = campaigns[index];
 if (!campaign) return;
@@ -4335,7 +4297,7 @@ picker.addEventListener('change',()=>{language=picker.value;try{localStorage.set
 </style>
 <script>
 (()=>{const boxes=[document.querySelector('.credit-badge'),document.querySelector('.sidebar-credits')].filter(Boolean);const fallback=document.getElementById('sidebarCreditCount')?.parentElement;if(fallback&&!boxes.includes(fallback))boxes.push(fallback);
-function show(data){const en=document.documentElement.lang==='en';for(const el of boxes)el.innerHTML=data?'<span class="quota-values">'+data.videos.remaining+'/4 '+(en?'videos':'vidéos')+' · '+data.images.remaining+'/16 '+(en?'AI images':'images IA')+'</span>':'<span class="quota-label">'+(en?'Usage unavailable':'Utilisation indisponible')+'</span>';}
+function show(data){if(!Number.isFinite(data?.videos?.remaining)||!Number.isFinite(data?.images?.remaining))data=null;const en=document.documentElement.lang==='en';for(const el of boxes)el.innerHTML=data?'<span class="quota-values">'+data.videos.remaining+'/4 '+(en?'videos':'vidéos')+' · '+data.images.remaining+'/16 '+(en?'AI images':'images IA')+'</span>':'<span class="quota-label">'+(en?'Usage unavailable':'Utilisation indisponible')+'</span>';}
 let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{usage=d;show(d)}).catch(()=>show());new MutationObserver(()=>show(usage)).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});})();
 </script>
 <style>html[lang="en"] .action-card:disabled::after,html[lang="en"] .action-card:disabled::before{content:"Locked"}</style>
@@ -5065,6 +5027,56 @@ body:not(#legacy-theme) .main .library-view>p{font-size:14px!important}
 body:not(#legacy-theme) .auth-avatar{background:#ede8f5!important;color:#594580!important;box-shadow:none!important;border:1px solid #ddd3eb!important}
 body:not(#legacy-theme) .main #scenarioResult .brief-field h4{color:#594580!important}
 body:not(#legacy-theme) .main .vh-link{color:#594580!important}
-</style></body>
+</style><style>/* Owned components: library, filters, settings and navigation. */
+.vr-library,.vr-settings{max-width:1240px;margin:auto;color:#253047}
+.vr-page-head{margin:8px 0 28px}.vr-page-head h1{margin:8px 0!important;font-size:28px!important}.vr-page-head p{font-size:14px!important;margin:0!important}.vr-kicker{font-size:10px;letter-spacing:1.4px;color:#746883}
+.vr-toolbar{display:flex;align-items:end;gap:16px;margin:0 0 14px;padding:18px;background:#fff;border:1px solid #dde3eb;border-radius:12px}
+.vr-search{display:flex;flex:1;flex-direction:column;gap:7px;min-width:0}.vr-filter{display:flex;flex-direction:column;gap:7px;min-width:185px}.vr-toolbar label span,.vr-panel label span{font-size:12px;font-weight:600;color:#536177}.vr-toolbar input,.vr-toolbar select,.vr-panel select{width:100%;height:44px;box-sizing:border-box}.vr-count{font-size:12px!important;margin:12px 0!important}
+.vr-library-list{display:grid;gap:24px}.vr-library-card{background:#fff;border:1px solid #dde3eb;border-radius:14px;padding:24px;min-width:0}.vr-card-head h2{font-size:19px!important;line-height:1.5!important;margin:0 0 8px!important;overflow-wrap:anywhere}.vr-title{display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.vr-meta{font-size:12px!important;margin:6px 0!important;color:#66748a!important}
+.vr-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}.vr-media{margin:0;border:1px solid #dde3eb;border-radius:10px;overflow:hidden;min-width:0;background:#fff}.vr-preview{display:flex;align-items:center;justify-content:center;width:100%;height:240px;padding:12px;border:0;border-bottom:1px solid #dde3eb;border-radius:0!important;background:#f4f5f8;cursor:zoom-in}.vr-preview img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}.vr-media figcaption{padding:14px}.vr-media-meta{display:flex;justify-content:space-between;align-items:center;gap:8px}.vr-media-meta strong{font-size:13px}.vr-text-link{color:#594580;text-decoration:underline;text-underline-offset:3px;font-size:12px}.vr-preview-badge{display:block;margin-top:10px;padding:6px 8px;font-size:11px;line-height:1.5;color:#76572d;background:#fbf4e7;border-radius:5px}.vr-media-error{font-size:13px;color:#647186}
+.vr-details{margin:12px 0;color:#536177}.vr-details summary{cursor:pointer;font-size:13px;font-weight:500;line-height:1.6;padding:5px 0}.vr-details p,.vr-details pre{font:14px/1.7 "Segoe UI",sans-serif!important;white-space:pre-wrap;overflow-wrap:anywhere;color:#536177!important}.vr-copy{border-top:1px solid #e6eaf0;padding-top:14px}.vr-copy pre{background:#f7f8fa;border-radius:8px;padding:18px;max-height:480px;overflow:auto}.vr-empty{background:#fff;padding:32px;border:1px dashed #cbd4e0;border-radius:12px;font-size:14px}.vr-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;box-sizing:border-box;padding:10px 16px;border:1px solid #bac4d2;border-radius:8px;background:#f8f9fb;color:#35445b;font:600 13px/1.4 "Segoe UI",sans-serif;cursor:pointer;text-decoration:none}.vr-video{border-top:1px solid #e6eaf0;padding-top:18px;margin-top:18px}.vr-video video{display:block;width:100%;max-width:560px;max-height:420px;background:#10131a;border-radius:10px;object-fit:contain}.vr-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.vr-panel{padding:24px;background:white;border:1px solid #dde3eb;border-radius:12px;min-width:0}.vr-panel h2{font-size:18px!important;margin:0 0 18px!important}.vr-panel p{font-size:14px!important;overflow-wrap:anywhere}
+.vr-lightbox,.vr-navigation{border:1px solid #dce2eb;border-radius:14px;background:#fff;color:#253047;box-shadow:0 16px 64px #15213c33;padding:20px;max-width:calc(100vw - 40px);max-height:85vh;box-sizing:border-box}.vr-lightbox::backdrop,.vr-navigation::backdrop{background:#15213c99}.vr-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:16px}.vr-dialog-head h2{font:600 18px "Segoe UI",sans-serif;margin:0}.vr-lightbox>img{display:block;max-width:100%;max-height:65vh;object-fit:contain;margin:auto}.vr-navigation{width:360px}.vr-navigation h2{font-size:20px}.vr-navigation button{display:flex;width:100%;margin:8px 0}.vr-mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}.vr-more-button{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;font-size:10px;color:#657084}
+body .main .saved-campaign[hidden]{display:none!important}body .main .saved-campaign .vr-details{margin:0}body .main .saved-campaign .vr-details p{padding:10px;background:#f7f8fa;border-radius:6px}
+@media(max-width:1000px){.vr-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.vr-toolbar{flex-direction:column;align-items:stretch;padding:14px;gap:12px}.vr-filter{min-width:0}.vr-gallery{grid-template-columns:1fr}.vr-library-card{padding:16px}.vr-preview{height:280px}.vr-settings-grid{grid-template-columns:1fr}.vr-page-head h1{font-size:24px!important}.vr-card-head h2{font-size:17px!important}.vr-toolbar input,.vr-toolbar select{font-size:16px!important}}
+body .main .vr-toolbar :is(input,select),body .main .vr-panel select{font-weight:400!important}
+body .main .vr-toolbar input::placeholder{font-weight:400!important}
+</style><script>/* Application utilities: preserve existing API and campaign handlers. */
+(()=>{
+ const originalLanguage=document.getElementById('viraLanguage');
+ const t=(fr,en)=>document.documentElement.lang==='en'?en:fr;
+ const node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!=null)el.textContent=text;return el};
+ window.viraCampaignTools=()=>{
+  const list=document.querySelector('.campaign-list');if(!list||!list.querySelector('.saved-campaign'))return;
+  const bar=node('div','vr-toolbar');const label=node('label','vr-search');label.append(node('span','',t('Rechercher une campagne','Search campaigns')));const search=node('input');search.type='search';label.append(search);const field=node('label','vr-filter');field.append(node('span','',t('Statut','Status')));const filter=node('select');[['all',t('Tous les statuts','All statuses')],['draft',t('Brouillons','Drafts')],['visuals_ready',t('Visuels prêts','Visuals ready')],['completed',t('Terminées','Completed')]].forEach(([v,l])=>{const o=node('option','',l);o.value=v;filter.append(o)});field.append(filter);bar.append(label,field);list.before(bar);const state=node('p','vr-count');state.setAttribute('role','status');bar.after(state);
+  const cards=[...list.querySelectorAll('.saved-campaign')];cards.forEach(card=>{const title=card.querySelector('.campaign-card-info>strong');if(!title||title.textContent.length<100)return;title.classList.add('vr-title');const details=node('details','vr-details');details.append(node('summary','',t('Lire le brief','Read brief')));const full=node('p','',title.textContent);full.dataset.userContent='';details.append(full);title.after(details);details.addEventListener('click',e=>e.stopPropagation())});
+  function apply(){let count=0;cards.forEach(card=>{const yes=card.textContent.toLocaleLowerCase().includes(search.value.toLocaleLowerCase())&&(filter.value==='all'||card.querySelector('.campaign-status')?.dataset.status===filter.value);card.hidden=!yes;if(yes)count++});state.textContent=count+' '+t('campagne(s) affichée(s)','campaign(s) shown')}
+  search.oninput=apply;filter.onchange=apply;apply();
+ };
+ window.viraSettings=async()=>{
+ document.querySelectorAll('.sidebar-link').forEach(n=>n.classList.toggle('active',n.dataset.navigationLabel==='Paramètres'||n.dataset.navigationLabel==='Réglages'));
+ document.querySelectorAll('.mobile-nav button').forEach(n=>n.classList.toggle('active',n.id==='navSettings'));
+  const root=node('section','vr-settings');const header=node('header','vr-page-head');header.append(node('span','vr-kicker',t('VOTRE ESPACE','YOUR WORKSPACE')),node('h1','',t('Réglages','Settings')),node('p','',t('Votre compte et vos préférences de travail.','Your account and workspace preferences.')));root.append(header);document.querySelector('main').replaceChildren(root);window.scrollTo(0,0);
+  const grid=node('div','vr-settings-grid');root.append(grid);const account=node('section','vr-panel');account.append(node('h2','',t('Compte','Account')));const identity=node('p','',t('Chargement du compte…','Loading account…'));account.append(identity);grid.append(account);
+  const prefs=node('section','vr-panel');prefs.append(node('h2','',t('Langue de l’interface','Interface language')));const label=node('label','vr-search');label.append(node('span','',t('Langue','Language')));const picker=node('select');[['fr','Français'],['en','English']].forEach(([v,l])=>{const o=node('option','',l);o.value=v;picker.append(o)});picker.value=document.documentElement.lang==='en'?'en':'fr';label.append(picker);prefs.append(label);picker.onchange=()=>{const original=originalLanguage;if(original){original.value=picker.value;original.dispatchEvent(new Event('change',{bubbles:true}))}else{localStorage.setItem('viraLanguage',picker.value);location.reload()}window.viraSettings()};grid.append(prefs);
+  const storage=node('section','vr-panel');storage.append(node('h2','',t('Enregistrement des données','Data storage')),node('p','',t('Les campagnes sauvegardées sont chargées depuis votre compte. Le brief en cours et les planifications du calendrier sont conservés dans ce navigateur.','Saved campaigns are loaded from your account. Your current brief and calendar schedules are stored in this browser.')),node('p','',t('Le calendrier organise vos publications ; il ne publie pas automatiquement sur les réseaux sociaux.','The calendar organizes your posts; it does not publish to social networks automatically.')));grid.append(storage);
+  const usage=node('section','vr-panel');usage.append(node('h2','',t('Utilisation','Usage')),node('p','',document.querySelector('.quota-values')?.textContent||document.querySelector('.credit-badge')?.textContent||t('Consultez le compteur de crédits de votre espace.','Check your workspace credit counter.')));grid.append(usage);
+  try{const r=await fetch('/api/auth/me',{credentials:'same-origin'});if(!r.ok)throw Error();const data=await r.json();if(!data.user)throw Error();identity.textContent=data.user.email||data.user.displayName||t('Compte connecté','Signed in');identity.dataset.userContent=''}catch{identity.textContent=t('Les informations du compte sont indisponibles pour le moment.','Account information is temporarily unavailable.')}
+ };
+ const nav=document.querySelector('.mobile-nav');if(nav){nav.classList.add('vr-mobile-nav');const more=node('button','vr-more-button');more.type='button';more.setAttribute('aria-label',t('Toutes les sections','All sections'));more.innerHTML='<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';more.append(node('span','',t('Plus','More')));nav.append(more);more.onclick=()=>{const dialog=node('dialog','vr-navigation');dialog.append(node('h2','',t('Votre espace','Your workspace')));[['navHome','Accueil','Home'],['navCampaigns','Campagnes','Campaigns'],['navBrain','VIRA Brain','VIRA Brain'],['navContent','Bibliothèque','Library'],['navCalendar','Calendrier','Calendar'],['navStats','Statistiques','Analytics'],['navSettings','Réglages','Settings']].forEach(([id,fr,en])=>{const b=node('button','vr-button',t(fr,en));b.onclick=()=>{dialog.close();document.getElementById(id)?.click()};dialog.append(b)});const close=node('button','vr-button',t('Fermer','Close'));close.onclick=()=>dialog.close();dialog.append(close);document.body.append(dialog);dialog.onclose=()=>{dialog.remove();more.focus()};dialog.showModal()}}
+ // Match native tab keyboard navigation with a single Tab stop.
+ const tabs=document.querySelector('.vs-steps');if(tabs){const sync=()=>tabs.querySelectorAll('[role=tab]').forEach(b=>b.tabIndex=b.getAttribute('aria-selected')==='true'?0:-1);sync();new MutationObserver(sync).observe(tabs,{attributes:true,subtree:true,attributeFilter:['aria-selected']})}
+})();
+
+
+</script><script>(()=>{
+ const main=document.querySelector('main');
+ function inspect(){
+  main.querySelectorAll('#videoResult video:not([data-vr-checked])').forEach(video=>{video.dataset.vrChecked='true';const state=document.createElement('p');state.className='vr-export-state';state.setAttribute('role','status');const en=()=>document.documentElement.lang==='en';const copy=video.closest('.studio-export')?.querySelector('.studio-ready');const update=()=>{const failed=!!video.error;const loaded=video.readyState>=1;state.textContent=failed?(en()?'Video unavailable. Check the file before publishing.':'Vidéo indisponible. Vérifiez le fichier avant publication.') : loaded?(en()?'Video loaded. Preview it before publishing.':'Vidéo chargée. Vérifiez l’aperçu avant publication.'):(en()?'Loading saved video…':'Chargement de la vidéo enregistrée…');if(copy)copy.textContent=failed?(en()?'File unavailable':'Fichier indisponible'):loaded?(en()?'Video available':'Vidéo disponible'):(en()?'Saved export':'Export enregistré')};video.after(state);video.addEventListener('error',update);video.addEventListener('loadedmetadata',update);update()});
+  main.querySelectorAll('.vira-calendar:not([data-vr-agenda])').forEach(cal=>{cal.dataset.vrAgenda='true';const grid=cal.querySelector('.vira-month-grid');const toolbar=cal.querySelector('.vira-month-toolbar');if(!grid||!toolbar)return;const b=document.createElement('button');b.type='button';b.className='vira-calendar-button';b.style.marginBottom='16px';let agenda=matchMedia('(max-width:650px)').matches;const apply=()=>{grid.hidden=agenda;toolbar.hidden=agenda;b.textContent=agenda?'Afficher le mois':'Afficher la liste';b.setAttribute('aria-pressed',String(agenda))};b.onclick=()=>{agenda=!agenda;apply()};toolbar.before(b);apply()});
+ }
+ new MutationObserver(inspect).observe(main,{childList:true,subtree:true});inspect();
+})();
+</script></body>
 </html>
 
