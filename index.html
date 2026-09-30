@@ -4297,7 +4297,7 @@ picker.addEventListener('change',()=>{language=picker.value;try{localStorage.set
 </style>
 <script>
 (()=>{const boxes=[document.querySelector('.credit-badge'),document.querySelector('.sidebar-credits')].filter(Boolean);const fallback=document.getElementById('sidebarCreditCount')?.parentElement;if(fallback&&!boxes.includes(fallback))boxes.push(fallback);
-function show(data){if(!Number.isFinite(data?.videos?.remaining)||!Number.isFinite(data?.images?.remaining))data=null;const en=document.documentElement.lang==='en';for(const el of boxes)el.innerHTML=data?'<span class="quota-values">'+data.videos.remaining+'/4 '+(en?'videos':'vidéos')+' · '+data.images.remaining+'/16 '+(en?'AI images':'images IA')+'</span>':'<span class="quota-label">'+(en?'Usage unavailable':'Utilisation indisponible')+'</span>';}
+function show(data){if(!Number.isFinite(data?.videos?.remaining)||!Number.isFinite(data?.images?.remaining))data=null;const en=document.documentElement.lang==='en';for(const el of boxes)el.innerHTML=data?'<span class="quota-values">'+data.videos.remaining+'/'+(data.videos.limit||4)+' '+(en?'videos':'vidéos')+' · '+data.images.remaining+'/'+(data.images.limit||16)+' '+(en?'AI images':'images IA')+'</span>':'<span class="quota-label">'+(en?'Usage unavailable':'Utilisation indisponible')+'</span>';}
 let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{usage=d;show(d)}).catch(()=>show());new MutationObserver(()=>show(usage)).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});})();
 </script>
 <style>html[lang="en"] .action-card:disabled::after,html[lang="en"] .action-card:disabled::before{content:"Locked"}</style>
