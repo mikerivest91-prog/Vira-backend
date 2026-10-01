@@ -13,6 +13,7 @@ import ffmpegPath from "ffmpeg-static";
 import fs from "node:fs";
 import path from "node:path";
 import { assembleVideoClips } from "./video-assembler.mjs";
+import { installRunwayAdmin } from "./runway-admin.mjs";
 const { Pool } = pg;
 const scrypt = promisify(crypto.scrypt);
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -313,6 +314,8 @@ async function requireAdmin(req, res, next) {
     return next();
   });
 }
+
+installRunwayAdmin({app, requireAdmin, storage:VIDEO_STORAGE_DIR, decodeImage:decodePreviewImage});
 
 // Disk administration is restricted to the owner: this disk is shared by accounts.
 app.get('/api/admin/storage', requireAdmin, async (_req,res) => {

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Olyvex · Vidéo animée IA</title>
+<style>body{font:17px system-ui;background:#f5f5fa;color:#242338;margin:0}main{max-width:650px;margin:40px auto;padding:28px;background:white;border-radius:20px}label{display:block;margin:24px 0 8px}textarea{box-sizing:border-box;width:100%;min-height:110px;padding:12px}button,a{color:#6040a0}button{padding:14px;border:1px solid #c6b9e2;border-radius:10px;cursor:pointer;margin:12px 8px 0 0}video{display:block;max-width:100%;max-height:550px;margin:20px auto}#status{white-space:pre-wrap}input[type=file]{max-width:100%}</style>
+<main><a href="/">← Retour à Olyvex</a><h1>Vidéo animée IA</h1><p>Test administrateur · Animez une image en un clip vertical de 5 secondes, sans narration.</p>
+<p>Gen‑4 Turbo : <strong>25 crédits Runway par lancement</strong>. Ce test utilise les crédits Runway, séparément du quota vidéo Olyvex.</p>
+<form id="form"><label for="image">Image JPEG ou PNG</label><input id="image" type="file" accept="image/jpeg,image/png" required>
+<label for="prompt">Quel mouvement souhaitez-vous ?</label><textarea id="prompt" maxlength="900" required placeholder="Ex. : la caméra avance doucement, les feuilles bougent dans le vent."></textarea>
+<label><input id="paid" type="checkbox" required> J’accepte d’utiliser 25 crédits Runway pour ce test et d’envoyer cette image à Runway.</label>
+<button id="start">Créer le clip animé · 25 crédits</button></form><button id="refresh" type="button">Consulter le statut</button>
+<p id="status" role="status" aria-live="polite"></p><video id="video" controls hidden></video><a id="download" hidden download>Télécharger le clip</a>
+<p>Vous pourrez ensuite importer ce clip dans votre campagne.</p></main>
+<script>
+const el=id=>document.getElementById(id); let busy=false,timer;
+function display(job){
+ const messages={IDLE:'Prêt pour un premier test.',PENDING:'Test en attente chez Runway…',RUNNING:'Animation en cours…',THROTTLED:'Runway attend une place disponible…',SUBMITTING:'Envoi incertain. Vérifiez le projet dans Runway avant toute nouvelle génération.',UNKNOWN:'Envoi incertain. Vérifiez le projet dans Runway. Aucun nouvel envoi automatique.',FAILED:'Runway n’a pas pu générer le clip. Vérifiez les détails dans votre projet Runway.',CANCELED:'Test annulé.'};
+ el('status').textContent=job.videoUrl?'Votre clip est prêt.':messages[job.status]||'Traitement en cours…';
+ el('start').disabled=busy||!['IDLE','SUCCEEDED','FAILED','CANCELED'].includes(job.status);
+ if(job.videoUrl&&/^\/videos\/vira-runway-[a-f0-9-]+\.mp4$/.test(job.videoUrl)){el('video').src=job.videoUrl;el('video').hidden=false;el('download').href=job.videoUrl;el('download').hidden=false;}
+ clearTimeout(timer);if(['PENDING','RUNNING','THROTTLED','SUCCEEDED'].includes(job.status)&&!job.videoUrl)timer=setTimeout(refresh,6000);
+}
+async function refresh(){try{const r=await fetch('/api/admin/runway',{cache:'no-store'});const j=await r.json();if(!r.ok)throw Error(j.error||'Accès administrateur requis.');display(j);}catch(e){el('status').textContent=e.message+' Cliquez sur « Consulter le statut » pour reprendre.';}}
+el('refresh').onclick=refresh;
+async function imageData(file){
+ if(!file||!['image/jpeg','image/png'].includes(file.type)||file.size>15*1024*1024)throw Error('Choisissez une image JPEG ou PNG de moins de 15 Mo.');
+ const bitmap=await createImageBitmap(file);const canvas=document.createElement('canvas');const scale=Math.min(1,1280/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();const data=canvas.toDataURL('image/jpeg',0.82);if(data.length>1300000)throw Error('Image trop détaillée. Réduisez sa taille.');return data;
+}
+el('form').onsubmit=async e=>{e.preventDefault();if(busy)return;busy=true;el('start').disabled=true;clearTimeout(timer);let submitted=false;try{const image=await imageData(el('image').files[0]);el('status').textContent='Envoi du test…';submitted=true;const r=await fetch('/api/admin/runway',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image,prompt:el('prompt').value,confirmPaid:el('paid').checked})});const j=await r.json();if(!r.ok)throw Error(j.error);busy=false;el('paid').checked=false;display(j);}catch(e){el('status').textContent=e.message;if(!submitted)el('start').disabled=false;}finally{busy=false;}};
+el('start').disabled=true;refresh();
+</script></html>

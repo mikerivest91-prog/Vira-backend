@@ -4197,6 +4197,11 @@ els.navStats?.addEventListener("click", async () => {
     .then(data => {
       if (!data?.user || String(data.user.email).toLowerCase() !== adminEmail) return;
       button.hidden = false;
+      const animationLink = document.createElement('a');
+      animationLink.href = '/animation-ia';
+      animationLink.textContent = 'Vidéo animée IA · Test admin';
+      animationLink.style.cssText = 'display:inline-block;margin:12px;padding:12px;color:#6040a0';
+      button.after(animationLink);
       button.addEventListener("click", async () => {
         button.disabled = true;
         try {
