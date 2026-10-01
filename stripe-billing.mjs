@@ -1,8 +1,19 @@
 import Stripe from "stripe";
 import { fileURLToPath } from "node:url";
 
-// This integration intentionally supports test mode only. It grants no paid credits.
-export function createTestBilling({ app, pool, requireAdmin, env = process.env, client }) {
+// Test subscriptions never grant production entitlements. Enforcement is opt-in per tester.
+export function testCreationAccess(subscriptions, now = Date.now() / 1000) {
+  return subscriptions.some(s => s.status === "active"
+    && Number.isFinite(s.current_period_end) && s.current_period_end > now
+    && (s.cancel_at == null || (Number.isFinite(s.cancel_at) && s.cancel_at > now)));
+}
+
+export function createTestBilling({ app, pool, requireAdmin, requireAuth, env = process.env, client }) {
+  const testers = new Set((env.BILLING_TEST_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean));
+  const isTester = user => testers.has(String(user?.email || "").trim().toLowerCase());
+  const requireBillingUser = (req, res, next) => requireAuth
+    ? requireAuth(req, res, () => isTester(req.user) ? next() : requireAdmin(req, res, next))
+    : requireAdmin(req, res, next);
   const PLAN_LIMITS = Object.freeze({ videos: 4, images: 16, secondsPerVideo: 30 });
   const origin = "https://vira-backend-im5s.onrender.com";
   const key = env.STRIPE_SECRET_KEY || "";
@@ -45,15 +56,15 @@ export function createTestBilling({ app, pool, requireAdmin, env = process.env, 
     await db.query("UPDATE vira_test_billing SET subscriptions=$2::jsonb, updated_at=NOW() WHERE customer_id=$1", [customer, JSON.stringify(snapshot)]);
     return snapshot;
   }
-  app.get("/api/billing/status", requireAdmin, route(async (req, res) => {
+  app.get("/api/billing/status", requireBillingUser, route(async (req, res) => {
     const currentPrice = await price();
     const result = await locked(req.user.id, async db => {
       const { rows } = await db.query("SELECT customer_id FROM vira_test_billing WHERE user_id=$1", [req.user.id]);
       return rows[0] ? sync(db, rows[0].customer_id) : [];
     });
-    res.json({ ok: true, mode: "test", subscriptions: result, planLimits: PLAN_LIMITS, price: { amount: currentPrice.unit_amount, currency: currentPrice.currency, interval: currentPrice.recurring.interval } });
+    res.json({ ok: true, mode: "test", subscriptions: result, access: { enforced: isTester(req.user), canCreate: testCreationAccess(result) }, planLimits: PLAN_LIMITS, price: { amount: currentPrice.unit_amount, currency: currentPrice.currency, interval: currentPrice.recurring.interval } });
   }));
-  app.post("/api/billing/checkout", requireAdmin, route(async (req, res) => {
+  app.post("/api/billing/checkout", requireBillingUser, route(async (req, res) => {
     await price();
     const url = await locked(req.user.id, async db => {
       let { rows: [row] } = await db.query("SELECT * FROM vira_test_billing WHERE user_id=$1", [req.user.id]);
@@ -90,17 +101,33 @@ export function createTestBilling({ app, pool, requireAdmin, env = process.env, 
     if (!url) return fail(res, 409, "Un abonnement existe déjà. Utilisez Gérer mon abonnement.");
     res.json({ ok: true, url });
   }));
-  app.post("/api/billing/portal", requireAdmin, route(async (req, res) => {
+  app.post("/api/billing/portal", requireBillingUser, route(async (req, res) => {
     const { rows } = await pool.query("SELECT customer_id FROM vira_test_billing WHERE user_id=$1", [req.user.id]);
     if (!rows[0]) return fail(res, 409, "Créez d’abord un abonnement de test.");
     const session = await stripe.billingPortal.sessions.create({ customer: rows[0].customer_id, return_url: `${origin}/abonnement-test` });
     res.json({ ok: true, url: session.url });
   }));
-  app.get("/abonnement-test", requireAdmin, (_req, res) => {
+  app.get("/abonnement-test", requireBillingUser, (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.sendFile(fileURLToPath(new URL("./abonnement-test.html", import.meta.url)));
   });
   return {
+    async requireCreation(req, res, next) {
+      if (!isTester(req.user)) return next();
+      res.setHeader("Cache-Control", "no-store");
+      if (!enabled) return fail(res, 503, "Vérification de l’abonnement de test indisponible.");
+      try {
+        await price();
+        const subs = await locked(req.user.id, async db => {
+          const { rows } = await db.query("SELECT customer_id FROM vira_test_billing WHERE user_id=$1", [req.user.id]);
+          return rows[0] ? sync(db, rows[0].customer_id) : [];
+        });
+        if (!testCreationAccess(subs)) return fail(res, 403, "Un abonnement de test actif est nécessaire. Consultez la page /abonnement-test.");
+      } catch {
+        return fail(res, 503, "Impossible de vérifier votre abonnement de test. Réessayez dans un instant.");
+      }
+      return next();
+    },
     async init() {
       await pool.query(`CREATE TABLE IF NOT EXISTS vira_test_billing (
         user_id BIGINT PRIMARY KEY REFERENCES vira_users(id) ON DELETE CASCADE,

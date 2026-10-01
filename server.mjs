@@ -318,7 +318,19 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 });
 
 
-const billing = createTestBilling({ app, pool, requireAdmin });
+const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
+// Apply before upload and generation handlers; existing files remain readable.
+const subscriptionCreationPaths = new Set([
+  "/api/audio/test", "/api/audio/generate", "/api/audio/upload",
+  "/api/video/generate", "/api/video/assemble", "/api/video/import-clip",
+  "/api/video/assemble-clips", "/api/video/free-assemble",
+  "/api/images/reserve", "/api/brain/analyze"
+]);
+app.use((req, res, next) => {
+  const pathname = req.path.toLowerCase().replace(/\/+$/, "");
+  if (req.method !== "POST" || !subscriptionCreationPaths.has(pathname)) return next();
+  return requireAuth(req, res, () => billing.requireCreation(req, res, next));
+});
 
 async function initDatabase() {
   await pool.query(`
