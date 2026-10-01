@@ -282,6 +282,29 @@ async function requireAdmin(req, res, next) {
   });
 }
 
+// Disk administration is restricted to the owner: this disk is shared by accounts.
+app.get('/api/admin/storage', requireAdmin, async (_req,res) => {
+  try {
+    const disk=await fs.promises.statfs(VIDEO_STORAGE_DIR);
+    const files=[];
+    for(const entry of await fs.promises.readdir(VIDEO_STORAGE_DIR,{withFileTypes:true})) {
+      if(!entry.isFile() || !/^vira-[a-zA-Z0-9_-]+\.mp4$/.test(entry.name))continue;
+      const info=await fs.promises.stat(path.join(VIDEO_STORAGE_DIR,entry.name));
+      files.push({name:entry.name,bytes:info.size,createdAt:info.mtime.toISOString()});
+    }
+    res.set('Cache-Control','no-store').json({files:files.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)),totalBytes:disk.blocks*disk.bsize,availableBytes:disk.bavail*disk.bsize,videoBytes:files.reduce((sum,f)=>sum+f.bytes,0)});
+  }catch{res.status(500).json({error:'Stockage indisponible. Réessayez.'});}
+});
+app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
+  const name=req.params.name;
+  if(!/^vira-[a-zA-Z0-9_-]+\.mp4$/.test(name))return res.status(400).json({error:'Nom de vidéo invalide.'});
+  try {
+    await fs.promises.unlink(path.join(VIDEO_STORAGE_DIR,name));
+    res.json({ok:true});
+  }catch(error){res.status(error.code==='ENOENT'?404:500).json({error:error.code==='ENOENT'?'Vidéo déjà absente.':'Suppression impossible.'});}
+});
+
+
 const billing = createTestBilling({ app, pool, requireAdmin });
 
 async function initDatabase() {

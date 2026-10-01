@@ -5098,6 +5098,45 @@ body .app-shell .main #progressWrap .progress-meta{font-size:14px!important;colo
 body .app-shell .main #progressWrap .progress-track{height:10px!important;background:#edeaf5!important;border:0!important}
 body .app-shell .main #progressWrap .progress-fill{background:#7054be!important;box-shadow:none!important}
 @media(max-width:650px){body .app-shell .main #videoResult .studio-export-body{grid-template-columns:1fr!important;gap:24px!important}body .app-shell .main #videoResult video.video-player{margin:auto!important;max-width:100%!important}}
-</style></body>
+</style><script>(()=>{
+ const settings=window.viraSettings;
+ const format=n=>new Intl.NumberFormat('fr-CA',{maximumFractionDigits:1}).format(n/1024/1024)+' Mo';
+ window.viraSettings=async()=>{
+  await settings();
+  const grid=document.querySelector('.vr-settings-grid');if(!grid)return;
+  const panel=document.createElement('section');panel.className='vr-panel';
+  async function refresh(){
+   try{
+    const response=await fetch('/api/admin/storage',{credentials:'same-origin',cache:'no-store'});
+    if(response.status===403||response.status===401){panel.remove();return;}
+    if(!response.ok)throw Error('Impossible de charger le stockage.');
+    const data=await response.json();panel.replaceChildren();
+    const add=(tag,text)=>{const e=document.createElement(tag);e.textContent=text;panel.append(e);return e;};
+    add('h2','Stockage vidéo · Administration');
+    add('p','Disque partagé par tous les comptes.');
+    const used=data.totalBytes-data.availableBytes;
+    add('p',format(used)+' utilisés sur '+format(data.totalBytes)+' · '+format(data.availableBytes)+' disponibles');
+    const meter=add('progress','');meter.max=data.totalBytes;meter.value=used;meter.style.width='100%';meter.setAttribute('aria-label','Espace disque utilisé');
+    if(used/data.totalBytes>=0.8)add('p','Le disque approche de sa limite. Libérez de l’espace avant de créer d’autres vidéos.').setAttribute('role','alert');
+    add('p',data.files.length+' vidéos · '+format(data.videoBytes));
+    for(const file of data.files){
+     const row=add('div','');row.style.cssText='padding:16px 0;border-top:1px solid #e0e4ed;overflow-wrap:anywhere';
+     const name=document.createElement('p');name.textContent=new Date(file.createdAt).toLocaleString('fr-CA')+' · '+format(file.bytes);row.append(name);
+     const link=document.createElement('a');link.href='/videos/'+encodeURIComponent(file.name);link.target='_blank';link.rel='noopener';link.textContent='Voir la vidéo';row.append(link);
+     const button=document.createElement('button');button.className='vr-button';button.style.marginLeft='16px';button.textContent='Supprimer';row.append(button);
+     button.onclick=async()=>{
+      if(!confirm('Supprimer définitivement cette vidéo du serveur ? Son lien ne fonctionnera plus dans les campagnes. Téléchargez une copie avant de continuer. Aucun crédit ne sera remboursé.'))return;
+      button.disabled=true;
+      try{const reply=await fetch('/api/admin/storage/'+encodeURIComponent(file.name),{method:'DELETE',credentials:'same-origin'});if(!reply.ok)throw Error('Suppression impossible.');await refresh();}
+      catch(error){button.disabled=false;const message=document.createElement('p');message.setAttribute('role','alert');message.textContent=error.message;row.append(message);}
+     };
+    }
+    if(!data.files.length)add('p','Aucune vidéo enregistrée sur le disque.');
+   }catch(error){panel.textContent=error.message;const retry=document.createElement('button');retry.textContent='Réessayer';retry.onclick=refresh;panel.append(retry);}
+  }
+  grid.append(panel);await refresh();
+ };
+})();
+</script></body>
 </html>
 
