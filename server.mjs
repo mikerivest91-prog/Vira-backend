@@ -57,8 +57,28 @@ async function withClipJob(req,res,work) {
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
+// Baseline browser protections. Keep the policy compatible with the existing
+// inline application UI; stricter CSP rules require a separate frontend pass.
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+  next();
+});
+
+const allowedCorsOrigins = new Set(
+  [process.env.APP_ORIGIN, process.env.FRONTEND_ORIGIN]
+    .map(value => String(value || "").trim().replace(/\/$/, ""))
+    .filter(Boolean)
+);
 app.use(cors({
-  origin: true,
+  origin(origin, callback) {
+    // Same-origin requests normally omit Origin and do not need CORS.
+    if (!origin || allowedCorsOrigins.has(origin)) return callback(null, true);
+    return callback(new Error("CORS origin denied"));
+  },
   credentials: true
 }));
 
