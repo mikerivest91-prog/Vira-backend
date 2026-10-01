@@ -1034,8 +1034,7 @@ app.post("/api/audio/test", requireAuth, async (req, res) => {
 app.post("/api/audio/generate", requireAuth, async (req, res) => {
   const text = String(req.body?.text || "").trim();
   const gender = req.body?.gender;
-  if (!text || text.length > 800 || !["male", "female"].includes(gender)) {
-    return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
+if (!text || text.length > 800 || !["female", "female_fr", "male", "male_fr"].includes(gender)) {    return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
   }
   return withAudioJob(req,res,async () => {
     try {return res.json({ok:true,mode:"free",...await synthesizeAudio(text,gender,AUDIO_TEMP_DIR,req.user.id)});}
