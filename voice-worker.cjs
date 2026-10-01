@@ -21,10 +21,14 @@ process.stdin.on("end", async () => {
 
     const { Communicate } = await import("edge-tts.js");
 
-    const voice =
-      gender === "female"
-        ? "fr-CA-SylvieNeural"
-        : "fr-CA-AntoineNeural";
+   const voices = {
+  female: "fr-CA-SylvieNeural",
+  female_fr: "fr-FR-DeniseNeural",
+  male: "fr-CA-AntoineNeural",
+  male_fr: "fr-FR-HenriNeural"
+};
+
+const voice = voices[gender] || voices.female;
 
     const communicate = new Communicate(text.trim(), voice);
 
