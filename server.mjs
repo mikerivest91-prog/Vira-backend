@@ -756,6 +756,35 @@ app.get("/api/calendar", requireAuth, async (req, res) => {
     });
   }
 });
+app.post("/api/calendar", requireAuth, async (req, res) => {
+  try {
+    const campaignId = Number(req.body?.campaignId);
+    const at = new Date(req.body?.scheduledAt);
+    const platform = String(req.body?.platform || "Instagram");
+    if (!Number.isInteger(campaignId) || campaignId <= 0 || !Number.isFinite(at.getTime()) || at.getTime() <= Date.now() || !["Instagram","Facebook","TikTok","YouTube","LinkedIn"].includes(platform)) return res.status(400).json({ok:false,error:"Planification invalide."});
+    const result = await pool.query(`INSERT INTO vira_calendar_events(campaign_id,scheduled_at,platform) SELECT id,$2,$3 FROM vira_campaigns WHERE id=$1 AND user_id=$4 RETURNING id,campaign_id,scheduled_at,platform,status`, [campaignId, at.toISOString(), platform, req.user.id]);
+    if (!result.rows[0]) return res.status(404).json({ok:false,error:"Campagne introuvable."});
+    return res.status(201).json({ok:true,event:result.rows[0]});
+  } catch (error) { console.error("CALENDAR CREATE ERROR:", error); return res.status(500).json({ok:false,error:"Impossible d’enregistrer la planification."}); }
+});
+app.put("/api/calendar/:id", requireAuth, async (req, res) => {
+  try {
+    const eventId = Number(req.params.id); const at = new Date(req.body?.scheduledAt); const platform = String(req.body?.platform || "Instagram");
+    if (!Number.isInteger(eventId) || eventId <= 0 || !Number.isFinite(at.getTime()) || at.getTime() <= Date.now() || !["Instagram","Facebook","TikTok","YouTube","LinkedIn"].includes(platform)) return res.status(400).json({ok:false,error:"Planification invalide."});
+    const result = await pool.query(`UPDATE vira_calendar_events e SET scheduled_at=$2,platform=$3 FROM vira_campaigns c WHERE e.id=$1 AND e.campaign_id=c.id AND c.user_id=$4 RETURNING e.id,e.campaign_id,e.scheduled_at,e.platform,e.status`, [eventId, at.toISOString(), platform, req.user.id]);
+    if (!result.rows[0]) return res.status(404).json({ok:false,error:"Planification introuvable."});
+    return res.json({ok:true,event:result.rows[0]});
+  } catch (error) { console.error("CALENDAR UPDATE ERROR:", error); return res.status(500).json({ok:false,error:"Impossible de modifier la planification."}); }
+});
+app.delete("/api/calendar/:id", requireAuth, async (req, res) => {
+  try {
+    const eventId = Number(req.params.id);
+    if (!Number.isInteger(eventId) || eventId <= 0) return res.status(400).json({ok:false,error:"Planification invalide."});
+    const result = await pool.query(`DELETE FROM vira_calendar_events e USING vira_campaigns c WHERE e.id=$1 AND e.campaign_id=c.id AND c.user_id=$2 RETURNING e.id`, [eventId, req.user.id]);
+    if (!result.rows[0]) return res.status(404).json({ok:false,error:"Planification introuvable."});
+    return res.json({ok:true});
+  } catch (error) { console.error("CALENDAR DELETE ERROR:", error); return res.status(500).json({ok:false,error:"Impossible de supprimer la planification."}); }
+});
 app.get("/api/campaigns", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(

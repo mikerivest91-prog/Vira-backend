@@ -3582,24 +3582,34 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
       document.querySelectorAll(".sidebar-link").forEach(item => item.classList.toggle("active", item === els.navCalendar));
       document.querySelectorAll(".mobile-nav button").forEach(item => item.classList.remove("active"));
       const main = document.querySelector("main");
-      main.innerHTML = `<section class="box vira-calendar"><div class="section-head"><div><span class="eyebrow">VIRA WORKSPACE</span><h2>Calendrier</h2><p>Préparez vos prochaines publications, sans consommation de crédits.</p></div></div><p class="vira-calendar-note">Enregistré dans ce navigateur pour votre compte. Publication manuelle sur les réseaux sociaux. Les horaires sont affichés dans votre fuseau local.</p><p role="status" id="viraPlanStatus">Chargement…</p><div id="viraCalendarBody"></div></section>`;
+      main.innerHTML = `<section class="box vira-calendar"><div class="section-head"><div><span class="eyebrow">VIRA WORKSPACE</span><h2>Calendrier</h2><p>Préparez vos prochaines publications, sans consommation de crédits.</p></div></div><p class="vira-calendar-note">Enregistré sur votre compte pour rester disponible sur vos appareils. Publication manuelle sur les réseaux sociaux. Les horaires sont affichés dans votre fuseau local.</p><p role="status" id="viraPlanStatus">Chargement…</p><div id="viraCalendarBody"></div></section>`;
       const root = main.querySelector(".vira-calendar");
       const status = root.querySelector("#viraPlanStatus");
       const body = root.querySelector("#viraCalendarBody");
       window.scrollTo(0,0);
       try {
         const owner = viraPlansKey();
-        const response = await fetch("/api/campaigns", {credentials:"same-origin"});
-        if (!response.ok) throw new Error("Impossible de charger les campagnes. Rouvrez le calendrier pour réessayer.");
+        const [response, calendarResponse] = await Promise.all([fetch("/api/campaigns", {credentials:"same-origin"}), fetch("/api/calendar", {credentials:"same-origin"})]);
+        if (!response.ok || !calendarResponse.ok) throw new Error("Impossible de charger le calendrier. Rouvrez-le pour réessayer.");
         const data = await response.json();
+        const calendarData = await calendarResponse.json();
         if (!root.isConnected || viraPlansKey() !== owner) return;
         if (!Array.isArray(data.campaigns)) throw new Error("La liste des campagnes est invalide.");
         const campaigns = data.campaigns.filter(c => c.id != null);
         const byId = new Map(campaigns.map(c => [String(c.id), c]));
-        const plans = readViraPlans();
-        // Remove orphaned local events only after successfully loading all campaigns.
-        const active = plans.filter(p => byId.has(p.campaignId));
-        if (active.length !== plans.length) writeViraPlans(active);
+        const localPlans = readViraPlans();
+        let plansFromServer = Array.isArray(calendarData.events) ? calendarData.events.map(e => ({id:String(e.id),campaignId:String(e.campaign_id),at:new Date(e.scheduled_at).toISOString(),platform:e.platform||"Instagram"})).filter(p => byId.has(p.campaignId)) : [];
+        // One-time migration: preserve browser-only plans when the account calendar is still empty.
+        if (!plansFromServer.length && localPlans.length) {
+          for (const old of localPlans) {
+            if (!byId.has(old.campaignId) || Date.parse(old.at) <= Date.now()) continue;
+            const migration = await fetch("/api/calendar", {method:"POST", credentials:"same-origin", headers:{"Content-Type":"application/json"}, body:JSON.stringify({campaignId:old.campaignId,scheduledAt:new Date(old.at).toISOString(),platform:old.platform||"Instagram"})});
+            if (!migration.ok) continue;
+            const migrated = await migration.json(); const e=migrated.event;
+            if (e) plansFromServer.push({id:String(e.id),campaignId:String(e.campaign_id),at:new Date(e.scheduled_at).toISOString(),platform:e.platform||"Instagram"});
+          }
+        }
+        writeViraPlans(plansFromServer);
         let month = new Date(); month = new Date(month.getFullYear(), month.getMonth(),1);
         let editing = null;
         body.innerHTML = `<form class="campaign-section" id="viraPlanForm"><h3 id="viraPlanHeading">Planifier une campagne</h3><div class="form-grid two"><div class="field-group"><label for="viraPlanCampaign">Campagne</label><select id="viraPlanCampaign" required></select></div><div class="field-group"><label for="viraPlanDate">Date et heure locales</label><input id="viraPlanDate" type="datetime-local" required step="60" aria-describedby="viraPlanZone"></div></div><p id="viraPlanZone"></p><div class="vira-plan-actions"><button class="vira-plan-button" type="submit" id="viraPlanSave"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18"/></svg>Planifier</button><button class="vira-calendar-button" type="button" id="viraPlanCancel" hidden>Annuler la modification</button></div></form><div class="vira-month-toolbar"><button class="vira-calendar-button" id="viraPrevMonth" type="button" aria-label="Mois précédent">←</button><h3 id="viraMonthTitle" aria-live="polite"></h3><button class="vira-calendar-button" id="viraNextMonth" type="button" aria-label="Mois suivant">→</button><button class="vira-calendar-button" id="viraToday" type="button">Aujourd’hui</button></div><div class="vira-month-grid" id="viraMonthGrid"></div><h3 id="viraPlanCount"></h3><div id="viraPlanList" class="campaign-list"></div>`;
@@ -3658,9 +3668,9 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
             const actions=document.createElement("div"); actions.className="vira-plan-actions";
             const modify=document.createElement("button"); modify.type="button"; modify.className="vira-calendar-button"; modify.textContent="Modifier"; modify.addEventListener("click",()=>edit(plan.id));
             const remove=document.createElement("button"); remove.type="button"; remove.className="vira-calendar-button"; remove.textContent="Supprimer la planification";
-            remove.addEventListener("click",()=> {
+            remove.addEventListener("click",async()=> {
               if(!confirm("Supprimer cette planification ? La campagne sera conservée.")) return;
-              try { writeViraPlans(readViraPlans().filter(p=>p.id!==plan.id)); if(editing===plan.id) reset(); render(); status.textContent="Planification supprimée. La campagne est conservée."; }
+              try { const response=await fetch("/api/calendar/"+encodeURIComponent(plan.id),{method:"DELETE",credentials:"same-origin"}); const data=await response.json(); if(!response.ok) throw new Error(data.error||"Suppression impossible."); writeViraPlans(readViraPlans().filter(p=>p.id!==plan.id)); if(editing===plan.id) reset(); render(); status.textContent="Planification supprimée. La campagne est conservée."; }
               catch(error) { status.textContent="Suppression impossible : "+error.message; }
             });
             actions.append(modify,remove); card.append(title,when,actions); list.append(card);
@@ -3668,7 +3678,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
         }
         date.addEventListener("input",()=>date.setCustomValidity(""));
         cancel.addEventListener("click",reset);
-        form.addEventListener("submit",event=> {
+        form.addEventListener("submit",async event=> {
           event.preventDefault();
           const at=new Date(date.value);
           if (!Number.isFinite(at.getTime()) || viraLocalDate(at)!==date.value || at.getTime()<=Date.now()) {
@@ -3680,9 +3690,12 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
             const latest=readViraPlans();
             if(editing && !latest.some(p=>p.id===editing)) throw new Error("Cette planification a été supprimée. Annulez la modification.");
             if(latest.some(p=>p.id!==editing && p.campaignId===select.value && Date.parse(p.at)===at.getTime())) throw new Error("Cette campagne est déjà planifiée à cet horaire.");
-            const plan={id:editing || Array.from(crypto.getRandomValues(new Uint32Array(4)), n => n.toString(16).padStart(8,"0")).join(""),campaignId:select.value,at:at.toISOString()};
+            const endpoint=editing?"/api/calendar/"+encodeURIComponent(editing):"/api/calendar";
+            const response=await fetch(endpoint,{method:editing?"PUT":"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({campaignId:select.value,scheduledAt:at.toISOString(),platform:"Instagram"})});
+            const data=await response.json(); if(!response.ok) throw new Error(data.error||"Enregistrement impossible.");
+            const eventData=data.event; const plan={id:String(eventData.id),campaignId:String(eventData.campaign_id),at:new Date(eventData.scheduled_at).toISOString(),platform:eventData.platform||"Instagram"};
             writeViraPlans([...latest.filter(p=>p.id!==editing),plan]);
-            month=new Date(at.getFullYear(),at.getMonth(),1); reset(); render(); status.textContent="Planification enregistrée dans ce navigateur.";
+            month=new Date(at.getFullYear(),at.getMonth(),1); reset(); render(); status.textContent="Planification enregistrée sur votre compte.";
           } catch(error) { status.textContent="Enregistrement impossible : "+error.message; }
         });
         const refresh = () => { try {render();} catch(error) {status.textContent=error.message;} };
