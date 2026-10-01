@@ -17,6 +17,11 @@ const { Pool } = pg;
 const scrypt = promisify(crypto.scrypt);
 ffmpeg.setFfmpegPath(ffmpegPath);
 const VIDEO_TEMP_DIR = path.join(process.cwd(), "tmp", "videos");
+// Point this directory at an attached persistent disk in production.
+const VIDEO_STORAGE_DIR = process.env.VIDEO_STORAGE_DIR
+  ? path.resolve(process.env.VIDEO_STORAGE_DIR)
+  : VIDEO_TEMP_DIR;
+fs.mkdirSync(VIDEO_STORAGE_DIR, { recursive: true });
 const uploadVideoClips = multer({
   dest: VIDEO_TEMP_DIR,
   limits: {
@@ -61,7 +66,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json", limit: "
 app.use(express.json({ limit: "2mb" }));
 app.get("/", (_req, res) => res.sendFile(path.resolve("index.html")));
 app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
-app.use("/videos", express.static(VIDEO_TEMP_DIR));
+app.use("/videos", express.static(VIDEO_STORAGE_DIR));
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl:
@@ -1006,7 +1011,15 @@ async function publishVideo(clipPaths, prefix, audioPath = null, transition = nu
   const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress);
   try {
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
-    await fs.promises.copyFile(result.outputPath, path.join(VIDEO_TEMP_DIR, filename));
+    const destination = path.join(VIDEO_STORAGE_DIR, filename);
+    const pending = destination + ".partial";
+    try {
+      await fs.promises.copyFile(result.outputPath, pending);
+      await fs.promises.rename(pending, destination);
+    } catch (error) {
+      await fs.promises.unlink(pending).catch(() => {});
+      throw error;
+    }
     return `/videos/${filename}`;
   } finally {
     await result.cleanup();
