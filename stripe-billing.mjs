@@ -41,17 +41,17 @@ export function createTestBilling({ app, pool, requireAdmin, env = process.env, 
   }
   async function sync(db, customer) {
     const list = await subscriptions(customer);
-    const snapshot = list.map(s => ({ id: s.id, status: s.status, cancel_at_period_end: s.cancel_at_period_end }));
+    const snapshot = list.map(s => ({ id: s.id, status: s.status, cancel_at_period_end: Boolean(s.cancel_at_period_end), cancel_at: s.cancel_at || null, current_period_end: s.current_period_end || s.items.data.find(i => i.price.id === priceId)?.current_period_end || null }));
     await db.query("UPDATE vira_test_billing SET subscriptions=$2::jsonb, updated_at=NOW() WHERE customer_id=$1", [customer, JSON.stringify(snapshot)]);
     return snapshot;
   }
   app.get("/api/billing/status", requireAdmin, route(async (req, res) => {
-    await price();
+    const currentPrice = await price();
     const result = await locked(req.user.id, async db => {
       const { rows } = await db.query("SELECT customer_id FROM vira_test_billing WHERE user_id=$1", [req.user.id]);
       return rows[0] ? sync(db, rows[0].customer_id) : [];
     });
-    res.json({ ok: true, mode: "test", subscriptions: result, planLimits: PLAN_LIMITS });
+    res.json({ ok: true, mode: "test", subscriptions: result, planLimits: PLAN_LIMITS, price: { amount: currentPrice.unit_amount, currency: currentPrice.currency, interval: currentPrice.recurring.interval } });
   }));
   app.post("/api/billing/checkout", requireAdmin, route(async (req, res) => {
     await price();
