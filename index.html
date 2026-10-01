@@ -2168,6 +2168,7 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoR
     function setProgress(percent, label) {
       const safe = Math.max(0, Math.min(100, Number(percent) || 0));
       els.progressWrap.style.display = "block";
+      els.progressWrap.setAttribute("aria-valuenow",String(Math.round(safe)));
       els.progressFill.style.width = `${safe}%`;
       els.progressPercent.textContent = `${Math.round(safe)}%`;
       els.progressLabel.textContent = label || "Préparation";
@@ -3300,6 +3301,8 @@ els.videoBtn.addEventListener("click", async () => {
   }
 
   videoInProgress = true;
+  let progressPolling = null;
+  let progressStopped = false;
   els.videoBtn.disabled = true;
   const revision = flowRevision;
   videoReady = false;
@@ -3308,6 +3311,11 @@ els.videoBtn.addEventListener("click", async () => {
   clearFinalVideoUrl();
   els.videoResult.innerHTML = "";
   updateWorkflowState();
+  els.videoStatus.after(els.progressWrap);
+  els.progressWrap.setAttribute('role','progressbar');
+  els.progressWrap.setAttribute('aria-label','Création de la vidéo');
+  els.progressWrap.setAttribute('aria-valuemin','0');
+  els.progressWrap.setAttribute('aria-valuemax','100');
   setProgress(0, "Préparation de la vidéo");
 
   try {
@@ -3316,7 +3324,17 @@ els.videoBtn.addEventListener("click", async () => {
         const images = usingClips ? [] : await Promise.all(generatedImages.map(rasterizePreview));
 const payload = JSON.stringify(usingClips ? {clipIds:sourceClips.map(c=>c.id),audioId:preparedAudioId} : { images, audioId: preparedAudioId });
 if (new Blob([payload]).size > 1900000) throw new Error("Les visuels dépassent la taille acceptée par le serveur.");
-const response = await fetch(usingClips ? "/api/video/assemble-clips" : "/api/video/free-assemble", {
+const progressId=crypto.randomUUID();
+const pollProgress=async()=>{
+  try {
+    const reply=await fetch('/api/video/progress/'+progressId,{credentials:'same-origin',cache:'no-store'});
+    if(reply.ok){const job=await reply.json();if(!progressStopped && job.status==='running')setProgress(job.percent,job.percent<40?'Préparation des scènes':job.percent<95?'Assemblage de la vidéo':'Enregistrement du MP4');}
+  } catch {}
+  if(!progressStopped)progressPolling=setTimeout(pollProgress,1000);
+};
+if(!usingClips)pollProgress();
+else {els.progressPercent.textContent='En cours';els.progressWrap.removeAttribute('aria-valuenow');}
+const response = await fetch(usingClips ? "/api/video/assemble-clips" : "/api/video/free-assemble?progressId="+progressId, {
   method: "POST",
   credentials: "same-origin",
   headers: { "Content-Type": "application/json" },
@@ -3344,18 +3362,8 @@ if (typeof prepared.videoUrl !== "string" || !/^\/videos\/[a-zA-Z0-9_-]+\.mp4$/.
 }
 if (revision !== flowRevision) return;
 finalVideoUrl = prepared.videoUrl;
-      const steps = [
-        [25,"Préparation des scènes"],
-        [50,"Assemblage de la campagne"],
-        [75,"Vérification du MP4"],
-        [100,"Vidéo finale prête"]
-      ];
-
-      for (const [progress,label] of steps) {
-        await new Promise(resolve => setTimeout(resolve, 280));
-        setProgress(progress,label);
-      }
-
+      progressStopped=true;clearTimeout(progressPolling);
+      setProgress(100,"Vidéo finale prête");
       if (revision !== flowRevision) return;
       renderFinalVideo(true);
 
@@ -3452,6 +3460,8 @@ if (currentCampaignId) {
     setStatus(els.videoStatus,escapeHtml(error.message || "Erreur de création vidéo"),"error");
   } finally {
     videoInProgress = false;
+    progressStopped = true;
+    clearTimeout(progressPolling);
     voicePanel.querySelectorAll("button,input,select,textarea").forEach(control=>control.disabled=false);
     updateWorkflowState();
     hideProgress(1200);
@@ -5073,11 +5083,21 @@ body .main .vr-toolbar input::placeholder{font-weight:400!important}
 </script><script>(()=>{
  const main=document.querySelector('main');
  function inspect(){
-  main.querySelectorAll('#videoResult video:not([data-vr-checked])').forEach(video=>{video.dataset.vrChecked='true';const state=document.createElement('p');state.className='vr-export-state';state.setAttribute('role','status');const en=()=>document.documentElement.lang==='en';const copy=video.closest('.studio-export')?.querySelector('.studio-ready');const update=()=>{const failed=!!video.error;const loaded=video.readyState>=1;state.textContent=failed?(en()?'Video unavailable. Check the file before publishing.':'Vidéo indisponible. Vérifiez le fichier avant publication.') : loaded?(en()?'Video loaded. Preview it before publishing.':'Vidéo chargée. Vérifiez l’aperçu avant publication.'):(en()?'Loading saved video…':'Chargement de la vidéo enregistrée…');if(copy)copy.textContent=failed?(en()?'File unavailable':'Fichier indisponible'):loaded?(en()?'Video available':'Vidéo disponible'):(en()?'Saved export':'Export enregistré')};video.after(state);video.addEventListener('error',update);video.addEventListener('loadedmetadata',update);update()});
+  main.querySelectorAll('#videoResult video:not([data-vr-checked])').forEach(video=>{video.dataset.vrChecked='true';const state=document.createElement('p');state.className='vr-export-state';state.setAttribute('role','status');const en=()=>document.documentElement.lang==='en';const copy=video.closest('.studio-export')?.querySelector('.studio-ready');const update=()=>{const failed=!!video.error;const loaded=video.readyState>=1;state.textContent=failed?(en()?'Video unavailable. Check the file before publishing.':'Vidéo indisponible. Vérifiez le fichier avant publication.') : loaded?(en()?'Video loaded. Preview it before publishing.':'Vidéo chargée. Vérifiez l’aperçu avant publication.'):(en()?'Loading saved video…':'Chargement de la vidéo enregistrée…');if(copy)copy.textContent=failed?(en()?'File unavailable':'Fichier indisponible'):loaded?(en()?'Video available':'Vidéo disponible'):(en()?'Saved export':'Export enregistré')};video.closest(".studio-export-body").querySelector(".studio-export-copy").append(state);video.addEventListener('error',update);video.addEventListener('loadedmetadata',update);update()});
   main.querySelectorAll('.vira-calendar:not([data-vr-agenda])').forEach(cal=>{cal.dataset.vrAgenda='true';const grid=cal.querySelector('.vira-month-grid');const toolbar=cal.querySelector('.vira-month-toolbar');if(!grid||!toolbar)return;const b=document.createElement('button');b.type='button';b.className='vira-calendar-button';b.style.marginBottom='16px';let agenda=matchMedia('(max-width:650px)').matches;const apply=()=>{grid.hidden=agenda;toolbar.hidden=agenda;b.textContent=agenda?'Afficher le mois':'Afficher la liste';b.setAttribute('aria-pressed',String(agenda))};b.onclick=()=>{agenda=!agenda;apply()};toolbar.before(b);apply()});
  }
  new MutationObserver(inspect).observe(main,{childList:true,subtree:true});inspect();
 })();
-</script></body>
+</script><style>
+body .app-shell .main #videoResult .studio-export-body{display:grid!important;grid-template-columns:240px minmax(0,1fr)!important;align-items:center!important;gap:36px!important}
+body .app-shell .main #videoResult .studio-export-copy{width:100%!important;min-width:0!important;max-width:560px!important}
+body .app-shell .main #videoResult video.video-player{width:240px!important;height:auto!important;max-height:480px!important;margin:0!important}
+body .app-shell .main #videoResult .vr-export-state{font-size:13px!important;line-height:1.5!important;margin-top:16px!important}
+body .app-shell .main #progressWrap{padding:20px!important;background:white!important;border:1px solid #dde2ec;border-radius:12px;margin:16px 0!important}
+body .app-shell .main #progressWrap .progress-meta{font-size:14px!important;color:#34415a!important;margin-bottom:12px!important}
+body .app-shell .main #progressWrap .progress-track{height:10px!important;background:#edeaf5!important;border:0!important}
+body .app-shell .main #progressWrap .progress-fill{background:#7054be!important;box-shadow:none!important}
+@media(max-width:650px){body .app-shell .main #videoResult .studio-export-body{grid-template-columns:1fr!important;gap:24px!important}body .app-shell .main #videoResult video.video-player{margin:auto!important;max-width:100%!important}}
+</style></body>
 </html>
 

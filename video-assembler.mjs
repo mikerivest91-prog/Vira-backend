@@ -9,7 +9,7 @@ const runFile = promisify(execFile);
 let assembling = false;
 
 // Server-owned local paths only. One decoder and encoder at a time.
-export async function assembleVideoClips(clipPaths, audioPath = null, transition = null) {
+export async function assembleVideoClips(clipPaths, audioPath = null, transition = null, onProgress = () => {}) {
   if (!Array.isArray(clipPaths) || clipPaths.length !== 4) throw new Error("L’assemblage exige exactement 4 clips.");
   if (assembling) throw new Error("Une vidéo est en cours de préparation. Réessayez après sa fin.");
   if (!ffmpegPath) throw new Error("FFmpeg est indisponible sur ce serveur.");
@@ -38,6 +38,7 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
         "-filter_threads", "1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
         "-threads", "1", "-video_track_timescale", "15360", path.join(directory, `scene-${i}.mp4`)
       ]);
+      onProgress((i + 1) * 20);
     }
     await writeFile(path.join(directory, "clips.txt"), clipPaths.map((_, i) => `file 'scene-${i}.mp4'`).join("\n"));
     const outputPath = path.join(directory, "vira-final.mp4");
@@ -49,6 +50,7 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
       "-threads", "1", "-movflags", "+faststart", outputPath
     ]);
     if (!(await stat(outputPath)).size) throw new Error("Le fichier MP4 produit est vide.");
+    onProgress(100);
     return { outputPath, cleanup };
   } catch (error) {
     await cleanup();

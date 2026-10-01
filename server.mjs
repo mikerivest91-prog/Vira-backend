@@ -1002,8 +1002,8 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
   });
 });
 // Uploaded clips and generated previews share the same final MP4 contract.
-async function publishVideo(clipPaths, prefix, audioPath = null, transition = null) {
-  const result = await assembleVideoClips(clipPaths, audioPath, transition);
+async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}) {
+  const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress);
   try {
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
     await fs.promises.copyFile(result.outputPath, path.join(VIDEO_TEMP_DIR, filename));
@@ -1115,7 +1115,23 @@ function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0) {
   });
 }
 
+const videoProgressJobs = new Map();
+app.get('/api/video/progress/:id', requireAuth, (req,res) => {
+  res.set('Cache-Control','no-store');
+  const job=videoProgressJobs.get(req.params.id);
+  if(!job || job.userId!==String(req.user.id)) return res.status(404).json({ok:false});
+  res.json({ok:true,percent:job.percent,status:job.status});
+});
 app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
+  const progressId=String(req.query.progressId || '');
+  const tracked=/^[a-f0-9-]{36}$/.test(progressId) && !videoProgressJobs.has(progressId);
+  const progressJob={userId:String(req.user.id),percent:0,status:'running'};
+  if(tracked) {
+    videoProgressJobs.set(progressId,progressJob);
+    setTimeout(()=>videoProgressJobs.delete(progressId),15*60*1000).unref();
+    res.on('finish',()=>{progressJob.status=res.statusCode<400?'complete':'error';if(res.statusCode<400)progressJob.percent=100;});
+  }
+  const reportProgress=percent=>{if(tracked)progressJob.percent=Math.max(progressJob.percent,percent);};
   console.log("FREE-ASSEMBLE ROUTE REACHED");
   const images = req.body?.images;
   if (!Array.isArray(images) || images.length !== 4) {
@@ -1148,11 +1164,12 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
       await fs.promises.writeFile(imagePath, decoded[i].buffer);
       // Keep the input until FFmpeg has actually finished reading it.
       await createPreviewClip(imagePath, clipPath, transition.clipDuration, i);
+      reportProgress((i+1)*10);
       clips.push(clipPath);
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
-const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, null);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
+const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, null, percent => reportProgress(40 + percent * 0.55));    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
