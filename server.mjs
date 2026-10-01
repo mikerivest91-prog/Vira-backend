@@ -66,7 +66,19 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json", limit: "
 app.use(express.json({ limit: "2mb" }));
 app.get("/", (_req, res) => res.sendFile(path.resolve("index.html")));
 app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
-app.use("/videos", express.static(VIDEO_STORAGE_DIR));
+app.get('/videos/:filename', requireAuth, async (req,res) => {
+  res.setHeader('Cache-Control','private, no-store');
+  const filename=req.params.filename;
+  if(!/^vira-[a-zA-Z0-9_-]+\.mp4$/.test(filename))return res.sendStatus(404);
+  try {
+    const administrator=Boolean(ADMIN_EMAIL)&&normalizeEmail(req.user.email)===ADMIN_EMAIL;
+    if(!administrator){
+      const owner=JSON.parse(await fs.promises.readFile(path.join(VIDEO_STORAGE_DIR,filename+'.owner.json'),'utf8'));
+      if(owner.userId!==String(req.user.id))return res.sendStatus(404);
+    }
+    res.sendFile(path.join(VIDEO_STORAGE_DIR,filename),error=>{if(error&&!res.headersSent)res.sendStatus(404);});
+  }catch{return res.sendStatus(404);}
+});
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl:
@@ -300,6 +312,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
   if(!/^vira-[a-zA-Z0-9_-]+\.mp4$/.test(name))return res.status(400).json({error:'Nom de vidéo invalide.'});
   try {
     await fs.promises.unlink(path.join(VIDEO_STORAGE_DIR,name));
+    await fs.promises.unlink(path.join(VIDEO_STORAGE_DIR,name+'.owner.json')).catch(()=>{});
     res.json({ok:true});
   }catch(error){res.status(error.code==='ENOENT'?404:500).json({error:error.code==='ENOENT'?'Vidéo déjà absente.':'Suppression impossible.'});}
 });
@@ -1030,7 +1043,8 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
   });
 });
 // Uploaded clips and generated previews share the same final MP4 contract.
-async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}) {
+async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId) {
+  if(ownerId===undefined || ownerId===null)throw new Error("Propriétaire manquant.");
   const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress);
   try {
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
@@ -1038,9 +1052,11 @@ async function publishVideo(clipPaths, prefix, audioPath = null, transition = nu
     const pending = destination + ".partial";
     try {
       await fs.promises.copyFile(result.outputPath, pending);
+      await fs.promises.writeFile(destination+'.owner.json',JSON.stringify({userId:String(ownerId)}),{flag:'wx',mode:0o600});
       await fs.promises.rename(pending, destination);
     } catch (error) {
       await fs.promises.unlink(pending).catch(() => {});
+      await fs.promises.unlink(destination+'.owner.json').catch(() => {});
       throw error;
     }
     return `/videos/${filename}`;
@@ -1059,7 +1075,7 @@ app.post(
       if (files.length !== 4) {
         return res.status(400).json({ ok: false, error: "VIRA exige exactement 4 clips vidéo." });
       }
-      const videoUrl = await publishVideo(files.map(file => path.resolve(file.path)), "vira-final");
+      const videoUrl = await publishVideo(files.map(file => path.resolve(file.path)), "vira-final", null, null, () => {}, req.user.id);
       return res.json({ ok: true, videoUrl });
     } catch (error) {
       console.error("VIDEO ASSEMBLY ERROR:", error);
@@ -1103,7 +1119,7 @@ app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
     let fitted;
     try {
       fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
-      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition);
+      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id);
       await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
       return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:usage.limit,ownerTesting:usage.ownerTesting}});
     } catch(error) {
@@ -1205,7 +1221,7 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
-const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, null, percent => reportProgress(40 + percent * 0.55));    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
+const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, null, percent => reportProgress(40 + percent * 0.55), req.user.id);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
