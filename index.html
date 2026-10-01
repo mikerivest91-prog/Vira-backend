@@ -2883,8 +2883,17 @@ ${els.tone.value || "Professionnel"}
     voicePanel.innerHTML = `<strong>Votre narration</strong>
       <p>Voix automatique gratuite ou votre propre voix · 60 secondes maximum.</p>
       <div class="field-group"><label for="voiceMode">Source de la voix</label><select id="voiceMode"><option value="auto">Voix automatique</option><option value="personal">Ma voix · enregistrer ou importer</option></select></div>
-      <div id="autoVoiceFields"><div class="field-group"><label for="voiceGender">Choix de la voix</label><select id="voiceGender"><option value="female">Femme</option><option value="male">Homme</option></select></div>
-      <div class="field-group"><label for="voiceNarration">Texte à lire</label><textarea id="voiceNarration" maxlength="800"></textarea></div>
+<div id="autoVoiceFields">
+  <div class="field-group">
+    <label for="voiceGender">Choix de la voix</label>
+    <select id="voiceGender">
+      <option value="female">Femme — Canadienne française</option>
+      <option value="female_fr">Femme — Française</option>
+      <option value="male">Homme — Canadien français</option>
+      <option value="male_fr">Homme — Français</option>
+    </select>
+  </div>
+</div>      <div class="field-group"><label for="voiceNarration">Texte à lire</label><textarea id="voiceNarration" maxlength="800"></textarea></div>
       <p>Voix de synthèse basique en français, sans crédits.</p><button class="action-card" id="prepareVoice" type="button">Créer la voix</button></div>
       <div id="personalVoiceFields" hidden><div class="field-group"><label for="voiceFile">Importer un audio · MP3, WAV, M4A ou WebM · 15 Mo maximum</label><input id="voiceFile" type="file" accept="audio/*"></div><button class="action-card" id="recordVoice" type="button">Enregistrer ma voix</button><button class="action-card" id="stopVoice" type="button" hidden>Terminer l’enregistrement</button><p id="recordState" role="status"></p></div>
       <audio id="voicePreview" controls preload="metadata" hidden style="width:100%;margin-top:14px"></audio><p id="voiceFeedback" role="status" aria-live="polite"></p>`;
