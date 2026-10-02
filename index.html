@@ -1734,7 +1734,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 .brain-layout .brain-insights{grid-template-columns:1fr!important}
 </style>
   <style>
-@media (max-width:759px){
+@media (max-width:999px){
   html body{
     height:100dvh!important;
     overflow:hidden!important;
@@ -1748,6 +1748,7 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
   }
 
   body .mobile-nav{
+    display:grid!important;
     position:fixed!important;
     left:0!important;
     right:0!important;
@@ -1764,6 +1765,31 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
   }
 }
 </style>
+<script>
+/* Shared navigation: the mobile content pane owns its scrolling. */
+window.olyvexNavigationRevision = 0;
+window.olyvexScrollToTop = () => {
+  const pane=document.querySelector('.app-shell');
+  if(pane && matchMedia('(max-width:999px)').matches) pane.scrollTo({top:0,left:0,behavior:'instant'});
+  else window.scrollTo({top:0,left:0,behavior:'instant'});
+};
+window.olyvexMediaUrl = (value, image=false) => {
+  if(typeof value!=='string') return '';
+  if(image && /^data:image\/(png|jpeg|webp|gif|svg\+xml);/i.test(value)) return value;
+  try {const u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:'';}catch{return '';}
+};
+window.olyvexSetNavigation = id => {
+  const labels={navHome:['Tableau de bord','Accueil'],navCampaigns:['Campagnes'],navBrain:['Olyvex Brain'],navContent:['Bibliothèque','Contenus'],navCalendar:['Calendrier'],navStats:['Statistiques'],navSettings:['Paramètres','Réglages']};
+  document.querySelectorAll('.sidebar-link').forEach(b=>{const active=b.id===id||(labels[id]||[]).includes(b.dataset.navigationLabel||b.textContent.trim());b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  document.querySelectorAll('.mobile-nav button').forEach(b=>{const active=b.id===id||(b.classList.contains('vr-more-button')&&['navBrain','navCalendar','navStats'].includes(id));b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+};
+document.addEventListener('click',event=>{
+  const button=event.target.closest('button');
+  if(!button||!/^nav(Home|Campaigns|Brain|Content|Calendar|Stats|Settings)$/.test(button.id))return;
+  window.olyvexNavigationRevision++;
+  requestAnimationFrame(()=>{window.olyvexSetNavigation(button.id);window.olyvexScrollToTop();});
+},true);
+</script>
 </head>
 <body class="auth-pending">
 
@@ -2589,7 +2615,7 @@ localStorage.removeItem("viraGeneratedImages");
         els.result.innerHTML = `<details class="results-panel visual-collapse" open><summary class="results-title">Clips de campagne · 4 scènes</summary><div class="visual-strip">${sourceClips.map((clip,i)=>`<div class="visual-card"><div class="visual-frame"><video controls muted playsinline preload="metadata" src="${escapeHtml(clip.url)}" aria-label="Clip de la scène ${i+1}" style="width:100%;height:100%;object-fit:contain"></video></div><div class="visual-caption">Scène ${i+1} · ${clip.duration.toFixed(1)} s</div></div>`).join("")}</div></details>`;
         return;
       }
-      els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title" style="cursor:pointer;"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/4 scènes ${test ? "• mode test gratuit" : "• images de campagne"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${src}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
+      els.result.innerHTML = `<details class="results-panel visual-collapse"><summary class="results-title" style="cursor:pointer;"><span class="campaign-heading-icon">${uiIcon("image")}</span><span>Visuels de campagne</span></summary><div class="meta">${images.length}/4 scènes ${test ? "• mode test gratuit" : "• images de campagne"}</div><div class="visual-strip">${images.map((src,i)=>`<div class="visual-card"><div class="visual-frame"><img src="${escapeHtml(window.olyvexMediaUrl(src,true))}" alt="Visuel scène ${i+1}"><span class="visual-number">SCÈNE ${i+1}</span></div><div class="visual-caption">${escapeHtml((scenes[i]||"").slice(0,80))}</div></div>`).join("")}</div></details>`;
 
     }
 
@@ -2903,7 +2929,7 @@ ${els.tone.value || "Professionnel"}
         body: JSON.stringify({
           title: els.prompt.value.trim() || "Campagne Marketing",
           status: "draft",
-          campaignData: {
+          campaignData: { brief:els.prompt.value.trim(),
             scenario: rawScenario, audience: els.audience.value.trim(),
             goal: els.goal.value.trim(), tone: els.tone.value,
             platform: els.platform.value, marketingType: selectedMarketingType,
@@ -2916,6 +2942,7 @@ ${els.tone.value || "Professionnel"}
         throw new Error(data.error || "La sauvegarde a échoué. Relancez la génération pour réessayer.");
       }
       localStorage.setItem("viraCurrentCampaignId", String(data.campaign.id));
+      window.dispatchEvent(new Event("olyvex:campaign-saved"));
     }
 
     let audioBusy = false;
@@ -3176,7 +3203,7 @@ ${els.tone.value || "Professionnel"}
         const images=draftPhotos.slice();
         const response=await fetch(`/api/campaigns/${encodeURIComponent(id)}`,{
           method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({title:els.prompt.value.trim() || "Campagne Marketing",status:"visuals_ready",campaignData:{
+          body:JSON.stringify({title:els.prompt.value.trim() || "Campagne Marketing",status:"visuals_ready",campaignData:{ brief:els.prompt.value.trim(),
             scenario:rawScenario,audience:els.audience.value.trim(),goal:els.goal.value.trim(),tone:els.tone.value,
             platform:els.platform.value,marketingType:selectedMarketingType,generatedImages:images
           }})
@@ -3257,7 +3284,7 @@ ${els.tone.value || "Professionnel"}
       try {
         const clips=validSourceClips(draftClips), images=clips.map(c=>c.thumbnail);
         const response=await fetch(`/api/campaigns/${encodeURIComponent(id)}`,{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({title:els.prompt.value.trim() || "Campagne Marketing",status:"visuals_ready",campaignData:{
+          body:JSON.stringify({title:els.prompt.value.trim() || "Campagne Marketing",status:"visuals_ready",campaignData:{ brief:els.prompt.value.trim(),
             scenario:rawScenario,audience:els.audience.value.trim(),goal:els.goal.value.trim(),tone:els.tone.value,
             platform:els.platform.value,marketingType:selectedMarketingType,generatedImages:images,sourceClips:clips
           }})});
@@ -3341,6 +3368,7 @@ ${els.tone.value || "Professionnel"}
           
         }
 localStorage.setItem("viraGeneratedImages", JSON.stringify(generatedImages));
+window.olyvexRefreshUsage?.();
         const currentCampaignId = localStorage.getItem("viraCurrentCampaignId");
 
 if (currentCampaignId) {
@@ -3353,7 +3381,7 @@ if (currentCampaignId) {
     body: JSON.stringify({
       title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
       status: "visuals_ready",
-      campaignData: {
+      campaignData: { brief:els.prompt.value.trim(),
         scenario: rawScenario,
         audience: els.audience.value.trim(),
         goal: els.goal.value.trim(),
@@ -3504,7 +3532,9 @@ localStorage.setItem(
 );
       const currentCampaignId = localStorage.getItem("viraCurrentCampaignId");
 
+let saveWarning="";
 if (currentCampaignId) {
+  try {
   const updateResponse = await fetch(`/api/campaigns/${currentCampaignId}`, {
     method: "PUT",
     credentials: "same-origin",
@@ -3514,7 +3544,7 @@ if (currentCampaignId) {
     body: JSON.stringify({
       title: completedCampaign.title,
       status: "completed",
-      campaignData: {
+      campaignData: { brief:els.prompt.value.trim(),
         scenario: completedCampaign.scenario,
         audience: completedCampaign.audience,
         goal: completedCampaign.goal,
@@ -3530,13 +3560,14 @@ if (currentCampaignId) {
   });
 
   if (!updateResponse.ok) {
-    console.error("Impossible de sauvegarder la vidéo finale dans la campagne.");
+    saveWarning="La vidéo est prête à télécharger, mais sa sauvegarde dans Bibliothèque a échoué. Conservez le fichier avant de quitter cette page.";
   }
+  } catch(error) {saveWarning="La vidéo est prête à télécharger, mais la connexion a empêché sa sauvegarde dans Bibliothèque. Conservez le fichier avant de quitter cette page.";}
 }
       setStatus(
         els.videoStatus,
-        "",
-        "success"
+        saveWarning,
+        saveWarning ? "error" : "success"
       );
     } else {
       finalVideoUrl = await createFinalVideo();
@@ -3552,6 +3583,7 @@ if (currentCampaignId) {
     videoInProgress = false;
     progressStopped = true;
     clearTimeout(progressPolling);
+    window.olyvexRefreshUsage?.();
     voicePanel.querySelectorAll("button,input,select,textarea").forEach(control=>control.disabled=false);
     updateWorkflowState();
     hideProgress(1200);
@@ -3668,6 +3700,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
       return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
     }
     async function openViraCalendar(selectedId = "") {
+      window.olyvexNavigationRevision++;window.olyvexSetNavigation("navCalendar");
       document.querySelectorAll(".sidebar-link").forEach(item => item.classList.toggle("active", item === els.navCalendar));
       document.querySelectorAll(".mobile-nav button").forEach(item => item.classList.remove("active"));
       const main = document.querySelector("main");
@@ -3675,7 +3708,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
       const root = main.querySelector(".vira-calendar");
       const status = root.querySelector("#viraPlanStatus");
       const body = root.querySelector("#viraCalendarBody");
-      window.scrollTo(0,0);
+      window.olyvexScrollToTop();
       try {
         const owner = viraPlansKey();
         const [response, calendarResponse] = await Promise.all([fetch("/api/campaigns", {credentials:"same-origin"}), fetch("/api/calendar", {credentials:"same-origin"})]);
@@ -3811,7 +3844,7 @@ els.navContent?.addEventListener("click", async () => {
  const header=make('header','vr-page-head');header.append(make('span','vr-kicker',t('ESPACE DE TRAVAIL','WORKSPACE')),make('h1','',t('Bibliothèque','Library')),make('p','',t('Vos textes, images et vidéos, réunis par campagne.','Your copy, images and videos, organized by campaign.')));root.append(header);
  const state=make('p','vr-empty',t('Chargement de vos contenus…','Loading your content…'));state.setAttribute('role','status');root.append(state);
  document.querySelectorAll('.sidebar-link').forEach(n=>n.classList.toggle('active',n.dataset.navigationLabel==='Bibliothèque'));
- document.querySelector('.mobile-nav .active')?.classList.remove('active');els.navContent.classList.add('active');window.scrollTo(0,0);
+ document.querySelector('.mobile-nav .active')?.classList.remove('active');els.navContent.classList.add('active');window.olyvexScrollToTop();
  const safeUrl=(value,image=false)=>{if(typeof value!=='string')return '';if(image&&/^data:image\/(png|jpeg|webp|gif|svg\+xml);/i.test(value))return value;try{const u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:''}catch{return ''}};
  const isPreview=value=>{try{if(!value.startsWith('data:'))return false;const comma=value.indexOf(',');const data=value.slice(comma+1);const decoded=value.slice(0,comma).includes(';base64')?atob(data):decodeURIComponent(data);return decoded.includes('VIRA PREMIUM')&&decoded.includes('MODE TEST GRATUIT')}catch{return false}};
  function viewImage(url,label){const dialog=make('dialog','vr-lightbox');const top=make('div','vr-dialog-head');top.append(make('h2','',label));const close=make('button','vr-button','×');close.setAttribute('aria-label',t('Fermer l’aperçu','Close preview'));close.onclick=()=>dialog.close();top.append(close);const image=make('img');image.src=url;image.alt=label;dialog.append(top,image);document.body.append(dialog);dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});dialog.addEventListener('close',()=>dialog.remove(),{once:true});dialog.showModal();}
@@ -3823,10 +3856,10 @@ els.navContent?.addEventListener("click", async () => {
   function render(){list.replaceChildren();const q=search.value.trim().toLocaleLowerCase();const found=entries.filter(e=>(String(e.c.title||'')+' '+e.scenario).toLocaleLowerCase().includes(q)&&(select.value==='all'||select.value==='images'&&e.images.length||select.value==='video'&&e.video||select.value==='text'&&e.scenario.trim()));count.textContent=found.length+' '+t('campagne(s)','campaign(s)');if(!found.length){list.append(make('div','vr-empty',entries.length?t('Aucun résultat. Modifiez votre recherche ou le filtre.','No results. Change your search or filter.'):t('Votre bibliothèque est vide. Les contenus enregistrés de vos campagnes apparaîtront ici.','Your library is empty. Saved campaign content will appear here.')));return}
    found.forEach(({c,scenario,images,video})=>{
     const card=make('article','vr-library-card');const heading=make('header','vr-card-head');const title=make('h2','vr-title',c.title||t('Campagne sans titre','Untitled campaign'));title.dataset.userContent='';heading.append(title);const meta=make('p','vr-meta',[images.length+' '+t('image(s)','image(s)'),video?t('1 vidéo','1 video'):null,scenario?t('Textes disponibles','Copy available'):null].filter(Boolean).join(' · '));heading.append(meta);card.append(heading);
-    const brief=make('details','vr-details');brief.append(make('summary','',t('Lire le brief complet','Read full brief')));const full=make('p','',c.title||'');full.dataset.userContent='';brief.append(full);card.append(brief);
-    if(images.length){const gallery=make('div','vr-gallery');const scenes=parseScenario(scenario).scenes||[];images.forEach(({src,i})=>{const figure=make('figure','vr-media');const button=make('button','vr-preview');button.type='button';button.setAttribute('aria-label',t('Agrandir le visuel ','Enlarge image ')+(i+1));const img=make('img');img.src=src;img.alt=t('Visuel ','Image ')+(i+1);img.loading='lazy';button.append(img);button.onclick=()=>viewImage(src,img.alt);img.onerror=()=>{button.disabled=true;button.replaceChildren(make('span','vr-media-error',t('Image indisponible','Image unavailable')))};figure.append(button);const caption=make('figcaption');const row=make('div','vr-media-meta');row.append(make('strong','',t('Scène ','Scene ')+(i+1)));const link=make('a','vr-text-link',t('Ouvrir','Open'));link.href=src;link.target='_blank';link.rel='noopener noreferrer';row.append(link);caption.append(row);if(isPreview(src))caption.append(make('span','vr-preview-badge',t('Aperçu de test · à remplacer','Test preview · replace before publishing')));if(scenes[i]){const details=make('details','vr-details');details.append(make('summary','',t('Description de la scène','Scene description')));const p=make('p','',scenes[i]);p.dataset.userContent='';details.append(p);caption.append(details)}figure.append(caption);gallery.append(figure)});card.append(gallery)}
+    const brief=make('details','vr-details');brief.append(make('summary','',t('Lire le brief complet','Read full brief')));const full=make('p','',c.campaign_data?.brief||c.title||'');full.dataset.userContent='';brief.append(full);card.append(brief);
+    if(images.length){const gallery=make('div','vr-gallery');const scenes=parseScenario(scenario).scenes||[];images.forEach(({src,i})=>{const figure=make('figure','vr-media');const button=make('button','vr-preview');button.type='button';button.setAttribute('aria-label',t('Agrandir le visuel ','Enlarge image ')+(i+1));const img=make('img');img.src=src;img.alt=t('Visuel ','Image ')+(i+1);img.loading='lazy';button.append(img);button.onclick=()=>viewImage(src,img.alt);img.onerror=()=>{button.disabled=true;button.replaceChildren(make('span','vr-media-error',t('Image indisponible','Image unavailable')))};figure.append(button);const caption=make('figcaption');const row=make('div','vr-media-meta');row.append(make('strong','',t('Scène ','Scene ')+(i+1)));const link=make('a','vr-text-link',t('Ouvrir','Open'));link.href=src;link.target='_blank';link.rel='noopener noreferrer';link.onclick=event=>{if(src.startsWith('data:')){event.preventDefault();viewImage(src,img.alt)}};row.append(link);caption.append(row);if(isPreview(src))caption.append(make('span','vr-preview-badge',t('Aperçu de test · à remplacer','Test preview · replace before publishing')));if(scenes[i]){const details=make('details','vr-details');details.append(make('summary','',t('Description de la scène','Scene description')));const p=make('p','',scenes[i]);p.dataset.userContent='';details.append(p);caption.append(details)}figure.append(caption);gallery.append(figure)});card.append(gallery)}
     if(scenario.trim()){const text=make('details','vr-details vr-copy');text.append(make('summary','',t('Scénario et textes','Script and copy')));const pre=make('pre','',scenario);pre.dataset.userContent='';text.append(pre);card.append(text)}
-    if(video){const wrap=make('section','vr-video');wrap.append(make('h3','',t('Vidéo enregistrée','Saved video')));const player=make('video');player.controls=true;player.preload='metadata';player.src=video;const status=make('p','vr-meta',t('Chargement de la vidéo…','Loading video…'));status.setAttribute('role','status');player.onloadedmetadata=()=>status.textContent=t('Vidéo disponible','Video available');player.onerror=()=>status.textContent=t('Impossible de charger cette vidéo. Le fichier est peut-être indisponible.','Unable to load this video. The file may be unavailable.');const a=make('a','vr-button',t('Ouvrir la vidéo','Open video'));a.href=video;a.target='_blank';a.rel='noopener noreferrer';wrap.append(player,status,a);card.append(wrap)}
+    if(video){const wrap=make('section','vr-video');wrap.append(make('h3','',t('Vidéo enregistrée','Saved video')));const player=make('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=video;const status=make('p','vr-meta',t('Chargement de la vidéo…','Loading video…'));status.setAttribute('role','status');player.onloadedmetadata=()=>status.textContent=t('Vidéo disponible','Video available');player.onerror=()=>status.textContent=t('Impossible de charger cette vidéo. Le fichier est peut-être indisponible.','Unable to load this video. The file may be unavailable.');const a=make('a','vr-button',t('Ouvrir la vidéo','Open video'));a.href=video;a.target='_blank';a.rel='noopener noreferrer';wrap.append(player,status,a);card.append(wrap)}
     list.append(card);
    });
   }
@@ -3836,13 +3869,19 @@ els.navContent?.addEventListener("click", async () => {
 
 els.navSettings?.addEventListener("click", () => window.viraSettings());
 els.navCampaigns?.addEventListener("click", async () => {
+  const navigationRevision=window.olyvexNavigationRevision;
+  const main=document.querySelector('main');
+  main.innerHTML='<section class="box"><h2>Mes campagnes</h2><p role="status">Chargement des campagnes…</p></section>';
+  window.olyvexScrollToTop();
+  try {
       document.querySelector(".mobile-nav .active")?.classList.remove("active");
 els.navCampaigns?.classList.add("active");
       const response = await fetch("/api/campaigns", {
   credentials: "same-origin"
 });
 const data = await response.json();
-if (!response.ok) { alert(data.error || "Impossible de charger les campagnes."); return; }
+if(navigationRevision!==window.olyvexNavigationRevision)return;
+if (!response.ok || !Array.isArray(data.campaigns)) throw new Error(data.error || "Impossible de charger les campagnes.");
 const campaigns = data.campaigns || [];
       const campaignCount = campaigns.length;
       const campaignListHtml = campaigns.length
@@ -3850,13 +3889,13 @@ const campaigns = data.campaigns || [];
       <div class="campaign-section saved-campaign" data-vira-campaign-id="${escapeHtml(String(campaign.id))}" data-campaign-index="${index}">
       <div class="campaign-card-content">
       <div class="campaign-media">
-        ${campaign.image
-          ? `<img class="campaign-thumb" src="${campaign.image}" alt="Aperçu de ${escapeHtml(campaign.title || "Campagne")}">`
+        ${window.olyvexMediaUrl(campaign.campaign_data?.generatedImages?.[0] || campaign.image,true)
+          ? `<img class="campaign-thumb" src="${escapeHtml(window.olyvexMediaUrl(campaign.campaign_data?.generatedImages?.[0] || campaign.image,true))}" alt="Aperçu de ${escapeHtml(campaign.title || "Campagne")}">`
           : `<div class="campaign-thumb campaign-thumb-placeholder" aria-hidden="true"><svg class="campaign-document-icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div>`}
       </div>
       <div class="campaign-card-info">
         <strong data-user-content title="${escapeHtml(campaign.title || "Campagne Marketing")}">${escapeHtml(campaign.title || "Campagne Marketing")}</strong>
-      <span class="campaign-status" data-status="${campaign.status === "completed" ? "completed" : campaign.status === "visuals_ready" ? "visuals_ready" : "draft"}">${campaign.status === "completed" ? "✓ Terminée" : campaign.status === "visuals_ready" ? "Visuels prêts" : "Brouillon"}</span><p class="campaign-description">${(() => { const text = String(campaign.scenario || "").replace(/\*\*/g, ""); const objective = text.match(/OBJECTIF\s*:?\s*([\s\S]*?)(?=\n\s*(?:PUBLIC CIBLE|ACCROCHE|TEXTE PUBLICATION|HASHTAGS|SC[ÈE]NE\s*1|NARRATION|APPEL À L['’]ACTION|PROMPT VISUEL|STYLE)\s*:?|$)/i)?.[1] || text; const clean = objective.replace(/^\s*(?:TITRE|OBJECTIF)\s*:?\s*/i, "").trim(); return escapeHtml(clean.slice(0, 132)) + (clean.length > 132 ? "…" : ""); })()}</p>
+      <span class="campaign-status" data-status="${campaign.status === "completed" ? "completed" : campaign.status === "visuals_ready" ? "visuals_ready" : "draft"}">${campaign.status === "completed" ? "✓ Terminée" : campaign.status === "visuals_ready" ? "Visuels prêts" : "Brouillon"}</span><p class="campaign-description">${(() => { const text = String(campaign.campaign_data?.scenario || campaign.scenario || "").replace(/\*\*/g, ""); const objective = text.match(/OBJECTIF\s*:?\s*([\s\S]*?)(?=\n\s*(?:PUBLIC CIBLE|ACCROCHE|TEXTE PUBLICATION|HASHTAGS|SC[ÈE]NE\s*1|NARRATION|APPEL À L['’]ACTION|PROMPT VISUEL|STYLE)\s*:?|$)/i)?.[1] || text; const clean = objective.replace(/^\s*(?:TITRE|OBJECTIF)\s*:?\s*/i, "").trim(); return escapeHtml(clean.slice(0, 132)) + (clean.length > 132 ? "…" : ""); })()}</p>
         <p>${new Date(campaign.created_at || campaign.createdAt).toLocaleDateString(document.documentElement.lang === "en" ? "en-CA" : "fr-CA", { timeZone: "UTC" })}</p>
         <div class="vira-campaign-actions"><button type="button" class="campaign-resume">Ouvrir la campagne <span aria-hidden="true">→</span></button>
 <button type="button" class="vira-plan-button" data-campaign-index="${index}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18"/></svg>Planifier</button>
@@ -3885,7 +3924,7 @@ const campaigns = data.campaigns || [];
       <div class="campaign-list">${campaignListHtml}</div>
     </section>
   `;
-window.scrollTo(0, 0);
+window.olyvexScrollToTop();
 window.viraCampaignTools?.();
 document.querySelectorAll(".vira-plan-button").forEach(button => {
   button.addEventListener("click", event => {
@@ -3920,7 +3959,7 @@ const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario 
 } else {
   localStorage.removeItem("viraMarketingType");
     }
-    localStorage.setItem("viraIdea", campaign.title || "");
+    localStorage.setItem("viraIdea", campaignData.brief || campaign.title || "");
     localStorage.setItem("viraScenario", campaignData.scenario || campaign.scenario || "");
     localStorage.setItem(
   "viraGeneratedImages",
@@ -3940,7 +3979,7 @@ const parsedCampaign = parseScenario(campaignData.scenario || campaign.scenario 
   localStorage.removeItem("viraFinalVideoUrl");
 }
     localStorage.setItem("viraScenarioValidated", "true");
-    localStorage.setItem("viraResumePrompt", campaign.title || "");
+    localStorage.setItem("viraResumePrompt", campaignData.brief || campaign.title || "");
 localStorage.setItem("viraResumeCampaign", "true"); sessionStorage.setItem("viraStudioView", "content");
     window.location.reload();
   });
@@ -3976,12 +4015,18 @@ const campaignData = campaign.campaign_data || {};
       button.closest(".saved-campaign")?.remove();
 
     } catch (error) {
-      console.error("CAMPAIGN DELETE ERROR:", error);
+      console.error("CAMPAIGN DELETE ERROR:", error);alert(error.message||"Suppression impossible. La campagne est conservée.");
     }
   });
 });
-}); // Fin du gestionnaire Campagnes ; Statistiques est enregistré au démarrage.
+  } catch(error) {
+    if(navigationRevision!==window.olyvexNavigationRevision)return;
+    const message=document.createElement('p');message.setAttribute('role','alert');message.textContent=error.message||'Impossible de charger les campagnes.';
+    const retry=document.createElement('button');retry.type='button';retry.className='vr-button';retry.textContent=document.documentElement.lang==='en'?'Retry':'Réessayer';retry.onclick=()=>els.navCampaigns.click();main.replaceChildren(message,retry);
+  }
+}); // Campaigns: retain the latest selected view, including after slow replies.
 els.navStats?.addEventListener("click", async () => {
+  const navigationRevision=window.olyvexNavigationRevision;
   document.querySelectorAll(".sidebar-link").forEach(item => {
     item.classList.toggle("active", item === els.navStats);
   });
@@ -4013,6 +4058,7 @@ els.navStats?.addEventListener("click", async () => {
       c.status !== "visuals_ready"
     ).length;
 
+    if(navigationRevision!==window.olyvexNavigationRevision)return;
     const completionRate = total
       ? Math.round((completed / total) * 100)
       : 0;
@@ -4070,10 +4116,11 @@ els.navStats?.addEventListener("click", async () => {
       </section>
     `;
 
-    window.scrollTo(0, 0);
+    window.olyvexScrollToTop();
 
   } catch (error) {
     console.error("STATS ERROR:", error);
+    if(navigationRevision!==window.olyvexNavigationRevision)return;
 
     document.querySelector("main").innerHTML = `
       <section class="box">
@@ -4097,7 +4144,7 @@ els.navStats?.addEventListener("click", async () => {
   });
 
   window.location.hash = "brain";
-  window.scrollTo(0, 0);
+  window.olyvexScrollToTop();
 });
  if (localStorage.getItem("viraResumeCampaign") === "true") {
   localStorage.removeItem("viraResumeCampaign");
@@ -4114,31 +4161,7 @@ els.navStats?.addEventListener("click", async () => {
 })();    
   </script>
 
-<script>
-/* VIRA V8: keep the fixed mobile navigation from covering the final Olyvex Brain cards/CTA. */
-(() => {
-  const nav = document.querySelector('.mobile-nav');
-  const protectedBlocks = [...document.querySelectorAll('.vb-capabilities, .vb-cta')];
-  if (!nav || !protectedBlocks.length || !('IntersectionObserver' in window)) return;
 
-  const visible = new Set();
-  const sync = () => {
-    const mobile = window.matchMedia('(max-width:759px)').matches;
-    nav.classList.toggle('vira-nav-clear-content', mobile && visible.size > 0);
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) visible.add(entry.target);
-      else visible.delete(entry.target);
-    });
-    sync();
-  }, { root:null, threshold:0.08, rootMargin:'0px 0px -8% 0px' });
-
-  protectedBlocks.forEach((el) => observer.observe(el));
-  window.addEventListener('resize', sync, { passive:true });
-})();
-</script>
 
 
 <script>
@@ -4417,7 +4440,7 @@ picker.addEventListener('change',()=>{language=picker.value;try{localStorage.set
 <script>
 (()=>{const boxes=[document.querySelector('.credit-badge'),document.querySelector('.sidebar-credits')].filter(Boolean);const fallback=document.getElementById('sidebarCreditCount')?.parentElement;if(fallback&&!boxes.includes(fallback))boxes.push(fallback);
 function show(data){if(!Number.isFinite(data?.videos?.remaining)||!Number.isFinite(data?.images?.remaining))data=null;const en=document.documentElement.lang==='en';for(const el of boxes)el.innerHTML=data?'<span class="quota-values">'+data.videos.remaining+'/'+(data.videos.limit||4)+' '+(en?'videos':'vidéos')+' · '+data.images.remaining+'/'+(data.images.limit||16)+' '+(en?'AI images':'images IA')+'</span>':'<span class="quota-label">'+(en?'Usage unavailable':'Utilisation indisponible')+'</span>';}
-let usage;show();fetch('/api/usage',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{usage=d;show(d)}).catch(()=>show());new MutationObserver(()=>show(usage)).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});})();
+let usage;show();window.olyvexRefreshUsage=async()=>{try{const r=await fetch('/api/usage',{credentials:'same-origin'});if(!r.ok)throw Error();usage=await r.json();window.olyvexUsage=usage;show(usage);}catch{window.olyvexUsage=null;show();}};window.olyvexRefreshUsage();new MutationObserver(()=>show(usage)).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});})();
 </script>
 <style>html[lang="en"] .action-card:disabled::after,html[lang="en"] .action-card:disabled::before{content:"Locked"}</style>
 <style>
@@ -4938,16 +4961,16 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   const billing=document.getElementById('billingSummary');if(billing)main.append(billing);
   // Keep the creation workflow in place; collapse only the introduction.
   const hero=main.querySelector('.vb-hero');if(hero){const info=document.createElement('details');info.className='vh-intro';const summary=document.createElement('summary');summary.textContent=tr('Découvrir Olyvex Brain','Discover Olyvex Brain');hero.before(info);info.append(summary,hero);}
-  let campaigns=null;
+  let campaigns=null;let accountPlans=null;
   function element(tag,text,cls){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=text;return e;}
   function status(message){dashboard.querySelector('#vhStatus').textContent=message;}
   function render(){
     dashboard.querySelector('h1').textContent=tr('Vos idées prennent forme.','Bring your ideas to life.');
     dashboard.querySelector('.vh-heading p').textContent=tr('Retrouvez vos campagnes et préparez la suite.','Find your campaigns and plan what comes next.');
-    ['Campagnes créées','Campagnes terminées','À venir dans ce navigateur'].forEach((s,i)=>dashboard.querySelectorAll('.vh-stat span')[i].textContent=english()?['Campaigns created','Completed campaigns','Upcoming in this browser'][i]:s);
+    ['Campagnes créées','Campagnes terminées','À venir sur votre compte'].forEach((s,i)=>dashboard.querySelectorAll('.vh-stat span')[i].textContent=english()?['Campaigns created','Completed campaigns','Upcoming on your account'][i]:s);
     dashboard.querySelector('#vhRecentTitle').textContent=tr('Campagnes récentes','Recent campaigns');dashboard.querySelector('#vhNextTitle').textContent=tr('Prochaines publications','Upcoming posts');
     dashboard.querySelector('#vhAll').textContent=tr('Tout voir →','View all →');dashboard.querySelector('#vhCalendar').textContent=tr('Calendrier →','Calendar →');
-    dashboard.querySelector('#vhNote').textContent=tr('Planifications locales · publication manuelle.','Local schedules · manual publishing.');
+    dashboard.querySelector('#vhNote').textContent=tr('Calendrier du compte · publication manuelle.','Account calendar · manual publishing.');
     const recent=dashboard.querySelector('#vhRecent');const next=dashboard.querySelector('#vhNext');recent.replaceChildren();next.replaceChildren();
     if(!campaigns){recent.append(element('p',tr('Chargement des campagnes…','Loading campaigns…'),'vh-empty'));return;}
     dashboard.querySelector('#vhTotal').textContent=campaigns.length;
@@ -4965,7 +4988,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
       actions.append(open,plan);row.append(title,element('small',label),actions);recent.append(row);
     });
     try{
-      const owner=localStorage.getItem('viraWorkspaceUserId');const raw=JSON.parse(localStorage.getItem('viraCalendarPlans:v1:'+owner)||'[]');if(!Array.isArray(raw))throw Error();
+      if(!Array.isArray(accountPlans))throw Error();const raw=accountPlans;
       const byId=new Map(campaigns.map(c=>[String(c.id),c]));const plans=raw.filter(p=>p && byId.has(p.campaignId) && Date.parse(p.at)>Date.now()).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
       dashboard.querySelector('#vhScheduled').textContent=plans.length;
       if(!plans.length)next.append(element('p',tr('Aucune publication à venir. Choisissez une campagne à planifier.','No upcoming posts. Choose a campaign to schedule.'),'vh-empty'));
@@ -4976,7 +4999,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   newButton.addEventListener('click',()=>{try{sessionStorage.setItem('viraFocusCreation','true');}catch{}},true);
   try{if(sessionStorage.getItem('viraFocusCreation')==='true'){sessionStorage.removeItem('viraFocusCreation');requestAnimationFrame(()=>{document.getElementById('prompt')?.scrollIntoView({block:'center'});document.getElementById('prompt')?.focus({preventScroll:true});});}}catch{}
   render();let started=false;
-  async function load(){if(started||document.body.classList.contains('auth-pending'))return;started=true;authObserver.disconnect();try{const response=await fetch('/api/campaigns',{credentials:'same-origin'});if(!response.ok)throw Error();const data=await response.json();if(!Array.isArray(data.campaigns))throw Error();if(!dashboard.isConnected)return;campaigns=data.campaigns;render();}catch{dashboard.querySelector('#vhRecent').replaceChildren(element('p',tr('Chargement impossible. Réessayez depuis Campagnes.','Unable to load. Try again in Campaigns.'),'vh-empty'));status(tr('Vos données n’ont pas été modifiées.','Your data has not been changed.'));}}
+  async function load(){if(started||document.body.classList.contains('auth-pending'))return;started=true;authObserver.disconnect();try{const response=await fetch('/api/campaigns',{credentials:'same-origin'});if(!response.ok)throw Error();const data=await response.json();if(!Array.isArray(data.campaigns))throw Error();if(!dashboard.isConnected)return;campaigns=data.campaigns;try{const calendar=await fetch('/api/calendar',{credentials:'same-origin'});if(!calendar.ok)throw Error();const result=await calendar.json();if(!Array.isArray(result.events))throw Error();accountPlans=result.events.map(e=>({id:String(e.id),campaignId:String(e.campaign_id),at:e.scheduled_at,platform:e.platform}));}catch{accountPlans=null;}if(dashboard.isConnected)render();}catch{dashboard.querySelector('#vhRecent').replaceChildren(element('p',tr('Chargement impossible. Réessayez depuis Campagnes.','Unable to load. Try again in Campaigns.'),'vh-empty'));status(tr('Vos données n’ont pas été modifiées.','Your data has not been changed.'));}}
   const authObserver=new MutationObserver(load);authObserver.observe(document.body,{attributes:true,attributeFilter:['class']});load();
   const languageObserver=new MutationObserver(()=>{if(!dashboard.isConnected){languageObserver.disconnect();return;}render();});languageObserver.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 })();
@@ -5031,11 +5054,11 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     previewEmpty.hidden=!!result.textContent.trim();exportEmpty.hidden=!!videoResult.querySelector('video');
   }
   function choose(key,scroll=true){if(!steps.includes(key))key='brief';selected=key;sessionStorage.setItem('viraStudioView',key);studio.dataset.step=key;panels.forEach((p,i)=>p.hidden=steps[i]!==key);studio.querySelectorAll('[data-step]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.step===key)));studio.querySelector('.vs-summary').hidden=key==='content'||key==='export';preview.hidden=key!=='content';studio.querySelector('#vsPrevious').hidden=key==='brief';studio.querySelector('#vsNext').hidden=key==='export';update();if(scroll)studio.scrollIntoView({block:'start'});}
-  function editor(key){if(!studio.isConnected){sessionStorage.setItem('viraStudioView',key);location.reload();return;}dashboard.hidden=true;studio.hidden=false;document.querySelector('.vs-billing')?.setAttribute('hidden','');document.querySelectorAll('.sidebar-link').forEach(n=>n.classList.remove('active'));choose(key);}
+  function editor(key){window.olyvexSetNavigation('navBrain');if(!studio.isConnected){sessionStorage.setItem('viraStudioView',key);location.reload();return;}dashboard.hidden=true;studio.hidden=false;document.querySelector('.vs-billing')?.setAttribute('hidden','');document.querySelectorAll('.sidebar-link').forEach(n=>n.classList.remove('active'));choose(key);window.olyvexSetNavigation('navBrain');}
   function home(){sessionStorage.removeItem('viraStudioView');dashboard.hidden=false;studio.hidden=true;document.querySelector('.vs-billing')?.removeAttribute('hidden');}
   studio.querySelector('#vsBack').onclick=()=>document.getElementById('navCampaigns')?.click();
   studio.querySelector('#vsPrevious').onclick=()=>choose(steps[steps.indexOf(selected)-1]);studio.querySelector('#vsNext').onclick=()=>choose(steps[steps.indexOf(selected)+1]);
-  studio.addEventListener('input',update);studio.addEventListener('change',update);
+  studio.addEventListener('input',update);studio.addEventListener('change',update);window.addEventListener('olyvex:campaign-saved',()=>{if(studio.isConnected)update();});
   studio.querySelector('.vs-steps').addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();let i=steps.indexOf(selected);i=event.key==='Home'?0:event.key==='End'?3:(i+(event.key==='ArrowRight'?1:3))%4;choose(steps[i],false);studio.querySelector('#vs-tab-'+steps[i]).focus();});
   const watcher=new MutationObserver(()=>{previewEmpty.hidden=!result.textContent.trim()?false:true;exportEmpty.hidden=!!videoResult.querySelector('video');});watcher.observe(result,{childList:true,subtree:true});watcher.observe(videoResult,{childList:true,subtree:true});
   document.getElementById('brainAnalyzeBtn').addEventListener('click',()=>{if(['prompt','targetAudience','marketingGoal','platform'].every(id=>document.getElementById(id).value.trim()))choose('analysis');},true);
@@ -5043,7 +5066,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;if(button.id==='navBrain'){event.preventDefault();event.stopImmediatePropagation();editor('analysis');}if(['navHome','navCampaigns','navContent','navCalendar','navStats','navSettings'].includes(button.id)){sessionStorage.removeItem('viraStudioView');}if(button.id==='vsGoExport')choose('export');},true);
   document.getElementById('video').addEventListener('click',()=>{choose('export');videoStatus.textContent=t('Préparation de la vidéo en cours…','Preparing your video…');videoStatus.setAttribute('role','status');videoStatus.style.display='block';},true);
   const exportLink=document.createElement('button');exportLink.id='vsGoExport';exportLink.className='vs-export-link';exportLink.type='button';exportLink.textContent=t('Voir l’export →','View export →');panels[2].append(exportLink);
-  const view=sessionStorage.getItem('viraStudioView');sessionStorage.removeItem('viraStudioView');update();choose('brief',false);if(view)editor(view);else home();
+  const view=sessionStorage.getItem('viraStudioView');sessionStorage.removeItem('viraStudioView');update();choose('brief',false);if(view)editor(view);else{home();window.olyvexSetNavigation('navHome');}
   new MutationObserver(()=>{if(studio.isConnected)update();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 })();
 
@@ -5173,16 +5196,17 @@ body .main .vr-toolbar input::placeholder{font-weight:400!important}
   search.oninput=apply;filter.onchange=apply;apply();
  };
  window.viraSettings=async()=>{
+ window.olyvexNavigationRevision++;
  document.querySelectorAll('.sidebar-link').forEach(n=>n.classList.toggle('active',n.dataset.navigationLabel==='Paramètres'||n.dataset.navigationLabel==='Réglages'));
  document.querySelectorAll('.mobile-nav button').forEach(n=>n.classList.toggle('active',n.id==='navSettings'));
-  const root=node('section','vr-settings');const header=node('header','vr-page-head');header.append(node('span','vr-kicker',t('VOTRE ESPACE','YOUR WORKSPACE')),node('h1','',t('Réglages','Settings')),node('p','',t('Votre compte et vos préférences de travail.','Your account and workspace preferences.')));root.append(header);document.querySelector('main').replaceChildren(root);window.scrollTo(0,0);
+  const root=node('section','vr-settings');const header=node('header','vr-page-head');header.append(node('span','vr-kicker',t('VOTRE ESPACE','YOUR WORKSPACE')),node('h1','',t('Réglages','Settings')),node('p','',t('Votre compte et vos préférences de travail.','Your account and workspace preferences.')));root.append(header);document.querySelector('main').replaceChildren(root);window.olyvexScrollToTop();
   const grid=node('div','vr-settings-grid');root.append(grid);const account=node('section','vr-panel');account.append(node('h2','',t('Compte','Account')));const identity=node('p','',t('Chargement du compte…','Loading account…'));account.append(identity);grid.append(account);
   const prefs=node('section','vr-panel');prefs.append(node('h2','',t('Langue de l’interface','Interface language')));const label=node('label','vr-search');label.append(node('span','',t('Langue','Language')));const picker=node('select');[['fr','Français'],['en','English']].forEach(([v,l])=>{const o=node('option','',l);o.value=v;picker.append(o)});picker.value=document.documentElement.lang==='en'?'en':'fr';label.append(picker);prefs.append(label);picker.onchange=()=>{const original=originalLanguage;if(original){original.value=picker.value;original.dispatchEvent(new Event('change',{bubbles:true}))}else{localStorage.setItem('viraLanguage',picker.value);location.reload()}window.viraSettings()};grid.append(prefs);
-  const storage=node('section','vr-panel');storage.append(node('h2','',t('Enregistrement des données','Data storage')),node('p','',t('Les campagnes sauvegardées sont chargées depuis votre compte. Le brief en cours et les planifications du calendrier sont conservés dans ce navigateur.','Saved campaigns are loaded from your account. Your current brief and calendar schedules are stored in this browser.')),node('p','',t('Le calendrier organise vos publications ; il ne publie pas automatiquement sur les réseaux sociaux.','The calendar organizes your posts; it does not publish to social networks automatically.')));grid.append(storage);
-  const usage=node('section','vr-panel');usage.append(node('h2','',t('Utilisation','Usage')),node('p','',document.querySelector('.quota-values')?.textContent||document.querySelector('.credit-badge')?.textContent||t('Consultez le compteur de crédits de votre espace.','Check your workspace credit counter.')));grid.append(usage);
+  const storage=node('section','vr-panel');storage.append(node('h2','',t('Enregistrement des données','Data storage')),node('p','',t('Les campagnes et les planifications du calendrier sont enregistrées sur votre compte. Le brief en cours est conservé dans ce navigateur.','Campaigns and calendar schedules are saved to your account. Your current brief is stored in this browser.')),node('p','',t('Le calendrier organise vos publications ; il ne publie pas automatiquement sur les réseaux sociaux.','The calendar organizes your posts; it does not publish to social networks automatically.')));grid.append(storage);
+  const usage=node('section','vr-panel');usage.append(node('h2','',t('Utilisation','Usage')),node('p','',(()=>{const u=window.olyvexUsage;return Number.isFinite(u?.videos?.remaining)&&Number.isFinite(u?.images?.remaining)?u.videos.remaining+'/'+u.videos.limit+' '+t('vidéos','videos')+' · '+u.images.remaining+'/'+u.images.limit+' '+t('images IA','AI images'):t('Utilisation indisponible','Usage unavailable')})()));grid.append(usage);
   try{const r=await fetch('/api/auth/me',{credentials:'same-origin'});if(!r.ok)throw Error();const data=await r.json();if(!data.user)throw Error();identity.textContent=data.user.email||data.user.displayName||t('Compte connecté','Signed in');identity.dataset.userContent=''}catch{identity.textContent=t('Les informations du compte sont indisponibles pour le moment.','Account information is temporarily unavailable.')}
  };
- const nav=document.querySelector('.mobile-nav');if(nav){nav.classList.add('vr-mobile-nav');const more=node('button','vr-more-button');more.type='button';more.setAttribute('aria-label',t('Toutes les sections','All sections'));more.innerHTML='<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';more.append(node('span','',t('Plus','More')));nav.append(more);more.onclick=()=>{const dialog=node('dialog','vr-navigation');dialog.append(node('h2','',t('Votre espace','Your workspace')));[['navHome','Accueil','Home'],['navCampaigns','Campagnes','Campaigns'],['navBrain','Olyvex Brain','Olyvex Brain'],['navContent','Bibliothèque','Library'],['navCalendar','Calendrier','Calendar'],['navStats','Statistiques','Analytics'],['navSettings','Réglages','Settings']].forEach(([id,fr,en])=>{const b=node('button','vr-button',t(fr,en));b.onclick=()=>{dialog.close();document.getElementById(id)?.click()};dialog.append(b)});const close=node('button','vr-button',t('Fermer','Close'));close.onclick=()=>dialog.close();dialog.append(close);document.body.append(dialog);dialog.onclose=()=>{dialog.remove();more.focus()};dialog.showModal()}}
+ const nav=document.querySelector('.mobile-nav');if(nav){nav.classList.add('vr-mobile-nav');const more=node('button','vr-more-button');more.type='button';more.setAttribute('aria-label',t('Toutes les sections','All sections'));more.innerHTML='<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';more.append(node('span','',t('Plus','More')));nav.append(more);new MutationObserver(()=>{more.querySelector('span').textContent=t('Plus','More');more.setAttribute('aria-label',t('Toutes les sections','All sections'));}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});more.onclick=()=>{const dialog=node('dialog','vr-navigation');dialog.append(node('h2','',t('Votre espace','Your workspace')));[['navHome','Accueil','Home'],['navCampaigns','Campagnes','Campaigns'],['navBrain','Olyvex Brain','Olyvex Brain'],['navContent','Bibliothèque','Library'],['navCalendar','Calendrier','Calendar'],['navStats','Statistiques','Analytics'],['navSettings','Réglages','Settings']].forEach(([id,fr,en])=>{const b=node('button','vr-button',t(fr,en));b.onclick=()=>{dialog.close();document.getElementById(id)?.click()};dialog.append(b)});const close=node('button','vr-button',t('Fermer','Close'));close.onclick=()=>dialog.close();dialog.append(close);document.body.append(dialog);dialog.onclose=()=>{dialog.remove();more.focus()};dialog.showModal()}}
  // Match native tab keyboard navigation with a single Tab stop.
  const tabs=document.querySelector('.vs-steps');if(tabs){const sync=()=>tabs.querySelectorAll('[role=tab]').forEach(b=>b.tabIndex=b.getAttribute('aria-selected')==='true'?0:-1);sync();new MutationObserver(sync).observe(tabs,{attributes:true,subtree:true,attributeFilter:['aria-selected']})}
 })();
@@ -5192,7 +5216,7 @@ body .main .vr-toolbar input::placeholder{font-weight:400!important}
  const main=document.querySelector('main');
  function inspect(){
   main.querySelectorAll('#videoResult video:not([data-vr-checked])').forEach(video=>{video.dataset.vrChecked='true';const state=document.createElement('p');state.className='vr-export-state';state.setAttribute('role','status');const en=()=>document.documentElement.lang==='en';const copy=video.closest('.studio-export')?.querySelector('.studio-ready');const update=()=>{const failed=!!video.error;const loaded=video.readyState>=1;state.textContent=failed?(en()?'Video unavailable. Check the file before publishing.':'Vidéo indisponible. Vérifiez le fichier avant publication.') : loaded?(en()?'Video loaded. Preview it before publishing.':'Vidéo chargée. Vérifiez l’aperçu avant publication.'):(en()?'Loading saved video…':'Chargement de la vidéo enregistrée…');if(copy)copy.textContent=failed?(en()?'File unavailable':'Fichier indisponible'):loaded?(en()?'Video available':'Vidéo disponible'):(en()?'Saved export':'Export enregistré')};video.closest(".studio-export-body").querySelector(".studio-export-copy").append(state);video.addEventListener('error',update);video.addEventListener('loadedmetadata',update);update()});
-  main.querySelectorAll('.vira-calendar:not([data-vr-agenda])').forEach(cal=>{cal.dataset.vrAgenda='true';const grid=cal.querySelector('.vira-month-grid');const toolbar=cal.querySelector('.vira-month-toolbar');if(!grid||!toolbar)return;const b=document.createElement('button');b.type='button';b.className='vira-calendar-button';b.style.marginBottom='16px';let agenda=matchMedia('(max-width:650px)').matches;const apply=()=>{grid.hidden=agenda;toolbar.hidden=agenda;b.textContent=agenda?'Afficher le mois':'Afficher la liste';b.setAttribute('aria-pressed',String(agenda))};b.onclick=()=>{agenda=!agenda;apply()};toolbar.before(b);apply()});
+  main.querySelectorAll('.vira-calendar:not([data-vr-agenda])').forEach(cal=>{const grid=cal.querySelector('.vira-month-grid');const toolbar=cal.querySelector('.vira-month-toolbar');if(!grid||!toolbar)return;cal.dataset.vrAgenda='true';const b=document.createElement('button');b.type='button';b.className='vira-calendar-button';b.style.marginBottom='16px';let agenda=matchMedia('(max-width:650px)').matches;const apply=()=>{grid.hidden=agenda;toolbar.hidden=agenda;b.textContent=agenda?'Afficher le mois':'Afficher la liste';b.setAttribute('aria-pressed',String(agenda))};b.onclick=()=>{agenda=!agenda;apply()};toolbar.before(b);apply()});
  }
  new MutationObserver(inspect).observe(main,{childList:true,subtree:true});inspect();
 })();
@@ -5245,6 +5269,17 @@ body .app-shell .main #progressWrap .progress-fill{background:#7054be!important;
   grid.append(panel);await refresh();
  };
 })();
-</script></body>
+</script><style id="olyvex-audit-mobile">
+@media(max-width:999px){
+  body .app-shell .main{padding-bottom:24px!important;}
+  body .app-shell .main::after{display:none!important;}
+  body .mobile-nav.vira-nav-clear-content{transform:none!important;opacity:1!important;pointer-events:auto!important;}
+  body .mobile-nav>button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;min-width:0;min-height:48px!important;padding:4px 2px!important;}
+  body .mobile-nav>button>span:not(.nav-icon){font-size:10px!important;line-height:1.2!important;margin:0!important;}
+  body .mobile-nav .nav-icon,body .mobile-nav>button>svg{width:20px!important;height:20px!important;margin:0!important;flex-shrink:0;}
+}
+</style>
+</body>
 </html>
+
 
