@@ -1,16 +1,18 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdtemp, stat, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, stat, rm, writeFile, rename } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import ffmpegPath from "ffmpeg-static";
 import { wavDuration } from "./audio-service.mjs";
+import { soundOptions, soundWav } from "./sound-library.mjs";
 
 const runFile = promisify(execFile);
 let assembling = false;
 
 // Server-owned local paths only. One decoder and encoder at a time.
-export async function assembleVideoClips(clipPaths, audioPath = null, transition = null, onProgress = () => {}) {
+export async function assembleVideoClips(clipPaths, audioPath = null, transition = null, onProgress = () => {}, soundtrack = {}) {
+  const sound = soundOptions(soundtrack);
   if (!Array.isArray(clipPaths) || clipPaths.length !== 4) throw new Error("L’assemblage exige exactement 4 clips.");
   if (assembling) throw new Error("Une vidéo est en cours de préparation. Réessayez après sa fin.");
   if (!ffmpegPath) throw new Error("FFmpeg est indisponible sur ce serveur.");
@@ -57,6 +59,31 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
       ...(audioPath ? ["-map", "1:a:0", "-c:a", "aac", "-b:a", "64k", "-shortest"] : ["-an"]),
       "-threads", "1", "-movflags", "+faststart", outputPath
     ]);
+    if (sound.music || sound.effect) {
+      const duration = narrationDuration || (transition ? 4*transition.clipDuration-3*transition.fade : null);
+      if (!duration) throw Error('Durée requise pour ajouter la musique.');
+      const inputs=[],filters=[],mix=[];
+      let inputIndex=1;
+      if(audioPath)mix.push('[0:a]');
+      for(const kind of ['music','effect']){
+        if(!sound[kind])continue;
+        const file=path.join(directory,`${kind}.wav`);
+        await writeFile(file,soundWav(sound[kind],duration,kind==='effect'));
+        inputs.push('-i',file);
+        filters.push(`[${inputIndex++}:a]volume=${sound[kind+'Volume']}[${kind}]`);
+        if(kind==='music'&&audioPath){
+          // Split the voice so it can both control ducking and remain in the mix.
+          filters.push('[0:a]asplit=2[voice][control]');
+          mix[0]='[voice]';
+          filters.push('[music][control]sidechaincompress=threshold=0.025:ratio=8:attack=15:release=300[ducked]');
+          mix.push('[ducked]');
+        }else mix.push(`[${kind}]`);
+      }
+      filters.push(`${mix.join('')}amix=inputs=${mix.length}:duration=longest:normalize=0,alimiter=limit=0.95:latency=1[audio]`);
+      const mixed=path.join(directory,'vira-mixed.mp4');
+      await run(['-i',outputPath,...inputs,'-filter_complex',filters.join(';'),'-map','0:v:0','-map','[audio]','-c:v','copy','-c:a','aac','-b:a','128k','-t',String(duration),'-movflags','+faststart',mixed]);
+      await rename(mixed,outputPath);
+    }
     if (!(await stat(outputPath)).size) throw new Error("Le fichier MP4 produit est vide.");
     onProgress(100);
     return { outputPath, cleanup };

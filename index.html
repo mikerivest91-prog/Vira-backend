@@ -3007,6 +3007,36 @@ ${els.tone.value || "Professionnel"}
       <div id="personalVoiceFields" hidden><div class="field-group"><label for="voiceFile">Importer un audio · MP3, WAV, M4A ou WebM · 15 Mo maximum</label><input id="voiceFile" type="file" accept="audio/*"></div><button class="action-card" id="recordVoice" type="button">Enregistrer ma voix</button><button class="action-card" id="stopVoice" type="button" hidden>Terminer l’enregistrement</button><p id="recordState" role="status"></p></div>
       <audio id="voicePreview" controls preload="metadata" hidden style="width:100%;margin-top:14px"></audio><p id="voiceFeedback" role="status" aria-live="polite"></p>`;
     els.voiceBtn.closest(".video-next-step").appendChild(voicePanel);
+    const soundPanel=document.createElement('section');
+    soundPanel.className='campaign-section';
+    soundPanel.id='soundLibrary';
+    soundPanel.style.cssText='padding:20px;margin-top:16px;display:grid;gap:12px';
+    soundPanel.innerHTML=`<h3>Musique et effets sonores</h3>
+      <p>Sons originaux inclus. La musique baisse pendant la voix. Les effets accompagnent les changements de scène.</p>
+      <div class="field-group"><label for="soundMusic">Musique de fond</label><select id="soundMusic"><option value="">Sans musique</option><option value="soft">Douce · piano synthétique</option><option value="modern">Moderne · publicité</option><option value="energy">Énergique · pulsation</option></select></div>
+      <audio id="musicPreview" controls preload="none" hidden style="width:100%"></audio>
+      <div class="field-group"><label for="musicVolume">Volume de la musique · <output id="musicLevel">12 %</output></label><input id="musicVolume" type="range" min="0" max="50" value="12"></div>
+      <div class="field-group"><label for="soundEffect">Effet aux transitions</label><select id="soundEffect"><option value="">Sans effet</option><option value="whoosh">Souffle de transition</option><option value="chime">Carillon léger</option><option value="pop">Pop discret</option></select></div>
+      <audio id="effectPreview" controls preload="none" hidden style="width:100%"></audio>
+      <div class="field-group"><label for="effectVolume">Volume des effets · <output id="effectLevel">20 %</output></label><input id="effectVolume" type="range" min="0" max="50" value="20"></div>
+      <p id="soundFeedback" role="status">Choisissez un son pour l’écouter avant de préparer la vidéo finale.</p>`;
+    voicePanel.after(soundPanel);
+    for(const [choice,preview,volume,level] of [['soundMusic','musicPreview','musicVolume','musicLevel'],['soundEffect','effectPreview','effectVolume','effectLevel']]){
+      const select=soundPanel.querySelector('#'+choice),audio=soundPanel.querySelector('#'+preview),slider=soundPanel.querySelector('#'+volume);
+      select.addEventListener('change',()=>{
+        soundPanel.querySelectorAll('audio').forEach(a=>a.pause());
+        audio.hidden=!select.value;
+        if(select.value){audio.src='/api/sounds/'+encodeURIComponent(select.value);audio.volume=Number(slider.value)/100;audio.load();}
+        else{audio.removeAttribute('src');audio.load();}
+      });
+      audio.addEventListener('error',()=>{if(select.value)soundPanel.querySelector('#soundFeedback').textContent='Impossible de lire cet aperçu. Vérifiez votre connexion et réessayez.';});
+      slider.addEventListener('input',()=>{soundPanel.querySelector('#'+level).textContent=slider.value+' %';audio.volume=Number(slider.value)/100;});
+    }
+    function selectedSoundtrack(){
+      soundPanel.querySelectorAll('audio').forEach(a=>a.pause());
+      return {music:document.getElementById('soundMusic').value,effect:document.getElementById('soundEffect').value,musicVolume:Number(document.getElementById('musicVolume').value)/100,effectVolume:Number(document.getElementById('effectVolume').value)/100};
+    }
+
     const voiceElement = id => document.getElementById(id);
     function invalidateAudio() {
       preparedAudioId = "";
@@ -3441,7 +3471,8 @@ els.videoBtn.addEventListener("click", async () => {
     if (FREE_VIDEO_MODE) {
         const usingClips=sourceClips.length===4;
         const images = usingClips ? [] : await Promise.all(generatedImages.map(rasterizePreview));
-const payload = JSON.stringify(usingClips ? {clipIds:sourceClips.map(c=>c.id),audioId:preparedAudioId} : { images, audioId: preparedAudioId });
+const soundtrack=selectedSoundtrack();
+const payload = JSON.stringify(usingClips ? {clipIds:sourceClips.map(c=>c.id),audioId:preparedAudioId,soundtrack} : { images, audioId: preparedAudioId,soundtrack });
 if (new Blob([payload]).size > 1900000) throw new Error("Les visuels dépassent la taille acceptée par le serveur.");
 const progressId=crypto.randomUUID();
 const pollProgress=async()=>{

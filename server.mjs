@@ -1,3 +1,4 @@
+import { sounds, soundOptions, soundWav } from "./sound-library.mjs";
 import { installTikTokSocial } from "./tiktok-social.mjs";
 import { installMetaSocial } from "./meta-social.mjs";
 import { prepareClip, readClip, fitClips, clipPath } from "./clip-service.mjs";
@@ -1142,10 +1143,17 @@ app.post("/api/video/generate", requireAuth, async (req, res) => {
     }
   });
 });
+app.get('/api/sounds', requireAuth, (_req,res)=>res.json({ok:true,sounds}));
+app.get('/api/sounds/:id', requireAuth, (req,res)=>{
+  const sound=sounds.find(s=>s.id===req.params.id);
+  if(!sound)return res.status(404).json({ok:false,error:'Son introuvable.'});
+  res.setHeader('Cache-Control','private, max-age=3600');
+  res.type('audio/wav').send(soundWav(sound.id,sound.kind==='music'?8:1));
+});
 // Uploaded clips and generated previews share the same final MP4 contract.
-async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId) {
+async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId, soundtrack = {}) {
   if(ownerId===undefined || ownerId===null)throw new Error("Propriétaire manquant.");
-  const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress);
+  const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress, soundtrack);
   try {
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
     const destination = path.join(VIDEO_STORAGE_DIR, filename);
@@ -1205,6 +1213,7 @@ app.get("/api/video/clips/:id", requireAuth, async (req,res)=>{
   } catch { return res.status(404).json({ok:false,error:"Clip indisponible. Importez-le de nouveau."}); }
 });
 app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
+  try { soundOptions(req.body?.soundtrack); } catch(error) { return res.status(400).json({ok:false,error:error.message}); }
   const ids=req.body?.clipIds;
   if (!Array.isArray(ids) || ids.length !== 4 || !req.body?.audioId) return res.status(400).json({ok:false,error:"Préparez quatre clips et une narration."});
   return withClipJob(req,res,async()=>{
@@ -1219,7 +1228,7 @@ app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
     let fitted;
     try {
       fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
-      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id);
+      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id, req.body.soundtrack);
       await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
       return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:usage.limit,ownerTesting:usage.ownerTesting}});
     } catch(error) {
@@ -1284,6 +1293,7 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     res.on('finish',()=>{progressJob.status=res.statusCode<400?'complete':'error';if(res.statusCode<400)progressJob.percent=100;});
   }
   const reportProgress=percent=>{if(tracked)progressJob.percent=Math.max(progressJob.percent,percent);};
+  try { soundOptions(req.body?.soundtrack); } catch(error) { return res.status(400).json({ok:false,error:error.message}); }
   console.log("FREE-ASSEMBLE ROUTE REACHED");
   const images = req.body?.images;
   if (!Array.isArray(images) || images.length !== 4) {
@@ -1321,7 +1331,7 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
-const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition, percent => reportProgress(40 + percent * 0.55), req.user.id);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
+const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition, percent => reportProgress(40 + percent * 0.55), req.user.id, req.body.soundtrack);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
