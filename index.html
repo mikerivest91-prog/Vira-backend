@@ -1733,6 +1733,37 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 .brain-layout .score-note{font-size:12px!important;line-height:1.5!important}
 .brain-layout .brain-insights{grid-template-columns:1fr!important}
 </style>
+  <style>
+@media (max-width:759px){
+  html body{
+    height:100dvh!important;
+    overflow:hidden!important;
+  }
+
+  body .app-shell{
+    height:calc(100dvh - 80px - env(safe-area-inset-bottom))!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+
+  body .mobile-nav{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    width:100%!important;
+    max-width:none!important;
+    height:calc(80px + env(safe-area-inset-bottom))!important;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;
+    border-radius:0!important;
+    background:#fff!important;
+    transform:none!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+  }
+}
+</style>
 </head>
 <body class="auth-pending">
 
