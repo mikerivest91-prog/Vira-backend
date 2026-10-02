@@ -3021,6 +3021,34 @@ ${els.tone.value || "Professionnel"}
       <div class="field-group"><label for="effectVolume">Volume des effets · <output id="effectLevel">20 %</output></label><input id="effectVolume" type="range" min="0" max="50" value="20"></div>
       <p id="soundFeedback" role="status">Choisissez un son pour l’écouter avant de préparer la vidéo finale.</p>`;
     voicePanel.after(soundPanel);
+    const soundSearch=document.createElement('input');soundSearch.type='search';soundSearch.id='soundSearch';soundSearch.placeholder='Rechercher une musique ou un effet';soundSearch.setAttribute('aria-label','Rechercher dans la bibliothèque sonore');
+    soundPanel.querySelector('h3').after(soundSearch);
+    let soundCatalog=[];
+    function renderSoundChoices(){
+      const query=soundSearch.value.trim().toLocaleLowerCase('fr');
+      for(const [kind,id] of [['music','soundMusic'],['effect','soundEffect']]){
+        const select=soundPanel.querySelector('#'+id),current=select.value;
+        const none=document.createElement('option');none.value='';none.textContent=kind==='music'?'Sans musique':'Sans effet';select.replaceChildren(none);
+        const groups=new Map();
+        for(const sound of soundCatalog.filter(s=>s.kind===kind&&(s.id===current||!query||(s.name+' '+s.category).toLocaleLowerCase('fr').includes(query)))){
+          if(!groups.has(sound.category)){const group=document.createElement('optgroup');group.label=sound.category;groups.set(sound.category,group);select.append(group);}
+          const option=document.createElement('option');option.value=sound.id;option.textContent=sound.name;groups.get(sound.category).append(option);
+        }
+        select.value=current;
+      }
+    }
+    soundSearch.addEventListener('input',renderSoundChoices);
+    async function loadSoundCatalog(){
+      try{
+        const response=await fetch('/api/sounds',{credentials:'same-origin'});if(!response.ok)throw Error();
+        const data=await response.json();if(!Array.isArray(data.sounds)||!data.sounds.length)throw Error();
+        soundCatalog=data.sounds;renderSoundChoices();
+        soundPanel.querySelector('#soundFeedback').textContent=soundCatalog.filter(s=>s.kind==='music').length+' musiques et '+soundCatalog.filter(s=>s.kind==='effect').length+' effets · choisissez un son pour l’écouter.';
+      }catch{soundPanel.querySelector('#soundFeedback').textContent='Connectez-vous pour charger toute la bibliothèque sonore.';}
+    }
+    loadSoundCatalog();
+    document.getElementById('testVoice').addEventListener('click',()=>{if(!soundCatalog.length)loadSoundCatalog();});
+
     for(const [choice,preview,volume,level] of [['soundMusic','musicPreview','musicVolume','musicLevel'],['soundEffect','effectPreview','effectVolume','effectLevel']]){
       const select=soundPanel.querySelector('#'+choice),audio=soundPanel.querySelector('#'+preview),slider=soundPanel.querySelector('#'+volume);
       select.addEventListener('change',()=>{
