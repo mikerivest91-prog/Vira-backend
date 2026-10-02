@@ -1060,7 +1060,7 @@ app.post("/api/audio/generate", requireAuth, async (req, res) => {
   "female_en_gb_libby",
   "male_en_gb_ryan",
   "male_en_gb_thomas"
-]  }
+]  
          .includes(gender)) {
   return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
     }
