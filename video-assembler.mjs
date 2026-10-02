@@ -27,8 +27,14 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
       const file = await stat(filePath);
       if (!file.isFile() || !file.size) throw new Error("Un fichier source est vide ou invalide.");
     }
-    const narrationDuration = audioPath ? await wavDuration(audioPath) : null;
     directory = await mkdtemp(path.join(tmpdir(), "vira-assembly-"));
+    if (audioPath) {
+      const trimmedAudio = path.join(directory, "narration.wav");
+      // Remove only trailing silence; preserve pauses within the narration.
+      await run(["-i", audioPath, "-vn", "-af", "areverse,silenceremove=start_periods=1:start_duration=0.1:start_threshold=-55dB:start_silence=0.15,areverse", "-ac", "1", "-ar", "22050", "-c:a", "pcm_s16le", trimmedAudio]);
+      audioPath = trimmedAudio;
+    }
+    const narrationDuration = audioPath ? await wavDuration(audioPath) : null;
     for (let i = 0; i < 4; i++) {
       // Preserve total duration when replacing overlapping transitions with cuts.
       const duration = narrationDuration ? Math.ceil(narrationDuration / 4 * 30) / 30 : transition ? transition.clipDuration - (i < 3 ? transition.fade : 0) : null;
@@ -61,3 +67,4 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
     assembling = false;
   }
 }
+
