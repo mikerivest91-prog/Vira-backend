@@ -2886,12 +2886,47 @@ ${els.tone.value || "Professionnel"}
 <div id="autoVoiceFields">
   <div class="field-group">
     <label for="voiceGender">Choix de la voix</label>
-    <select id="voiceGender">
-   <option value="female">Femme — Français (Canada)</option>
-<option value="female_fr">Femme — Français (France)</option>
-<option value="male">Homme — Français (Canada)</option>
-<option value="male_fr">Homme — Français (France)</option>
-    </select>
+  <select id="voiceGender">
+  <optgroup label="Français — Canada">
+    <option value="female">Sylvie — Femme</option>
+    <option value="male">Antoine — Homme</option>
+    <option value="male_ca_jean">Jean — Homme</option>
+    <option value="male_ca_thierry">Thierry — Homme</option>
+  </optgroup>
+
+  <optgroup label="Français — France">
+    <option value="female_fr">Denise — Femme</option>
+    <option value="female_fr_brigitte">Brigitte — Femme</option>
+    <option value="female_fr_celeste">Céleste — Femme</option>
+    <option value="female_fr_corali">Coralie — Femme</option>
+    <option value="female_fr_jacqueline">Jacqueline — Femme</option>
+    <option value="male_fr">Henri — Homme</option>
+    <option value="male_fr_alain">Alain — Homme</option>
+    <option value="male_fr_claude">Claude — Homme</option>
+    <option value="male_fr_jerome">Jérôme — Homme</option>
+  </optgroup>
+
+  <optgroup label="English — Canada">
+    <option value="female_en_ca">Clara — Female</option>
+    <option value="male_en_ca">Liam — Male</option>
+  </optgroup>
+
+  <optgroup label="English — United States">
+    <option value="female_en_us_ava">Ava — Female</option>
+    <option value="female_en_us_jenny">Jenny — Female</option>
+    <option value="female_en_us_aria">Aria — Female</option>
+    <option value="male_en_us_andrew">Andrew — Male</option>
+    <option value="male_en_us_guy">Guy — Male</option>
+    <option value="male_en_us_davis">Davis — Male</option>
+  </optgroup>
+
+  <optgroup label="English — United Kingdom">
+    <option value="female_en_gb_sonia">Sonia — Female</option>
+    <option value="female_en_gb_libby">Libby — Female</option>
+    <option value="male_en_gb_ryan">Ryan — Male</option>
+    <option value="male_en_gb_thomas">Thomas — Male</option>
+  </optgroup>
+</select>
   </div>
 </div>      <div class="field-group"><label for="voiceNarration">Texte à lire</label><textarea id="voiceNarration" maxlength="800"></textarea></div>
       <p>Voix de synthèse basique en français, sans crédits.</p><button class="action-card" id="prepareVoice" type="button">Créer la voix</button></div>
