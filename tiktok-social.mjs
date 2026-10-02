@@ -4,7 +4,8 @@ import {seal,unseal} from './meta-social.mjs';
 export function tiktokConfiguration(env) {
   let origin='';try {const u=new URL(env.APP_ORIGIN);if(u.protocol==='https:'&&u.pathname==='/'&&!u.username&&!u.password)origin=u.origin;}catch{}
   const key=/^[a-f0-9]{64}$/i.test(env.SOCIAL_TOKEN_KEY||'')?Buffer.from(env.SOCIAL_TOKEN_KEY,'hex'):null;
-  return {origin,key,client:env.TIKTOK_CLIENT_KEY,secret:env.TIKTOK_CLIENT_SECRET,callback:origin+'/api/social/tiktok/callback',ready:Boolean(origin&&key&&env.TIKTOK_CLIENT_KEY&&env.TIKTOK_CLIENT_SECRET)};
+  const client=String(env.TIKTOK_CLIENT_KEY||'').trim(),secret=String(env.TIKTOK_CLIENT_SECRET||'').trim();
+  return {origin,key,client,secret,callback:origin+'/api/social/tiktok/callback',ready:Boolean(origin&&key&&client&&secret)};
 }
 export function installTikTokSocial({app,pool,requireAuth,env=process.env,fetchImpl=fetch}) {
   const cfg=tiktokConfiguration(env),hash=s=>crypto.createHash('sha256').update(s).digest('hex');
