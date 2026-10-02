@@ -93,6 +93,7 @@ export function installMetaSocial({app,pool,requireAuth,videoStorage,ffmpegPath,
         const response=await graph('me/accounts',token,{fields:'id,name,access_token,tasks,instagram_business_account{id,username,name}',limit:'100',...(after?{after}:{})});
         pages.push(...(response.data || []));after=response.paging?.cursors?.after;if(!response.paging?.next || !after)break;
       }
+      console.info('[Olyvex Meta diagnostic]',JSON.stringify({version:'connexion-2',pagesReceived:pages.length,pagesWithValidId:pages.filter(p=>id(p.id)).length,pagesWithToken:pages.filter(p=>typeof p.access_token==='string'&&p.access_token.length>0).length,pagesWithPublishingAccess:pages.filter(p=>canPublishToPage(p.tasks)).length,pagesWithInstagram:pages.filter(p=>id(p.instagram_business_account?.id)).length,grantedPermissions:scopes.filter(s=>granted.includes(s)),tasks:[...new Set(pages.flatMap(p=>Array.isArray(p.tasks)?p.tasks.filter(t=>typeof t==='string'&&/^[A-Z_]{1,64}$/.test(t)):[]))]}));
       const client=await pool.connect();
       try {
         await client.query('BEGIN');
