@@ -345,7 +345,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const metaSocial = installMetaSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR,ffmpegPath});
-const tiktokSocial = installTikTokSocial({app,pool,requireAuth});
+const tiktokSocial = installTikTokSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR});
 app.get("/tiktok-social-ui.js", (_req,res) => res.sendFile(path.resolve("tiktok-social-ui.js")));
 app.get("/terms", (_req,res) => res.sendFile(path.resolve("terms.html")));
 app.get("/privacy", (_req,res) => res.sendFile(path.resolve("privacy.html")));

@@ -4,6 +4,7 @@ import { mkdtemp, stat, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import ffmpegPath from "ffmpeg-static";
+import { wavDuration } from "./audio-service.mjs";
 
 const runFile = promisify(execFile);
 let assembling = false;
@@ -26,12 +27,13 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
       const file = await stat(filePath);
       if (!file.isFile() || !file.size) throw new Error("Un fichier source est vide ou invalide.");
     }
+    const narrationDuration = audioPath ? await wavDuration(audioPath) : null;
     directory = await mkdtemp(path.join(tmpdir(), "vira-assembly-"));
     for (let i = 0; i < 4; i++) {
       // Preserve total duration when replacing overlapping transitions with cuts.
-      const duration = transition ? transition.clipDuration - (i < 3 ? transition.fade : 0) : null;
+      const duration = narrationDuration ? Math.ceil(narrationDuration / 4 * 30) / 30 : transition ? transition.clipDuration - (i < 3 ? transition.fade : 0) : null;
       await run([
-        "-threads", "1", "-protocol_whitelist", "file,pipe", "-i", clipPaths[i],
+        "-threads", "1", "-protocol_whitelist", "file,pipe", ...(narrationDuration ? ["-stream_loop", "-1"] : []), "-i", clipPaths[i],
         "-map", "0:v:0", "-an", "-sn", "-dn",
         ...(duration ? ["-t", String(duration)] : []),
         "-vf", "scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=30,format=yuv420p",
@@ -45,7 +47,7 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
     await run([
       "-f", "concat", "-safe", "1", "-i", path.join(directory, "clips.txt"),
       ...(audioPath ? ["-threads", "1", "-i", audioPath] : []),
-      "-map", "0:v:0", "-c:v", "copy",
+      "-map", "0:v:0", ...(audioPath ? ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-t", String(narrationDuration)] : ["-c:v", "copy"]),
       ...(audioPath ? ["-map", "1:a:0", "-c:a", "aac", "-b:a", "64k", "-shortest"] : ["-an"]),
       "-threads", "1", "-movflags", "+faststart", outputPath
     ]);
