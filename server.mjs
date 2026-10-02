@@ -1034,8 +1034,36 @@ app.post("/api/audio/test", requireAuth, async (req, res) => {
 app.post("/api/audio/generate", requireAuth, async (req, res) => {
   const text = String(req.body?.text || "").trim();
   const gender = req.body?.gender;
-if (!text || text.length > 800 || !["female", "female_fr", "male", "male_fr"].includes(gender)) {    return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
-  }
+  if (!text || text.length > 800 || ![
+  "female",
+  "female_fr",
+  "female_fr_brigitte",
+  "female_fr_celeste",
+  "female_fr_corali",
+  "female_fr_jacqueline",
+  "male",
+  "male_ca_jean",
+  "male_ca_thierry",
+  "male_fr",
+  "male_fr_alain",
+  "male_fr_claude",
+  "male_fr_jerome",
+  "female_en_ca",
+  "male_en_ca",
+  "female_en_us_ava",
+  "female_en_us_jenny",
+  "female_en_us_aria",
+  "male_en_us_andrew",
+  "male_en_us_guy",
+  "male_en_us_davis",
+  "female_en_gb_sonia",
+  "female_en_gb_libby",
+  "male_en_gb_ryan",
+  "male_en_gb_thomas"
+]  }
+         .includes(gender)) {
+  return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
+    }
   return withAudioJob(req,res,async () => {
     try {return res.json({ok:true,mode:"free",...await synthesizeAudio(text,gender,AUDIO_TEMP_DIR,req.user.id)});}
     catch(error){console.error("VOICE ERROR:",error);return res.status(422).json({ok:false,error:"Impossible de préparer la voix. Essayez un texte plus court (60 secondes maximum)."});}
