@@ -12,9 +12,11 @@ export function installTikTokSocial({app,pool,requireAuth,env=process.env,fetchI
   const allowed=(req,res,next)=>permitted(req.user)?next():res.status(403).json({error:'TikTok est en test privé.'});
   const mutation=(req,res,next)=>req.get('origin')===cfg.origin&&req.get('x-olyvex-request')==='1'?next():res.status(403).json({error:'Requête non autorisée.'});
   const handler=fn=>async(req,res)=>{res.set('Cache-Control','no-store');try{await fn(req,res);}catch{res.status(503).json({error:'TikTok est indisponible. Réessayez ou reconnectez votre compte.'});}};
+  const safeCodes=new Set(['invalid_client','invalid_grant','invalid_request','invalid_scope','access_denied','access_token_invalid','scope_not_authorized','rate_limit_exceeded','internal_error','ok','42P01','23502','23503','22P02','42883','42703','42501']);
+  const safeCode=value=>safeCodes.has(value)?value:'unclassified';
   async function oauth(endpoint,params) {
     const r=await fetchImpl('https://open.tiktokapis.com/v2/oauth/'+endpoint+'/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_key:cfg.client,client_secret:cfg.secret,...params}),redirect:'error',signal:AbortSignal.timeout(20000)});
-    const data=await r.json();if(!r.ok||data.error)throw Error('TikTok OAuth failed');return data;
+    const data=await r.json();if(!r.ok||data.error){const error=Error('TikTok OAuth failed');error.providerCode=safeCode(typeof data.error==='string'?data.error:data.error?.code);error.httpStatus=r.status;throw error;}return data;
   }
   function validateToken(data) {if(typeof data.access_token!=='string'||!data.access_token||typeof data.refresh_token!=='string'||!data.refresh_token||typeof data.open_id!=='string'||!data.open_id||!Number.isFinite(data.expires_in)||data.expires_in<=0||!Number.isFinite(data.refresh_expires_in)||data.refresh_expires_in<=0)throw Error('Invalid token');}
   async function storeToken(userId,data,name) {
@@ -32,16 +34,17 @@ export function installTikTokSocial({app,pool,requireAuth,env=process.env,fetchI
   }));
   app.get('/api/social/tiktok/callback',requireAuth,allowed,async(req,res)=>{
     res.set('Cache-Control','no-store');res.set('Referrer-Policy','no-referrer');const back=s=>res.redirect('/#tiktok='+s);
+    let stage='state';
     try{
       if(!cfg.ready||!/^[a-f0-9]{64}$/.test(req.query.state||''))return back('invalid');
       const state=await pool.query('DELETE FROM olyvex_tiktok_states WHERE state_hash=$1 AND user_id=$2 AND expires_at>NOW() RETURNING user_id',[hash(req.query.state),req.user.id]);
       if(!state.rowCount)return back('invalid');if(req.query.error)return back('cancelled');if(typeof req.query.code!=='string'||!req.query.code||req.query.code.length>4096)return back('invalid');
-      const data=await oauth('token',{grant_type:'authorization_code',code:req.query.code,redirect_uri:cfg.callback});validateToken(data);
+      stage='token';const data=await oauth('token',{grant_type:'authorization_code',code:req.query.code,redirect_uri:cfg.callback});stage='token-validation';validateToken(data);
       if(!String(data.scope||'').split(',').includes('user.info.basic'))return back('permissions');
-      const r=await fetchImpl('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name',{headers:{Authorization:'Bearer '+data.access_token},redirect:'error',signal:AbortSignal.timeout(20000)});const profile=await r.json();
-      if(!r.ok||profile.error?.code!=='ok'||profile.data?.user?.open_id!==data.open_id||typeof profile.data.user.display_name!=='string')throw Error('Profile unavailable');
-      await storeToken(req.user.id,data,profile.data.user.display_name);return back('connected');
-    }catch{return back('failed');}
+      stage='profile';const r=await fetchImpl('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name',{headers:{Authorization:'Bearer '+data.access_token},redirect:'error',signal:AbortSignal.timeout(20000)});const profile=await r.json();
+      if(!r.ok||profile.error?.code!=='ok'||profile.data?.user?.open_id!==data.open_id||typeof profile.data.user.display_name!=='string'){const error=Error('Profile unavailable');error.providerCode=safeCode(profile.error?.code);error.httpStatus=r.status;throw error;}
+      stage='database';await storeToken(req.user.id,data,profile.data.user.display_name);return back('connected');
+    }catch(error){console.warn('[Olyvex TikTok diagnostic]',JSON.stringify({version:'connexion-2',stage,code:safeCode(error.providerCode||error.code),...(Number.isInteger(error.httpStatus)?{httpStatus:error.httpStatus}:{})}));return back('failed');}
   });
   app.delete('/api/social/tiktok/accounts/:id',requireAuth,allowed,mutation,handler(async(req,res)=>{
     if(!/^[1-9][0-9]{0,19}$/.test(req.params.id))return res.status(400).json({error:'Compte invalide.'});
