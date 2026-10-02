@@ -1,3 +1,4 @@
+import { installTikTokSocial } from "./tiktok-social.mjs";
 import { installMetaSocial } from "./meta-social.mjs";
 import { prepareClip, readClip, fitClips, clipPath } from "./clip-service.mjs";
 import "dotenv/config";
@@ -344,6 +345,10 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const metaSocial = installMetaSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR,ffmpegPath});
+const tiktokSocial = installTikTokSocial({app,pool,requireAuth});
+app.get("/tiktok-social-ui.js", (_req,res) => res.sendFile(path.resolve("tiktok-social-ui.js")));
+app.get("/terms", (_req,res) => res.sendFile(path.resolve("terms.html")));
+app.get("/privacy", (_req,res) => res.sendFile(path.resolve("privacy.html")));
 app.get("/meta-social-ui.js", (_req,res) => res.sendFile(path.resolve("meta-social-ui.js")));
 app.get("/meta-social.css", (_req,res) => res.sendFile(path.resolve("meta-social.css")));
 // Apply before upload and generation handlers; existing files remain readable.
@@ -1443,6 +1448,7 @@ async function start() {
     await initDatabase();
     await billing.init();
     await metaSocial.init();
+    await tiktokSocial.init();
 
     app.listen(port, "0.0.0.0", () => {
       console.log(
