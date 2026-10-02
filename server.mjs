@@ -1,3 +1,4 @@
+import { installMetaSocial } from "./meta-social.mjs";
 import { prepareClip, readClip, fitClips, clipPath } from "./clip-service.mjs";
 import "dotenv/config";
 import express from "express";
@@ -342,6 +343,9 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
+const metaSocial = installMetaSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR,ffmpegPath});
+app.get("/meta-social-ui.js", (_req,res) => res.sendFile(path.resolve("meta-social-ui.js")));
+app.get("/meta-social.css", (_req,res) => res.sendFile(path.resolve("meta-social.css")));
 // Apply before upload and generation handlers; existing files remain readable.
 const subscriptionCreationPaths = new Set([
   "/api/audio/test", "/api/audio/generate", "/api/audio/upload",
@@ -1438,6 +1442,7 @@ async function start() {
 
     await initDatabase();
     await billing.init();
+    await metaSocial.init();
 
     app.listen(port, "0.0.0.0", () => {
       console.log(
@@ -1456,5 +1461,6 @@ async function start() {
 }
 
 start();
+
 
 
