@@ -9,6 +9,9 @@ const run = promisify(execFile);
 const scopes = ['pages_show_list','pages_read_engagement','pages_manage_posts','instagram_basic','instagram_content_publish','business_management'];
 const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 const id = value => typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value);
+export function canPublishToPage(tasks) {
+  return Array.isArray(tasks) && tasks.some(t => ['CREATE_CONTENT','MANAGE','PROFILE_PLUS_CREATE_CONTENT','PROFILE_PLUS_MANAGE','PROFILE_PLUS_FULL_CONTROL'].includes(t));
+}
 export function seal(value, key) {
   const iv = crypto.randomBytes(12), cipher = crypto.createCipheriv('aes-256-gcm',key,iv);
   const body = Buffer.concat([cipher.update(value,'utf8'),cipher.final()]);
@@ -96,7 +99,7 @@ export function installMetaSocial({app,pool,requireAuth,videoStorage,ffmpegPath,
         // Keep previously scheduled jobs attached to surviving destinations.
         const kept=[];
         for(const p of pages) {
-          if(!id(p.id) || typeof p.access_token!=='string' || !p.tasks?.some(t=>['CREATE_CONTENT','MANAGE','PROFILE_PLUS_FULL_CONTROL'].includes(t)))continue;
+            if(!id(p.id) || typeof p.access_token!=='string' || !canPublishToPage(p.tasks))continue;
           for(const platform of ['facebook','instagram']) {
             const ig=p.instagram_business_account;
             if(platform==='instagram'&&!ig?.id)continue;
