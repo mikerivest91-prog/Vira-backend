@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr">https://github.com/mikerivest91-prog/Vira-backend/edit/main/index.html
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -1698,6 +1698,36 @@ button,input,textarea,select{font-family:var(--vira-ui-font)!important}
 .library-images img{display:block;width:100%;max-width:360px;aspect-ratio:16/9;object-fit:cover;border-radius:13px;background:#05070c}.library-scene figcaption{min-width:0}.library-scene .library-scene-number{position:absolute;top:6px;left:6px;padding:4px 6px;border-radius:7px;background:rgba(0,0,0,.65);color:#fff;font-size:8px;font-weight:700}.library-scene p{margin:0!important;font-size:13px!important;line-height:1.55!important;overflow-wrap:anywhere;color:#9f96a7;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .library-card video{width:100%;max-width:520px;max-height:290px;object-fit:cover;border-radius:13px}@media(max-width:900px){.library-scene{grid-template-columns:minmax(0,1fr);align-items:start;padding:10px;gap:8px}}
 @media(max-width:600px){.library-images{gap:8px}.library-scene p{font-size:12px}}
+  /* OLYVEX — Bibliothèque médias compacts */
+.library-images{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:12px !important;
+  max-width:760px !important;
+}
+
+.library-images img{
+  width:100% !important;
+  max-width:none !important;
+  height:auto !important;
+  aspect-ratio:16/9 !important;
+  object-fit:cover !important;
+  border-radius:12px !important;
+}
+
+.library-card video{
+  width:100% !important;
+  max-width:760px !important;
+  max-height:430px !important;
+  object-fit:contain !important;
+}
+
+@media(max-width:600px){
+  .library-images{
+    grid-template-columns:1fr !important;
+    max-width:100% !important;
+  }
+}
 </style>
 <style id="brain-analysis-layout">
 .brain-insight{white-space:pre-wrap;font-size:14px!important;line-height:1.75!important;overflow-wrap:anywhere}
