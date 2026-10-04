@@ -92,7 +92,7 @@ export function installTikTokSocial({app,pool,requireAuth,videoStorage,env=proce
         const data=await posting('inbox/video/init',token,{source_info:{source:'FILE_UPLOAD',video_size:size,chunk_size:size,total_chunk_count:1}});
         if(typeof data.publish_id!=='string'||!data.publish_id||data.publish_id.length>64)throw Error('Invalid publish ID');
         await pool.query('UPDATE olyvex_tiktok_uploads SET publish_id=$2,updated_at=NOW() WHERE id=$1',[job.id,data.publish_id]);
-        stage='adresse_transfert';const upload=new URL(data.upload_url);if(upload.protocol!=='https:'||!['open-upload.tiktokapis.com','upload.us.tiktokapis.com'].includes(upload.hostname)||upload.port||upload.username||upload.password)throw Error('Invalid upload host');
+        stage='adresse_transfert';const upload=new URL(data.upload_url);if(upload.protocol!=='https:'||!(/^(?:open-upload|upload(?:\.[a-z0-9-]+)*)\.tiktokapis\.com$/i.test(upload.hostname))||upload.port||upload.username||upload.password)throw Error('Invalid upload host');
         const bytes=await fs.readFile(path.join(videoStorage,job.filename));
         stage='transfert_video';const r=await fetchImpl(upload.href,{method:'PUT',headers:{'Content-Type':'video/mp4','Content-Length':String(size),'Content-Range':`bytes 0-${size-1}/${size}`},body:bytes,redirect:'error',signal:AbortSignal.timeout(240000)});
         if(r.status!==201){const e=Error('Transfer incomplete');e.httpStatus=r.status;throw e;}
