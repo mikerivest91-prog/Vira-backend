@@ -15,7 +15,7 @@ export function installTikTokSocial({app,pool,requireAuth,videoStorage,env=proce
   const allowed=(req,res,next)=>permitted(req.user)?next():res.status(403).json({error:'TikTok est en test privé.'});
   const mutation=(req,res,next)=>req.get('origin')===cfg.origin&&req.get('x-olyvex-request')==='1'?next():res.status(403).json({error:'Requête non autorisée.'});
   const handler=fn=>async(req,res)=>{res.set('Cache-Control','no-store');try{await fn(req,res);}catch{res.status(503).json({error:'TikTok est indisponible. Réessayez ou reconnectez votre compte.'});}};
-  const safeCodes=new Set(['invalid_param','spam_risk_too_many_pending_share','spam_risk_user_banned_from_posting','invalid_publish_id','token_not_authorized_for_specified_publish_id','TimeoutError','AbortError','TypeError','invalid_client','invalid_grant','invalid_request','invalid_scope','access_denied','access_token_invalid','scope_not_authorized','rate_limit_exceeded','internal_error','ok','42P01','23502','23503','22P02','42883','42703','42501']);
+  const safeCodes=new Set(['upload_url_missing','upload_url_invalid','upload_host_refused','upload_protocol_refused','upload_credentials_refused','ENOENT','EACCES','EISDIR','invalid_param','spam_risk_too_many_pending_share','spam_risk_user_banned_from_posting','invalid_publish_id','token_not_authorized_for_specified_publish_id','TimeoutError','AbortError','TypeError','invalid_client','invalid_grant','invalid_request','invalid_scope','access_denied','access_token_invalid','scope_not_authorized','rate_limit_exceeded','internal_error','ok','42P01','23502','23503','22P02','42883','42703','42501']);
   const safeCode=value=>safeCodes.has(value)?value:'unclassified';
   async function oauth(endpoint,params) {
     const r=await fetchImpl('https://open.tiktokapis.com/v2/oauth/'+endpoint+'/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_key:cfg.client,client_secret:cfg.secret,...params}),redirect:'error',signal:AbortSignal.timeout(20000)});
@@ -85,19 +85,27 @@ export function installTikTokSocial({app,pool,requireAuth,videoStorage,env=proce
     try{
       await pool.query("UPDATE olyvex_tiktok_uploads SET status='uncertain',error='Envoi interrompu. Vérifiez votre boîte de réception TikTok avant de renvoyer.' WHERE status='uploading' AND updated_at<NOW()-INTERVAL '10 minutes'");
       const jobs=await pool.query("UPDATE olyvex_tiktok_uploads SET status='uploading',updated_at=NOW() WHERE id=(SELECT id FROM olyvex_tiktok_uploads WHERE status='queued' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING *");
-      for(const job of jobs.rows){let dispatched=false,stage='validation';try{
+      for(const job of jobs.rows){let dispatched=false,stage='validation',uploadHost;try{
         const a=await pool.query('SELECT * FROM olyvex_tiktok_accounts WHERE id=$1 AND user_id=$2',[job.account_id,job.user_id]);const account=a.rows[0];if(!account||new Date(account.expires_at)<=new Date()||!account.permissions.includes('video.upload'))throw Error('Account unavailable');
         const size=await ownedVideo(job.filename,job.user_id);if(size!==Number(job.total_bytes))throw Error('Video changed');
         const token=unseal(account.token_cipher,cfg.key);stage='initialisation';dispatched=true;
         const data=await posting('inbox/video/init',token,{source_info:{source:'FILE_UPLOAD',video_size:size,chunk_size:size,total_chunk_count:1}});
         if(typeof data.publish_id!=='string'||!data.publish_id||data.publish_id.length>64)throw Error('Invalid publish ID');
         await pool.query('UPDATE olyvex_tiktok_uploads SET publish_id=$2,updated_at=NOW() WHERE id=$1',[job.id,data.publish_id]);
-        stage='adresse_transfert';const upload=new URL(data.upload_url);if(upload.protocol!=='https:'||!(/^(?:open-upload|upload(?:\.[a-z0-9-]+)*)\.tiktokapis\.com$/i.test(upload.hostname))||upload.port||upload.username||upload.password)throw Error('Invalid upload host');
+        stage='adresse_transfert';
+        const fail=code=>{const e=Error(code);e.code=code;throw e;};
+        if(typeof data.upload_url!=='string'||!data.upload_url)fail('upload_url_missing');
+        let upload;try{upload=new URL(data.upload_url);}catch{fail('upload_url_invalid');}
+        uploadHost=upload.hostname;
+        if(upload.protocol!=='https:'||upload.port)fail('upload_protocol_refused');
+        if(upload.username||upload.password)fail('upload_credentials_refused');
+        if(!/^(?:open-upload|upload)(?:[.-][a-z0-9-]+)*\.tiktokapis\.com$/i.test(upload.hostname))fail('upload_host_refused');
+        stage='lecture_video';
         const bytes=await fs.readFile(path.join(videoStorage,job.filename));
         stage='transfert_video';const r=await fetchImpl(upload.href,{method:'PUT',headers:{'Content-Type':'video/mp4','Content-Length':String(size),'Content-Range':`bytes 0-${size-1}/${size}`},body:bytes,redirect:'error',signal:AbortSignal.timeout(240000)});
         if(r.status!==201){const e=Error('Transfer incomplete');e.httpStatus=r.status;throw e;}
         await pool.query("UPDATE olyvex_tiktok_uploads SET status='processing',uploaded_bytes=total_bytes,updated_at=NOW() WHERE id=$1",[job.id]);
-      }catch(e){console.warn('[Olyvex TikTok envoi]',JSON.stringify({stage,code:safeCode(e.providerCode||e.code||e.name),...(Number.isInteger(e.httpStatus)?{httpStatus:e.httpStatus}:{})}));await pool.query('UPDATE olyvex_tiktok_uploads SET status=$2,error=$3,updated_at=NOW() WHERE id=$1',[job.id,dispatched&&!e.refused?'uncertain':'failed',dispatched&&!e.refused?'Réponse TikTok non confirmée à l’étape '+stage+'. Olyvex vérifie le suivi sans renvoyer la vidéo.':'Envoi refusé ou vidéo indisponible ('+safeCode(e.providerCode||e.code)+'). Vérifiez les permissions et les limites TikTok.']);}}
+      }catch(e){console.warn('[Olyvex TikTok envoi]',JSON.stringify({version:'transfert-3',stage,...(uploadHost?{uploadHost}:{}),code:safeCode(e.providerCode||e.code||e.name),...(Number.isInteger(e.httpStatus)?{httpStatus:e.httpStatus}:{})}));await pool.query('UPDATE olyvex_tiktok_uploads SET status=$2,error=$3,updated_at=NOW() WHERE id=$1',[job.id,dispatched&&!e.refused?'uncertain':'failed',dispatched&&!e.refused?'Le transfert n’a pas été confirmé. Olyvex vérifie son résultat sans renvoyer la vidéo.':'Envoi refusé ou vidéo indisponible ('+safeCode(e.providerCode||e.code)+'). Vérifiez les permissions et les limites TikTok.']);}}
       const pending=await pool.query("UPDATE olyvex_tiktok_uploads SET checked_at=NOW() WHERE id IN (SELECT id FROM olyvex_tiktok_uploads WHERE (status='processing' OR (status='uncertain' AND publish_id IS NOT NULL AND created_at>NOW()-INTERVAL '24 hours')) AND (checked_at IS NULL OR checked_at<NOW()-INTERVAL '1 minute') ORDER BY created_at LIMIT 5 FOR UPDATE SKIP LOCKED) RETURNING *");
       for(const job of pending.rows){try{const a=await pool.query('SELECT * FROM olyvex_tiktok_accounts WHERE id=$1 AND user_id=$2',[job.account_id,job.user_id]);if(!a.rows[0])continue;const data=await posting('status/fetch',unseal(a.rows[0].token_cipher,cfg.key),{publish_id:job.publish_id});
         const status={SEND_TO_USER_INBOX:'inbox',PUBLISH_COMPLETE:'published',FAILED:'failed'}[data.status];if(status)await pool.query('UPDATE olyvex_tiktok_uploads SET status=$2,error=$3,updated_at=NOW() WHERE id=$1',[job.id,status,status==='failed'?'TikTok a refusé le traitement. Vérifiez le format, la durée et les limites du compte.':null]);
