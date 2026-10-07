@@ -9,6 +9,11 @@ const run = promisify(execFile);
 const scopes = ['pages_show_list','pages_read_engagement','pages_manage_posts','instagram_basic','instagram_content_publish','business_management'];
 const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 const id = value => typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value);
+export function confirmedPublicationUrl(value,platform){
+  try{const u=new URL(value);const allowed=platform==='instagram'?['www.instagram.com','instagram.com']:platform==='facebook'?['www.facebook.com','facebook.com','m.facebook.com']:[];
+    return u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&allowed.includes(u.hostname)&&u.pathname!=='/'?u.href:null;
+  }catch{return null;}
+}
 export function canPublishToPage(tasks) {
   return Array.isArray(tasks) && tasks.some(t => ['CREATE_CONTENT','MANAGE','PROFILE_PLUS_CREATE_CONTENT','PROFILE_PLUS_MANAGE','PROFILE_PLUS_FULL_CONTROL'].includes(t));
 }
@@ -157,7 +162,17 @@ export function installMetaSocial({app,pool,requireAuth,videoStorage,ffmpegPath,
     res.sendFile(path.resolve(videoStorage,asset.filename));
   }));
   app.get('/api/social/meta/posts',requireAuth,allowed,handler(async(req,res)=>{
-    const result=await pool.query('SELECT p.id,p.campaign_id,p.status,p.scheduled_at,p.created_at,p.remote_id,p.error,a.platform,a.display_name FROM olyvex_social_posts p JOIN olyvex_social_accounts a ON a.id=p.account_id WHERE p.user_id=$1 ORDER BY p.created_at DESC LIMIT 50',[req.user.id]);res.json({posts:result.rows});
+    const result=await pool.query('SELECT p.id,p.campaign_id,p.status,p.scheduled_at,p.created_at,p.remote_id,p.error,a.platform,a.display_name,c.title AS campaign_title FROM olyvex_social_posts p JOIN olyvex_social_accounts a ON a.id=p.account_id LEFT JOIN vira_campaigns c ON c.id=p.campaign_id AND c.user_id=p.user_id WHERE p.user_id=$1 ORDER BY p.created_at DESC LIMIT 50',[req.user.id]);res.json({posts:result.rows});
+  }));
+  app.get('/api/social/meta/posts/:id/view',requireAuth,allowed,handler(async(req,res)=>{
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.params.id))throw new PublicError('Publication introuvable.',404);
+    const found=await pool.query('SELECT p.status,p.remote_id,a.platform,a.token_cipher FROM olyvex_social_posts p JOIN olyvex_social_accounts a ON a.id=p.account_id AND a.user_id=p.user_id WHERE p.id=$1 AND p.user_id=$2',[req.params.id,req.user.id]);
+    if(!found.rowCount)throw new PublicError('Publication introuvable.',404);
+    const post=found.rows[0];if(post.status!=='published'||!post.remote_id)throw new PublicError('Le lien est disponible après confirmation de la publication.',409);
+    const field=post.platform==='instagram'?'permalink':'permalink_url';
+    const info=await graph(post.remote_id,unseal(post.token_cipher,cfg.key),{fields:field});
+    const url=confirmedPublicationUrl(info[field],post.platform);if(!url)throw new PublicError('Le réseau ne fournit pas encore de lien. Consultez votre profil.',409);
+    res.redirect(302,url);
   }));
   app.post('/api/social/meta/posts',requireAuth,allowed,mutation,handler(async(req,res)=>{
     needsConfig();const b=req.body || {};

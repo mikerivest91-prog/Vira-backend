@@ -62,7 +62,7 @@ export function installTikTokSocial({app,pool,requireAuth,videoStorage,env=proce
     const owner=JSON.parse(await fs.readFile(path.join(videoStorage,filename+'.owner.json'),'utf8'));if(String(owner.userId)!==String(userId))throw Error('Video owner mismatch');
     const stat=await fs.stat(path.join(videoStorage,filename));if(!stat.isFile()||stat.size<1||stat.size>64*1024*1024)throw Error('Video size unsupported');return stat.size;
   }
-  const publicJob=j=>({id:j.id,status:j.status,uploadedBytes:Number(j.uploaded_bytes||0),totalBytes:Number(j.total_bytes||0),error:j.error||null});
+  const publicJob=j=>({id:j.id,status:j.status,campaignId:j.campaign_id||null,campaignTitle:j.campaign_title||null,displayName:j.display_name||null,createdAt:j.created_at||null,uploadedBytes:Number(j.uploaded_bytes||0),totalBytes:Number(j.total_bytes||0),error:j.error||null});
   app.post('/api/social/tiktok/uploads',requireAuth,allowed,mutation,handler(async(req,res)=>{
     const b=req.body||{};if(!cfg.ready||!numberId(b.accountId)||!numberId(b.campaignId)||!uuid(b.requestId)||b.confirm!==true)return res.status(400).json({error:'Confirmez le compte et la vidéo à envoyer.'});
     const prior=await pool.query('SELECT * FROM olyvex_tiktok_uploads WHERE user_id=$1 AND request_id=$2',[req.user.id,b.requestId]);if(prior.rowCount)return res.json({upload:publicJob(prior.rows[0])});
@@ -77,7 +77,7 @@ export function installTikTokSocial({app,pool,requireAuth,videoStorage,env=proce
     const row=inserted.rows[0]||(await pool.query('SELECT * FROM olyvex_tiktok_uploads WHERE user_id=$1 AND request_id=$2',[req.user.id,b.requestId])).rows[0];res.status(202).json({upload:publicJob(row)});
   }));
   app.get('/api/social/tiktok/uploads/:id',requireAuth,allowed,handler(async(req,res)=>{if(!uuid(req.params.id))return res.sendStatus(404);const r=await pool.query('SELECT * FROM olyvex_tiktok_uploads WHERE id=$1 AND user_id=$2',[req.params.id,req.user.id]);if(!r.rowCount)return res.status(404).json({error:'Envoi introuvable.'});res.json({upload:publicJob(r.rows[0])});}));
-  app.get('/api/social/tiktok/uploads',requireAuth,allowed,handler(async(req,res)=>{const r=await pool.query('SELECT * FROM olyvex_tiktok_uploads WHERE user_id=$1 ORDER BY created_at DESC LIMIT 10',[req.user.id]);res.json({uploads:r.rows.map(publicJob)});}));
+  app.get('/api/social/tiktok/uploads',requireAuth,allowed,handler(async(req,res)=>{const r=await pool.query('SELECT u.*,a.display_name,c.title AS campaign_title FROM olyvex_tiktok_uploads u JOIN olyvex_tiktok_accounts a ON a.id=u.account_id AND a.user_id=u.user_id LEFT JOIN vira_campaigns c ON c.id=u.campaign_id AND c.user_id=u.user_id WHERE u.user_id=$1 ORDER BY u.created_at DESC LIMIT 50',[req.user.id]);res.json({uploads:r.rows.map(publicJob)});}));
   async function posting(endpoint,token,body){const r=await fetchImpl('https://open.tiktokapis.com/v2/post/publish/'+endpoint+'/',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json; charset=UTF-8'},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(30000)});const data=await r.json();if(!r.ok||data.error?.code!=='ok'){const e=Error('TikTok refused');e.refused=Boolean(data.error?.code&&data.error.code!=='ok');e.providerCode=safeCode(data.error?.code);e.httpStatus=r.status;throw e;}return data.data;}
   let timer,uploadTimer,busy=false;
   async function tick(){
