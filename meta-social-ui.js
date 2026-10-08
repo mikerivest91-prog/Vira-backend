@@ -299,7 +299,18 @@ function hasUnsavedText() {
   return caption.value !== savedCaption ||
     tags.value !== savedHashtags;
 }
+function warnBeforeLeaving(event) {
+  if (!d.isConnected || !hasUnsavedText()) return;
 
+  event.preventDefault();
+  event.returnValue = "";
+}
+
+window.addEventListener("beforeunload", warnBeforeLeaving);
+
+d.addEventListener("close", () => {
+  window.removeEventListener("beforeunload", warnBeforeLeaving);
+}, { once: true });
 const originalClose = d.close.bind(d);
 
 d.close = (...args) => {
