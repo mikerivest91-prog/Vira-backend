@@ -904,7 +904,47 @@ app.post("/api/campaigns", requireAuth, async (req, res) => {
     });
   }
 });
+app.patch("/api/campaigns/:id/publication", requireAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { caption, hashtags } = req.body || {};
 
+    if (
+      !Number.isSafeInteger(id) || id <= 0 ||
+      typeof caption !== "string" ||
+      typeof hashtags !== "string" ||
+      caption.length > 5000 ||
+      hashtags.length > 2200
+    ) {
+      return res.status(400).json({ error: "Texte invalide." });
+    }
+
+    const publicationDraft = {
+      caption: caption.trim(),
+      hashtags: hashtags.trim()
+    };
+
+    const result = await pool.query(
+      `UPDATE vira_campaigns
+       SET campaign_data =
+         COALESCE(campaign_data, '{}'::jsonb) ||
+         jsonb_build_object('publicationDraft', $1::jsonb),
+         updated_at = NOW()
+       WHERE id = $2 AND user_id = $3
+       RETURNING id`,
+      [JSON.stringify(publicationDraft), id, req.user.id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ error: "Campagne introuvable." });
+    }
+
+    res.json({ ok: true, publicationDraft });
+  } catch (error) {
+    console.error("PUBLICATION DRAFT SAVE ERROR", error);
+    res.status(500).json({ error: "Enregistrement impossible." });
+  }
+});
 app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
   try {
     const campaignId = Number(req.params.id);
