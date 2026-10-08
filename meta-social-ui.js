@@ -144,6 +144,80 @@ clearAll.onclick = () => {
 
 selectionActions.append(selectAll, clearAll);
 panels[0].prepend(selectionActions);
+    const previousSends = make("section");
+previousSends.style.cssText =
+  "margin-top:18px;padding:14px;border:1px solid #dfe4ee;" +
+  "border-radius:12px;background:#f8f9fc";
+
+previousSends.append(make("h3", "Derniers envois de cette campagne"));
+
+const previousMessage = make("p", "Vérification…", "ov-pub-note");
+previousMessage.setAttribute("role", "status");
+previousSends.append(previousMessage);
+panels[0].append(previousSends);
+
+const previousResults = await Promise.allSettled([
+  api("meta", "posts"),
+  api("tiktok", "uploads")
+]);
+
+if (!d.isConnected) return;
+
+const previousRows = [];
+const unavailable = [];
+
+previousResults.forEach((result, index) => {
+  if (result.status === "rejected") {
+    unavailable.push(index === 0 ? "Facebook / Instagram" : "TikTok");
+    return;
+  }
+
+  const items = index === 0
+    ? result.value.posts || []
+    : result.value.uploads || [];
+
+  for (const item of items) {
+    const campaignId = index === 0
+      ? item.campaign_id
+      : item.campaignId;
+
+    if (String(campaignId) !== String(campaign.id)) continue;
+
+    previousRows.push({
+      platform: index === 0 ? item.platform : "tiktok",
+      account: index === 0 ? item.display_name : item.displayName,
+      status: item.status,
+      date: index === 0 ? item.created_at : item.createdAt
+    });
+  }
+});
+
+previousRows.sort((a, b) =>
+  (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0)
+);
+
+previousMessage.textContent = unavailable.length
+  ? "Suivi indisponible pour " + unavailable.join(" et ") +
+    ". Vérifiez ces réseaux avant de renvoyer."
+  : previousRows.length
+    ? "Vérifiez ces envois avant de publier à nouveau."
+    : "Aucun envoi trouvé dans l’historique récent disponible.";
+
+for (const item of previousRows.slice(0, 6)) {
+  const date = new Date(item.date);
+  const dateText = Number.isFinite(date.getTime())
+    ? " · " + date.toLocaleString("fr-CA")
+    : "";
+
+  previousSends.append(make(
+    "p",
+    (names[item.platform] || "Réseau") +
+    " · " + (item.account || "Compte") +
+    " · " + (labels[item.status] || "Statut à vérifier") +
+    dateText,
+    "ov-pub-note"
+  ));
+}
     const data=campaign.campaign_data||{},media=make('select');const choices=[];if(data.videoUrl)choices.push(['video','Vidéo finale']);(data.generatedImages||[]).forEach((src,i)=>{if(/^data:image\/(png|jpeg|webp);base64,/i.test(src))choices.push(['image:'+i,'Image '+(i+1)]);});choices.push(['text','Texte uniquement · Facebook']);for(const [value,text] of choices){const o=make('option',text);o.value=value;media.append(o);}
     const field=(parent,title,input)=>{const l=make('label');l.append(make('span',title),input);parent.append(l);return l;};field(panels[1],'Contenu',media);const previewBox=make('div');panels[1].append(previewBox);
     const caption=make('textarea');caption.rows=4;caption.maxLength=2200;field(panels[1],'Texte de publication',caption);const tags=make('textarea');tags.rows=2;field(panels[1],'Hashtags',tags);const captionNote=make('p','','ov-pub-note');panels[1].append(captionNote);
