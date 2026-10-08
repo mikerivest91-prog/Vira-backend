@@ -119,6 +119,28 @@
     const data=campaign.campaign_data||{},media=make('select');const choices=[];if(data.videoUrl)choices.push(['video','Vidéo finale']);(data.generatedImages||[]).forEach((src,i)=>{if(/^data:image\/(png|jpeg|webp);base64,/i.test(src))choices.push(['image:'+i,'Image '+(i+1)]);});choices.push(['text','Texte uniquement · Facebook']);for(const [value,text] of choices){const o=make('option',text);o.value=value;media.append(o);}
     const field=(parent,title,input)=>{const l=make('label');l.append(make('span',title),input);parent.append(l);return l;};field(panels[1],'Contenu',media);const previewBox=make('div');panels[1].append(previewBox);
     const caption=make('textarea');caption.rows=4;caption.maxLength=2200;field(panels[1],'Texte de publication',caption);const tags=make('textarea');tags.rows=2;field(panels[1],'Hashtags',tags);const captionNote=make('p','','ov-pub-note');panels[1].append(captionNote);
+    const savedScenario = String(data.scenario || campaign.scenario || "")
+  .replace(/\*\*/g, "")
+  .replace(/^#{1,6}[ \t]+/gm, "")
+  .trim();
+
+const sectionHeadings =
+  "TITRE|OBJECTIF|PUBLIC CIBLE|ACCROCHE|TEXTE PUBLICATION|" +
+  "HASHTAGS|SC[ÈE]NE\\s*[1-4]|NARRATION|" +
+  "APPEL À L['’]ACTION|PROMPT VISUEL|STYLE";
+
+function savedSection(heading) {
+  const pattern = new RegExp(
+    "(?:^|\\n)\\s*" + heading +
+    "\\s*:?\\s*([\\s\\S]*?)(?=\\n\\s*(?:" +
+    sectionHeadings + ")\\s*:?|$)",
+    "i"
+  );
+  return savedScenario.match(pattern)?.[1]?.trim() || "";
+}
+
+caption.value = savedSection("TEXTE PUBLICATION");
+tags.value = savedSection("HASHTAGS");
     const when=make('select');for(const [value,text] of [['now','Maintenant'],['later','Programmer Facebook et Instagram']]){const o=make('option',text);o.value=value;when.append(o);}const whenField=field(panels[1],'Quand publier ?',when);const date=make('input');date.type='datetime-local';const dateField=field(panels[1],'Date et heure locales',date);dateField.hidden=true;when.onchange=()=>{dateField.hidden=when.value!=='later';};
     const recap=make('div');panels[2].append(recap);const agree=make('input');agree.type='checkbox';const consent=make('label','','ov-pub-consent');consent.append(agree,make('span','J’ai vérifié le contenu et les comptes. J’autorise la publication Facebook / Instagram et l’envoi du brouillon TikTok sélectionnés.'));panels[2].append(consent);
     const statusList=make('div');statusList.setAttribute('aria-live','polite');panels[3].append(statusList,make('p','Vous pouvez fermer cette fenêtre et retrouver les résultats dans Paramètres → Mes réseaux.','ov-pub-note'));
