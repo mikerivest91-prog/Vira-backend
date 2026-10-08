@@ -316,7 +316,8 @@ saveDraft.onclick = async () => {
     }
 
     data.publicationDraft = result.publicationDraft;
-
+savedCaption = snapshot.caption;
+savedHashtags = snapshot.hashtags;
     draftStatus.textContent =
       caption.value === snapshot.caption &&
       tags.value === snapshot.hashtags
