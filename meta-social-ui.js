@@ -470,6 +470,31 @@ media.addEventListener("change", updateSendButton);
 next.addEventListener("click", updateSendButton);
 
 updateSendButton();
+    const networkHint = make(
+  "p",
+  "Sélectionnez au moins un réseau.",
+  "ov-pub-note"
+);
+
+panels[0].append(networkHint);
+
+function updateNetworkSelection() {
+  const hasNetwork = fields.some(({ c }) => c.checked);
+
+  networkHint.hidden = hasNetwork;
+  next.disabled = step === 0 && !hasNetwork;
+}
+
+for (const { c } of fields) {
+  c.addEventListener("change", updateNetworkSelection);
+}
+
+selectAll.addEventListener("click", updateNetworkSelection);
+clearAll.addEventListener("click", updateNetworkSelection);
+next.addEventListener("click", updateNetworkSelection);
+back.addEventListener("click", updateNetworkSelection);
+
+updateNetworkSelection();
     const jobs=[];function show(j,status,error=''){j.status=status;j.box.dataset.state=status;j.box.replaceChildren(make('strong',names[j.a.platform]+' · '+j.a.display_name),make('p',labels[status]||status));if(error)j.box.append(make('p',error));if(status==='inbox')j.box.append(make('p','Ouvrez TikTok → Boîte de réception sur votre téléphone pour terminer la publication.'));if(j.a.platform==='tiktok'&&text()&&(status==='inbox'||status==='published'))j.box.append(action('Copier le texte et les hashtags',async()=>{try{await navigator.clipboard.writeText(text());j.box.append(make('p','Texte copié. Collez-le dans TikTok.'));}catch{j.box.append(make('p','La copie est indisponible. Sélectionnez le texte dans le récapitulatif.'));}}));}
     form.onsubmit=async e=>{e.preventDefault();if(sending||step!==2)return;const duplicateNetworks = selected().filter(account =>
   previousRows.some(previous =>
