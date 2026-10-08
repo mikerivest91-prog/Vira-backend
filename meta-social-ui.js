@@ -260,6 +260,38 @@ saveDraft.type = "button";
 const draftStatus = make("p", "", "ov-pub-note");
 draftStatus.setAttribute("role", "status");
 panels[1].append(saveDraft, draftStatus);
+    const restoreText = make(
+  "button",
+  "Restaurer le texte de la campagne",
+  "vr-button"
+);
+restoreText.type = "button";
+
+restoreText.onclick = () => {
+  const originalCaption = savedSection("TEXTE PUBLICATION");
+  const originalHashtags = savedSection("HASHTAGS");
+
+  if (!originalCaption && !originalHashtags) {
+    draftStatus.textContent =
+      "Cette campagne ne contient aucun texte d’origine à restaurer.";
+    return;
+  }
+
+  if (!window.confirm(
+    "Remplacer le texte et les hashtags actuels par ceux d’origine de la campagne ?"
+  )) {
+    return;
+  }
+
+  caption.value = originalCaption;
+  tags.value = originalHashtags;
+  agree.checked = false;
+
+  draftStatus.textContent =
+    "Texte d’origine restauré. Cliquez sur Enregistrer le texte pour le sauvegarder.";
+};
+
+saveDraft.after(restoreText);
 let savedCaption = caption.value;
 let savedHashtags = tags.value;
 
