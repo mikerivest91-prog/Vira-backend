@@ -141,7 +141,64 @@ function savedSection(heading) {
 
 caption.value = savedSection("TEXTE PUBLICATION");
 tags.value = savedSection("HASHTAGS");
-    const when=make('select');for(const [value,text] of [['now','Maintenant'],['later','Programmer Facebook et Instagram']]){const o=make('option',text);o.value=value;when.append(o);}const whenField=field(panels[1],'Quand publier ?',when);const date=make('input');date.type='datetime-local';const dateField=field(panels[1],'Date et heure locales',date);dateField.hidden=true;when.onchange=()=>{dateField.hidden=when.value!=='later';};
+   if (data.publicationDraft) {
+  if (typeof data.publicationDraft.caption === "string") {
+    caption.value = data.publicationDraft.caption;
+  }
+  if (typeof data.publicationDraft.hashtags === "string") {
+    tags.value = data.publicationDraft.hashtags;
+  }
+}
+
+const saveDraft = make(
+  "button", "Enregistrer le texte", "vr-button"
+);
+saveDraft.type = "button";
+
+const draftStatus = make("p", "", "ov-pub-note");
+draftStatus.setAttribute("role", "status");
+panels[1].append(saveDraft, draftStatus);
+
+saveDraft.onclick = async () => {
+  saveDraft.disabled = true;
+  draftStatus.textContent = "Enregistrement…";
+
+  const snapshot = {
+    caption: caption.value,
+    hashtags: tags.value
+  };
+
+  try {
+    const response = await fetch(
+      "/api/campaigns/" +
+      encodeURIComponent(campaign.id) +
+      "/publication",
+      {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(snapshot)
+      }
+    );
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Enregistrement impossible.");
+    }
+
+    data.publicationDraft = result.publicationDraft;
+
+    draftStatus.textContent =
+      caption.value === snapshot.caption &&
+      tags.value === snapshot.hashtags
+        ? "Texte enregistré dans votre compte."
+        : "Version enregistrée. Enregistrez vos nouvelles modifications.";
+  } catch (error) {
+    draftStatus.textContent = error.message;
+  } finally {
+    saveDraft.disabled = false;
+  }
+}; const when=make('select');for(const [value,text] of [['now','Maintenant'],['later','Programmer Facebook et Instagram']]){const o=make('option',text);o.value=value;when.append(o);}const whenField=field(panels[1],'Quand publier ?',when);const date=make('input');date.type='datetime-local';const dateField=field(panels[1],'Date et heure locales',date);dateField.hidden=true;when.onchange=()=>{dateField.hidden=when.value!=='later';};
     const recap=make('div');panels[2].append(recap);const agree=make('input');agree.type='checkbox';const consent=make('label','','ov-pub-consent');consent.append(agree,make('span','J’ai vérifié le contenu et les comptes. J’autorise la publication Facebook / Instagram et l’envoi du brouillon TikTok sélectionnés.'));panels[2].append(consent);
     const statusList=make('div');statusList.setAttribute('aria-live','polite');panels[3].append(statusList,make('p','Vous pouvez fermer cette fenêtre et retrouver les résultats dans Paramètres → Mes réseaux.','ov-pub-note'));
     const foot=make('footer');const back=action('Retour',()=>go(step-1));const next=action('Continuer',()=>advance());next.classList.add('ov-pub-primary');const send=make('button','Confirmer et envoyer','vr-button ov-pub-primary');send.type='submit';const done=action('Fermer',()=>d.close());foot.append(back,next,send,done);form.append(foot);let step=0;
