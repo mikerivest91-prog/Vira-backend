@@ -492,3 +492,15 @@ if (duplicateNetworks.length) {
   function observe(){const grid=document.querySelector('.vr-settings-grid');if(grid&&!grid.querySelector('.ov-history'))mount(grid);}
   new MutationObserver(observe).observe(document.body,{childList:true,subtree:true});observe();
 })();
+(() => {
+  const style = document.createElement("style");
+
+  style.textContent = `
+    dialog.ov-publish {
+      border-radius: 18px !important;
+      clip-path: inset(0 round 18px);
+    }
+  `;
+
+  document.head.append(style);
+})();
