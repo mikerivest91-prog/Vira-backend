@@ -116,6 +116,34 @@
     const panels=titles.map((name,i)=>{const n=make('section','','ov-pub-panel');const h=make('h3',(i+1)+'. '+name);h.tabIndex=-1;n.append(h);form.append(n);return n;});
     const fields=[];for(const a of accounts){const l=make('label','','ov-pub-account');const c=make('input');c.type='checkbox';const text=make('span',names[a.platform]+' · '+a.display_name);l.append(c,text);panels[0].append(l);fields.push({a,c});}
     panels[0].append(make('p','Facebook et Instagram : publication directe ou programmée. TikTok : brouillon à terminer sur votre téléphone.','ov-pub-note'));
+    const selectionActions = make("div");
+selectionActions.style.cssText =
+  "display:flex;gap:10px;flex-wrap:wrap;margin:14px 0";
+
+const selectAll = make(
+  "button", "Tout sélectionner", "vr-button"
+);
+selectAll.type = "button";
+
+const clearAll = make(
+  "button", "Tout décocher", "vr-button"
+);
+clearAll.type = "button";
+
+selectAll.onclick = () => {
+  fields.forEach(({ c }) => {
+    c.checked = true;
+  });
+};
+
+clearAll.onclick = () => {
+  fields.forEach(({ c }) => {
+    c.checked = false;
+  });
+};
+
+selectionActions.append(selectAll, clearAll);
+panels[0].prepend(selectionActions);
     const data=campaign.campaign_data||{},media=make('select');const choices=[];if(data.videoUrl)choices.push(['video','Vidéo finale']);(data.generatedImages||[]).forEach((src,i)=>{if(/^data:image\/(png|jpeg|webp);base64,/i.test(src))choices.push(['image:'+i,'Image '+(i+1)]);});choices.push(['text','Texte uniquement · Facebook']);for(const [value,text] of choices){const o=make('option',text);o.value=value;media.append(o);}
     const field=(parent,title,input)=>{const l=make('label');l.append(make('span',title),input);parent.append(l);return l;};field(panels[1],'Contenu',media);const previewBox=make('div');panels[1].append(previewBox);
     const caption=make('textarea');caption.rows=4;caption.maxLength=2200;field(panels[1],'Texte de publication',caption);const tags=make('textarea');tags.rows=2;field(panels[1],'Hashtags',tags);const captionNote=make('p','','ov-pub-note');panels[1].append(captionNote);
