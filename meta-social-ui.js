@@ -292,6 +292,37 @@ restoreText.onclick = () => {
 };
 
 saveDraft.after(restoreText);
+    const copyText = make(
+  "button",
+  "Copier le texte et les hashtags",
+  "vr-button"
+);
+copyText.type = "button";
+
+copyText.onclick = async () => {
+  const content = [
+    caption.value.trim(),
+    tags.value.trim()
+  ].filter(Boolean).join("\n\n");
+
+  if (!content) {
+    draftStatus.textContent = "Aucun texte à copier.";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(content);
+    draftStatus.textContent = hasUnsavedText()
+      ? "Texte et hashtags copiés. Modifications non enregistrées."
+      : "Texte et hashtags copiés.";
+  } catch {
+    draftStatus.textContent =
+      "Copie impossible. Sélectionnez le texte et copiez-le manuellement.";
+  }
+};
+
+copyText.style.margin = "8px 0 0 8px";
+restoreText.after(copyText);
 let savedCaption = caption.value;
 let savedHashtags = tags.value;
 
