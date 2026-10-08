@@ -311,7 +311,33 @@ saveDraft.onclick = async () => {
     function validate(){const list=selected();if(!list.length)return 'Sélectionnez au moins un compte.';const kind=media.value.split(':')[0];if(kind==='video'){try{const u=new URL(data.videoUrl,location.origin);if(u.origin!==location.origin||!/^\/videos\/vira-[a-zA-Z0-9_-]+\.mp4$/.test(u.pathname))return 'Vidéo enregistrée indisponible.';}catch{return 'Vidéo enregistrée indisponible.';}}if(list.some(a=>a.platform==='tiktok')&&kind!=='video')return 'TikTok nécessite une vidéo finale. Choisissez une vidéo ou retirez TikTok.';if(list.some(a=>a.platform==='instagram')&&kind==='text')return 'Instagram nécessite une image ou une vidéo.';if(kind==='text'&&!text())return 'Ajoutez le texte de publication.';const limit=list.some(a=>a.platform==='instagram')?2200:5000;if(text().length>limit)return 'Le texte et les hashtags dépassent '+limit+' caractères.';if(when.value==='later'){if(list.some(a=>a.platform==='tiktok'))return 'La programmation concerne Facebook et Instagram. Retirez TikTok ou choisissez Maintenant.';if(!date.value||!Number.isFinite(new Date(date.value).getTime())||new Date(date.value)<=new Date())return 'Choisissez une date et une heure futures.';}return '';}
     function advance(){message.textContent='';if(step===0){if(!selected().length){message.textContent='Sélectionnez au moins un compte.';return;}whenField.hidden=selected().every(a=>a.platform==='tiktok');if(whenField.hidden){when.value='now';dateField.hidden=true;}captionNote.textContent=selected().some(a=>a.platform==='tiktok')?'Pour TikTok, copiez ce texte et collez-le lors de la publication sur votre téléphone. Il sera envoyé directement avec la publication Facebook / Instagram.':'Le texte et les hashtags seront envoyés avec votre publication.';preview();go(1);}else{const error=validate();if(error){message.textContent=error;return;}recap.replaceChildren();for(const a of selected())recap.append(make('p',names[a.platform]+' · '+a.display_name+' — '+(a.platform==='tiktok'?'brouillon à terminer sur téléphone':when.value==='later'?'publication le '+new Date(date.value).toLocaleString('fr-CA'):'publication immédiate')));recap.append(make('p',text()||'Sans texte de publication','ov-pub-note'));agree.checked=false;go(2);}}
     const jobs=[];function show(j,status,error=''){j.status=status;j.box.dataset.state=status;j.box.replaceChildren(make('strong',names[j.a.platform]+' · '+j.a.display_name),make('p',labels[status]||status));if(error)j.box.append(make('p',error));if(status==='inbox')j.box.append(make('p','Ouvrez TikTok → Boîte de réception sur votre téléphone pour terminer la publication.'));if(j.a.platform==='tiktok'&&text()&&(status==='inbox'||status==='published'))j.box.append(action('Copier le texte et les hashtags',async()=>{try{await navigator.clipboard.writeText(text());j.box.append(make('p','Texte copié. Collez-le dans TikTok.'));}catch{j.box.append(make('p','La copie est indisponible. Sélectionnez le texte dans le récapitulatif.'));}}));}
-    form.onsubmit=async e=>{e.preventDefault();if(sending||step!==2)return;const error=validate();if(error){message.textContent=error;return;}if(!agree.checked){message.textContent='Cochez la confirmation après avoir vérifié votre contenu.';agree.focus();return;}sending=true;message.textContent='';previewBox.querySelector('video')?.pause();go(3);const chosen=selected();for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
+    form.onsubmit=async e=>{e.preventDefault();if(sending||step!==2)return;const duplicateNetworks = selected().filter(account =>
+  previousRows.some(previous =>
+    previous.platform === account.platform &&
+    previous.account === account.display_name &&
+    [
+      "queued", "processing", "uploading", "waiting",
+      "published", "inbox", "uncertain"
+    ].includes(previous.status)
+  )
+);
+
+if (duplicateNetworks.length) {
+  const destinations = duplicateNetworks
+    .map(account =>
+      (names[account.platform] || "Réseau") +
+      " · " + account.display_name
+    )
+    .join("\n");
+
+  const confirmed = window.confirm(
+    "Cette campagne a déjà un envoi enregistré pour :\n\n" +
+    destinations +
+    "\n\nVoulez-vous vraiment créer un nouvel envoi ?"
+  );
+
+  if (!confirmed) return;
+}const error=validate();if(error){message.textContent=error;return;}if(!agree.checked){message.textContent='Cochez la confirmation après avoir vérifié votre contenu.';agree.focus();return;}sending=true;message.textContent='';previewBox.querySelector('video')?.pause();go(3);const chosen=selected();for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
       for(const a of chosen){const j={a,box:make('div','','ov-pub-result'),requestId:crypto.randomUUID()};jobs.push(j);statusList.append(j.box);show(j,'queued');}
       for(const j of jobs){try{const [kind,index]=media.value.split(':');const payload=j.a.platform==='tiktok'?{campaignId:campaign.id,accountId:j.a.id,requestId:j.requestId,confirm:true}:{campaignId:String(campaign.id),accountId:String(j.a.id),kind,imageIndex:Number(index||0),caption:text(),scheduledAt:when.value==='later'?new Date(date.value).toISOString():null,requestId:j.requestId};const r=await api(j.a.network,j.a.platform==='tiktok'?'uploads':'posts',{method:'POST',headers,body:JSON.stringify(payload)});j.id=(r.upload||r.post).id;j.scheduled=when.value==='later'&&j.a.platform!=='tiktok';show(j,(r.upload||r.post).status,(r.upload||r.post).error);if(j.scheduled)j.box.append(make('p','Publication programmée. Retrouvez son suivi dans Paramètres.'));}catch(err){show(j,'uncertain',err.message+' Vérifiez l’historique avant de renvoyer.');}}
       let busy=false;const started=Date.now();timer=setInterval(async()=>{if(!d.isConnected||Date.now()-started>10*60*1000){clearInterval(timer);return;}if(busy)return;busy=true;try{const pending=jobs.filter(j=>j.id&&!j.scheduled&&!['published','inbox','failed','cancelled'].includes(j.status));if(!pending.length){clearInterval(timer);return;}let meta=null;if(pending.some(j=>j.a.network==='meta')){try{meta=await api('meta','posts');}catch{for(const j of pending.filter(j=>j.a.network==='meta'))show(j,'uncertain','Suivi Meta indisponible. Vérifiez les résultats dans Paramètres.');}}for(const j of pending){if(j.a.network==='meta'&&!meta)continue;try{const r=j.a.network==='tiktok'?(await api('tiktok','uploads/'+j.id)).upload:meta.posts.find(p=>p.id===j.id);if(r)show(j,r.status,r.error);}catch{show(j,'uncertain','Suivi indisponible. Vérifiez les résultats dans Paramètres.');}}}catch{for(const j of jobs.filter(j=>j.a.network==='meta'&&j.id&&!['published','failed','cancelled'].includes(j.status)))show(j,'uncertain','Suivi indisponible. Vérifiez les résultats dans Paramètres.');}finally{busy=false;}},5000);
