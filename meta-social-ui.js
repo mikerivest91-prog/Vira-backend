@@ -260,7 +260,34 @@ saveDraft.type = "button";
 const draftStatus = make("p", "", "ov-pub-note");
 draftStatus.setAttribute("role", "status");
 panels[1].append(saveDraft, draftStatus);
+let savedCaption = caption.value;
+let savedHashtags = tags.value;
 
+function hasUnsavedText() {
+  return caption.value !== savedCaption ||
+    tags.value !== savedHashtags;
+}
+
+const originalClose = d.close.bind(d);
+
+d.close = (...args) => {
+  if (
+    hasUnsavedText() &&
+    !window.confirm(
+      "Votre texte ou vos hashtags ont été modifiés sans être enregistrés.\n\n" +
+      "Fermer et abandonner ces modifications ?"
+    )
+  ) {
+    return;
+  }
+
+  originalClose(...args);
+};
+
+d.addEventListener("cancel", event => {
+  event.preventDefault();
+  d.close();
+});
 saveDraft.onclick = async () => {
   saveDraft.disabled = true;
   draftStatus.textContent = "Enregistrement…";
