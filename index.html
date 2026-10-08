@@ -5369,6 +5369,258 @@ body .app-shell .main #imageImportPanel .photo-editor-footer{display:flex!import
 body .app-shell .main #imageImportPanel .photo-editor-footer>div{flex:1 1 180px;min-width:0}
 body .app-shell .main #imageImportPanel .photo-editor-footer>button{max-width:100%;white-space:normal!important;word-break:normal!important}
 </style>
+<script>
+(() => {
+  "use strict";
+
+  const networks = {
+    facebook: "Facebook",
+    instagram: "Instagram",
+    tiktok: "TikTok"
+  };
+
+  const statuses = {
+    queued: "En attente",
+    processing: "Traitement en cours",
+    uploading: "Transfert en cours",
+    waiting: "Préparation par le réseau",
+    published: "Publication confirmée",
+    inbox: "Brouillon TikTok reçu",
+    failed: "Échec de l’envoi",
+    uncertain: "Résultat à vérifier",
+    cancelled: "Annulée"
+  };
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .ov-calendar-posts {
+      margin-top:24px;
+      padding:22px;
+      background:white;
+      border:1px solid #dfe4ee;
+      border-radius:16px;
+    }
+    .ov-calendar-posts header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .ov-calendar-posts article {
+      margin-top:14px;
+      padding:18px;
+      border:1px solid #dfe4ee;
+      border-radius:12px;
+      overflow-wrap:anywhere;
+    }
+    .ov-calendar-posts h3 { margin:0 0 10px; }
+    .ov-calendar-posts p { margin:10px 0; }
+    .ov-calendar-posts .ov-status {
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:8px;
+      background:#eee7ff;
+      color:#6339a6;
+    }
+    .ov-calendar-posts [data-state="published"] .ov-status,
+    .ov-calendar-posts [data-state="inbox"] .ov-status {
+      background:#e5f5eb;
+      color:#236a42;
+    }
+    .ov-calendar-posts [data-state="failed"] .ov-status,
+    .ov-calendar-posts [data-state="uncertain"] .ov-status {
+      background:#fff1df;
+      color:#915515;
+    }
+  `;
+  document.head.append(style);
+
+  function element(tag, text, className = "") {
+    const node = document.createElement(tag);
+    node.textContent = text;
+    node.className = className;
+    return node;
+  }
+
+  async function read(path, key) {
+    const response = await fetch(path, {
+      credentials: "same-origin"
+    });
+    if (!response.ok) throw new Error("Chargement indisponible");
+    const data = await response.json();
+    if (!Array.isArray(data[key])) throw new Error("Réponse invalide");
+    return data[key];
+  }
+
+  function mount(calendar) {
+    const block = element("section", "", "ov-calendar-posts");
+    const header = element("header");
+    const refresh = element("button", "Actualiser", "vira-calendar-button");
+    refresh.type = "button";
+    header.append(element("h2", "Suivi des publications"), refresh);
+
+    const message = element("p");
+    message.setAttribute("role", "status");
+    const list = element("div");
+
+    block.append(
+      header,
+      element("p", "Retrouvez vos derniers envois et leurs résultats."),
+      message,
+      list
+    );
+    calendar.append(block);
+
+    async function load() {
+      refresh.disabled = true;
+      message.textContent = "Chargement…";
+
+      try {
+        const results = await Promise.allSettled([
+          read("/api/social/meta/posts", "posts"),
+          read("/api/social/tiktok/uploads", "uploads")
+        ]);
+
+        if (!block.isConnected) return;
+
+        const rows = [];
+        const errors = [];
+
+        results.forEach((result, index) => {
+          if (result.status === "rejected") {
+            errors.push(
+              index === 0
+                ? "Facebook / Instagram indisponibles."
+                : "TikTok indisponible."
+            );
+            return;
+          }
+
+          for (const post of result.value) {
+            rows.push({
+              id: post.id,
+              title: index === 0
+                ? post.campaign_title
+                : post.campaignTitle,
+              network: index === 0 ? post.platform : "tiktok",
+              account: index === 0
+                ? post.display_name
+                : post.displayName,
+              status: post.status,
+              date: index === 0
+                ? post.scheduled_at || post.created_at
+                : post.createdAt,
+              remoteId: post.remote_id,
+              error: post.error
+            });
+          }
+        });
+
+        rows.sort((a, b) =>
+          (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0)
+        );
+
+        list.replaceChildren();
+        message.textContent = errors.join(" ");
+
+        if (!rows.length) {
+          list.append(element(
+            "p",
+            errors.length
+              ? "Impossible de vérifier les publications. Réessayez."
+              : "Aucune publication enregistrée."
+          ));
+        }
+
+        for (const post of rows) {
+          const card = element("article");
+          card.dataset.state = post.status;
+
+          const future =
+            post.status === "queued" &&
+            Date.parse(post.date) > Date.now();
+
+          card.append(
+            element("h3", post.title || "Campagne sans titre"),
+            element(
+              "p",
+              (networks[post.network] || "Réseau") +
+              " · " + (post.account || "Compte")
+            ),
+            element(
+              "span",
+              future
+                ? "Publication programmée"
+                : statuses[post.status] || "Statut à vérifier",
+              "ov-status"
+            )
+          );
+
+          const date = new Date(post.date);
+          if (Number.isFinite(date.getTime())) {
+            card.append(element(
+              "p",
+              (post.network === "tiktok"
+                ? "Demande du "
+                : "Horaire d’envoi : ") +
+              date.toLocaleString("fr-CA")
+            ));
+          }
+
+          if (post.error) card.append(element("p", post.error));
+
+          if (
+            post.network !== "tiktok" &&
+            post.status === "published" &&
+            post.remoteId &&
+            post.id
+          ) {
+            const link = element(
+              "a", "Voir la publication", "vira-calendar-button"
+            );
+            link.href =
+              "/api/social/meta/posts/" +
+              encodeURIComponent(post.id) + "/view";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            card.append(link);
+          }
+
+          if (post.network === "tiktok" && post.status === "inbox") {
+            card.append(element(
+              "p",
+              "Ouvrez la boîte de réception TikTok sur votre téléphone pour terminer la publication."
+            ));
+          }
+
+          list.append(card);
+        }
+      } catch {
+        message.textContent = "Chargement impossible. Cliquez sur Actualiser.";
+      } finally {
+        refresh.disabled = false;
+      }
+    }
+
+    refresh.addEventListener("click", load);
+    load();
+  }
+
+  function observe() {
+    const calendar = document.querySelector(".vira-calendar");
+    if (calendar && !calendar.querySelector(".ov-calendar-posts")) {
+      mount(calendar);
+    }
+  }
+
+  new MutationObserver(observe).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  observe();
+})();
+</script>  
 </body>
 </html>
 
