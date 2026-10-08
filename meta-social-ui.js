@@ -444,8 +444,17 @@ recap.style.overflowWrap = "anywhere";panels[2].append(recap);const agree=make('
     media.onchange=()=>{agree.checked=false;preview();};caption.oninput=tags.oninput=()=>{agree.checked=false;};
     function validate(){const list=selected();if(!list.length)return 'Sélectionnez au moins un compte.';const kind=media.value.split(':')[0];if(kind==='video'){try{const u=new URL(data.videoUrl,location.origin);if(u.origin!==location.origin||!/^\/videos\/vira-[a-zA-Z0-9_-]+\.mp4$/.test(u.pathname))return 'Vidéo enregistrée indisponible.';}catch{return 'Vidéo enregistrée indisponible.';}}if(list.some(a=>a.platform==='tiktok')&&kind!=='video')return 'TikTok nécessite une vidéo finale. Choisissez une vidéo ou retirez TikTok.';if(list.some(a=>a.platform==='instagram')&&kind==='text')return 'Instagram nécessite une image ou une vidéo.';if(kind==='text'&&!text())return 'Ajoutez le texte de publication.';const limit=list.some(a=>a.platform==='instagram')?2200:5000;if(text().length>limit)return 'Le texte et les hashtags dépassent '+limit+' caractères.';if(when.value==='later'){if(list.some(a=>a.platform==='tiktok'))return 'La programmation concerne Facebook et Instagram. Retirez TikTok ou choisissez Maintenant.';if(!date.value||!Number.isFinite(new Date(date.value).getTime())||new Date(date.value)<=new Date())return 'Choisissez une date et une heure futures.';}return '';}
     function advance(){message.textContent='';if(step===0){if(!selected().length){message.textContent='Sélectionnez au moins un compte.';return;}whenField.hidden=selected().every(a=>a.platform==='tiktok');if(whenField.hidden){when.value='now';dateField.hidden=true;}captionNote.textContent=selected().some(a=>a.platform==='tiktok')?'Pour TikTok, copiez ce texte et collez-le lors de la publication sur votre téléphone. Il sera envoyé directement avec la publication Facebook / Instagram.':'Le texte et les hashtags seront envoyés avec votre publication.';preview();go(1);}else{const error=validate();if(error){message.textContent=error;return;}recap.replaceChildren();for(const a of selected())recap.append(make('p',names[a.platform]+' · '+a.display_name+' — '+(a.platform==='tiktok'?'brouillon à terminer sur téléphone':when.value==='later'?'publication le '+new Date(date.value).toLocaleString('fr-CA'):'publication immédiate')));recap.append(make('p',text()||'Sans texte de publication','ov-pub-note'));agree.checked=false;go(2);}}
-    function updateSendButton() {
+const sendHint = make(
+  "p",
+  "Cochez la case pour autoriser l’envoi.",
+  "ov-pub-note"
+);
+
+panels[2].append(sendHint);
+
+function updateSendButton() {
   send.disabled = sending || !agree.checked;
+  sendHint.hidden = agree.checked;
 }
 
 agree.addEventListener("change", updateSendButton);
