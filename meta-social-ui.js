@@ -311,6 +311,14 @@ window.addEventListener("beforeunload", warnBeforeLeaving);
 d.addEventListener("close", () => {
   window.removeEventListener("beforeunload", warnBeforeLeaving);
 }, { once: true });
+    function updateDraftStatus() {
+  draftStatus.textContent = hasUnsavedText()
+    ? "Modifications non enregistrées."
+    : "Aucune modification non enregistrée.";
+}
+
+caption.addEventListener("input", updateDraftStatus);
+tags.addEventListener("input", updateDraftStatus);
 const originalClose = d.close.bind(d);
 
 d.close = (...args) => {
