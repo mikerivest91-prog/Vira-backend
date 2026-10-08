@@ -107,7 +107,18 @@
   const names={facebook:'Facebook',instagram:'Instagram',tiktok:'TikTok'};
   const labels={queued:'En attente d’envoi',processing:'Traitement en cours',uploading:'Transfert vers TikTok',waiting:'Préparation par le réseau',published:'Publication confirmée',inbox:'Brouillon reçu par TikTok',failed:'Échec de l’envoi',uncertain:'Résultat à vérifier',cancelled:'Publication annulée'};
   window.olyvexSocialComposer=async campaign=>{
+  
     const d=make('dialog','','vr-lightbox ov-social-dialog ov-publish');d.setAttribute('aria-label','Publication sur vos réseaux');const form=make('form');const head=make('header');head.append(make('h2','Publier sur vos réseaux'),action('Fermer',()=>d.close()));form.append(head,make('p','Préparez votre contenu et suivez chaque destination, étape par étape.','ov-pub-note'));const message=make('p','Chargement des comptes…');message.setAttribute('role','status');form.append(message);d.append(form);document.body.append(d);let timer,sending=false;d.addEventListener('close',()=>{clearInterval(timer);d.remove();},{once:true});d.showModal();
+      const campaignName = make(
+  "p",
+  "Campagne : " + (campaign.title || "Sans titre"),
+  "ov-pub-note"
+);
+
+campaignName.style.cssText =
+  "font-weight:600;overflow-wrap:anywhere;margin:12px 0;";
+
+head.after(campaignName);
     const results=await Promise.allSettled([api('meta','accounts'),api('tiktok','accounts')]);if(!d.isConnected)return;
     const accounts=[];results.forEach((r,i)=>{if(r.status==='fulfilled')for(const a of r.value.accounts||[])accounts.push({...a,network:i?'tiktok':'meta',platform:i?'tiktok':a.platform});});
     const notices=results.map((r,i)=>r.status==='rejected'?(i?'TikTok':'Facebook et Instagram')+' : '+r.reason.message:'').filter(Boolean);
