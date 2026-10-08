@@ -323,6 +323,18 @@ copyText.onclick = async () => {
 
 copyText.style.margin = "8px 0 0 8px";
 restoreText.after(copyText);
+    const textActions = make("div");
+textActions.style.cssText =
+  "display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;";
+
+saveDraft.before(textActions);
+
+for (const button of [saveDraft, restoreText, copyText]) {
+  button.style.margin = "0";
+  button.style.maxWidth = "100%";
+  button.style.whiteSpace = "normal";
+  textActions.append(button);
+}
 let savedCaption = caption.value;
 let savedHashtags = tags.value;
 
