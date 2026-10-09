@@ -5,6 +5,7 @@ import { prepareClip, readClip, fitClips, clipPath } from "./clip-service.mjs";
 import "dotenv/config";
 import express from "express";
 import { createTestBilling } from "./stripe-billing.mjs";
+import { installImageGeneration } from "./image-generation.mjs";
 import { audioFile, wavDuration, prepareAudio, synthesizeAudio } from "./audio-service.mjs";
 import multer from "multer";
 import cors from "cors";
@@ -345,6 +346,8 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
+const imageGeneration = installImageGeneration({ app, pool, requireAuth,
+  requireCreation: (req, res, next) => billing.requireCreation(req, res, next) });
 const metaSocial = installMetaSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR,ffmpegPath});
 const tiktokSocial = installTikTokSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR});
 app.get("/tiktok-social-ui.js", (_req,res) => res.sendFile(path.resolve("tiktok-social-ui.js")));
@@ -1497,6 +1500,7 @@ async function start() {
 
     await initDatabase();
     await billing.init();
+    await imageGeneration.init();
     await metaSocial.init();
     await tiktokSocial.init();
 
@@ -1517,6 +1521,3 @@ async function start() {
 }
 
 start();
-
-
-
