@@ -2281,6 +2281,13 @@ let voiceReady = localStorage.getItem("viraVoiceReady") === "true";   let videoR
       els.downloadBtn.style.display = videoReady ? "flex" : "none";
 
 els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
+      const aiButton = document.getElementById("generate-ai-images");
+      if (aiButton) {
+        aiButton.hidden = !hasScenario;
+        aiButton.disabled = busy || !scenarioValidated || !aiImagesAvailable;
+        aiButton.style.display = hasScenario ? "flex" : "none";
+        aiButton.title = aiImagesAvailable ? "Quatre crédits images, rendus si la génération échoue." : "La génération IA est en cours d’activation. L’import reste disponible.";
+      }
       els.voiceBtn.disabled = busy || !(hasScenario && scenarioValidated && hasVisuals);
       els.videoBtn.disabled = busy || !(hasScenario && scenarioValidated && hasVisuals && voiceReady && preparedAudioId);
       document.querySelectorAll("#voiceOptions button,#voiceOptions input,#voiceOptions select,#voiceOptions textarea").forEach(control => { if (videoInProgress) control.disabled=true; });
@@ -2636,18 +2643,33 @@ localStorage.removeItem("viraGeneratedImages");
     }
 
     async function generateRealImages(scenes, visualPrompt, style) {
-      const images = [];
-      for (let i=0;i<4;i++) {
-        setProgress(15 + i*14, `Création du visuel ${i+1}/4`);
-        const prompt = `${visualPrompt || "Professional premium marketing visual"}. Scene ${i+1}: ${scenes[i]}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Maintain visual continuity with the other scenes. No text or typography in the image.`;
-        const response = await fetch("/api/images/generate", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,size:"1024x1536",quality:"low"})});
-        const data = await response.json();
-        if (!response.ok) throw new Error(data?.error || `Erreur visuel ${i+1}`);
-        const url = data?.url || data?.image?.url;
-        if (!url) throw new Error(`Aucune image reçue pour la scène ${i+1}.`);
-        images.push(url);
+      const prompts = scenes.map((scene,i) => `${visualPrompt || "Professional marketing photography"}. Scene ${i+1}: ${scene}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Consistent clothing, colors and lighting across scenes. No text or typography.`);
+      const cacheKey = "olyvexImageJob:" + (localStorage.getItem("viraCurrentCampaignId") || "draft");
+      const fingerprint = JSON.stringify(prompts);
+      let pending;
+      try { pending = JSON.parse(sessionStorage.getItem(cacheKey)); } catch {}
+      if (!pending || pending.fingerprint !== fingerprint) {
+        pending = { requestId: crypto.randomUUID(), fingerprint };
+        sessionStorage.setItem(cacheKey, JSON.stringify(pending));
       }
-      return images;
+      const response = await fetch("/api/images/generate", { method:"POST", credentials:"same-origin",
+        headers:{"Content-Type":"application/json"}, body:JSON.stringify({requestId:pending.requestId,prompts}) });
+      let job = await response.json();
+      if (!response.ok) throw new Error(job.error || "Impossible de démarrer les images IA.");
+      for (let attempt=0; attempt<180; attempt++) {
+        if (job.status === "failed") { sessionStorage.removeItem(cacheKey); throw new Error(job.error); }
+        if (job.status === "completed") {
+          if (!Array.isArray(job.images) || job.images.length !== 4) throw new Error("Lot d’images incomplet.");
+          return await Promise.all(job.images.map(rasterizePreview));
+        }
+        setProgress(10 + (job.completed || 0)*20, `Création IA : ${job.completed || 0}/4 images prêtes. Vous pouvez reprendre ici après une coupure.`);
+        await new Promise(resolve => setTimeout(resolve,4000));
+        const status = await fetch("/api/images/jobs/" + encodeURIComponent(pending.requestId), {credentials:"same-origin"});
+        if (status.status === 401 || status.status === 404) throw new Error("Reconnectez-vous et reprenez la génération.");
+        if (!status.ok) continue;
+        job = await status.json();
+      }
+      throw new Error("La génération continue. Cliquez de nouveau sur Images IA pour reprendre le suivi.");
     }
 
     async function waitForRunwayTask(taskId, sceneNumber) {
@@ -3359,115 +3381,53 @@ ${els.tone.value || "Professionnel"}
       finally {importingPhotos=false;visualsInProgress=false;refreshClipImports();updateWorkflowState();}
     });
 
-    els.visualBtn.addEventListener("click", async () => {
-      if (!scenarioValidated || !rawScenario) {
-        return setStatus(els.status,"Validez d’abord le scénario.","warning");
-      }
-
-      const d = parseScenario(rawScenario);
-      const scenes = d.scenes.filter(Boolean);
-      if (scenes.length !== 4) {
-        return setStatus(els.status,`OLYVEX a besoin de 4 scènes. Scènes détectées : ${scenes.length}.`,"warning");
-      }
-
-      if (visualsInProgress || videoInProgress) return;
-      if (FREE_VISUAL_MODE) {
-        draftPhotos = generatedImages.length===4 ? generatedImages.slice() : [];
-        draftClips = sourceClips.slice();
-        showMediaMode(sourceClips.length===4 ? "clips" : "photos");
-        importStatus.textContent = "Import gratuit : vos images remplacent les visuels de test.";
-        refreshPhotoImports();
-        importPanel.hidden=false;
-        importPanel.scrollIntoView({behavior:"smooth",block:"center"});
-        return;
-      }
-      visualsInProgress = true;
-      const revision = ++flowRevision;
-      invalidateAudio();
-      generatedImages = [];
-      localStorage.removeItem("viraGeneratedImages");
-      els.visualBtn.disabled = true;
-      els.result.innerHTML = "";
-      els.videoResult.innerHTML = "";
-      voiceReady = false;
-      videoReady = false;
-      clearFinalVideoUrl();
-      updateWorkflowState();
-      setProgress(0,"Préparation des visuels");
-
-      try {
-        if (FREE_VISUAL_MODE) {
-          const visualSteps = [
-            [25,"Préparation des scènes"],
-            [50,"Création des visuels"],
-            [75,"Harmonisation de la campagne"],
-            [100,"4 visuels prêts"]
-          ];
-          for (const [progress,label] of visualSteps) {
-            await new Promise(r=>setTimeout(r,260));
-            setProgress(progress,label);
-          }
-          if (revision !== flowRevision) return;
-          generatedImages = scenes.map(makeTestImage);
-          renderImages(generatedImages, scenes, true);
-          setStatus(els.status,"4 visuels Premium préparés en mode aperçu. Aucun crédit image utilisé.","success");
-        } else {
-          const quota = await fetch("/api/images/reserve", {
-            method: "POST",
-            credentials: "same-origin",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ quantity: scenes.length })
-          });
-          const quotaData = await quota.json().catch(() => ({}));
-          if (!quota.ok) throw new Error(quotaData?.error || "Limite mensuelle d’images atteinte.");
-          generatedImages = await generateRealImages(scenes,d.visualPrompt,d.style);
-          setProgress(100,"4 visuels prêts");
-          renderImages(generatedImages,scenes,false);
-          setStatus(els.status,"4 visuels générés avec succès.","success");
-          
-        }
-localStorage.setItem("viraGeneratedImages", JSON.stringify(generatedImages));
-window.olyvexRefreshUsage?.();
-        const currentCampaignId = localStorage.getItem("viraCurrentCampaignId");
-
-if (currentCampaignId) {
-  const visualsResponse = await fetch(`/api/campaigns/${currentCampaignId}`, {
-    method: "PUT",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      title: els.prompt?.value?.trim() || localStorage.getItem("viraIdea") || "Campagne Marketing",
-      status: "visuals_ready",
-      campaignData: { brief:els.prompt.value.trim(),
-        scenario: rawScenario,
-        audience: els.audience.value.trim(),
-        goal: els.goal.value.trim(),
-        tone: els.tone.value,
-        platform: els.platform.value,
-        marketingType: selectedMarketingType,
-        generatedImages: generatedImages
-      }
-    })
-  });
-  if (!visualsResponse.ok) {
-    setStatus(els.status, "Visuels prêts sur cet appareil, mais leur sauvegarde a échoué. La Bibliothèque conserve la dernière version enregistrée.", "warning");
-  }
-} else {
-  setStatus(els.status, "Visuels prêts sur cet appareil, mais aucune campagne sauvegardée n’est associée. Validez et sauvegardez la campagne pour les retrouver dans la Bibliothèque.", "warning");
-}
-      } catch (error) {
-        generatedImages = [];
-        console.error(error);
-        setStatus(els.status,escapeHtml(error.message || "Erreur de génération des visuels"),"error");
-      } finally {
-        visualsInProgress = false;
-        updateWorkflowState();
-        hideProgress(900);
-      }
+    const aiImagesBtn = document.createElement("button");
+    aiImagesBtn.id = "generate-ai-images";
+    aiImagesBtn.type = "button";
+    aiImagesBtn.className = els.visualBtn.className;
+    aiImagesBtn.textContent = "Générer 4 images IA · 4 crédits";
+    aiImagesBtn.hidden = true;
+    els.visualBtn.after(aiImagesBtn);
+    let aiImagesAvailable = false;
+    fetch("/api/images/config",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).then(config=>{
+      aiImagesAvailable = Boolean(config?.enabled); updateWorkflowState();
+    }).catch(()=>{});
+    els.visualBtn.addEventListener("click", () => {
+      if (!scenarioValidated || visualsInProgress || videoInProgress) return;
+      draftPhotos = generatedImages.length===4 ? generatedImages.slice() : [];
+      draftClips = sourceClips.slice();
+      showMediaMode(sourceClips.length===4 ? "clips" : "photos");
+      importStatus.textContent = "Importez vos quatre images ou clips. Aucun crédit image utilisé.";
+      refreshPhotoImports(); importPanel.hidden=false;
+      importPanel.scrollIntoView({behavior:"smooth",block:"center"});
     });
-els.videoBtn.addEventListener("click", async () => {
+    aiImagesBtn.addEventListener("click", async () => {
+      if (!aiImagesAvailable || !scenarioValidated || !rawScenario || visualsInProgress || videoInProgress) return;
+      const campaignId = localStorage.getItem("viraCurrentCampaignId");
+      if (!campaignId) return setStatus(els.status,"Sauvegardez d’abord votre campagne.","warning");
+      const scenario = parseScenario(rawScenario);
+      const scenes = scenario.scenes.filter(Boolean);
+      if (scenes.length !== 4) return setStatus(els.status,"Validez un scénario de quatre scènes.","warning");
+      visualsInProgress=true; updateWorkflowState(); setProgress(0,"Préparation des quatre images IA");
+      try {
+        const images = await generateRealImages(scenes,scenario.visualPrompt,scenario.style);
+        const saved = await fetch("/api/campaigns/"+encodeURIComponent(campaignId),{
+          method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({title:els.prompt.value.trim() || "Campagne Marketing",status:"visuals_ready",campaignData:{
+            brief:els.prompt.value.trim(),scenario:rawScenario,audience:els.audience.value.trim(),goal:els.goal.value.trim(),
+            tone:els.tone.value,platform:els.platform.value,marketingType:selectedMarketingType,generatedImages:images
+          }})
+        });
+        if (!saved.ok) throw new Error("Images générées, mais la sauvegarde a échoué. Cliquez de nouveau pour les récupérer sans nouvelle génération.");
+        ++flowRevision; invalidateAudio(); clearFinalVideoUrl(); voiceReady=false; videoReady=false;
+        generatedImages=images; sourceClips=[]; localStorage.removeItem("viraSourceClips");
+        localStorage.setItem("viraGeneratedImages",JSON.stringify(images));
+        sessionStorage.removeItem("olyvexImageJob:"+campaignId);
+        renderImages(images,scenes,false); setProgress(100,"Quatre images IA sauvegardées");
+        setStatus(els.status,"Vos quatre images IA sont sauvegardées. Préparez maintenant la voix.","success");
+      } catch(error) { setStatus(els.status,escapeHtml(error.message || "Génération indisponible."),"error"); }
+      finally { visualsInProgress=false; window.olyvexRefreshUsage?.(); updateWorkflowState(); hideProgress(900); }
+    });ls.videoBtn.addEventListener("click", async () => {
   if (videoInProgress) return;
   if (generatedImages.length !== 4 || !voiceReady || !preparedAudioId) {
     return setStatus(
