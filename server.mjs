@@ -6,6 +6,8 @@ import "dotenv/config";
 import express from "express";
 import { createTestBilling } from "./stripe-billing.mjs";
 import { installImageGeneration } from "./image-generation.mjs";
+import { installPasswordRecovery } from "./password-recovery.mjs";
+import { createRecoveryMailer } from "./recovery-mail.mjs";
 import { installAuthProtection } from "./auth-protection.mjs";
 import { audioFile, wavDuration, prepareAudio, synthesizeAudio } from "./audio-service.mjs";
 import multer from "multer";
@@ -348,6 +350,9 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const authProtection = installAuthProtection({ app, pool });
+const passwordRecovery = installPasswordRecovery({ app, pool, hashPassword, clearSessionCookie, sendMail: await createRecoveryMailer() });
+app.get("/reset-password", (_req,res) => {res.setHeader("Cache-Control","no-store");res.setHeader("Referrer-Policy","no-referrer");res.sendFile(path.resolve("reset-password.html"));});
+app.get("/forgot-password", (_req,res) => res.sendFile(path.resolve("forgot-password.html")));
 const imageGeneration = installImageGeneration({ app, pool, requireAuth,
   requireCreation: (req, res, next) => billing.requireCreation(req, res, next) });
 const metaSocial = installMetaSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR,ffmpegPath});
@@ -1503,6 +1508,7 @@ async function start() {
     await initDatabase();
     await billing.init();
     await authProtection.init();
+    await passwordRecovery.init();
     await imageGeneration.init();
     await metaSocial.init();
     await tiktokSocial.init();
