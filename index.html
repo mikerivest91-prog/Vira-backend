@@ -3427,7 +3427,8 @@ ${els.tone.value || "Professionnel"}
         setStatus(els.status,"Vos quatre images IA sont sauvegardées. Préparez maintenant la voix.","success");
       } catch(error) { setStatus(els.status,escapeHtml(error.message || "Génération indisponible."),"error"); }
       finally { visualsInProgress=false; window.olyvexRefreshUsage?.(); updateWorkflowState(); hideProgress(900); }
-    });ls.videoBtn.addEventListener("click", async () => {
+    });
+els.videoBtn.addEventListener("click", async () => {
   if (videoInProgress) return;
   if (generatedImages.length !== 4 || !voiceReady || !preparedAudioId) {
     return setStatus(
