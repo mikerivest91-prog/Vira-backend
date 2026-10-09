@@ -19,6 +19,7 @@
     "multer": "^2.3.0",
     "pg": "^8.16.3",
     "mespeak": "2.0.2",
-    "edge-tts.js": "^2.0.4"
+    "edge-tts.js": "^2.0.4",
+    "nodemailer": "10.0.16"
   }
 }
