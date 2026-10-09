@@ -6,6 +6,7 @@ import "dotenv/config";
 import express from "express";
 import { createTestBilling } from "./stripe-billing.mjs";
 import { installImageGeneration } from "./image-generation.mjs";
+import { installAuthProtection } from "./auth-protection.mjs";
 import { audioFile, wavDuration, prepareAudio, synthesizeAudio } from "./audio-service.mjs";
 import multer from "multer";
 import cors from "cors";
@@ -346,6 +347,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
+const authProtection = installAuthProtection({ app, pool });
 const imageGeneration = installImageGeneration({ app, pool, requireAuth,
   requireCreation: (req, res, next) => billing.requireCreation(req, res, next) });
 const metaSocial = installMetaSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR,ffmpegPath});
@@ -1500,6 +1502,7 @@ async function start() {
 
     await initDatabase();
     await billing.init();
+    await authProtection.init();
     await imageGeneration.init();
     await metaSocial.init();
     await tiktokSocial.init();
