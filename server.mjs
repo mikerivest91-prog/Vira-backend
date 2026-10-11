@@ -993,7 +993,7 @@ app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
         SET
           title = $1,
           status = $2,
-          campaign_data = $3::jsonb,
+          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand')),
           updated_at = NOW()
         WHERE id = $4
           AND user_id = $5
