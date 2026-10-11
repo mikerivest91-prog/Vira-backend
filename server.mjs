@@ -1,3 +1,4 @@
+import { installBrandProfile } from "./brand-profile.mjs";
 import { sounds, soundOptions, soundWav } from "./sound-library.mjs";
 import { installTikTokSocial } from "./tiktok-social.mjs";
 import { installMetaSocial } from "./meta-social.mjs";
@@ -348,6 +349,8 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 });
 
 
+const brandProfile = installBrandProfile({app,pool,requireAuth});
+app.get("/brand", requireAuth, (_req,res) => res.sendFile(path.resolve("brand.html")));
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const authProtection = installAuthProtection({ app, pool });
 const passwordRecovery = installPasswordRecovery({ app, pool, hashPassword, clearSessionCookie, sendMail: await createRecoveryMailer() });
@@ -877,6 +880,8 @@ app.post("/api/campaigns", requireAuth, async (req, res) => {
       typeof req.body.campaignData === "object"
         ? req.body.campaignData
         : {};
+
+    campaignData.brand = await brandProfile.read(req.user.id);
 
     const result = await pool.query(
       `
@@ -1508,6 +1513,7 @@ async function start() {
     await initDatabase();
     await billing.init();
     await authProtection.init();
+    await brandProfile.init();
     await passwordRecovery.init();
     await imageGeneration.init();
     await metaSocial.init();
