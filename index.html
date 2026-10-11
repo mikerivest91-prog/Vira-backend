@@ -5583,7 +5583,7 @@ body .app-shell .main #imageImportPanel .photo-editor-footer>button{max-width:10
   observe();
 })();
 </script>  
-<script>document.addEventListener('click',async event=>{const button=event.target.closest('.campaign-duplicate');if(!button||button.disabled)return;event.stopPropagation();const id=button.dataset.campaignId;if(!/^\d+$/.test(id||''))return;button.disabled=true;button.textContent='Duplication…';try{const response=await fetch('/api/campaigns/'+id+'/duplicate',{method:'POST',credentials:'same-origin'});const data=await response.json();if(!response.ok)throw Error(data.error||'Duplication impossible.');location.reload();}catch(error){button.disabled=false;button.textContent='Dupliquer';alert(error.message);}});</script></body>
+<script>document.addEventListener('click',async event=>{const button=event.target.closest('.campaign-duplicate');if(!button||button.disabled)return;event.stopPropagation();const id=button.dataset.campaignId;if(!/^\d+$/.test(id||''))return;button.disabled=true;button.textContent='Duplication…';try{const response=await fetch('/api/campaigns/'+id+'/duplicate',{method:'POST',credentials:'same-origin'});const data=await response.json();if(!response.ok)throw Error(data.error||'Duplication impossible.');location.reload();}catch(error){button.disabled=false;button.textContent='Dupliquer';alert(error.message);}},true);</script></body>
 </html>
 
 
