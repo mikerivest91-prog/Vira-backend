@@ -1,3 +1,4 @@
+import { copyCampaignData } from "./campaign-copy.mjs";
 import { installBrandProfile } from "./brand-profile.mjs";
 import { sounds, soundOptions, soundWav } from "./sound-library.mjs";
 import { installTikTokSocial } from "./tiktok-social.mjs";
@@ -862,6 +863,17 @@ app.get("/api/campaigns", requireAuth, async (req, res) => {
       error: "Impossible de charger les campagnes."
     });
   }
+});
+app.post("/api/campaigns/:id/duplicate", requireAuth, async (req,res) => {
+  const id=Number(req.params.id);
+  if(!Number.isSafeInteger(id)||id<=0)return res.status(400).json({error:"Campagne invalide."});
+  try {
+    const original=(await pool.query("SELECT title,campaign_data FROM vira_campaigns WHERE id=$1 AND user_id=$2",[id,req.user.id])).rows[0];
+    if(!original)return res.status(404).json({error:"Campagne introuvable."});
+    const title=(original.title+" — copie").slice(0,160);
+    const result=await pool.query("INSERT INTO vira_campaigns(user_id,title,status,campaign_data) VALUES($1,$2,'draft',$3::jsonb) RETURNING id,title,status,campaign_data,created_at,updated_at",[req.user.id,title,JSON.stringify(copyCampaignData(original.campaign_data||{}))]);
+    res.status(201).json({campaign:result.rows[0]});
+  }catch{res.status(503).json({error:"Duplication impossible. Réessayez."});}
 });
 app.post("/api/campaigns", requireAuth, async (req, res) => {
   try {
