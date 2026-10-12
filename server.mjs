@@ -1,3 +1,4 @@
+import {canRenderBrand} from "./video-brand.mjs";
 import { copyCampaignData } from "./campaign-copy.mjs";
 import { installBrandProfile } from "./brand-profile.mjs";
 import { sounds, soundOptions, soundWav } from "./sound-library.mjs";
@@ -351,6 +352,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 
 const brandProfile = installBrandProfile({app,pool,requireAuth});
+app.get("/api/brand/rendering",requireAuth,async (_req,res)=>res.json({available:await canRenderBrand(ffmpegPath)}));
 app.get("/brand", requireAuth, (_req,res) => res.sendFile(path.resolve("brand.html")));
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const authProtection = installAuthProtection({ app, pool });
@@ -1220,7 +1222,7 @@ app.get('/api/sounds/:id', requireAuth, (req,res)=>{
 // Uploaded clips and generated previews share the same final MP4 contract.
 async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId, soundtrack = {}) {
   if(ownerId===undefined || ownerId===null)throw new Error("Propriétaire manquant.");
-  const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress, soundtrack);
+  const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress, soundtrack, await brandProfile.read(ownerId));
   try {
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
     const destination = path.join(VIDEO_STORAGE_DIR, filename);
