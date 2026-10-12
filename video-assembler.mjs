@@ -1,3 +1,4 @@
+import {applyVideoBrand} from "./video-brand.mjs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, stat, rm, writeFile, rename } from "node:fs/promises";
@@ -11,7 +12,7 @@ const runFile = promisify(execFile);
 let assembling = false;
 
 // Server-owned local paths only. One decoder and encoder at a time.
-export async function assembleVideoClips(clipPaths, audioPath = null, transition = null, onProgress = () => {}, soundtrack = {}) {
+export async function assembleVideoClips(clipPaths, audioPath = null, transition = null, onProgress = () => {}, soundtrack = {}, brand = null) {
   const sound = soundOptions(soundtrack);
   if (!Array.isArray(clipPaths) || clipPaths.length !== 4) throw new Error("L’assemblage exige exactement 4 clips.");
   if (assembling) throw new Error("Une vidéo est en cours de préparation. Réessayez après sa fin.");
@@ -84,6 +85,7 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
       await run(['-i',outputPath,...inputs,'-filter_complex',filters.join(';'),'-map','0:v:0','-map','[audio]','-c:v','copy','-c:a','aac','-b:a','128k','-t',String(duration),'-movflags','+faststart',mixed]);
       await rename(mixed,outputPath);
     }
+    await applyVideoBrand({outputPath,directory,ffmpegPath,brand});
     if (!(await stat(outputPath)).size) throw new Error("Le fichier MP4 produit est vide.");
     onProgress(100);
     return { outputPath, cleanup };
