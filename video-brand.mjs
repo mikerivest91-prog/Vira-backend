@@ -1,12 +1,12 @@
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {writeFile,rename,copyFile,access} from 'node:fs/promises';
+import {writeFile,rename,copyFile,access,readFile} from 'node:fs/promises';
 import path from 'node:path';
 const exec=promisify(execFile);
 let capability;
 export async function canRenderBrand(ffmpegPath){
   if(capability)return capability;
-  capability=(async()=>{try{await access(process.platform==='win32'?'C:/Windows/Fonts/arial.ttf':'/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');const r=await exec(ffmpegPath,['-hide_banner','-filters'],{timeout:10000,maxBuffer:1024*1024,windowsHide:true});return /\bdrawtext\b/.test(r.stdout);}catch{return false;}})();return capability;
+  capability=(async()=>{try{await access(new URL('./brand-font.base64',import.meta.url));const r=await exec(ffmpegPath,['-hide_banner','-filters'],{timeout:10000,maxBuffer:1024*1024,windowsHide:true});return /\bdrawtext\b/.test(r.stdout);}catch{return false;}})();return capability;
 }
 export function wrapBrandText(value,width=34,maxLines=3){
   const words=String(value||'').replace(/[\u0000-\u001f]/g,' ').split(/\s+/).filter(Boolean);const lines=[];let line='';
@@ -26,7 +26,7 @@ export async function applyVideoBrand({outputPath,directory,ffmpegPath,brand}){
   const inputs=['-i',outputPath],filters=[];let current='0:v';
   if(logo){const filename='brand-logo.'+(logo[1]==='jpeg'?'jpg':logo[1]);await writeFile(path.join(directory,filename),Buffer.from(logo[2],'base64'));inputs.push('-i',path.join(directory,filename));filters.push('[1:v]scale=140:140:force_original_aspect_ratio=decrease[logo]','[0:v][logo]overlay=x=W-w-28:y=28:eof_action=repeat[marked]');current='marked';}
   if(endCard){
-    await copyFile(process.platform==='win32'?'C:/Windows/Fonts/arial.ttf':'/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',path.join(directory,'brand-font.ttf'));
+    await writeFile(path.join(directory,'brand-font.ttf'),Buffer.from((await readFile(new URL('./brand-font.base64',import.meta.url),'utf8')).trim(),'base64'));
     const color=field=>/^#[0-9a-f]{6}$/i.test(brand[field]||'')?brand[field].slice(1):'263249';
     await writeFile(path.join(directory,'brand-name.txt'),wrapBrandText(brand.name,24,3));
     await writeFile(path.join(directory,'brand-contact.txt'),[brand.tagline,brand.website,brand.email,brand.phone,brand.address].filter(Boolean).map(v=>wrapBrandText(v,36,2)).slice(0,4).join('\n\n'));
