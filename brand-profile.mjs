@@ -9,6 +9,8 @@ export function validateBrand(value) {
   if (brand.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(brand.email)) throw Error('Courriel invalide.');
   if (brand.website) { const url = new URL(brand.website); if (!['https:','http:'].includes(url.protocol) || url.username || url.password) throw Error('Adresse web invalide.'); }
   for (const field of ['primaryColor','secondaryColor']) { brand[field] = value[field] || (field==='primaryColor'?'#7444d5':'#263249'); if (!/^#[a-f0-9]{6}$/i.test(brand[field])) throw Error('Couleur invalide.'); }
+  brand.videoBrandingEnabled = value.videoBrandingEnabled === true;
+  brand.videoEndCardEnabled = value.videoEndCardEnabled !== false;
   brand.logo = value.logo || '';
   if (typeof brand.logo !== 'string' || brand.logo.length > 500000 || (brand.logo && !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(brand.logo))) throw Error('Logo invalide. Importez une image PNG, JPEG ou WebP.');
   return brand;
