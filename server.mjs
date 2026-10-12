@@ -353,6 +353,9 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 const brandProfile = installBrandProfile({app,pool,requireAuth});
 app.get("/api/brand/rendering",requireAuth,async (_req,res)=>res.json({available:await canRenderBrand(ffmpegPath)}));
+app.get("/offers",requireAuth,(_req,res)=>res.sendFile(path.resolve("offers.html")));
+app.get("/offer-math.mjs",requireAuth,(_req,res)=>res.sendFile(path.resolve("offer-math.mjs")));
+app.get("/offers-ui.mjs",requireAuth,(_req,res)=>res.sendFile(path.resolve("offers-ui.mjs")));
 app.get("/brand", requireAuth, (_req,res) => res.sendFile(path.resolve("brand.html")));
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const authProtection = installAuthProtection({ app, pool });
