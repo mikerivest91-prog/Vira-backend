@@ -1172,7 +1172,7 @@ app.get("/api/audio/:id", requireAuth, async (req,res) => {
     const filename=audioFile(AUDIO_TEMP_DIR,req.user.id,req.params.id);
     await fs.promises.access(filename);
     res.setHeader("Cache-Control","private, no-store");
-    return res.sendFile(filename);
+    return res.sendFile(filename, {dotfiles:'allow'});
   } catch {return res.status(404).json({ok:false,error:"Audio introuvable. Préparez à nouveau la narration."});}
 });
 
@@ -1288,7 +1288,7 @@ app.get("/api/video/clips/:id", requireAuth, async (req,res)=>{
     const file=clipPath(CLIP_TEMP_DIR,req.user.id,req.params.id);
     await fs.promises.access(file);
     res.setHeader("Cache-Control","private, no-store");
-    return res.sendFile(file);
+    return res.sendFile(file, {dotfiles:'allow'});
   } catch { return res.status(404).json({ok:false,error:"Clip indisponible. Importez-le de nouveau."}); }
 });
 app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
