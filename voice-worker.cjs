@@ -59,12 +59,19 @@ process.stdin.on("end", async () => {
 
 const voice = voices[gender] || voices.female;
 
-    const communicate = new Communicate(text.trim(), voice);
-
-    await communicate.save(process.argv[2]);
+    const { default: WebSocket } = await import('ws');
+    const { createVoiceTransport, saveVoice } = require('./voice-transport.cjs');
+    const report = event => process.stderr.write(JSON.stringify(event) + '\n');
+    const communicate = new Communicate(text.trim(), voice, {connect:createVoiceTransport(WebSocket, report)});
+    await saveVoice(communicate, process.argv[2], report);
+    // The file is closed; lingering provider handles must not block the parent.
+    process.stderr.write('', () => process.exit(0));
 
   } catch (error) {
-    console.error(error?.message || error);
-    process.exitCode = 1;
+    const status = Number(error?.status);
+    const code = status === 403 ? 'VOICE_PROVIDER_DENIED' : status === 429 ? 'VOICE_PROVIDER_BUSY' :
+      error?.code === 'VOICE_INVALID_AUDIO' ? 'VOICE_INVALID_AUDIO' :
+      error?.code === 'VOICE_NO_AUDIO' || error?.name === 'NoAudioReceived' ? 'VOICE_NO_AUDIO' : 'VOICE_UNAVAILABLE';
+    process.stderr.write(JSON.stringify({code, ...(Number.isInteger(status) && status >= 100 && status <= 599 ? {providerStatus:status} : {})}) + '\n', () => process.exit(1));
   }
 });

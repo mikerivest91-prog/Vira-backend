@@ -7,6 +7,18 @@ import { fileURLToPath } from 'node:url';
 import ffmpegPath from 'ffmpeg-static';
 const runFile = promisify(execFile);
 const workerPath = fileURLToPath(new URL('./voice-worker.cjs', import.meta.url));
+const voiceMessages = {
+  VOICE_TIMEOUT: 'Le service vocal n’a pas répondu à temps. Réessayez plus tard ou importez votre narration.',
+  VOICE_PROVIDER_DENIED: 'Le fournisseur vocal refuse la connexion. Importez votre narration en attendant le rétablissement du service.',
+  VOICE_PROVIDER_BUSY: 'Le fournisseur vocal est temporairement saturé. Réessayez plus tard ou importez votre narration.',
+  VOICE_NO_AUDIO: 'Le fournisseur vocal n’a renvoyé aucun audio. Réessayez plus tard ou importez votre narration.',
+  VOICE_INVALID_AUDIO: 'Le fournisseur vocal a renvoyé un audio invalide. Importez votre narration.',
+  VOICE_UNAVAILABLE: 'La voix automatique est indisponible. Réessayez plus tard ou importez votre narration.'
+};
+export function voiceFailure(code, diagnostics = {}) {
+  const safeCode = Object.hasOwn(voiceMessages, code) ? code : 'VOICE_UNAVAILABLE';
+  return Object.assign(new Error(voiceMessages[safeCode]), {code:safeCode, ...diagnostics});
+}
 export function audioFile(directory, userId, id) {
   if (!/^\d+$/.test(String(userId)) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(String(id))) throw Error('Audio invalide.');
   return path.join(directory, `audio-${userId}-${id}.wav`);
@@ -33,10 +45,24 @@ export async function synthesizeAudio(text, gender, directory, userId) {
   try {
     await new Promise((resolve,reject)=>{
       const child=spawn(process.execPath,[workerPath,input],{windowsHide:true,stdio:['pipe','ignore','pipe']});
-      let detail='';const timer=setTimeout(()=>{child.kill();reject(Error('La génération vocale a dépassé le délai.'));},30000);
-      child.stderr.on('data',b=>{detail=(detail+b.toString()).slice(-1000);});
-      child.on('error',error=>{clearTimeout(timer);reject(error);});
-      child.on('close',code=>{clearTimeout(timer);code===0?resolve():reject(Error('Synthèse vocale indisponible. '+detail));});
+      let pending='', failureCode='VOICE_UNAVAILABLE';
+      const diagnostics={stage:'starting'};
+      const timer=setTimeout(()=>{child.kill('SIGKILL');reject(voiceFailure('VOICE_TIMEOUT',diagnostics));},30000);
+      child.stderr.on('data',buffer=>{
+        pending=(pending+buffer.toString()).slice(-8192);
+        let newline;
+        while((newline=pending.indexOf('\n'))!==-1){
+          const line=pending.slice(0,newline);pending=pending.slice(newline+1);
+          try {
+            const event=JSON.parse(line);
+            if(['connecting','receiving','audio_received','complete'].includes(event.stage))diagnostics.stage=event.stage;
+            if(Object.hasOwn(voiceMessages,event.code))failureCode=event.code;
+            if(Number.isInteger(event.providerStatus)&&event.providerStatus>=100&&event.providerStatus<=599)diagnostics.providerStatus=event.providerStatus;
+          } catch {}
+        }
+      });
+      child.on('error',()=>{clearTimeout(timer);reject(voiceFailure('VOICE_UNAVAILABLE',diagnostics));});
+      child.on('close',code=>{clearTimeout(timer);code===0?resolve():reject(voiceFailure(failureCode,diagnostics));});
       child.stdin.on('error',()=>{});child.stdin.end(JSON.stringify({text,gender}));
     });
     return await prepareAudio(input,directory,userId);
