@@ -1,12 +1,26 @@
-import { spawn, execFile } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { fileURLToPath } from 'node:url';
+import { requestSpeech } from './openai-voice.mjs';
 import ffmpegPath from 'ffmpeg-static';
 const runFile = promisify(execFile);
-const workerPath = fileURLToPath(new URL('./voice-worker.cjs', import.meta.url));
+
+const voiceMessages = {
+  VOICE_NOT_CONFIGURED: 'La voix automatique n’est pas configurée sur le serveur. Importez votre narration.',
+  VOICE_INVALID_INPUT: 'Ajoutez une narration de 800 caractères maximum et choisissez une voix.',
+  VOICE_TIMEOUT: 'Le service vocal n’a pas répondu à temps. Réessayez plus tard ou importez votre narration.',
+  VOICE_PROVIDER_DENIED: 'Le fournisseur vocal refuse la connexion. Importez votre narration en attendant le rétablissement du service.',
+  VOICE_PROVIDER_BUSY: 'Le fournisseur vocal est temporairement saturé. Réessayez plus tard ou importez votre narration.',
+  VOICE_NO_AUDIO: 'Le fournisseur vocal n’a renvoyé aucun audio. Réessayez plus tard ou importez votre narration.',
+  VOICE_INVALID_AUDIO: 'Le fournisseur vocal a renvoyé un audio invalide. Importez votre narration.',
+  VOICE_UNAVAILABLE: 'La voix automatique est indisponible. Réessayez plus tard ou importez votre narration.'
+};
+export function voiceFailure(code, diagnostics = {}) {
+  const safeCode = Object.hasOwn(voiceMessages, code) ? code : 'VOICE_UNAVAILABLE';
+  return Object.assign(new Error(voiceMessages[safeCode]), {code:safeCode, ...diagnostics});
+}
 export function audioFile(directory, userId, id) {
   if (!/^\d+$/.test(String(userId)) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(String(id))) throw Error('Audio invalide.');
   return path.join(directory, `audio-${userId}-${id}.wav`);
@@ -31,14 +45,10 @@ export async function prepareAudio(input, directory, userId) {
 export async function synthesizeAudio(text, gender, directory, userId) {
   const input=path.join(directory,`synthesis-${crypto.randomUUID()}.wav`);
   try {
-    await new Promise((resolve,reject)=>{
-      const child=spawn(process.execPath,[workerPath,input],{windowsHide:true,stdio:['pipe','ignore','pipe']});
-      let detail='';const timer=setTimeout(()=>{child.kill();reject(Error('La génération vocale a dépassé le délai.'));},30000);
-      child.stderr.on('data',b=>{detail=(detail+b.toString()).slice(-1000);});
-      child.on('error',error=>{clearTimeout(timer);reject(error);});
-      child.on('close',code=>{clearTimeout(timer);code===0?resolve():reject(Error('Synthèse vocale indisponible. '+detail));});
-      child.stdin.on('error',()=>{});child.stdin.end(JSON.stringify({text,gender}));
-    });
+    try {
+      const audio=await requestSpeech(text,gender);
+      await fs.writeFile(input,audio,{flag:'wx'});
+    } catch(error) { throw voiceFailure(error.code,{stage:'synthesis',providerStatus:error.providerStatus}); }
     return await prepareAudio(input,directory,userId);
   } finally {await fs.unlink(input).catch(()=>{});}
 }

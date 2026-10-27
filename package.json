@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "node server.mjs"
+    "dev": "node server.mjs",
+    "test:voice": "node --test openai-voice.test.mjs"
   },
   "dependencies": {
     "stripe": "22.6.2",
@@ -19,7 +20,6 @@
     "multer": "^2.3.0",
     "pg": "^8.16.3",
     "mespeak": "2.0.2",
-    "edge-tts.js": "^2.0.4",
     "nodemailer": "10.0.16",
     "sharp": "0.35.5"
   }

@@ -1147,8 +1147,14 @@ app.post("/api/audio/generate", requireAuth, async (req, res) => {
   return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
     }
   return withAudioJob(req,res,async () => {
-    try {return res.json({ok:true,mode:"free",...await synthesizeAudio(text,gender,AUDIO_TEMP_DIR,req.user.id)});}
-    catch(error){console.error("VOICE ERROR:",error);return res.status(422).json({ok:false,error:"Impossible de préparer la voix. Essayez un texte plus court (60 secondes maximum)."});}
+    try {return res.json({ok:true,mode:"openai",...await synthesizeAudio(text,gender,AUDIO_TEMP_DIR,req.user.id)});}
+    catch(error){
+      const voiceError=typeof error?.code==='string'&&error.code.startsWith('VOICE_');
+      console.error('VOICE ERROR:',{code:voiceError?error.code:'AUDIO_PREPARATION_FAILED',stage:error?.stage||null,providerStatus:error?.providerStatus||null});
+      return res.status(voiceError?(error.code==='VOICE_TIMEOUT'?504:503):422).json({ok:false,
+        error:voiceError?error.message:'Impossible de préparer l’audio. Vérifiez que la narration ne dépasse pas 60 secondes.',
+        code:voiceError?error.code:'AUDIO_PREPARATION_FAILED'});
+    }
   });
 });
 app.post("/api/audio/upload", requireAuth, uploadAudio.single("audio"), async (req,res) => {
