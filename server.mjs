@@ -43,7 +43,8 @@ const uploadVideoClips = multer({
 if (!fs.existsSync(VIDEO_TEMP_DIR)) {
   fs.mkdirSync(VIDEO_TEMP_DIR, { recursive: true });
 }
-const AUDIO_TEMP_DIR = path.join(process.cwd(), "tmp", "audio");
+// Keep campaign source media across deploys when VIDEO_STORAGE_DIR is persistent.
+const AUDIO_TEMP_DIR = path.join(VIDEO_STORAGE_DIR, ".audio");
 fs.mkdirSync(AUDIO_TEMP_DIR, { recursive: true });
 const uploadAudio = multer({ dest: AUDIO_TEMP_DIR, limits: { fileSize: 15 * 1024 * 1024, files: 1 } });
 const audioJobs = new Set();
@@ -54,7 +55,7 @@ async function withAudioJob(req, res, work) {
   try { return await work(); } finally { audioJobs.delete(key); }
 }
 
-const CLIP_TEMP_DIR = path.join(process.cwd(), "tmp", "clips");
+const CLIP_TEMP_DIR = path.join(VIDEO_STORAGE_DIR, ".clips");
 fs.mkdirSync(CLIP_TEMP_DIR, { recursive: true });
 const uploadClip = multer({ dest: CLIP_TEMP_DIR, limits:{ fileSize:30*1024*1024, files:1, fields:2 } });
 const clipJobs = new Set();
