@@ -2978,55 +2978,21 @@ ${els.tone.value || "Professionnel"}
     voicePanel.id = "voiceOptions";
     voicePanel.hidden = true;
     voicePanel.innerHTML = `<strong>Votre narration</strong>
-      <p>Voix automatique gratuite ou votre propre voix · 60 secondes maximum.</p>
+      <p>Voix générée par IA ou votre propre voix · 60 secondes maximum.</p>
       <div class="field-group"><label for="voiceMode">Source de la voix</label><select id="voiceMode"><option value="auto">Voix automatique</option><option value="personal">Ma voix · enregistrer ou importer</option></select></div>
 <div id="autoVoiceFields">
   <div class="field-group">
     <label for="voiceGender">Choix de la voix</label>
   <select id="voiceGender">
-  <optgroup label="Français — Canada">
-    <option value="female">Sylvie — Femme</option>
-    <option value="male">Antoine — Homme</option>
-    <option value="male_ca_jean">Jean — Homme</option>
-    <option value="male_ca_thierry">Thierry — Homme</option>
-  </optgroup>
-
-  <optgroup label="Français — France">
-    <option value="female_fr">Denise — Femme</option>
-    <option value="female_fr_brigitte">Brigitte — Femme</option>
-    <option value="female_fr_celeste">Céleste — Femme</option>
-    <option value="female_fr_corali">Coralie — Femme</option>
-    <option value="female_fr_jacqueline">Jacqueline — Femme</option>
-    <option value="male_fr">Henri — Homme</option>
-    <option value="male_fr_alain">Alain — Homme</option>
-    <option value="male_fr_claude">Claude — Homme</option>
-    <option value="male_fr_jerome">Jérôme — Homme</option>
-  </optgroup>
-
-  <optgroup label="English — Canada">
-    <option value="female_en_ca">Clara — Female</option>
-    <option value="male_en_ca">Liam — Male</option>
-  </optgroup>
-
-  <optgroup label="English — United States">
-    <option value="female_en_us_ava">Ava — Female</option>
-    <option value="female_en_us_jenny">Jenny — Female</option>
-    <option value="female_en_us_aria">Aria — Female</option>
-    <option value="male_en_us_andrew">Andrew — Male</option>
-    <option value="male_en_us_guy">Guy — Male</option>
-    <option value="male_en_us_davis">Davis — Male</option>
-  </optgroup>
-
-  <optgroup label="English — United Kingdom">
-    <option value="female_en_gb_sonia">Sonia — Female</option>
-    <option value="female_en_gb_libby">Libby — Female</option>
-    <option value="male_en_gb_ryan">Ryan — Male</option>
-    <option value="male_en_gb_thomas">Thomas — Male</option>
-  </optgroup>
+<optgroup label="Français — Québec"><option value="female">Coral · voix féminine</option><option value="male">Cedar · voix masculine</option></optgroup>
+<optgroup label="Français — France"><option value="female_fr">Marin · voix féminine</option><option value="male_fr">Onyx · voix masculine</option></optgroup>
+<optgroup label="English — Canada"><option value="female_en_ca">Coral · female voice</option><option value="male_en_ca">Cedar · male voice</option></optgroup>
+<optgroup label="English — United States"><option value="female_en_us_ava">Marin · female voice</option><option value="male_en_us_andrew">Onyx · male voice</option></optgroup>
+<optgroup label="English — United Kingdom"><option value="female_en_gb_sonia">Coral · female voice</option><option value="male_en_gb_ryan">Cedar · male voice</option></optgroup>
 </select>
   </div>
       <div class="field-group"><label for="voiceNarration">Texte à lire</label><textarea id="voiceNarration" maxlength="800"></textarea></div>
-      <p>Voix de synthèse basique en français, sans crédits.</p><button class="action-card" id="prepareVoice" type="button">Créer la voix</button></div>
+      <p>Voix générée par IA avec OpenAI. Écoutez et vérifiez la narration avant de créer votre vidéo.</p><button class="action-card" id="prepareVoice" type="button">Créer la voix</button></div>
       <div id="personalVoiceFields" hidden><div class="field-group"><label for="voiceFile">Importer un audio · MP3, WAV, M4A ou WebM · 15 Mo maximum</label><input id="voiceFile" type="file" accept="audio/*"></div><button class="action-card" id="recordVoice" type="button">Enregistrer ma voix</button><button class="action-card" id="stopVoice" type="button" hidden>Terminer l’enregistrement</button><p id="recordState" role="status"></p></div>
       <audio id="voicePreview" controls preload="metadata" hidden style="width:100%;margin-top:14px"></audio><p id="voiceFeedback" role="status" aria-live="polite"></p>`;
     els.voiceBtn.closest(".video-next-step").appendChild(voicePanel);
@@ -3126,7 +3092,7 @@ ${els.tone.value || "Professionnel"}
         voiceElement("voicePreview").hidden = false;
         voiceElement("voiceFeedback").textContent = `Audio prêt · ${Math.ceil(data.duration)} secondes. Écoutez-le, puis cliquez sur Vidéo finale.`;
         els.voiceBtn.querySelector("strong").textContent = "Voix prête";
-        setStatus(els.status,"Narration prête à être intégrée au MP4. Aucun crédit utilisé.","success");
+        setStatus(els.status,"Narration prête à être intégrée au MP4.","success");
       } catch (error) { voiceElement("voiceFeedback").textContent = error.message; }
       finally { audioBusy = false; voicePanel.querySelectorAll("button,input,select,textarea").forEach(el => el.disabled = false); updateWorkflowState(); }
     }
@@ -3160,7 +3126,7 @@ ${els.tone.value || "Professionnel"}
       const form = new FormData(); form.append("audio",file,file.name||"narration.webm");
       return prepareVoiceRequest("/api/audio/upload",form);
     }
-    voiceElement("voiceFile").addEventListener("change",event=>uploadNarration(event.target.files[0]));
+    voiceElement("voiceFile").addEventListener("change",event=>{const file=event.target.files[0];event.target.value="";if(file)uploadNarration(file);});
     function stopRecording(discard=false) {
       if (recorder && recorder.state !== "inactive") { recorder.discard=discard;recorder.stop(); }
       recordStream?.getTracks().forEach(track=>track.stop());
