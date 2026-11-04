@@ -1,3 +1,5 @@
+import "./export-model.js";
+import {applyVideoCaptions} from "./video-captions.mjs";
 import {applyVideoBrand} from "./video-brand.mjs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -12,7 +14,9 @@ const runFile = promisify(execFile);
 let assembling = false;
 
 // Server-owned local paths only. One decoder and encoder at a time.
-export async function assembleVideoClips(clipPaths, audioPath = null, transition = null, onProgress = () => {}, soundtrack = {}, brand = null) {
+export async function assembleVideoClips(clipPaths, audioPath = null, transition = null, onProgress = () => {}, soundtrack = {}, brand = null, exportSettings = {}) {
+  const settings=globalThis.olyvexExportModel.normalize(exportSettings);
+  const {width,height}=globalThis.olyvexExportModel.formats[settings.format];
   const sound = soundOptions(soundtrack);
   if (!Array.isArray(clipPaths) || clipPaths.length !== 4) throw new Error("L’assemblage exige exactement 4 clips.");
   if (assembling) throw new Error("Une vidéo est en cours de préparation. Réessayez après sa fin.");
@@ -45,7 +49,7 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
         "-threads", "1", "-protocol_whitelist", "file,pipe", ...(narrationDuration ? ["-stream_loop", "-1"] : []), "-i", clipPaths[i],
         "-map", "0:v:0", "-an", "-sn", "-dn",
         ...(duration ? ["-t", String(duration)] : []),
-        "-vf", "scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=30,format=yuv420p",
+        "-vf", `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=30,format=yuv420p`,
         "-filter_threads", "1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
         "-threads", "1", "-video_track_timescale", "15360", path.join(directory, `scene-${i}.mp4`)
       ]);
@@ -85,7 +89,8 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
       await run(['-i',outputPath,...inputs,'-filter_complex',filters.join(';'),'-map','0:v:0','-map','[audio]','-c:v','copy','-c:a','aac','-b:a','128k','-t',String(duration),'-movflags','+faststart',mixed]);
       await rename(mixed,outputPath);
     }
-    await applyVideoBrand({outputPath,directory,ffmpegPath,brand});
+    await applyVideoBrand({outputPath,directory,ffmpegPath,brand,width,height});
+    if(settings.captionsEnabled){if(!narrationDuration)throw Error("Préparez une voix pour les sous-titres.");await applyVideoCaptions({outputPath,directory,ffmpegPath,settings,duration:narrationDuration});}
     if (!(await stat(outputPath)).size) throw new Error("Le fichier MP4 produit est vide.");
     onProgress(100);
     return { outputPath, cleanup };

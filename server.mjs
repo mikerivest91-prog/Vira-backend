@@ -1,3 +1,4 @@
+import {installExportRoutes, validatedExport} from "./export-routes.mjs";
 import {canRenderBrand} from "./video-brand.mjs";
 import {installCampaignNarration} from "./campaign-narration.mjs";
 import {installCampaignScript} from "./campaign-script.mjs";
@@ -361,7 +362,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 const brandProfile = installBrandProfile({app,pool,requireAuth});
 installCampaignNarration({app,pool,requireAuth,audioDirectory:AUDIO_TEMP_DIR});
 installCampaignScript({app,pool,requireAuth});
-for(const file of ['script-model.js','script-editor-ui.js','script-editor.css'])app.get('/'+file,(_req,res)=>res.sendFile(path.resolve(file)));
+for(const file of ['script-model.js','script-editor-ui.js','script-editor.css','export-model.js','export-ui.js','export-ui.css'])app.get('/'+file,(_req,res)=>res.sendFile(path.resolve(file)));
 app.get('/olyvex-logo-9208494f098d.png',(_req,res)=>{res.setHeader('Cache-Control','public, max-age=31536000, immutable');res.sendFile(path.resolve('olyvex-logo-9208494f098d.png'));});
 app.get("/api/brand/rendering",requireAuth,async (_req,res)=>res.json({available:await canRenderBrand(ffmpegPath)}));
 app.get("/offers",requireAuth,(_req,res)=>res.sendFile(path.resolve("offers.html")));
@@ -386,7 +387,7 @@ app.get("/meta-social-ui.js", (_req,res) => res.sendFile(path.resolve("meta-soci
 app.get("/meta-social.css", (_req,res) => res.sendFile(path.resolve("meta-social.css")));
 // Apply before upload and generation handlers; existing files remain readable.
 const subscriptionCreationPaths = new Set([
-  "/api/audio/test", "/api/audio/generate", "/api/audio/upload",
+  "/api/audio/test", "/api/audio/generate", "/api/audio/upload", "/api/audio/captions",
   "/api/video/generate", "/api/video/assemble", "/api/video/import-clip",
   "/api/video/assemble-clips", "/api/video/free-assemble",
   "/api/images/reserve", "/api/brain/analyze"
@@ -398,6 +399,7 @@ app.use((req, res, next) => {
 });
 const resourceProtection=createResourceProtection({pool,storage:VIDEO_STORAGE_DIR,temporaryStorage:VIDEO_TEMP_DIR});
 app.use(resourceProtection.media);
+installExportRoutes({app,pool,requireAuth,resourceProtection,audioDirectory:AUDIO_TEMP_DIR});
 installClientAnimations({app,pool,requireAuth,commerce,resourceProtection,storage:VIDEO_STORAGE_DIR,decodeImage:decodePreviewImage});
 
 async function initDatabase() {
@@ -1029,7 +1031,7 @@ app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
         SET
           title = $1,
           status = $2,
-          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand'), 'previousExport', campaign_data->'previousExport',
+          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand'), 'previousExport', campaign_data->'previousExport', 'exportSettings', campaign_data->'exportSettings',
             'narration', CASE WHEN campaign_data->>'scenario' IS NOT DISTINCT FROM $3::jsonb->>'scenario' THEN campaign_data->'narration' ELSE 'null'::jsonb END),
           updated_at = NOW()
         WHERE id = $4
@@ -1256,9 +1258,9 @@ app.get('/api/sounds/:id', requireAuth, (req,res)=>{
   res.type('audio/wav').send(soundWav(sound.id,sound.kind==='music'?8:1));
 });
 // Uploaded clips and generated previews share the same final MP4 contract.
-async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId, soundtrack = {}, acceptMedia = async()=>{}) {
+async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId, soundtrack = {}, acceptMedia = async()=>{}, exportSettings = {}) {
   if(ownerId===undefined || ownerId===null)throw new Error("Propriétaire manquant.");
-  const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress, soundtrack, await brandProfile.read(ownerId));
+  const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress, soundtrack, await brandProfile.read(ownerId), exportSettings);
   try {
     await acceptMedia([result.outputPath]);
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
@@ -1289,11 +1291,12 @@ app.post(
       if (files.length !== 4) {
         return res.status(400).json({ ok: false, error: "VIRA exige exactement 4 clips vidéo." });
       }
+      const settings=await validatedExport(req.body?.exportSettings,null,AUDIO_TEMP_DIR,req.user.id);
       const usage=await reserveVideoSlot(req.user);
       if(!usage.ok)return res.status(429).json({ok:false,error:'Votre limite mensuelle de vidéos est atteinte.'});
       let videoUrl;
       try{
-        videoUrl=await publishVideo(files.map(file=>path.resolve(file.path)),"vira-final",null,null,()=>{},req.user.id,{},res.locals.acceptMedia);
+        videoUrl=await publishVideo(files.map(file=>path.resolve(file.path)),"vira-final",null,null,()=>{},req.user.id,{},res.locals.acceptMedia,settings);
         await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
       }catch(error){await pool.query('DELETE FROM vira_video_usage WHERE id=$1',[usage.id]).catch(()=>{});throw error;}
       return res.json({ ok: true, videoUrl });
@@ -1330,8 +1333,9 @@ app.post("/api/video/assemble-clips", requireAuth, resourceProtection.run(async 
   const ids=req.body?.clipIds;
   if (!Array.isArray(ids) || ids.length !== 4 || !req.body?.audioId) return res.status(400).json({ok:false,error:"Préparez quatre clips et une narration."});
   return withClipJob(req,res,async()=>{
-    let clips, audioPath, duration;
+    let clips, audioPath, duration, settings;
     try {
+      settings=await validatedExport(req.body?.exportSettings,req.body.audioId,AUDIO_TEMP_DIR,req.user.id);
       clips=await Promise.all(ids.map(id=>readClip(CLIP_TEMP_DIR,req.user.id,id)));
       audioPath=audioFile(AUDIO_TEMP_DIR,req.user.id,req.body.audioId);
       duration=await wavDuration(audioPath);
@@ -1341,7 +1345,7 @@ app.post("/api/video/assemble-clips", requireAuth, resourceProtection.run(async 
     let fitted;
     try {
       fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
-      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id, req.body.soundtrack,res.locals.acceptMedia);
+      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id, req.body.soundtrack,res.locals.acceptMedia,settings);
       await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
       return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:usage.limit,ownerTesting:usage.ownerTesting}});
     } catch(error) {
@@ -1366,7 +1370,8 @@ function decodePreviewImage(source, index) {
   return { buffer, extension: match[1] === "jpeg" ? "jpg" : "png" };
 }
 
-function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0) {
+function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0, format = "portrait") {
+  const {width,height}=globalThis.olyvexExportModel.formats[format];
   const frames = Math.max(1, Math.ceil(duration * 30));
   const zoom = sceneIndex % 2 === 0 ? `1+0.035*on/${frames}` : `1.035-0.035*on/${frames}`;
   return new Promise((resolve, reject) => {
@@ -1376,7 +1381,7 @@ function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0) {
       .videoCodec("libx264")
       .format("mp4")
       .outputOptions([
-        "-vf", `scale=1440:2560:force_original_aspect_ratio=decrease,pad=1440:2560:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z=\'${zoom}\':x=\'iw/2-iw/zoom/2\':y=\'ih/2-ih/zoom/2\':d=1:s=720x1280:fps=30`,
+        "-vf", `scale=${width*2}:${height*2}:force_original_aspect_ratio=decrease,pad=${width*2}:${height*2}:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z=\'${zoom}\':x=\'iw/2-iw/zoom/2\':y=\'ih/2-ih/zoom/2\':d=1:s=${width}x${height}:fps=30`,
         "-pix_fmt", "yuv420p",
         "-r", "30",
         "-an",
@@ -1420,6 +1425,8 @@ app.post("/api/video/free-assemble", requireAuth, resourceProtection.run(async (
     return res.status(400).json({ ok: false, error: error.message });
   }
 
+  let settings;
+  try { settings=await validatedExport(req.body?.exportSettings,req.body?.audioId,AUDIO_TEMP_DIR,req.user.id); } catch(error) {return res.status(400).json({ok:false,error:error.message});}
   let audioPath = null, duration = 6;
   if (req.body?.audioId) {
     try { audioPath = audioFile(AUDIO_TEMP_DIR, req.user.id, req.body.audioId); duration = await wavDuration(audioPath); }
@@ -1439,13 +1446,13 @@ app.post("/api/video/free-assemble", requireAuth, resourceProtection.run(async (
       temporaryFiles.push(imagePath, clipPath);
       await fs.promises.writeFile(imagePath, decoded[i].buffer);
       // Keep the input until FFmpeg has actually finished reading it.
-      await createPreviewClip(imagePath, clipPath, transition.clipDuration, i);
+      await createPreviewClip(imagePath, clipPath, transition.clipDuration, i, settings.format);
       reportProgress((i+1)*10);
       clips.push(clipPath);
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
-const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition, percent => reportProgress(40 + percent * 0.55), req.user.id, req.body.soundtrack,res.locals.acceptMedia);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
+const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition, percent => reportProgress(40 + percent * 0.55), req.user.id, req.body.soundtrack,res.locals.acceptMedia,settings);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});

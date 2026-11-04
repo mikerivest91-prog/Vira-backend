@@ -80,7 +80,7 @@ test('legacy multipart assembly respects monthly quota before publishing',async(
  const start=source.indexOf('app.post(\n  "/api/video/assemble"');const end=source.indexOf('app.post("/api/video/import-clip"',start);
  let handler,published=0,cleaned=0;
  const context={app:{post:(_route,...handlers)=>{handler=handlers.at(-1);}},requireAuth:()=>{},uploadVideoClips:{array:()=>()=>{}},
-  resourceProtection:{run:fn=>fn},reserveVideoSlot:async()=>({ok:false}),publishVideo:async()=>{published++;},
+  resourceProtection:{run:fn=>fn},validatedExport:async()=>({format:'portrait'}),AUDIO_TEMP_DIR:'test',reserveVideoSlot:async()=>({ok:false}),publishVideo:async()=>{published++;},
   fs:{promises:{unlink:async()=>cleaned++}},path,console};
   vm.runInNewContext(source.slice(start,end),context);
   const res=new Response();await handler({user:{id:1},files:[1,2,3,4].map(i=>({path:'test-'+i}))},res);

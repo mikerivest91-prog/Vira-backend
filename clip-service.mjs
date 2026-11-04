@@ -26,7 +26,7 @@ export async function prepareClip(input, directory, userId) {
     await run(ffmpegPath, ["-hide_banner","-loglevel","error","-nostdin","-y",
       "-protocol_whitelist","file,pipe","-format_whitelist","mov,matroska,webm",
       "-i",input,"-map","0:v:0","-t","31","-an",
-      "-vf","scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30",
+      "-vf","scale=1280:1280:force_original_aspect_ratio=decrease:force_divisible_by=2,setsar=1,fps=30",
       "-c:v","libx264","-preset","veryfast","-crf","23","-threads","2","-pix_fmt","yuv420p","-movflags","+faststart",output], options);
     // Inspect our normalized MP4 using the bundled FFmpeg (no ffprobe dependency).
     let detail = "";
