@@ -2073,6 +2073,7 @@ document.addEventListener('click',event=>{
   <script src="/script-model.js"></script>
   <link rel="stylesheet" href="/script-editor.css">
   <script src="/script-editor-ui.js" defer></script>
+  <script src="/export-model.js"></script><link rel="stylesheet" href="/export-ui.css"><script src="/export-ui.js" defer></script>
   <script>
   (() => {
     "use strict";
@@ -2600,11 +2601,12 @@ localStorage.removeItem("viraGeneratedImages");
         image.src = source;
       });
       const canvas = document.createElement("canvas");
-      canvas.width = 720; canvas.height = 1280;
+      const ratio=Math.min(1,1280/image.naturalWidth,1280/image.naturalHeight);
+      canvas.width=Math.max(2,Math.round(image.naturalWidth*ratio));canvas.height=Math.max(2,Math.round(image.naturalHeight*ratio));
       const context = canvas.getContext("2d");
       context.fillStyle = "#08070c";
-      context.fillRect(0, 0, 720, 1280);
-      context.drawImage(image, 0, 0, 720, 1280);
+      context.fillRect(0,0,canvas.width,canvas.height);
+      context.drawImage(image,0,0,canvas.width,canvas.height);
       return canvas.toDataURL("image/jpeg", 0.85);
     }
 
@@ -3255,12 +3257,11 @@ ${els.tone.value || "Professionnel"}
         const photo = new Image();
         await new Promise((resolve,reject) => { photo.onload=resolve; photo.onerror=()=>reject(new Error("Cette image est illisible.")); photo.src=url; });
         const canvas = document.createElement("canvas");
-        canvas.width=720; canvas.height=1280;
+        const scale=Math.min(1,1280/photo.naturalWidth,1280/photo.naturalHeight);
+        canvas.width=Math.max(2,Math.round(photo.naturalWidth*scale));canvas.height=Math.max(2,Math.round(photo.naturalHeight*scale));
         const context=canvas.getContext("2d");
-        context.fillStyle="#08070c"; context.fillRect(0,0,720,1280);
-        const scale=Math.min(720/photo.naturalWidth,1280/photo.naturalHeight);
-        const width=photo.naturalWidth*scale, height=photo.naturalHeight*scale;
-        context.drawImage(photo,(720-width)/2,(1280-height)/2,width,height);
+        context.fillStyle="#08070c"; context.fillRect(0,0,canvas.width,canvas.height);
+        context.drawImage(photo,0,0,canvas.width,canvas.height);
         for (const quality of [0.85,0.7,0.55,0.4,0.25]) {
           const result=canvas.toDataURL("image/jpeg",quality);
           if(result.length<=300000) return result;
@@ -3433,7 +3434,9 @@ ${els.tone.value || "Professionnel"}
       finally { visualsInProgress=false; window.olyvexRefreshUsage?.(); updateWorkflowState(); hideProgress(900); }
     });
 els.videoBtn.addEventListener("click", async () => {
-  if (videoInProgress) return;
+  if (videoInProgress || window.olyvexExportUI?.isBusy()) return;
+  let exportSettings;
+  try { exportSettings=window.olyvexExportUI?.collect() || {format:"portrait"}; } catch(error) {return setStatus(els.videoStatus,escapeHtml(error.message),"warning");}
   if (generatedImages.length !== 4 || !voiceReady || !preparedAudioId) {
     return setStatus(
       els.videoStatus,
@@ -3462,10 +3465,11 @@ els.videoBtn.addEventListener("click", async () => {
 
   try {
     if (FREE_VIDEO_MODE) {
+        await window.olyvexExportUI?.save(exportSettings);
         const usingClips=sourceClips.length===4;
         const images = usingClips ? [] : await Promise.all(generatedImages.map(rasterizePreview));
 const soundtrack=selectedSoundtrack();
-const payload = JSON.stringify(usingClips ? {clipIds:sourceClips.map(c=>c.id),audioId:preparedAudioId,soundtrack} : { images, audioId: preparedAudioId,soundtrack });
+const payload = JSON.stringify(usingClips ? {clipIds:sourceClips.map(c=>c.id),audioId:preparedAudioId,soundtrack,exportSettings} : { images, audioId: preparedAudioId,soundtrack,exportSettings });
 if (new Blob([payload]).size > 1900000) throw new Error("Les visuels dépassent la taille acceptée par le serveur.");
 const progressId=crypto.randomUUID();
 const pollProgress=async()=>{
@@ -3688,6 +3692,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
       new MutationObserver(syncScore).observe(scoreSource,{childList:true,characterData:true,subtree:true});
     }
 
+    window.olyvexExportState=()=>({campaignId:localStorage.getItem("viraCurrentCampaignId"),audioId:voiceReady?preparedAudioId:"",busy:audioBusy||videoInProgress||scenarioInProgress||visualsInProgress||importingPhotos});
     window.olyvexScriptEditor = {
       snapshot() {
         return {campaignId:localStorage.getItem('viraCurrentCampaignId'), baseScenario:rawScenario,
@@ -4472,7 +4477,7 @@ const translations=new Map([["Tableau de bord","Dashboard"],["Campagnes","Campai
 for(const [fr,en] of [["Comment fonctionne Olyvex Brain ?","How does Olyvex Brain work?"],["COMPLÉTUDE DU BRIEF","BRIEF COMPLETENESS"],["Analyse de croissance","Brief analysis"],["Score indicatif • complétez votre brief pour l’affiner","Complete your brief to refine this score"],["Brief complet • prêt à être testé","Complete brief • ready to test"],["Brief solide • quelques optimisations possibles","Solid brief • some details can be improved"],["Cet indicateur mesure les informations renseignées dans votre brief. Il ne prédit pas les ventes ni les performances de votre campagne.","This score measures the information provided in your brief. It does not predict sales or campaign performance."],["→ Olyvex vous proposera l’action prioritaire à réaliser.","→ Olyvex will suggest your next priority action."],["Vérifiez votre brief et découvrez les prochaines actions","Review your brief and discover your next steps"],["Olyvex vérifie les informations de votre brief","Olyvex is checking your brief"],["Analyse...","Analyzing..."],["Mes campagnes","My campaigns"],["Retrouvez, reprenez et gérez vos campagnes marketing.","Find, resume and manage your marketing campaigns."],["Ouvrir la campagne","Open campaign"],["Supprimer","Delete"],["✓ Terminée","✓ Completed"],["✓ Scénario validé","✓ Script approved"],["OLYVEX WORKSPACE"],["Aucune campagne sauvegardée pour le moment.","No saved campaigns yet."],["Vos futures campagnes apparaîtront ici.","Your campaigns will appear here."],["Mes contenus","My content"],["Retrouvez tous les contenus créés dans vos campagnes.","Find all the content created for your campaigns."],["Aucun contenu sauvegardé pour le moment.","No saved content yet."],["Vos scénarios, textes, visuels et vidéos apparaîtront ici.","Your scripts, copy, visuals and videos will appear here."],["Compte & préférences","Account & preferences"],["Les paramètres de votre espace Olyvex apparaîtront ici.","Your Olyvex workspace settings will appear here."],["Gérez votre compte, vos préférences et votre utilisation de Olyvex.","Manage your account, preferences and Olyvex usage."]]) translations.set(fr,en);
 translations.set("Brouillon","Draft");translations.set("Visuels prêts","Visuals ready");
 // Core authentication and workspace labels kept outside the studio templates.
-for(const [fr,en] of [["Connectez-vous à votre workspace marketing sécurisé ou créez votre compte.","Sign in to your secure marketing workspace or create your account."],["Vérification de la session…","Checking your session…"],["Connexion","Sign in"],["Créer un compte","Create an account"],["Créer mon compte","Create my account"],["Mot de passe","Password"],["Adresse e-mail","Email address"],["Se connecter","Sign in"],["Déjà un compte ?","Already have an account?"],["Pas encore de compte ?","Don't have an account yet?"],["Se déconnecter","Sign out"],["Nouvelle campagne","New campaign"],["Brief","Brief"],["Analyse","Analysis"],["Export","Export"],["Campagne enregistrée","Saved campaign"],["Étape précédente","Previous step"],["Préparer les contenus","Prepare content"],["Votre campagne, prête à partager.","Your campaign is ready to share."],["Retrouvez votre vidéo finale et téléchargez-la pour la publier.","Find your final video and download it to publish."],["Vidéo disponible","Video available"],["Fichier indisponible","File unavailable"],["Vidéo chargée. Vérifiez l’aperçu avant publication.","Video loaded. Check the preview before publishing."],["Aucun export disponible","No export available"],["Préparation de la vidéo en cours…","Preparing the video…"],["Réessayez dans un instant.","Try again in a moment."],["Votre campagne est prête à être partagée.","Your campaign is ready to share."]]) translations.set(fr,en);
+for(const [fr,en] of [["Connectez-vous à votre workspace marketing sécurisé ou créez votre compte.","Sign in to your secure marketing workspace or create your account."],["Vérification de la session…","Checking your session…"],["Connexion","Sign in"],["Créer un compte","Create an account"],["Créer mon compte","Create my account"],["Mot de passe","Password"],["Adresse e-mail","Email address"],["Se connecter","Sign in"],["Déjà un compte ?","Already have an account?"],["Pas encore de compte ?","Don't have an account yet?"],["Se déconnecter","Sign out"],["Nouvelle campagne","New campaign"],["Brief","Brief"],["Analyse","Analysis"],["Export","Export"],["Campagne enregistrée","Saved campaign"],["Étape précédente","Previous step"],["Préparer les contenus","Prepare content"],["Votre campagne, prête à partager.","Your campaign is ready to share."],["Choisissez votre format, vérifiez les sous-titres, puis créez votre MP4.","Find your final video and download it to publish."],["Vidéo disponible","Video available"],["Fichier indisponible","File unavailable"],["Vidéo chargée. Vérifiez l’aperçu avant publication.","Video loaded. Check the preview before publishing."],["Aucun export disponible","No export available"],["Préparation de la vidéo en cours…","Preparing the video…"],["Réessayez dans un instant.","Try again in a moment."],["Votre campagne est prête à être partagée.","Your campaign is ready to share."]]) translations.set(fr,en);
 const originals=new WeakMap();
 let language='fr';try{language=localStorage.getItem('viraLanguage')==='en'?'en':'fr'}catch{}
 const picker=document.getElementById('viraLanguage');
@@ -5101,8 +5106,8 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   panels[2].append(production);
   const preview=document.createElement('aside');preview.className='vs-preview';preview.append(result);studio.querySelector('.vs-workspace').append(preview);
   const previewEmpty=document.createElement('div');previewEmpty.className='vs-preview-empty';previewEmpty.innerHTML='<span class="vs-eyebrow">APERÇU DU CONTENU</span><h2>Votre campagne prendra forme ici.</h2><p>Retrouvez le scénario, les textes et les scènes après la création de votre campagne.</p>';preview.prepend(previewEmpty);
-  const exportIntro=document.createElement('div');exportIntro.className='vs-export-intro';exportIntro.innerHTML='<span class="vs-eyebrow">DERNIÈRE ÉTAPE</span><h2>Votre campagne, prête à partager.</h2><p>Retrouvez votre vidéo finale et téléchargez-la pour la publier.</p>';panels[3].append(exportIntro,videoStatus,videoResult);
-  const exportEmpty=document.createElement('div');exportEmpty.className='vs-export-empty';exportEmpty.innerHTML='<h3>Aucun export disponible</h3><p>Préparez vos contenus et votre vidéo depuis l’étape Contenus. Votre export apparaîtra ici lorsqu’il sera prêt.</p><button type="button">Préparer les contenus →</button>';exportEmpty.querySelector('button').onclick=()=>choose('content');panels[3].append(exportEmpty);
+  const exportIntro=document.createElement('div');exportIntro.className='vs-export-intro';exportIntro.innerHTML='<span class="vs-eyebrow">DERNIÈRE ÉTAPE</span><h2>Votre campagne, prête à partager.</h2><p>Choisissez votre format, vérifiez les sous-titres, puis créez votre MP4.</p>';panels[3].append(exportIntro,videoStatus,videoResult);
+  const exportEmpty=document.createElement('div');exportEmpty.className='vs-export-empty';exportEmpty.innerHTML='<h3>Aucun export disponible</h3><p>Préparez les visuels et la voix à l’étape Contenus. Choisissez ensuite vos options ici et cliquez sur Vidéo finale.</p><button type="button">Préparer les contenus →</button>';exportEmpty.querySelector('button').onclick=()=>choose('content');panels[3].append(exportEmpty);
   const welcome=main.querySelector('.welcome-block');if(welcome)welcome.remove();
   main.querySelector('.vh-intro')?.remove();
   const billing=document.getElementById('billingSummary');if(billing){const details=document.createElement('details');details.className='vs-billing';const summary=document.createElement('summary');summary.textContent=t('Mon abonnement','My subscription');billing.before(details);details.append(summary,billing);}

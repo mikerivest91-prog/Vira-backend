@@ -32,7 +32,7 @@ export function createResourceProtection({pool,storage,temporaryStorage,env=proc
   // One media job at a time on the shared disk. A PostgreSQL session lock also
   // works across processes, and is released automatically on connection loss.
   const paths=new Map([
-    ['/api/audio/generate',8],['/api/audio/upload',20],['/api/video/import-clip',80],
+    ['/api/audio/captions',8],['/api/audio/generate',8],['/api/audio/upload',20],['/api/video/import-clip',80],
     ['/api/video/assemble',500],['/api/video/assemble-clips',100],['/api/video/free-assemble',100],['/api/animations/media',100]
   ]);
   const reject=(res,status,message,retry)=>{if(retry)res.set('Retry-After',String(retry));return res.status(status).json({ok:false,error:message});};
