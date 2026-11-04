@@ -1,4 +1,5 @@
 import {canRenderBrand} from "./video-brand.mjs";
+import {createResourceProtection} from "./resource-protection.mjs";
 import { copyCampaignData } from "./campaign-copy.mjs";
 import { installBrandProfile } from "./brand-profile.mjs";
 import { sounds, soundOptions, soundWav } from "./sound-library.mjs";
@@ -384,6 +385,8 @@ app.use((req, res, next) => {
   if (req.method !== "POST" || !subscriptionCreationPaths.has(pathname)) return next();
   return requireAuth(req, res, () => billing.requireCreation(req, res, next));
 });
+const resourceProtection=createResourceProtection({pool,storage:VIDEO_STORAGE_DIR,temporaryStorage:VIDEO_TEMP_DIR});
+app.use(resourceProtection.media);
 
 async function initDatabase() {
   await pool.query(`
@@ -1114,7 +1117,7 @@ app.post("/api/audio/test", requireAuth, async (req, res) => {
     audioUrl: null
   });
 });
-app.post("/api/audio/generate", requireAuth, async (req, res) => {
+app.post("/api/audio/generate", requireAuth, resourceProtection.run(async (req, res) => {
   const text = String(req.body?.text || "").trim();
   const gender = req.body?.gender;
   if (!text || text.length > 800 || ![
@@ -1148,8 +1151,15 @@ app.post("/api/audio/generate", requireAuth, async (req, res) => {
   return res.status(400).json({ok:false,error:"Ajoutez une narration de 800 caractères maximum et choisissez une voix."});
     }
   return withAudioJob(req,res,async () => {
-    try {return res.json({ok:true,mode:"openai",...await synthesizeAudio(text,gender,AUDIO_TEMP_DIR,req.user.id)});}
+    try {
+      if(!process.env.OPENAI_API_KEY)return res.status(503).json({ok:false,error:'La voix automatique n’est pas configurée.'});
+      if(!await resourceProtection.reserveVoice(req.user.id))return res.status(429).json({ok:false,error:'La limite quotidienne de voix IA est atteinte. Réessayez demain ou importez votre narration.'});
+      const audio=await synthesizeAudio(text,gender,AUDIO_TEMP_DIR,req.user.id);
+      await res.locals.acceptMedia([audioFile(AUDIO_TEMP_DIR,req.user.id,audio.audioId)]);
+      return res.json({ok:true,mode:"openai",...audio});
+    }
     catch(error){
+      if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});
       const voiceError=typeof error?.code==='string'&&error.code.startsWith('VOICE_');
       console.error('VOICE ERROR:',{code:voiceError?error.code:'AUDIO_PREPARATION_FAILED',stage:error?.stage||null,providerStatus:error?.providerStatus||null});
       return res.status(voiceError?(error.code==='VOICE_TIMEOUT'?504:503):422).json({ok:false,
@@ -1157,16 +1167,16 @@ app.post("/api/audio/generate", requireAuth, async (req, res) => {
         code:voiceError?error.code:'AUDIO_PREPARATION_FAILED'});
     }
   });
-});
-app.post("/api/audio/upload", requireAuth, uploadAudio.single("audio"), async (req,res) => {
+}));
+app.post("/api/audio/upload", requireAuth, uploadAudio.single("audio"), resourceProtection.run(async (req,res) => {
   if (!req.file) return res.status(400).json({ok:false,error:"Choisissez ou enregistrez un fichier audio."});
   try {
     return await withAudioJob(req,res,async () => {
-      try {return res.json({ok:true,mode:"upload",...await prepareAudio(req.file.path,AUDIO_TEMP_DIR,req.user.id)});}
-      catch(error){console.error("AUDIO UPLOAD ERROR:",error);return res.status(422).json({ok:false,error:"Fichier audio invalide ou trop long. Durée maximale : 60 secondes."});}
+      try {const audio=await prepareAudio(req.file.path,AUDIO_TEMP_DIR,req.user.id);await res.locals.acceptMedia([audioFile(AUDIO_TEMP_DIR,req.user.id,audio.audioId)]);return res.json({ok:true,mode:"upload",...audio});}
+      catch(error){if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});console.error("AUDIO UPLOAD ERROR:",error);return res.status(422).json({ok:false,error:"Fichier audio invalide ou trop long. Durée maximale : 60 secondes."});}
     });
   } finally {await fs.promises.unlink(req.file.path).catch(()=>{});}
-});
+}));
 app.get("/api/audio/:id", requireAuth, async (req,res) => {
   try {
     const filename=audioFile(AUDIO_TEMP_DIR,req.user.id,req.params.id);
@@ -1230,10 +1240,11 @@ app.get('/api/sounds/:id', requireAuth, (req,res)=>{
   res.type('audio/wav').send(soundWav(sound.id,sound.kind==='music'?8:1));
 });
 // Uploaded clips and generated previews share the same final MP4 contract.
-async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId, soundtrack = {}) {
+async function publishVideo(clipPaths, prefix, audioPath = null, transition = null, onProgress = () => {}, ownerId, soundtrack = {}, acceptMedia = async()=>{}) {
   if(ownerId===undefined || ownerId===null)throw new Error("Propriétaire manquant.");
   const result = await assembleVideoClips(clipPaths, audioPath, transition, onProgress, soundtrack, await brandProfile.read(ownerId));
   try {
+    await acceptMedia([result.outputPath]);
     const filename = `${prefix}-${crypto.randomUUID()}.mp4`;
     const destination = path.join(VIDEO_STORAGE_DIR, filename);
     const pending = destination + ".partial";
@@ -1256,33 +1267,40 @@ app.post(
   "/api/video/assemble",
   requireAuth,
   uploadVideoClips.array("clips", 4),
-  async (req, res) => {
+  resourceProtection.run(async (req, res) => {
     const files = req.files || [];
     try {
       if (files.length !== 4) {
         return res.status(400).json({ ok: false, error: "VIRA exige exactement 4 clips vidéo." });
       }
-      const videoUrl = await publishVideo(files.map(file => path.resolve(file.path)), "vira-final", null, null, () => {}, req.user.id);
+      const usage=await reserveVideoSlot(req.user);
+      if(!usage.ok)return res.status(429).json({ok:false,error:'Votre limite mensuelle de vidéos est atteinte.'});
+      let videoUrl;
+      try{
+        videoUrl=await publishVideo(files.map(file=>path.resolve(file.path)),"vira-final",null,null,()=>{},req.user.id,{},res.locals.acceptMedia);
+        await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
+      }catch(error){await pool.query('DELETE FROM vira_video_usage WHERE id=$1',[usage.id]).catch(()=>{});throw error;}
       return res.json({ ok: true, videoUrl });
     } catch (error) {
+      if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});
       console.error("VIDEO ASSEMBLY ERROR:", error);
       return res.status(500).json({ ok: false, error: "Impossible d’assembler les clips vidéo." });
     } finally {
       await Promise.allSettled(files.map(file => fs.promises.unlink(file.path)));
     }
-  }
+  })
 );
 
 
-app.post("/api/video/import-clip", requireAuth, uploadClip.single("clip"), async (req,res) => {
+app.post("/api/video/import-clip", requireAuth, uploadClip.single("clip"), resourceProtection.run(async (req,res) => {
   if (!req.file) return res.status(400).json({ok:false,error:"Choisissez un clip vidéo."});
   try {
     return await withClipJob(req,res,async()=>{
-      try { return res.json({ok:true,clip:await prepareClip(req.file.path,CLIP_TEMP_DIR,req.user.id)}); }
-      catch(error) { console.error("CLIP IMPORT ERROR:",error); return res.status(422).json({ok:false,error:"Clip illisible ou durée invalide. Utilisez un MP4, MOV ou WebM de 1 à 30 secondes."}); }
+      try {const clip=await prepareClip(req.file.path,CLIP_TEMP_DIR,req.user.id);const filename=clipPath(CLIP_TEMP_DIR,req.user.id,clip.id);await res.locals.acceptMedia([filename,filename+'.json']);return res.json({ok:true,clip});}
+      catch(error) { if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});console.error("CLIP IMPORT ERROR:",error); return res.status(422).json({ok:false,error:"Clip illisible ou durée invalide. Utilisez un MP4, MOV ou WebM de 1 à 30 secondes."}); }
     });
   } finally { await fs.promises.unlink(req.file.path).catch(()=>{}); }
-});
+}));
 app.get("/api/video/clips/:id", requireAuth, async (req,res)=>{
   try {
     const file=clipPath(CLIP_TEMP_DIR,req.user.id,req.params.id);
@@ -1291,7 +1309,7 @@ app.get("/api/video/clips/:id", requireAuth, async (req,res)=>{
     return res.sendFile(file, {dotfiles:'allow'});
   } catch { return res.status(404).json({ok:false,error:"Clip indisponible. Importez-le de nouveau."}); }
 });
-app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
+app.post("/api/video/assemble-clips", requireAuth, resourceProtection.run(async (req,res)=>{
   try { soundOptions(req.body?.soundtrack); } catch(error) { return res.status(400).json({ok:false,error:error.message}); }
   const ids=req.body?.clipIds;
   if (!Array.isArray(ids) || ids.length !== 4 || !req.body?.audioId) return res.status(400).json({ok:false,error:"Préparez quatre clips et une narration."});
@@ -1307,16 +1325,17 @@ app.post("/api/video/assemble-clips", requireAuth, async (req,res)=>{
     let fitted;
     try {
       fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
-      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id, req.body.soundtrack);
+      const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id, req.body.soundtrack,res.locals.acceptMedia);
       await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
       return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:usage.limit,ownerTesting:usage.ownerTesting}});
     } catch(error) {
       await pool.query("DELETE FROM vira_video_usage WHERE id=$1",[usage.id]).catch(()=>{});
+      if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});
       console.error("CLIP ASSEMBLY ERROR:",error);
       return res.status(500).json({ok:false,error:"Impossible d’assembler les clips. Réessayez dans un instant."});
     } finally { if(fitted) await fitted.cleanup(); }
   });
-});
+}));
 
 function decodePreviewImage(source, index) {
   // The new index.html sends raster JPEGs, avoiding SVG decoder dependencies.
@@ -1362,7 +1381,7 @@ app.get('/api/video/progress/:id', requireAuth, (req,res) => {
   if(!job || job.userId!==String(req.user.id)) return res.status(404).json({ok:false});
   res.json({ok:true,percent:job.percent,status:job.status});
 });
-app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
+app.post("/api/video/free-assemble", requireAuth, resourceProtection.run(async (req, res) => {
   const progressId=String(req.query.progressId || '');
   const tracked=/^[a-f0-9-]{36}$/.test(progressId) && !videoProgressJobs.has(progressId);
   const progressJob={userId:String(req.user.id),percent:0,status:'running'};
@@ -1410,10 +1429,11 @@ app.post("/api/video/free-assemble", requireAuth, async (req, res) => {
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
-const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition, percent => reportProgress(40 + percent * 0.55), req.user.id, req.body.soundtrack);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
+const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition, percent => reportProgress(40 + percent * 0.55), req.user.id, req.body.soundtrack,res.locals.acceptMedia);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
     return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
+    if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});
     console.error("FREE VIDEO ASSEMBLY ERROR:", error?.stack || error);
     const message = usage.ownerTesting && error?.message
       ? `Test vidéo : ${String(error.message).slice(0, 220)}`
@@ -1422,7 +1442,7 @@ const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transit
   } finally {
     await Promise.allSettled(temporaryFiles.map(file => fs.promises.unlink(file)));
   }
-});
+}));
 
 // Reserve image-generation units before any paid AI image request.
 app.get("/api/usage", requireAuth, async (req, res) => {
@@ -1514,6 +1534,7 @@ app.post("/api/brain/analyze", requireAuth, async (req, res) => {
 });
 // Keep API errors JSON, including malformed JSON and oversized uploads.
 app.use((error, req, res, next) => {
+  void res.locals.releaseMedia?.();
   if (res.headersSent) return next(error);
   console.error("REQUEST ERROR:", error);
   const status = error.type === "entity.too.large" ? 413
@@ -1537,6 +1558,7 @@ async function start() {
     await initDatabase();
     await billing.init();
     await authProtection.init();
+    await resourceProtection.init();
     await brandProfile.init();
     await passwordRecovery.init();
     await imageGeneration.init();
