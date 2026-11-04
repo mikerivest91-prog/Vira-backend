@@ -5134,6 +5134,9 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   const panels=steps.map((key,i)=>{const p=document.createElement('section');p.className='vs-panel';p.id='vs-'+key;p.setAttribute('role','tabpanel');p.setAttribute('aria-labelledby','vs-tab-'+key);studio.querySelector('.vs-panels').append(p);const b=document.createElement('button');b.type='button';b.id='vs-tab-'+key;b.setAttribute('role','tab');b.setAttribute('aria-controls',p.id);b.dataset.step=key;b.addEventListener('click',()=>choose(key));studio.querySelector('.vs-steps').append(b);return p;});
   studio.querySelector('.vs-steps').setAttribute('role','tablist');
   panels[0].append(objectives,brief);panels[1].append(brain);
+  // Keep the existing analysis control in the visible analysis panel.
+  const analysisButton=document.getElementById('brainAnalyzeBtn');
+  if(analysisButton)panels[1].prepend(analysisButton);
   // Move existing nodes so their event handlers and data remain intact.
   const result=document.getElementById('scenarioResult');
   const videoResult=document.getElementById('videoResult');const videoStatus=document.getElementById('videoStatus');
