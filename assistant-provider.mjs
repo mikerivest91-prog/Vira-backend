@@ -9,7 +9,8 @@ export function normalizeAssistantInput(body){
  const history=body.history??[];if(!Array.isArray(history)||history.length>8)throw Error('Historique trop long. Commencez une nouvelle discussion.');
  const messages=history.map(item=>{if(!['user','assistant'].includes(item?.role)||typeof item.content!=='string'||item.content.length>2500)throw Error('Historique invalide.');return {role:item.role,content:item.content.trim()};});
  const campaignId=body.campaignId==null?null:Number(body.campaignId);if(campaignId!==null&&(!Number.isSafeInteger(campaignId)||campaignId<=0))throw Error('Campagne invalide.');
- return {message:body.message.trim(),history:messages,language:body.language==='en'?'en':'fr',campaignId};
+ if(body.useBrand!=null&&typeof body.useBrand!=='boolean')throw Error('Choix de marque invalide.');
+ return {message:body.message.trim(),history:messages,language:body.language==='en'?'en':'fr',campaignId,useBrand:body.useBrand===true};
 }
 export function normalizeAssistantDraft(draft){
  if(!draft||typeof draft.brief!=='string'||!draft.brief.trim()||draft.brief.length>2400||!['Instagram','Facebook','TikTok','YouTube','LinkedIn'].includes(draft.platform)||!['Professionnel','Dynamique','Amical','Premium','Inspirant'].includes(draft.tone))throw Error('Proposition de campagne invalide.');

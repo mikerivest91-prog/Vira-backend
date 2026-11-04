@@ -2075,6 +2075,7 @@ document.addEventListener('click',event=>{
   <script src="/script-editor-ui.js" defer></script>
   <script src="/export-model.js"></script><link rel="stylesheet" href="/export-ui.css"><script src="/export-ui.js" defer></script>
   <link rel="stylesheet" href="/assistant-ui.css"><script src="/assistant-ui.js" defer></script>
+  <link rel="stylesheet" href="/production-guide.css"><script src="/production-guide-ui.js" defer></script>
   <script>
   (() => {
     "use strict";
@@ -2635,8 +2636,9 @@ localStorage.removeItem("viraGeneratedImages");
       </section>`;
     }
 
+    const buildImagePrompts=(scenes,visualPrompt,style)=>scenes.map((scene,i) => `${visualPrompt || "Professional marketing photography"}. Scene ${i+1}: ${scene}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Consistent clothing, colors and lighting across scenes. No text or typography.`);
     async function generateRealImages(scenes, visualPrompt, style) {
-      const prompts = scenes.map((scene,i) => `${visualPrompt || "Professional marketing photography"}. Scene ${i+1}: ${scene}. Style: ${style || els.tone.value}. Platform: ${els.platform.value}. Consistent clothing, colors and lighting across scenes. No text or typography.`);
+      const prompts = buildImagePrompts(scenes,visualPrompt,style);
       const cacheKey = "olyvexImageJob:" + (localStorage.getItem("viraCurrentCampaignId") || "draft");
       const fingerprint = JSON.stringify(prompts);
       let pending;
@@ -3090,6 +3092,20 @@ ${els.tone.value || "Professionnel"}
       }catch(error){if(revision===audioRevision && scenario===rawScenario)voiceElement("voiceFeedback").textContent=error.message;}
       finally{updateWorkflowState();}
     }
+    let productionApprovalBusy=false;
+    async function requestProductionConsent(kind){
+      if(productionApprovalBusy||audioBusy||videoInProgress||visualsInProgress||scenarioInProgress||importingPhotos)return false;
+      productionApprovalBusy=true;const campaignId=localStorage.getItem('viraCurrentCampaignId'),revision=flowRevision,audio=audioRevision;
+      try{
+        await narrationSaveQueue;
+        if(kind==='video'&&voiceReady&&preparedAudioId)await saveCampaignNarration({audioId:preparedAudioId,mode:voiceElement('voiceMode').value,voice:voiceElement('voiceGender').value,text:voiceElement('voiceNarration').value.slice(0,800)});
+        if(!window.olyvexProductionGuide)throw Error('Le contrôle des crédits n’est pas chargé. Rechargez la page avant de générer.');
+        let imageRequest;
+        if(kind==='images'){const d=parseScenario(rawScenario),prompts=buildImagePrompts(d.scenes,d.visualPrompt,d.style);try{const pending=JSON.parse(sessionStorage.getItem('olyvexImageJob:'+campaignId));if(pending?.fingerprint===JSON.stringify(prompts))imageRequest={requestId:pending.requestId,prompts};}catch{}}
+        const accepted=await window.olyvexProductionGuide.confirm(kind,{imageRequest});
+        return accepted&&campaignId===localStorage.getItem('viraCurrentCampaignId')&&revision===flowRevision&&audio===audioRevision;
+      }finally{productionApprovalBusy=false;}
+    }
     function invalidateAudio() {
       audioRevision++;
       if(preparedAudioId)void saveCampaignNarration(null).catch(()=>{voiceElement("voiceFeedback").textContent="La modification de la narration n’a pas été sauvegardée. Vérifiez votre connexion avant de quitter.";});
@@ -3156,10 +3172,10 @@ ${els.tone.value || "Professionnel"}
       voiceElement("personalVoiceFields").hidden = automatic;
     });
     for (const id of ["voiceGender","voiceNarration"]) voiceElement(id).addEventListener("input",invalidateAudio);
-    voiceElement("prepareVoice").addEventListener("click", () => {
+    voiceElement("prepareVoice").addEventListener("click", async () => {
       const text = voiceElement("voiceNarration").value.trim();
       if (!text) { voiceElement("voiceFeedback").textContent = "Ajoutez un texte à lire."; return; }
-      prepareVoiceRequest("/api/audio/generate",{text,gender:voiceElement("voiceGender").value},true);
+      try {if(!await requestProductionConsent("voice"))return;await prepareVoiceRequest("/api/audio/generate",{text,gender:voiceElement("voiceGender").value},true);}catch(error){voiceElement("voiceFeedback").textContent=error.message;}
     });
     function uploadNarration(file) {
       if (!file || file.size > 15*1024*1024 || !file.size) { voiceElement("voiceFeedback").textContent="Choisissez un fichier audio non vide de moins de 15 Mo.";return; }
@@ -3414,6 +3430,7 @@ ${els.tone.value || "Professionnel"}
       const scenario = parseScenario(rawScenario);
       const scenes = scenario.scenes.filter(Boolean);
       if (scenes.length !== 4) return setStatus(els.status,"Validez un scénario de quatre scènes.","warning");
+      try{if(!await requestProductionConsent("images"))return;}catch(error){return setStatus(els.status,escapeHtml(error.message),"error");}
       visualsInProgress=true; updateWorkflowState(); setProgress(0,"Préparation des quatre images IA");
       try {
         const images = await generateRealImages(scenes,scenario.visualPrompt,scenario.style);
@@ -3446,7 +3463,9 @@ els.videoBtn.addEventListener("click", async () => {
     );
   }
 
+  try{if(!await requestProductionConsent("video")){setStatus(els.videoStatus,"Export annulé. Aucun crédit vidéo utilisé.","warning");return;}}catch(error){return setStatus(els.videoStatus,escapeHtml(error.message),"error");}
   videoInProgress = true;
+  setStatus(els.videoStatus,"Préparation de la vidéo en cours…");
   let progressPolling = null;
   let progressStopped = false;
   els.videoBtn.disabled = true;
@@ -5142,7 +5161,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   document.getElementById('brainAnalyzeBtn').addEventListener('click',()=>{if(['prompt','targetAudience','marketingGoal','platform'].every(id=>document.getElementById(id).value.trim()))choose('analysis');},true);
   document.getElementById('newCampaignBtn').addEventListener('click',()=>sessionStorage.setItem('viraStudioView','brief'),true);
   document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;if(button.id==='navBrain'){event.preventDefault();event.stopImmediatePropagation();editor('analysis');}if(['navHome','navCampaigns','navContent','navCalendar','navStats','navSettings'].includes(button.id)){sessionStorage.removeItem('viraStudioView');}if(button.id==='vsGoExport')choose('export');},true);
-  document.getElementById('video').addEventListener('click',()=>{choose('export');videoStatus.textContent=t('Préparation de la vidéo en cours…','Preparing your video…');videoStatus.setAttribute('role','status');videoStatus.style.display='block';},true);
+  document.getElementById('video').addEventListener('click',()=>{choose('export');videoStatus.textContent=t('Vérification du format et des crédits…','Checking format and credits…');videoStatus.setAttribute('role','status');videoStatus.style.display='block';},true);
   const exportLink=document.createElement('button');exportLink.id='vsGoExport';exportLink.className='vs-export-link';exportLink.type='button';exportLink.textContent=t('Voir l’export →','View export →');panels[2].append(exportLink);
   const view=sessionStorage.getItem('viraStudioView');sessionStorage.removeItem('viraStudioView');update();choose('brief',false);if(view)editor(view);else{home();window.olyvexSetNavigation('navHome');}
   new MutationObserver(()=>{if(studio.isConnected)update();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
