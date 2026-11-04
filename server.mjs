@@ -1531,8 +1531,14 @@ app.post("/api/brain/analyze", requireAuth, async (req, res) => {
   const now = Date.now();
   for (const [id, state] of brainRequests) if (!state.pending && now - state.started > 60000) brainRequests.delete(id);
   const previous = brainRequests.get(userId);
-  if (previous && (previous.pending || now - previous.started < 15000)) {
-    return res.status(429).json({ok:false,error:"Une analyse vient d’être lancée. Patientez quelques secondes."});
+  if (previous?.pending) {
+    res.setHeader("Retry-After", "5");
+    return res.status(429).json({ok:false,code:"BRAIN_BUSY",retryAfter:5,error:"Une analyse est déjà en cours. Attendez sa fin avant de réessayer."});
+  }
+  if (previous && now - previous.started < 15000) {
+    const retryAfter = Math.max(1, Math.ceil((15000 - (now - previous.started)) / 1000));
+    res.setHeader("Retry-After", String(retryAfter));
+    return res.status(429).json({ok:false,code:"BRAIN_COOLDOWN",retryAfter,error:`Vous pourrez relancer une analyse dans ${retryAfter} secondes.`});
   }
   brainRequests.set(userId, { pending:true, started:now });
   try {
@@ -1616,3 +1622,5 @@ async function start() {
 }
 
 start();
+
+

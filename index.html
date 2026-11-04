@@ -2395,6 +2395,20 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
           return;
         }
         if (!response.ok || !data.ok || typeof data.analysis !== "string" || !data.analysis.trim()) {
+          if (response.status === 429 && ["BRAIN_BUSY", "BRAIN_COOLDOWN"].includes(data.code)) {
+            setBrainState('idle');
+            els.score.textContent = data.code === "BRAIN_BUSY" ? "Analyse déjà en cours" : "Veuillez patienter";
+            els.scoreNote.textContent = data.error;
+            els.opportunity.textContent = "";
+            // Keep duplicate clicks blocked for the server's stated retry interval.
+            const seconds = Math.min(60, Math.max(1, Number(data.retryAfter) || 5));
+            await new Promise(resolve => setTimeout(resolve, seconds * 1000));
+            if (revision === brainRevision) {
+              els.score.textContent = "Prêt à réessayer";
+              els.scoreNote.textContent = "Vous pouvez relancer l’analyse si aucun résultat n’est apparu dans votre autre onglet.";
+            }
+            return;
+          }
           throw new Error(data.error || "Analyse indisponible. Réessayez dans un instant.");
         }
         els.score.textContent = "Analyse terminée";
@@ -5644,6 +5658,8 @@ body .app-shell .main #imageImportPanel .photo-editor-footer>button{max-width:10
 </script>  
 <script>document.addEventListener('click',async event=>{const button=event.target.closest('.campaign-duplicate');if(!button||button.disabled)return;event.stopPropagation();const id=button.dataset.campaignId;if(!/^\d+$/.test(id||''))return;button.disabled=true;button.textContent='Duplication…';try{const response=await fetch('/api/campaigns/'+id+'/duplicate',{method:'POST',credentials:'same-origin'});const data=await response.json();if(!response.ok)throw Error(data.error||'Duplication impossible.');location.reload();}catch(error){button.disabled=false;button.textContent='Dupliquer';alert(error.message);}},true);</script></body>
 </html>
+
+
 
 
 
