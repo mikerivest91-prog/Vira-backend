@@ -1,0 +1,36 @@
+#olyvexScriptDialog{width:min(1160px,96vw);max-width:1160px;max-height:92dvh;padding:0;border:1px solid #dfe3ed;border-radius:22px;background:#f8f9fc;color:#1c263c;font:14px/1.6 system-ui,sans-serif;box-shadow:0 30px 100px #18233c40}
+#olyvexScriptDialog::backdrop{background:#17213699;backdrop-filter:blur(5px)}
+#olyvexScriptDialog *{box-sizing:border-box}
+#olyvexScriptDialog h2,#olyvexScriptDialog h3,#olyvexScriptDialog h4{color:#1c263c!important;margin:0}
+#olyvexScriptDialog h2{font-size:28px!important;line-height:1.25}
+#olyvexScriptDialog h3{font-size:19px!important}
+#olyvexScriptDialog h4{font-size:15px!important}
+#olyvexScriptDialog p{color:#617087!important;font-size:13px!important;margin:8px 0;line-height:1.6!important}
+#olyvexScriptDialog .se-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:26px 30px;background:white;border-bottom:1px solid #e4e7ef}
+#olyvexScriptDialog .se-eyebrow{display:block;color:#7650b9;font-size:11px;font-weight:800;letter-spacing:.14em;margin-bottom:8px}
+#olyvexScriptDialog .se-content{padding:26px 30px;display:grid;gap:28px}
+#olyvexScriptDialog .se-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#olyvexScriptDialog .se-field{display:grid;gap:7px;min-width:0;color:#33425e;font-size:13px;font-weight:650}
+#olyvexScriptDialog #scriptEditorMessage .se-field:first-child{grid-column:1/-1}
+#olyvexScriptDialog input,#olyvexScriptDialog textarea{width:100%;min-width:0;background:white!important;border:1px solid #cdd5e3!important;border-radius:10px;padding:11px 12px;color:#24334e!important;font:400 14px/1.6 system-ui,sans-serif!important;resize:vertical}
+#olyvexScriptDialog input:focus,#olyvexScriptDialog textarea:focus{outline:2px solid #9672d3;outline-offset:1px}
+#olyvexScriptDialog .se-section-head{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:16px}
+#olyvexScriptDialog .se-scenes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+#olyvexScriptDialog .se-scene{display:grid;gap:12px;padding:15px;background:white;border:1px solid #e0e5ee;border-radius:16px;min-width:0}
+#olyvexScriptDialog .se-media{height:145px;border-radius:10px;background:#eef0f6;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#68758d}
+#olyvexScriptDialog .se-media img{width:100%;height:100%;object-fit:contain}
+#olyvexScriptDialog .se-move{display:flex;gap:6px;justify-content:space-between}
+#olyvexScriptDialog button{border:1px solid #d9d0e8;border-radius:9px;padding:9px 12px;background:#f4effb;color:#6c44a9;font:600 12px/1.4 system-ui,sans-serif;cursor:pointer}
+#olyvexScriptDialog button:disabled{opacity:.45;cursor:default}
+#olyvexScriptDialog #scriptEditorClose{font-size:24px;padding:3px 11px;background:white}
+#olyvexScriptDialog .se-details{border:1px solid #dfe4ee;border-radius:12px;background:white;padding:15px 18px}
+#olyvexScriptDialog .se-details summary{cursor:pointer;color:#33425e;font-weight:650}
+#olyvexScriptDialog .se-details .se-fields{padding-top:18px}
+#olyvexScriptDialog .se-footer{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:24px;background:white;border-top:1px solid #e4e7ef;padding:18px 30px}
+#olyvexScriptDialog .se-footer small{font-size:11px;color:#6b7891;display:block;max-width:660px}
+#olyvexScriptDialog #scriptEditorSave{background:#7549b9;color:white;padding:13px 18px;white-space:nowrap}
+#olyvexScriptDialog #scriptEditorPrevious{color:#6c44a9}
+#scenarioResult [data-script-editor-open]{margin:14px 0 0;padding:10px 16px;border:1px solid #dacded;border-radius:9px;background:#f4effb;color:#6840a8;font:600 13px system-ui,sans-serif;cursor:pointer}
+#scenarioResult [data-script-editor-open]:disabled{opacity:.45;cursor:default}
+@media(max-width:850px){#olyvexScriptDialog .se-scenes{grid-template-columns:1fr 1fr}#olyvexScriptDialog .se-header,#olyvexScriptDialog .se-content,#olyvexScriptDialog .se-footer{padding:20px}}
+@media(max-width:520px){#olyvexScriptDialog .se-scenes,#olyvexScriptDialog .se-fields{grid-template-columns:1fr}#olyvexScriptDialog .se-footer,#olyvexScriptDialog .se-section-head{align-items:stretch;flex-direction:column}#olyvexScriptDialog h2{font-size:23px!important}#olyvexScriptDialog .se-media{height:190px}}

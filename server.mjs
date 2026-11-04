@@ -1,5 +1,6 @@
 import {canRenderBrand} from "./video-brand.mjs";
 import {installCampaignNarration} from "./campaign-narration.mjs";
+import {installCampaignScript} from "./campaign-script.mjs";
 import {createCommerce} from "./commerce.mjs";
 import {installClientAnimations} from "./client-animations.mjs";
 import {createResourceProtection} from "./resource-protection.mjs";
@@ -359,6 +360,9 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 const brandProfile = installBrandProfile({app,pool,requireAuth});
 installCampaignNarration({app,pool,requireAuth,audioDirectory:AUDIO_TEMP_DIR});
+installCampaignScript({app,pool,requireAuth});
+for(const file of ['script-model.js','script-editor-ui.js','script-editor.css'])app.get('/'+file,(_req,res)=>res.sendFile(path.resolve(file)));
+app.get('/olyvex-logo-9208494f098d.png',(_req,res)=>{res.setHeader('Cache-Control','public, max-age=31536000, immutable');res.sendFile(path.resolve('olyvex-logo-9208494f098d.png'));});
 app.get("/api/brand/rendering",requireAuth,async (_req,res)=>res.json({available:await canRenderBrand(ffmpegPath)}));
 app.get("/offers",requireAuth,(_req,res)=>res.sendFile(path.resolve("offers.html")));
 app.get("/offer-math.mjs",requireAuth,(_req,res)=>res.sendFile(path.resolve("offer-math.mjs")));
@@ -1025,7 +1029,7 @@ app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
         SET
           title = $1,
           status = $2,
-          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand'),
+          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand'), 'previousExport', campaign_data->'previousExport',
             'narration', CASE WHEN campaign_data->>'scenario' IS NOT DISTINCT FROM $3::jsonb->>'scenario' THEN campaign_data->'narration' ELSE 'null'::jsonb END),
           updated_at = NOW()
         WHERE id = $4

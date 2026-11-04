@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test openai-voice.test.mjs recovery-mail.test.mjs resource-protection.test.mjs campaign-narration.test.mjs credit-bank.test.mjs commerce.test.mjs client-animations.test.mjs account-isolation.audit.test.mjs",
+    "test": "node --test openai-voice.test.mjs recovery-mail.test.mjs resource-protection.test.mjs campaign-narration.test.mjs credit-bank.test.mjs commerce.test.mjs client-animations.test.mjs account-isolation.audit.test.mjs script-model.test.mjs campaign-script.test.mjs",
+    "test:editor": "node --test script-model.test.mjs campaign-script.test.mjs",
     "start": "node server.mjs",
     "dev": "node server.mjs",
     "test:voice": "node --test openai-voice.test.mjs",

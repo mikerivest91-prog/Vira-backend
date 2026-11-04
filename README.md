@@ -63,3 +63,13 @@ Politique prudente du premier parcours : un remboursement, même partiel, ou une
 Avant activation commerciale : connecter et tester Stripe de bout en bout, vérifier les produits/prix et le portail, les conditions de vente/facturation applicables, la qualité et l'accès aux fournisseurs IA, puis dimensionner le stockage et les capacités globales. Le plafond média existant est conservé ; les forfaits n'augmentent pas automatiquement l'espace disque. Ne pas ouvrir les achats d'une fonctionnalité encore indisponible.
 
 Tests sans réseau fournisseur : `npm ci --include=dev --ignore-scripts` puis `npm test`. Les tests de crédits utilisent PostgreSQL embarqué (PGlite) et les appels Stripe/Runway sont simulés ; ils ne remplacent pas un paiement de test Stripe et ne constituent pas un test de charge multi-instance.
+
+## Éditeur de scénario et storyboard
+
+Le bouton « Modifier le scénario et les scènes » permet de corriger les textes et de réordonner les quatre scènes avec leurs médias. Le modèle de rubriques est partagé entre serveur et navigateur dans `script-model.js` ; il reconnaît uniquement les titres de section, sans confondre le mot « narration » dans un titre de campagne avec une rubrique. Les termes de marque AI/IA saisis par l'utilisateur ne sont plus remplacés automatiquement lors de l'affichage du scénario.
+
+La route authentifiée `PATCH /api/campaigns/:id/script` verrouille la campagne par propriétaire et compare le scénario d'origine avant toute écriture. Elle préserve le brief, la marque et les médias ; un changement d'ordre applique la même permutation aux deux tableaux de médias. Une narration modifiée invalide la référence audio. Une modification du scénario retire l'export courant des éléments prêts et conserve son URL dans `previousExport` ; le fichier lui-même n'est pas supprimé. La narration est conservée pour une correction de texte non vocal ou un changement d'ordre, sauf incohérence avec le texte d'une voix automatique enregistrée.
+
+Éditer un scénario ne consomme aucun crédit et ne déclenche aucun appel IA. Les descriptions modifiées ne régénèrent pas les visuels ; l'utilisateur les remplace ou les génère séparément. Un nouvel export suit toujours les règles du forfait. Ce storyboard reste limité aux quatre scènes du pipeline actuel et ne constitue pas une timeline multipiste.
+
+Vérification ciblée : `npm run test:editor`. Les tests d'écriture utilisent PostgreSQL embarqué, sans données client ni fournisseur externe.
