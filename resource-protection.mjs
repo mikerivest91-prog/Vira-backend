@@ -40,9 +40,10 @@ export function createResourceProtection({pool,storage,temporaryStorage,env=proc
     const budget=paths.get(req.path.toLowerCase().replace(/\/+$/,''));
     if(req.method!=='POST'||!budget)return next();
     if(!req.user)return reject(res,401,'Connexion requise.');
-    let db,locked=false,released=false;
+    let db,locked=false,released=false,uploadTimer;
     const release=async()=>{
       if(released||!db)return;released=true;
+      clearTimeout(uploadTimer);
       try{if(locked)await db.query('SELECT pg_advisory_unlock(91349,0)');db.release();}
       catch{db.release(true);}
     };
@@ -64,10 +65,13 @@ export function createResourceProtection({pool,storage,temporaryStorage,env=proc
         if(used+added>limits.storageBytes){await Promise.allSettled(files.map(filename=>io.unlink(filename)));throw storageError();}
       };
       res.locals.releaseMedia=release;
+      res.locals.clearUploadTimer=()=>clearTimeout(uploadTimer);
       res.locals.mediaProcessing=false;
       res.once('finish',()=>void release());
       res.once('close',()=>{if(!res.locals.mediaProcessing)void release();});
       req.setTimeout?.(60000,()=>req.destroy());
+      // An idle timeout alone permits an endless slow upload. Bound total upload time too.
+      uploadTimer=setTimeout(()=>req.destroy(),60000);uploadTimer.unref();
       return next();
     }catch{await release();if(!res.destroyed)return reject(res,503,'La protection des ressources est temporairement indisponible. Réessayez plus tard.');}
   }
@@ -83,7 +87,7 @@ export function createResourceProtection({pool,storage,temporaryStorage,env=proc
     }catch(error){await db.query('ROLLBACK').catch(()=>{});throw error;}finally{db.release();}
   }
   return {media,reserveVoice,limits,run:handler=>async(req,res,next)=>{
-    res.locals.mediaProcessing=true;req.setTimeout?.(0);
+    res.locals.mediaProcessing=true;res.locals.clearUploadTimer?.();req.setTimeout?.(0);
     try{return await handler(req,res,next);}finally{await res.locals.releaseMedia?.();}
   },async init(){
     await pool.query('CREATE TABLE IF NOT EXISTS olyvex_voice_daily_usage(day DATE NOT NULL,user_id BIGINT NOT NULL,requests INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(day,user_id))');
