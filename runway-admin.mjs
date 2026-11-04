@@ -3,8 +3,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 // Paid pilot: server-authorized administrator only; no automatic POST retries.
-export function installRunwayAdmin({app, requireAdmin, storage, decodeImage, fetchImpl = fetch}) {
-  const directory = path.join(storage, '.runway-jobs');
+export function installRunwayAdmin({app, requireAdmin, storage, decodeImage, fetchImpl = fetch, directoryName='.runway-jobs',beforeSubmit=async()=>null,settle=async()=>{},beforeDownload=async()=>true}) {
+  const directory = path.join(storage, directoryName);
   const locked = new Set();
   const jobFile = user => path.join(directory, crypto.createHash('sha256').update(String(user)).digest('hex') + '.json');
   const read = async user => { try { return JSON.parse(await fs.readFile(jobFile(user), 'utf8')); } catch(e) { if(e.code === 'ENOENT') return null; throw e; } };
@@ -47,7 +47,9 @@ export function installRunwayAdmin({app, requireAdmin, storage, decodeImage, fet
     if(previous && !['SUCCEEDED','FAILED','CANCELED'].includes(previous.status)) return res.status(409).json({error:'Un test existe déjà. Consultez son statut avant de continuer.'});
     // Persist before submitting: an ambiguous network failure must never auto-charge again.
     const job = {status:'SUBMITTING', createdAt:new Date().toISOString(), localId:crypto.randomUUID()};
-    await save(user,job);
+    job.reservationId=await beforeSubmit(user);
+    try { await save(user,job); }
+    catch(error){await settle(user,{...job,status:'NOT_SUBMITTED'});throw error;}
     try {
       const result = await api('image_to_video',{model:'gen4_turbo',promptImage:req.body.image,promptText:prompt.trim(),ratio:'720:1280',duration:5});
       if(typeof result.id !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(result.id)) throw new Error('Invalid task');
@@ -58,10 +60,11 @@ export function installRunwayAdmin({app, requireAdmin, storage, decodeImage, fet
   app.get('/api/admin/runway', requireAdmin, guard(async (_req,res,user) => {
     const job = await read(user);
     if(!job) return res.json({status:'IDLE'});
-    if(job.videoUrl || !job.id || ['FAILED','CANCELED'].includes(job.status)) return res.json(job);
+    if(job.videoUrl || !job.id || ['FAILED','CANCELED'].includes(job.status)) {await settle(user,job);return res.json(job);}
     const task = await api('tasks/'+encodeURIComponent(job.id));
     job.status = task.status;
     if(task.status === 'SUCCEEDED') {
+      if(!await beforeDownload(_req,res))return;
       const url = new URL(task.output?.[0]);
       // Accept only provider-owned media hosts, never arbitrary user URLs or redirects.
       if(url.protocol!=='https:' || !(url.hostname==='dnznrvs05pmza.cloudfront.net' || url.hostname.endsWith('.runwayml.com') || url.hostname.endsWith('.runway.com'))) throw new Error('Untrusted media host');
@@ -79,10 +82,12 @@ export function installRunwayAdmin({app, requireAdmin, storage, decodeImage, fet
         if(!size) throw new Error('Empty video');
       } catch(e) { await handle.close(); await fs.unlink(temporary).catch(()=>{}); throw e; }
       await handle.close();
+      await res.locals?.acceptMedia?.([temporary]);
       await fs.writeFile(target+'.owner.json',JSON.stringify({userId:user}));
       await fs.rename(temporary,target);
       job.videoUrl='/videos/'+name;
     }
+    await settle(user,job);
     await save(user,job); res.json(job);
   }));
 }

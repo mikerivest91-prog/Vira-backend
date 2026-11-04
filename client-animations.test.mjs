@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {installRunwayAdmin} from './runway-admin.mjs';
+async function fixture({unknown=false,before,acceptMedia}={}){
+ const folder=await fs.mkdtemp(path.join(os.tmpdir(),'olyvex-runway-test-'));let post,get;
+ const state={submitted:0,reserved:0,settled:[],taskStatus:'FAILED'};
+ installRunwayAdmin({app:{post:(_url,...h)=>post=h.at(-1),get:(url,...h)=>{if(url==='/api/admin/runway')get=h.at(-1);}},requireAdmin(){},storage:folder,decodeImage(){},
+  beforeSubmit:async()=>{state.reserved++;await before?.(folder);return 42;},settle:async(_user,job)=>state.settled.push(job.status),
+  fetchImpl:async(url,options)=>{if(options?.method==='POST'){state.submitted++;if(unknown)throw Error('timeout');return {ok:true,json:async()=>({id:'task_fixture'})};}if(url.includes('/tasks/'))return {ok:true,json:async()=>({status:state.taskStatus,output:['https://cdn.runwayml.com/clip.mp4']})};return {ok:true,body:(async function*(){yield Buffer.from('fixture');})()};}
+ });
+ async function call(method){const res={statusCode:200,locals:{acceptMedia},setHeader(){},status(n){this.statusCode=n;return this;},json(body){this.body=body;return this;}};await (method==='POST'?post:get)({user:{id:1},body:{prompt:'Un mouvement doux',image:'fixture',confirmPaid:true},get:name=>name==='origin'?'https://example.invalid':'example.invalid'},res);return res;}
+ return {folder,state,call,close:()=>fs.rm(folder,{recursive:true,force:true})};
+}
+test('animation reserves once and refuses duplicate provider submission',async()=>{const previous=process.env.RUNWAYML_API_SECRET;process.env.RUNWAYML_API_SECRET='fixture';const f=await fixture();try{assert.equal((await f.call('POST')).statusCode,202);assert.equal((await f.call('POST')).statusCode,409);assert.equal(f.state.reserved,1);assert.equal(f.state.submitted,1);}finally{await f.close();if(previous===undefined)delete process.env.RUNWAYML_API_SECRET;else process.env.RUNWAYML_API_SECRET=previous;}});
+test('known provider failure settles refundable reservation',async()=>{const previous=process.env.RUNWAYML_API_SECRET;process.env.RUNWAYML_API_SECRET='fixture';const f=await fixture();try{await f.call('POST');assert.equal((await f.call('GET')).body.status,'FAILED');assert.deepEqual(f.state.settled,['FAILED']);}finally{await f.close();if(previous===undefined)delete process.env.RUNWAYML_API_SECRET;else process.env.RUNWAYML_API_SECRET=previous;}});
+test('ambiguous provider timeout retains reservation and never retries paid POST',async()=>{const previous=process.env.RUNWAYML_API_SECRET;process.env.RUNWAYML_API_SECRET='fixture';const f=await fixture({unknown:true});try{assert.equal((await f.call('POST')).body.status,'UNKNOWN');assert.equal((await f.call('POST')).statusCode,409);assert.equal(f.state.submitted,1);assert.equal(f.state.settled.length,0);}finally{await f.close();if(previous===undefined)delete process.env.RUNWAYML_API_SECRET;else process.env.RUNWAYML_API_SECRET=previous;}});
+test('local save failure before provider submission settles reservation',async()=>{const previous=process.env.RUNWAYML_API_SECRET;process.env.RUNWAYML_API_SECRET='fixture';const f=await fixture({before:folder=>fs.writeFile(path.join(folder,'.runway-jobs'),'block directory')});try{assert.equal((await f.call('POST')).statusCode,502);assert.equal(f.state.submitted,0);assert.deepEqual(f.state.settled,['NOT_SUBMITTED']);}finally{await f.close();if(previous===undefined)delete process.env.RUNWAYML_API_SECRET;else process.env.RUNWAYML_API_SECRET=previous;}});
+test('storage acceptance is checked before publishing generated animation',async()=>{const previous=process.env.RUNWAYML_API_SECRET;process.env.RUNWAYML_API_SECRET='fixture';let accepted=0;const f=await fixture({acceptMedia:async()=>{accepted++;throw Error('quota');}});try{await f.call('POST');f.state.taskStatus='SUCCEEDED';assert.equal((await f.call('GET')).statusCode,502);assert.equal(accepted,1);assert.equal((await fs.readdir(f.folder)).filter(name=>/^vira-.*\.mp4$/.test(name)).length,0);}finally{await f.close();if(previous===undefined)delete process.env.RUNWAYML_API_SECRET;else process.env.RUNWAYML_API_SECRET=previous;}});

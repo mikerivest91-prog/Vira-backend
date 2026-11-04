@@ -1,5 +1,7 @@
 import {canRenderBrand} from "./video-brand.mjs";
 import {installCampaignNarration} from "./campaign-narration.mjs";
+import {createCommerce} from "./commerce.mjs";
+import {installClientAnimations} from "./client-animations.mjs";
 import {createResourceProtection} from "./resource-protection.mjs";
 import { copyCampaignData } from "./campaign-copy.mjs";
 import { installBrandProfile } from "./brand-profile.mjs";
@@ -97,6 +99,7 @@ app.use(cors({
 }));
 
 app.post("/api/stripe/webhook", express.raw({ type: "application/json", limit: "1mb" }), (req, res) => billing.webhook(req, res));
+app.post("/api/commerce/webhook", express.raw({type:"application/json",limit:"1mb"}), (req,res)=>commerce.webhook(req,res));
 app.use(express.json({ limit: "2mb" }));
 app.get("/", (_req, res) => res.sendFile(path.resolve("index.html")));
 app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
@@ -362,12 +365,14 @@ app.get("/offer-math.mjs",requireAuth,(_req,res)=>res.sendFile(path.resolve("off
 app.get("/offers-ui.mjs",requireAuth,(_req,res)=>res.sendFile(path.resolve("offers-ui.mjs")));
 app.get("/brand", requireAuth, (_req,res) => res.sendFile(path.resolve("brand.html")));
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
+const commerce = createCommerce({app,pool,requireAuth});
+const requireCreation=(req,res,next)=>commerce.applies(req.user)?commerce.requireCreation(req,res,next):billing.requireCreation(req,res,next);
 const authProtection = installAuthProtection({ app, pool });
 const passwordRecovery = installPasswordRecovery({ app, pool, hashPassword, clearSessionCookie, sendMail: await createRecoveryMailer() });
 app.get("/reset-password", (_req,res) => {res.setHeader("Cache-Control","no-store");res.setHeader("Referrer-Policy","no-referrer");res.sendFile(path.resolve("reset-password.html"));});
 app.get("/forgot-password", (_req,res) => res.sendFile(path.resolve("forgot-password.html")));
 const imageGeneration = installImageGeneration({ app, pool, requireAuth,
-  requireCreation: (req, res, next) => billing.requireCreation(req, res, next) });
+  commerce, requireCreation });
 const metaSocial = installMetaSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR,ffmpegPath});
 const tiktokSocial = installTikTokSocial({app,pool,requireAuth,videoStorage:VIDEO_STORAGE_DIR});
 app.get("/tiktok-social-ui.js", (_req,res) => res.sendFile(path.resolve("tiktok-social-ui.js")));
@@ -385,10 +390,11 @@ const subscriptionCreationPaths = new Set([
 app.use((req, res, next) => {
   const pathname = req.path.toLowerCase().replace(/\/+$/, "");
   if (req.method !== "POST" || !subscriptionCreationPaths.has(pathname)) return next();
-  return requireAuth(req, res, () => billing.requireCreation(req, res, next));
+  return requireAuth(req, res, () => requireCreation(req, res, next));
 });
 const resourceProtection=createResourceProtection({pool,storage:VIDEO_STORAGE_DIR,temporaryStorage:VIDEO_TEMP_DIR});
 app.use(resourceProtection.media);
+installClientAnimations({app,pool,requireAuth,commerce,resourceProtection,storage:VIDEO_STORAGE_DIR,decodeImage:decodePreviewImage});
 
 async function initDatabase() {
   await pool.query(`
@@ -488,8 +494,10 @@ async function initDatabase() {
   console.log("VIRA database ready");
 }
 
-async function reserveImageSlots(userId, quantity = 1) {
+async function reserveImageSlots(user, quantity = 1) {
+  const userId=user.id;
   const count = Math.max(1, Math.min(16, Number.parseInt(quantity, 10) || 1));
+  if(commerce.applies(user))return commerce.reserve(user,'images',count);
   const db = await pool.connect();
   try {
     await db.query("BEGIN");
@@ -504,6 +512,7 @@ async function reserveImageSlots(userId, quantity = 1) {
 }
 
 async function reserveVideoSlot(user) {
+  if(commerce.applies(user))return commerce.reserve(user,'videos',1);
   const userId = user.id;
   const quota = videoQuotaFor(user);
   const db = await pool.connect();
@@ -1324,7 +1333,7 @@ app.post("/api/video/assemble-clips", requireAuth, resourceProtection.run(async 
       duration=await wavDuration(audioPath);
     } catch { return res.status(400).json({ok:false,error:"Un clip ou la narration a expiré. Importez les clips ou préparez la voix de nouveau."}); }
     const usage=await reserveVideoSlot(req.user);
-    if (!usage.ok) return res.status(429).json({ok:false,error:`Limite atteinte : ${usage.limit} vidéos maximum par mois${usage.ownerTesting ? " en mode test propriétaire" : " avec VIRA Starter"}.`});
+    if (!usage.ok) return res.status(429).json({ok:false,error:usage.error || `Limite atteinte : ${usage.limit} vidéos maximum par mois${usage.ownerTesting ? " en mode test propriétaire" : " avec VIRA Starter"}.`});
     let fitted;
     try {
       fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
@@ -1413,7 +1422,7 @@ app.post("/api/video/free-assemble", requireAuth, resourceProtection.run(async (
     catch { return res.status(400).json({ok:false,error:"La narration a expiré ou est invalide. Préparez-la de nouveau."}); }
   }
   const usage = await reserveVideoSlot(req.user);
-  if (!usage.ok) return res.status(429).json({ ok:false, error:`Limite atteinte : ${usage.limit} vidéos maximum par mois${usage.ownerTesting ? " en mode test propriétaire" : " avec VIRA Starter"}.` });
+  if (!usage.ok) return res.status(429).json({ ok:false, error:usage.error || `Limite atteinte : ${usage.limit} vidéos maximum par mois${usage.ownerTesting ? " en mode test propriétaire" : " avec VIRA Starter"}.` });
   // Three short dissolves overlap the clips without shortening the narration.
   const transition = { fade: 0.3, clipDuration: Math.ceil(((Math.max(2, duration) + 0.9) / 4) * 30) / 30 };
   const temporaryFiles = [];
@@ -1450,6 +1459,7 @@ const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transit
 // Reserve image-generation units before any paid AI image request.
 app.get("/api/usage", requireAuth, async (req, res) => {
   try {
+    if(commerce.applies(req.user))return res.json(await commerce.usage(req.user));
     const { rows } = await pool.query(`SELECT
       (SELECT COUNT(*)::int FROM vira_video_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date) AS videos,
       (SELECT COALESCE(SUM(quantity),0)::int FROM vira_image_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month', NOW())::date) AS images`, [req.user.id]);
@@ -1461,8 +1471,8 @@ app.get("/api/usage", requireAuth, async (req, res) => {
 });
 app.post("/api/images/reserve", requireAuth, async (req, res) => {
   try {
-    const result = await reserveImageSlots(req.user.id, req.body?.quantity);
-    if (!result.ok) return res.status(429).json({ ok:false, error:"Limite atteinte : 16 images IA maximum par mois avec VIRA Starter.", ...result });
+    const result = await reserveImageSlots(req.user, req.body?.quantity);
+    if (!result.ok) return res.status(429).json({ ok:false, error:"Crédits images insuffisants. Consultez vos forfaits et blocs.", ...result });
     res.json(result);
   } catch (error) {
     console.error("image usage reservation error", error);
@@ -1560,6 +1570,7 @@ async function start() {
 
     await initDatabase();
     await billing.init();
+    await commerce.init();
     await authProtection.init();
     await resourceProtection.init();
     await brandProfile.init();
