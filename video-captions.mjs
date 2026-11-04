@@ -21,9 +21,10 @@ export async function applyVideoCaptions({outputPath,directory,ffmpegPath,settin
   for(let i=0;i<cues.length;i++){
     const cue=cues[i];if(cue.start>=duration)break;
     entry('caption-blank.png',cue.start-cursor);
-    const text=await sharp({text:{text:`<span foreground="white">${escape(cue.text)}</span>`,font:`Abel ${fontSize}`,fontfile,width:width-2*margin-32,height:100,align:'centre',rgba:true,wrap:'word-char',spacing:4}}).png().toBuffer();
+    const text=await sharp({text:{text:`<span foreground="white">${escape(cue.text)}</span>`,font:`Abel ${fontSize}`,fontfile,width:width-2*margin-32,dpi:72,align:'centre',rgba:true,wrap:'word-char',spacing:4}}).resize({height:100,withoutEnlargement:true}).png().toBuffer();
     const meta=await sharp(text).metadata();
-    const background=Buffer.from(`<svg width="${width}" height="${stripHeight}"><rect x="${margin}" y="8" width="${width-2*margin}" height="124" rx="14" fill="#101426" fill-opacity="0.88"/></svg>`);
+    const boxHeight=Math.min(124,meta.height+24);
+    const background=Buffer.from(`<svg width="${width}" height="${stripHeight}"><rect x="${margin}" y="${(stripHeight-boxHeight)/2}" width="${width-2*margin}" height="${boxHeight}" rx="14" fill="#101426" fill-opacity="0.88"/></svg>`);
     const name=`caption-${i}.png`;
     await writeFile(path.join(directory,name),await sharp(blank).composite([{input:background},{input:text,left:Math.round((width-meta.width)/2),top:Math.round((stripHeight-meta.height)/2)}]).png().toBuffer());
     entry(name,Math.min(cue.end,duration)-cue.start);cursor=Math.min(cue.end,duration);
