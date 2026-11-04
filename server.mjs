@@ -1,3 +1,5 @@
+import {installAssistant} from "./assistant-service.mjs";
+import {assistantFacts} from "./assistant-facts.mjs";
 import {installExportRoutes, validatedExport} from "./export-routes.mjs";
 import {canRenderBrand} from "./video-brand.mjs";
 import {installCampaignNarration} from "./campaign-narration.mjs";
@@ -372,6 +374,8 @@ app.get("/brand", requireAuth, (_req,res) => res.sendFile(path.resolve("brand.ht
 const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const commerce = createCommerce({app,pool,requireAuth});
 const requireCreation=(req,res,next)=>commerce.applies(req.user)?commerce.requireCreation(req,res,next):billing.requireCreation(req,res,next);
+const assistant=installAssistant({app,pool,requireAuth,brandProfile,factsFor:user=>assistantFacts({pool,user,commerce,videoQuotaFor})});
+for(const file of ["assistant-ui.js","assistant-ui.css"])app.get("/"+file,(_req,res)=>res.sendFile(path.resolve(file)));
 const authProtection = installAuthProtection({ app, pool });
 const passwordRecovery = installPasswordRecovery({ app, pool, hashPassword, clearSessionCookie, sendMail: await createRecoveryMailer() });
 app.get("/reset-password", (_req,res) => {res.setHeader("Cache-Control","no-store");res.setHeader("Referrer-Policy","no-referrer");res.sendFile(path.resolve("reset-password.html"));});
@@ -1584,6 +1588,7 @@ async function start() {
     await commerce.init();
     await authProtection.init();
     await resourceProtection.init();
+    await assistant.init();
     await brandProfile.init();
     await passwordRecovery.init();
     await imageGeneration.init();
