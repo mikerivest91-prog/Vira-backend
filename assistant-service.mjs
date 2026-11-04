@@ -27,14 +27,15 @@ export function installAssistant({app,pool,requireAuth,brandProfile,factsFor,env
  const origin=(env.APP_ORIGIN||'https://vira-backend-im5s.onrender.com').replace(/\/$/,'');
  const noStore=(req,res,next)=>{res.setHeader('Cache-Control','private, no-store');if(req.method==='POST'&&req.headers.origin&&req.headers.origin!==origin)return res.status(403).json({ok:false,error:'Origine invalide.'});return next();};
  app.get('/api/assistant/config',requireAuth,noStore,async(req,res)=>{
-  try{const {rows}=await pool.query("SELECT requests FROM olyvex_assistant_daily WHERE day=(NOW() AT TIME ZONE 'UTC')::date AND user_id=$1",[req.user.id]);return res.json({ok:true,enabled:enabled(),dailyLimit:userLimit,remaining:Math.max(0,userLimit-Number(rows[0]?.requests||0)),supportEmail:'olyvex@olyvexapp.com'});}catch{return res.status(503).json({ok:false,error:'Aide indisponible. Réessayez plus tard.'});}
+  try{const {rows}=await pool.query("SELECT requests FROM olyvex_assistant_daily WHERE day=(NOW() AT TIME ZONE 'UTC')::date AND user_id=$1",[req.user.id]);const brand=await brandProfile.read(req.user.id);return res.json({ok:true,enabled:enabled(),dailyLimit:userLimit,remaining:Math.max(0,userLimit-Number(rows[0]?.requests||0)),brandName:String(brand?.name||'').slice(0,100),supportEmail:'olyvex@olyvexapp.com'});}catch{return res.status(503).json({ok:false,error:'Aide indisponible. Réessayez plus tard.'});}
  });
  app.post('/api/assistant/message',requireAuth,noStore,async(req,res)=>{
   if(!enabled())return res.status(503).json({ok:false,error:'L’assistante IA est temporairement indisponible.'});
   let input;try{input=normalizeAssistantInput(req.body);}catch(error){return res.status(400).json({ok:false,error:error.message});}
   let reservation;
   try{
-   const facts=await factsFor(req.user);facts.campaign=null;
+   const facts=await factsFor(req.user);facts.campaign=null;facts.brand=null;
+   if(input.useBrand){const brand=await brandProfile.read(req.user.id);if(brand?.name)facts.brand={name:String(brand.name).slice(0,100),tagline:String(brand.tagline||'').slice(0,160),primaryColor:/^#[0-9a-f]{6}$/i.test(brand.primaryColor||'')?brand.primaryColor:null,secondaryColor:/^#[0-9a-f]{6}$/i.test(brand.secondaryColor||'')?brand.secondaryColor:null};}
    if(input.campaignId){const {rows}=await pool.query('SELECT title,status,campaign_data FROM vira_campaigns WHERE id=$1 AND user_id=$2',[input.campaignId,req.user.id]);if(!rows[0])return res.status(404).json({ok:false,error:'Campagne introuvable pour ce compte.'});const c=rows[0],data=c.campaign_data||{},parsed=scriptModel.parse(data.scenario||'');facts.campaign={title:String(c.title).slice(0,160),status:c.status,brief:String(data.brief||'').slice(0,1200),objective:parsed.objective.slice(0,700),target:parsed.target.slice(0,700),hook:parsed.hook.slice(0,500),narration:parsed.narration.slice(0,800),scenes:parsed.scenes.map(s=>s.slice(0,400)),visualsReady:data.generatedImages?.length===4||data.sourceClips?.length===4,voiceSaved:Boolean(data.narration?.audioId),exportSaved:Boolean(data.videoUrl)};}
    reservation=await budget.reserve(req.user.id);if(!reservation.ok){res.setHeader('Retry-After','5');return res.status(429).json({ok:false,error:reservation.error});}
    const result=await provider(input,facts,{key:env.OPENAI_API_KEY,modelName:env.ASSISTANT_MODEL||'gpt-5.4-mini-2026-03-17'});

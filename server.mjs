@@ -1,3 +1,5 @@
+import {installProductionPlan} from "./production-plan.mjs";
+import {inspectProductionMedia} from "./production-media.mjs";
 import {installAssistant} from "./assistant-service.mjs";
 import {assistantFacts} from "./assistant-facts.mjs";
 import {installExportRoutes, validatedExport} from "./export-routes.mjs";
@@ -375,6 +377,8 @@ const billing = createTestBilling({ app, pool, requireAdmin, requireAuth });
 const commerce = createCommerce({app,pool,requireAuth});
 const requireCreation=(req,res,next)=>commerce.applies(req.user)?commerce.requireCreation(req,res,next):billing.requireCreation(req,res,next);
 const assistant=installAssistant({app,pool,requireAuth,brandProfile,factsFor:user=>assistantFacts({pool,user,commerce,videoQuotaFor})});
+installProductionPlan({app,pool,requireAuth,requireCreation,factsFor:user=>assistantFacts({pool,user,commerce,videoQuotaFor}),inspectMedia:(data,userId)=>inspectProductionMedia(data,userId,{audioDirectory:AUDIO_TEMP_DIR,clipDirectory:CLIP_TEMP_DIR,videoDirectory:VIDEO_STORAGE_DIR,decodeImage:decodePreviewImage})});
+for(const file of ["production-guide-ui.js","production-guide.css"])app.get("/"+file,(_req,res)=>res.sendFile(path.resolve(file)));
 for(const file of ["assistant-ui.js","assistant-ui.css"])app.get("/"+file,(_req,res)=>res.sendFile(path.resolve(file)));
 const authProtection = installAuthProtection({ app, pool });
 const passwordRecovery = installPasswordRecovery({ app, pool, hashPassword, clearSessionCookie, sendMail: await createRecoveryMailer() });
