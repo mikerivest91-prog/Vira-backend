@@ -40,7 +40,7 @@ export async function generateImageBatch(prompts, { key, model = 'gpt-image-1-mi
   return images;
 }
 
-export function installImageGeneration({ app, pool, requireAuth, requireCreation, env = process.env }) {
+export function installImageGeneration({ app, pool, requireAuth, requireCreation, commerce, env = process.env }) {
   const enabled = () => env.AI_IMAGES_ENABLED === 'true' && Boolean(env.OPENAI_API_KEY);
   const allowed = user => env.AI_IMAGES_ALLOW_CLIENTS === 'true' ||
     [env.ADMIN_EMAIL, ...(env.AI_IMAGE_TEST_EMAILS || '').split(',')].filter(Boolean)
@@ -128,8 +128,9 @@ export function installImageGeneration({ app, pool, requireAuth, requireCreation
       if ((daily.rows[0].count + 1) * 4 > dayLimit || active.rows[0].count >= 2) { await db.query('ROLLBACK'); return res.status(429).json({ ok: false, error: 'La capacité de génération est atteinte. Réessayez plus tard ou importez vos images.' }); }
       await db.query('SELECT pg_advisory_xact_lock(91344,$1::integer)', [req.user.id]);
       const usage = await db.query("SELECT COALESCE(SUM(quantity),0)::int AS count FROM vira_image_usage WHERE user_id=$1 AND period_start=DATE_TRUNC('month',NOW())::date", [req.user.id]);
-      if (usage.rows[0].count + 4 > 16) { await db.query('ROLLBACK'); return res.status(429).json({ ok: false, error: 'Il faut quatre crédits images disponibles pour générer les scènes.' }); }
+      if (!commerce?.applies(req.user) && usage.rows[0].count + 4 > 16) { await db.query('ROLLBACK'); return res.status(429).json({ ok: false, error: 'Il faut quatre crédits images disponibles pour générer les scènes.' }); }
       const slot = await db.query('INSERT INTO vira_image_usage(user_id,quantity) VALUES($1,4) RETURNING id', [req.user.id]);
+      if(commerce?.applies(req.user) && !await commerce.consume(db,req.user.id,'images',slot.rows[0].id,4)){await db.query('ROLLBACK');return res.status(429).json({ok:false,error:'Il faut quatre crédits images disponibles pour générer les scènes.'});}
       const result = await db.query("INSERT INTO vira_image_jobs(id,user_id,fingerprint,usage_id,owner_run) VALUES($1,$2,$3,$4,$5) RETURNING *", [request.id, req.user.id, fingerprint, slot.rows[0].id, ownerRun]);
       await db.query('COMMIT'); started = true;
       res.status(202).json(publicJob(result.rows[0]));
