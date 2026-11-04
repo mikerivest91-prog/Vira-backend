@@ -1,4 +1,5 @@
 import {canRenderBrand} from "./video-brand.mjs";
+import {installCampaignNarration} from "./campaign-narration.mjs";
 import {createResourceProtection} from "./resource-protection.mjs";
 import { copyCampaignData } from "./campaign-copy.mjs";
 import { installBrandProfile } from "./brand-profile.mjs";
@@ -354,6 +355,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 
 const brandProfile = installBrandProfile({app,pool,requireAuth});
+installCampaignNarration({app,pool,requireAuth,audioDirectory:AUDIO_TEMP_DIR});
 app.get("/api/brand/rendering",requireAuth,async (_req,res)=>res.json({available:await canRenderBrand(ffmpegPath)}));
 app.get("/offers",requireAuth,(_req,res)=>res.sendFile(path.resolve("offers.html")));
 app.get("/offer-math.mjs",requireAuth,(_req,res)=>res.sendFile(path.resolve("offer-math.mjs")));
@@ -1014,7 +1016,8 @@ app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
         SET
           title = $1,
           status = $2,
-          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand')),
+          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand'),
+            'narration', CASE WHEN campaign_data->>'scenario' IS NOT DISTINCT FROM $3::jsonb->>'scenario' THEN campaign_data->'narration' ELSE 'null'::jsonb END),
           updated_at = NOW()
         WHERE id = $4
           AND user_id = $5

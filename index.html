@@ -3055,7 +3055,52 @@ ${els.tone.value || "Professionnel"}
     }
 
     const voiceElement = id => document.getElementById(id);
+    let audioRevision = 0;
+    let narrationSaveQueue = Promise.resolve();
+    voicePanel.dataset.scenario = rawScenario;
+    voiceElement("voiceNarration").value = (parseScenario(rawScenario).narration || "").trim().slice(0,800);
+    function saveCampaignNarration(narration) {
+      const campaignId = localStorage.getItem("viraCurrentCampaignId");
+      if (!campaignId) return Promise.resolve();
+      const body = {scenario:rawScenario, ...(narration || {audioId:null})};
+      const pending = narrationSaveQueue.catch(()=>{}).then(async()=>{
+        const response = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/narration`,{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw Error(data.error || "Sauvegarde de la narration impossible.");
+      });
+      narrationSaveQueue = pending;
+      return pending;
+    }
+    async function restoreCampaignNarration() {
+      const campaignId = localStorage.getItem("viraCurrentCampaignId");
+      if (!campaignId || !rawScenario) return;
+      const revision=audioRevision, scenario=rawScenario;
+      preparedAudioId=""; voiceReady=false;
+      localStorage.removeItem("viraPreparedAudioId"); localStorage.removeItem("viraVoiceReady");
+      try {
+        const response=await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/narration`,{credentials:"same-origin"});
+        const data=await response.json();
+        if(revision!==audioRevision || scenario!==rawScenario || audioBusy)return;
+        if(!response.ok)throw Error(data.error || "Impossible de retrouver la narration.");
+        const saved=data.narration;
+        if(!saved || data.scenario!==rawScenario)return;
+        if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(saved.audioId) || saved.audioUrl!==`/api/audio/${saved.audioId}`)throw Error("Narration enregistrée invalide.");
+        preparedAudioId=saved.audioId; voiceReady=true;
+        localStorage.setItem("viraPreparedAudioId",saved.audioId);localStorage.setItem("viraVoiceReady","true");
+        voiceElement("voiceMode").value=saved.mode==="personal"?"personal":"auto";
+        if([...voiceElement("voiceGender").options].some(option=>option.value===saved.voice))voiceElement("voiceGender").value=saved.voice;
+        voiceElement("voiceNarration").value=typeof saved.text==="string"?saved.text.slice(0,800):"";
+        voiceElement("autoVoiceFields").hidden=saved.mode==="personal";
+        voiceElement("personalVoiceFields").hidden=saved.mode!=="personal";
+        voiceElement("voicePreview").src=saved.audioUrl;voiceElement("voicePreview").hidden=false;
+        voiceElement("voiceFeedback").textContent="Narration retrouvée. Écoutez-la avant de préparer la vidéo finale.";
+        els.voiceBtn.querySelector("strong").textContent="Voix prête";
+      }catch(error){if(revision===audioRevision && scenario===rawScenario)voiceElement("voiceFeedback").textContent=error.message;}
+      finally{updateWorkflowState();}
+    }
     function invalidateAudio() {
+      audioRevision++;
+      if(preparedAudioId)void saveCampaignNarration(null).catch(()=>{voiceElement("voiceFeedback").textContent="La modification de la narration n’a pas été sauvegardée. Vérifiez votre connexion avant de quitter.";});
       preparedAudioId = "";
       localStorage.removeItem("viraPreparedAudioId");
       voiceReady = false;
@@ -3093,6 +3138,9 @@ ${els.tone.value || "Professionnel"}
         voiceElement("voiceFeedback").textContent = `Audio prêt · ${Math.ceil(data.duration)} secondes. Écoutez-le, puis cliquez sur Vidéo finale.`;
         els.voiceBtn.querySelector("strong").textContent = "Voix prête";
         setStatus(els.status,"Narration prête à être intégrée au MP4.","success");
+        try {
+          await saveCampaignNarration({audioId:data.audioId,mode:voiceElement("voiceMode").value,voice:voiceElement("voiceGender").value,text:voiceElement("voiceNarration").value.slice(0,800)});
+        }catch{voiceElement("voiceFeedback").textContent+=" La sauvegarde de la narration a échoué. Elle reste utilisable ici ; réessayez avant de quitter.";}
       } catch (error) { voiceElement("voiceFeedback").textContent = error.message; }
       finally { audioBusy = false; voicePanel.querySelectorAll("button,input,select,textarea").forEach(el => el.disabled = false); updateWorkflowState(); }
     }
@@ -3652,6 +3700,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
     }
 
     restoreForm();
+    void restoreCampaignNarration();
     if (videoReady && finalVideoUrl) renderFinalVideo(FREE_VIDEO_MODE);
 
     if (rawScenario && isValidScenarioText(rawScenario)) {
