@@ -2390,9 +2390,40 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
         report.append(preview);
       }
     }
+    function brainHistoryKey() {
+      const owner = localStorage.getItem('viraWorkspaceUserId');
+      const campaignId = localStorage.getItem('viraCurrentCampaignId');
+      return owner && campaignId ? 'viraBrainReport:v1:' + owner + ':' + campaignId : null;
+    }
+    function saveBrainReport(snapshot, analysis) {
+      try {
+        const key = brainHistoryKey();
+        if (!key) return false;
+        localStorage.setItem(key, JSON.stringify({snapshot, analysis, date: new Date().toISOString()}));
+        return true;
+      } catch { return false; }
+    }
+    function restoreBrainReport() {
+      try {
+        const key = brainHistoryKey();
+        const saved = key && JSON.parse(localStorage.getItem(key));
+        if (!saved || typeof saved.analysis !== 'string' || typeof saved.snapshot !== 'string' || !Number.isFinite(Date.parse(saved.date))) return false;
+        const stale = saved.snapshot !== JSON.stringify(brainCampaign());
+        renderBrainReport(saved.analysis, saved.snapshot);
+        setBrainState('complete');
+        els.score.textContent = stale ? 'À actualiser' : 'Analyse enregistrée';
+        const date = new Date(saved.date).toLocaleString('fr-CA', {dateStyle:'medium',timeStyle:'short'});
+        els.scoreNote.textContent = 'Analyse du ' + date + ' · Conservée dans ce navigateur.' +
+          (stale ? ' Le brief ou le scénario a changé : relancez l’analyse.' : '');
+        els.recommended.textContent = stale ? 'Ce diagnostic concerne une ancienne version de la campagne.' : 'Relancez l’analyse uniquement lorsque vous souhaitez un nouveau diagnostic.';
+        if (stale) els.opportunity.querySelectorAll('.brain-proposal button').forEach(button => { button.disabled = true; });
+        return true;
+      } catch { return false; }
+    }
     function updateBrain(run = false) {
       if (run === true) return runBrainAnalysis();
       brainRevision++;
+      if (restoreBrainReport()) return;
       setBrainState('idle');
       els.score.textContent = "À analyser";
       els.scoreNote.textContent = "Lancez une analyse après avoir renseigné votre campagne.";
@@ -2449,7 +2480,9 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
         }
         els.score.textContent = "Analyse terminée";
         els.scoreNote.textContent = "Diagnostic IA de cette version de votre campagne.";
+        const retained = saveBrainReport(snapshot, data.analysis);
         renderBrainReport(data.analysis, snapshot);
+        els.scoreNote.textContent += retained ? " Conservé dans ce navigateur pour cette campagne." : " Diagnostic non enregistré : enregistrez la campagne et vérifiez le stockage du navigateur.";
         setBrainState('complete');
         els.recommended.textContent = "Appliquez les actions prioritaires du diagnostic, puis testez votre campagne. Les résultats restent à mesurer.";
       } catch (error) {
