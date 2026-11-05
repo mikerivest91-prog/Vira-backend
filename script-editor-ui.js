@@ -18,11 +18,11 @@
   const byId = id => document.getElementById(id);
   let snapshot, order, scenes, saving = false;
   const inputs = new Map();
-  let selected = 0, history = [], future = [];
-  const capture = () => JSON.stringify({scenes, order, values:Object.fromEntries([...inputs].map(([k,v])=>[k,v.value]))});
+  let selected = 0, history = [], future = [], replacements = [null,null,null,null], importing = false, editSession = 0;
+  const capture = () => JSON.stringify({scenes, order, replacements, values:Object.fromEntries([...inputs].map(([k,v])=>[k,v.value]))});
   function historyButtons() { byId('seUndo').disabled=saving||history.length<2; byId('seRedo').disabled=saving||!future.length; }
   function remember() { const value=capture(); if(history.at(-1)!==value){history.push(value);if(history.length>80)history.shift();future=[];} historyButtons(); }
-  function restore(value) { const saved=JSON.parse(value);scenes=saved.scenes;order=saved.order;for(const [key,val] of Object.entries(saved.values))inputs.get(key).value=val;renderScenes();historyButtons(); }
+  function restore(value) { const saved=JSON.parse(value);scenes=saved.scenes;order=saved.order;replacements=saved.replacements||[null,null,null,null];for(const [key,val] of Object.entries(saved.values))inputs.get(key).value=val;renderScenes();historyButtons(); }
   function preview() {
     const target=byId('sePreview');target.replaceChildren();
     const title=document.createElement('h3');title.textContent='Scène '+(selected+1);
@@ -54,7 +54,7 @@
       const card = document.createElement('article'); card.className = 'se-scene';
       const heading = document.createElement('button'); heading.type='button'; heading.className='se-select'; heading.textContent = 'Scène ' + (index + 1); heading.onclick=()=>{selected=index;preview();};
       const media = document.createElement('div'); media.className = 'se-media';
-      const source = snapshot.clips[order[index]]?.thumbnail || snapshot.images[order[index]];
+      const source = replacements[order[index]] || snapshot.clips[order[index]]?.thumbnail || snapshot.images[order[index]];
       if (typeof source === 'string' && /^data:image\/(jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(source)) {
         const image = document.createElement('img'); image.src = source; image.alt = 'Visuel de la scène ' + (index + 1); media.append(image);
       } else { const label = document.createElement('span'); label.textContent = snapshot.clips[order[index]] ? 'Clip importé' : 'Visuel à préparer'; media.append(label); }
@@ -75,7 +75,30 @@
         };
         controls.append(button);
       }
-      card.append(heading, media, label, controls); byId('scriptEditorScenes').append(card);
+      const uploadLabel=document.createElement('label');uploadLabel.className='se-field';
+      const uploadTitle=document.createElement('span');uploadTitle.textContent='Remplacer la photo';
+      const upload=document.createElement('input');upload.type='file';upload.accept='image/jpeg,image/png,image/webp';upload.disabled=!!snapshot.clips.length||saving||importing;
+      upload.setAttribute('aria-label','Remplacer la photo de la scène '+(index+1));
+      upload.onchange=async()=>{
+        const file=upload.files[0];if(!file)return;const session=editSession,slot=order[index];importing=true;byId('scriptEditorSave').disabled=true;
+        try{
+          if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024)throw Error('Choisissez une photo JPEG, PNG ou WebP de 10 Mo maximum.');
+          const bitmap=await createImageBitmap(file);
+          let result;
+          try{
+            const canvas=document.createElement('canvas');const scale=Math.min(1,1200/Math.max(bitmap.width,bitmap.height));canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+            const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+            for(const quality of [.85,.7,.55,.4]){result=canvas.toDataURL('image/jpeg',quality);if(result.length<=220000)break;}
+            if(result.length>220000)throw Error('Cette photo est trop détaillée. Choisissez une image plus légère.');
+          }finally{bitmap.close();}
+          if(session!==editSession||!dialog.open)return;
+          replacements[slot]=result;remember();renderScenes();byId('scriptEditorFeedback').textContent='Photo remplacée dans le brouillon. Enregistrez pour l’utiliser dans le prochain export.';
+        }catch(error){if(session===editSession)byId('scriptEditorFeedback').textContent=error.message;}
+        finally{importing=false;if(session===editSession){byId('scriptEditorSave').disabled=saving;renderScenes();}}
+      };
+      uploadLabel.append(uploadTitle,upload);
+      if(snapshot.clips.length){const note=document.createElement('small');note.textContent='Le remplacement de photo est disponible pour les campagnes utilisant des images, sans clips importés.';uploadLabel.append(note);}
+      card.append(heading, media, label, uploadLabel, controls); byId('scriptEditorScenes').append(card);
     });
     preview(); historyButtons();
   }
@@ -87,6 +110,7 @@
   function openEditor() {
     snapshot = window.olyvexScriptEditor?.snapshot();
     if (!snapshot?.canEdit) return;
+    editSession++; replacements=[null,null,null,null];
     order = [0, 1, 2, 3]; scenes = snapshot.script.scenes.slice(); inputs.clear();
     for (const id of ['scriptEditorMessage', 'scriptEditorPublication', 'scriptEditorStrategy']) byId(id).replaceChildren();
     byId('scriptEditorVoice').querySelector('.se-field')?.remove();
@@ -107,14 +131,14 @@
   }
   document.addEventListener('click', event => { if (event.target.closest('[data-script-editor-open]')) openEditor(); });
   for (const name of ['olyvex:script-ready', 'olyvex:campaign-saved', 'olyvex:workflow-state']) window.addEventListener(name, buttons);
-  byId('scriptEditorClose').onclick = () => { if (!saving) dialog.close(); };
-  dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); });
+  byId('scriptEditorClose').onclick = () => { if (!saving) { editSession++; dialog.close(); } };
+  dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); else editSession++; });
   byId('scriptEditorResetOrder').onclick = () => {
     const original = [0, 1, 2, 3].map(index => scenes[order.indexOf(index)]);
     scenes = original; order = [0, 1, 2, 3]; remember(); renderScenes();
   };
   byId('scriptEditorForm').onsubmit = async event => {
-    event.preventDefault(); if (saving) return;
+    event.preventDefault(); if (saving || importing) return;
     let script;
     try { script = model.normalize({...Object.fromEntries([...inputs].map(([key, input]) => [key, input.value])), scenes}); }
     catch (error) { byId('scriptEditorFeedback').textContent = error.message; return; }
@@ -124,7 +148,7 @@
       await window.olyvexScriptEditor.settle();
       const response = await fetch('/api/campaigns/' + encodeURIComponent(snapshot.campaignId) + '/script', {
         method:'PATCH', credentials:'same-origin', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({baseScenario:snapshot.baseScenario, script, sceneOrder:order})
+        body:JSON.stringify({baseScenario:snapshot.baseScenario, script, sceneOrder:order, imageReplacements:replacements})
       });
       if (!response.headers.get('content-type')?.includes('application/json')) throw Error('Le service est temporairement indisponible. Vos modifications sont conservées ici.');
       const result = await response.json();
@@ -132,7 +156,7 @@
       window.olyvexScriptEditor.apply(result);
       snapshot = window.olyvexScriptEditor.snapshot();
       scenes = snapshot.script.scenes.slice(); order = [0, 1, 2, 3];
-      history=[]; future=[]; remember();
+      replacements=[null,null,null,null]; history=[]; future=[]; remember();
       previousExport(result.campaign.campaign_data.previousExport?.videoUrl);
       byId('scriptEditorFeedback').textContent = result.changed ? 'Modifications enregistrées. Aucun crédit utilisé.' + (result.audioInvalidated ? ' Préparez une nouvelle narration avant le prochain export.' : '') : 'Le scénario est déjà à jour. Aucun crédit utilisé.';
     } catch (error) { byId('scriptEditorFeedback').textContent = error.message; }

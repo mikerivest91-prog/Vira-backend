@@ -14,7 +14,11 @@
     const audioId=typeof value.audioId==='string'?value.audioId:'';
     if((enabled||cues.length)&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(audioId))throw Error('Préparez la voix correspondant aux sous-titres.');
     if(enabled&&!cues.length)throw Error('Créez ou ajoutez des sous-titres avant de les intégrer.');
-    return {format,captionsEnabled:enabled,audioId,cues};
+    const sceneDurations=value.sceneDurations??null;
+    if(sceneDurations!==null&&(!Array.isArray(sceneDurations)||sceneDurations.length!==4||sceneDurations.some(n=>!Number.isFinite(n)||n<1||n>30)||sceneDurations.reduce((a,b)=>a+b,0)>60))throw Error('Choisissez quatre durées de 1 à 30 secondes, pour un total maximum de 60 secondes.');
+    const sceneColors=value.sceneColors??['#000000','#000000','#000000','#000000'];
+    if(!Array.isArray(sceneColors)||sceneColors.length!==4||sceneColors.some(c=>typeof c!=='string'||!/^#[0-9a-f]{6}$/i.test(c)))throw Error('Couleur de fond invalide.');
+    return {format,captionsEnabled:enabled,audioId,cues,sceneDurations:sceneDurations?.map(n=>Math.round(n*100)/100)??null,sceneColors};
   }
   function timestamp(seconds,separator){const n=Math.round(seconds*1000);return `${String(Math.floor(n/3600000)).padStart(2,'0')}:${String(Math.floor(n/60000)%60).padStart(2,'0')}:${String(Math.floor(n/1000)%60).padStart(2,'0')}${separator}${String(n%1000).padStart(3,'0')}`;}
   function subtitles(cues,vtt=false){return (vtt?'WEBVTT\n\n':'')+cues.map((c,i)=>`${i+1}\n${timestamp(c.start,vtt?'.':',')} --> ${timestamp(c.end,vtt?'.':',')}\n${c.text.replace(/[<>]/g,'')}\n`).join('\n');}

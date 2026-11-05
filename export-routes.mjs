@@ -25,5 +25,6 @@ export function installExportRoutes({app,pool,requireAuth,resourceProtection,aud
 export async function validatedExport(value,audioId,audioDirectory,userId){
   const settings=model.normalize(value??{});
   if(settings.captionsEnabled){if(settings.audioId!==audioId)throw Error('Les sous-titres correspondent à une autre voix. Recréez-les.');model.normalize(settings,await wavDuration(audioFile(audioDirectory,userId,audioId)));}
+  if(settings.sceneDurations && audioId){const voiceDuration=await wavDuration(audioFile(audioDirectory,userId,audioId));if(settings.sceneDurations.reduce((a,b)=>a+b,0)+0.05<voiceDuration)throw Error('Allongez les scènes pour couvrir toute la narration.');}
   return settings;
 }

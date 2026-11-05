@@ -365,7 +365,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 
 const brandProfile = installBrandProfile({app,pool,requireAuth});
 installCampaignNarration({app,pool,requireAuth,audioDirectory:AUDIO_TEMP_DIR});
-installCampaignScript({app,pool,requireAuth});
+installCampaignScript({app,pool,requireAuth,decodeImage:decodePreviewImage});
 for(const file of ['script-model.js','script-editor-ui.js','script-editor.css','export-model.js','export-ui.js','export-ui.css'])app.get('/'+file,(_req,res)=>res.sendFile(path.resolve(file)));
 app.get('/olyvex-logo-9208494f098d.png',(_req,res)=>{res.setHeader('Cache-Control','public, max-age=31536000, immutable');res.sendFile(path.resolve('olyvex-logo-9208494f098d.png'));});
 app.get("/api/brand/rendering",requireAuth,async (_req,res)=>res.json({available:await canRenderBrand(ffmpegPath)}));
@@ -1355,7 +1355,7 @@ app.post("/api/video/assemble-clips", requireAuth, resourceProtection.run(async 
       fitted=await fitClips(clips,duration,CLIP_TEMP_DIR);
       const videoUrl=await publishVideo(fitted.paths,"vira-clips-final",audioPath,fitted.transition, () => {}, req.user.id, req.body.soundtrack,res.locals.acceptMedia,settings);
       await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1",[usage.id]);
-      return res.json({ok:true,videoUrl,hasAudio:true,duration,quota:{limit:usage.limit,ownerTesting:usage.ownerTesting}});
+      return res.json({ok:true,videoUrl,hasAudio:true,duration:settings.sceneDurations?.reduce((a,b)=>a+b,0)??duration,quota:{limit:usage.limit,ownerTesting:usage.ownerTesting}});
     } catch(error) {
       await pool.query("DELETE FROM vira_video_usage WHERE id=$1",[usage.id]).catch(()=>{});
       if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});
@@ -1378,7 +1378,7 @@ function decodePreviewImage(source, index) {
   return { buffer, extension: match[1] === "jpeg" ? "jpg" : "png" };
 }
 
-function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0, format = "portrait") {
+function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0, format = "portrait", background = "#000000") {
   const {width,height}=globalThis.olyvexExportModel.formats[format];
   const frames = Math.max(1, Math.ceil(duration * 30));
   const zoom = sceneIndex % 2 === 0 ? `1+0.035*on/${frames}` : `1.035-0.035*on/${frames}`;
@@ -1389,7 +1389,7 @@ function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0, fo
       .videoCodec("libx264")
       .format("mp4")
       .outputOptions([
-        "-vf", `scale=${width*2}:${height*2}:force_original_aspect_ratio=decrease,pad=${width*2}:${height*2}:(ow-iw)/2:(oh-ih)/2,setsar=1,zoompan=z=\'${zoom}\':x=\'iw/2-iw/zoom/2\':y=\'ih/2-ih/zoom/2\':d=1:s=${width}x${height}:fps=30`,
+        "-vf", `scale=${width*2}:${height*2}:force_original_aspect_ratio=decrease,pad=${width*2}:${height*2}:(ow-iw)/2:(oh-ih)/2:color=${background},setsar=1,zoompan=z=\'${zoom}\':x=\'iw/2-iw/zoom/2\':y=\'ih/2-ih/zoom/2\':d=1:s=${width}x${height}:fps=30`,
         "-pix_fmt", "yuv420p",
         "-r", "30",
         "-an",
@@ -1454,14 +1454,14 @@ app.post("/api/video/free-assemble", requireAuth, resourceProtection.run(async (
       temporaryFiles.push(imagePath, clipPath);
       await fs.promises.writeFile(imagePath, decoded[i].buffer);
       // Keep the input until FFmpeg has actually finished reading it.
-      await createPreviewClip(imagePath, clipPath, transition.clipDuration, i, settings.format);
+      await createPreviewClip(imagePath, clipPath, settings.sceneDurations?.[i] ?? transition.clipDuration, i, settings.format, settings.sceneColors[i]);
       reportProgress((i+1)*10);
       clips.push(clipPath);
     }
     console.log("FREE-ASSEMBLE clips ready:", clips.length);
 console.log("FREE-ASSEMBLE before publishVideo");
 const videoUrl = await publishVideo(clips, "vira-free-final", audioPath, transition, percent => reportProgress(40 + percent * 0.55), req.user.id, req.body.soundtrack,res.locals.acceptMedia,settings);    await pool.query("UPDATE vira_video_usage SET status='completed' WHERE id=$1", [usage.id]);
-    return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
+    return res.json({ ok: true, mode: "free", videoUrl, hasAudio: Boolean(audioPath), duration: settings.sceneDurations?.reduce((a,b)=>a+b,0)??Math.max(2,duration), quota: { limit: usage.limit, ownerTesting: usage.ownerTesting } });
   } catch (error) {
     await pool.query("DELETE FROM vira_video_usage WHERE id=$1", [usage.id]).catch(()=>{});
     if(error.code==='STORAGE_QUOTA')return res.status(413).json({ok:false,error:error.message});

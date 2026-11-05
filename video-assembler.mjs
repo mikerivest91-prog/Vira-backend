@@ -42,14 +42,17 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
       audioPath = trimmedAudio;
     }
     const narrationDuration = audioPath ? await wavDuration(audioPath) : null;
+    const customDuration = settings.sceneDurations?.reduce((a,b)=>a+b,0);
+    if(customDuration && narrationDuration && customDuration + 0.05 < narrationDuration) throw Error('La durée totale des scènes est plus courte que la narration.');
+    const outputDuration = customDuration || narrationDuration;
     for (let i = 0; i < 4; i++) {
       // Preserve total duration when replacing overlapping transitions with cuts.
-      const duration = narrationDuration ? Math.ceil(narrationDuration / 4 * 30) / 30 : transition ? transition.clipDuration - (i < 3 ? transition.fade : 0) : null;
+      const duration = settings.sceneDurations?.[i] ?? (narrationDuration ? Math.ceil(narrationDuration / 4 * 30) / 30 : transition ? transition.clipDuration - (i < 3 ? transition.fade : 0) : null);
       await run([
-        "-threads", "1", "-protocol_whitelist", "file,pipe", ...(narrationDuration ? ["-stream_loop", "-1"] : []), "-i", clipPaths[i],
+        "-threads", "1", "-protocol_whitelist", "file,pipe", ...(duration ? ["-stream_loop", "-1"] : []), "-i", clipPaths[i],
         "-map", "0:v:0", "-an", "-sn", "-dn",
         ...(duration ? ["-t", String(duration)] : []),
-        "-vf", `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=30,format=yuv420p`,
+        "-vf", `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=${settings.sceneColors[i]},setsar=1,fps=30,format=yuv420p`,
         "-filter_threads", "1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
         "-threads", "1", "-video_track_timescale", "15360", path.join(directory, `scene-${i}.mp4`)
       ]);
@@ -60,12 +63,12 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
     await run([
       "-f", "concat", "-safe", "1", "-i", path.join(directory, "clips.txt"),
       ...(audioPath ? ["-threads", "1", "-i", audioPath] : []),
-      "-map", "0:v:0", ...(audioPath ? ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-t", String(narrationDuration)] : ["-c:v", "copy"]),
-      ...(audioPath ? ["-map", "1:a:0", "-c:a", "aac", "-b:a", "64k", "-shortest"] : ["-an"]),
+      "-map", "0:v:0", ...(audioPath ? ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-t", String(outputDuration)] : ["-c:v", "copy"]),
+      ...(audioPath ? ["-map", "1:a:0", "-af", "apad", "-c:a", "aac", "-b:a", "64k", "-shortest"] : ["-an"]),
       "-threads", "1", "-movflags", "+faststart", outputPath
     ]);
     if (sound.music || sound.effect) {
-      const duration = narrationDuration || (transition ? 4*transition.clipDuration-3*transition.fade : null);
+      const duration = outputDuration || (transition ? 4*transition.clipDuration-3*transition.fade : null);
       if (!duration) throw Error('Durée requise pour ajouter la musique.');
       const inputs=[],filters=[],mix=[];
       let inputIndex=1;
