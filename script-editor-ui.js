@@ -7,7 +7,7 @@
   dialog.innerHTML = `<form id="scriptEditorForm">
     <header class="se-header"><div><span class="se-eyebrow">STUDIO DE CAMPAGNE</span><h2 id="scriptEditorTitle">Votre campagne, scène par scène.</h2><p>Adaptez le message et l’ordre des visuels avant de produire votre vidéo.</p></div><button type="button" id="scriptEditorClose" aria-label="Fermer l’éditeur sans enregistrer">×</button></header>
     <div class="se-content"><section class="se-fields" id="scriptEditorMessage" aria-label="Message de la campagne"></section>
-    <section><div class="se-section-head"><div><h3>Les quatre scènes</h3><p>Les descriptions et leurs visuels se déplacent ensemble. Modifier une description ne régénère pas son visuel.</p></div><button type="button" id="scriptEditorResetOrder">Rétablir l’ordre initial</button></div><div class="se-scenes" id="scriptEditorScenes"></div></section>
+    <section><div class="se-section-head"><div><h3>Les quatre scènes</h3><p>Les descriptions et leurs visuels se déplacent ensemble. Modifier une description ne régénère pas son visuel.</p></div><button type="button" id="scriptEditorResetOrder">Rétablir l’ordre initial</button></div><div class="se-toolbar"><button type="button" id="seUndo">Annuler</button><button type="button" id="seRedo">Rétablir</button><span>Modifications avant enregistrement</span></div><div id="sePreview" class="se-preview" aria-label="Aperçu de la scène sélectionnée"></div><div class="se-scenes" id="scriptEditorScenes"></div></section>
     <section id="scriptEditorVoice"><h3>La narration</h3><p>Si vous changez les mots à prononcer, préparez une nouvelle voix après la sauvegarde.</p></section>
     <details class="se-details"><summary>Texte de publication et hashtags</summary><div class="se-fields" id="scriptEditorPublication"></div></details>
     <details class="se-details"><summary>Stratégie et direction visuelle</summary><div class="se-fields" id="scriptEditorStrategy"></div></details>
@@ -18,6 +18,24 @@
   const byId = id => document.getElementById(id);
   let snapshot, order, scenes, saving = false;
   const inputs = new Map();
+  let selected = 0, history = [], future = [];
+  const capture = () => JSON.stringify({scenes, order, values:Object.fromEntries([...inputs].map(([k,v])=>[k,v.value]))});
+  function historyButtons() { byId('seUndo').disabled=saving||history.length<2; byId('seRedo').disabled=saving||!future.length; }
+  function remember() { const value=capture(); if(history.at(-1)!==value){history.push(value);if(history.length>80)history.shift();future=[];} historyButtons(); }
+  function restore(value) { const saved=JSON.parse(value);scenes=saved.scenes;order=saved.order;for(const [key,val] of Object.entries(saved.values))inputs.get(key).value=val;renderScenes();historyButtons(); }
+  function preview() {
+    const target=byId('sePreview');target.replaceChildren();
+    const title=document.createElement('h3');title.textContent='Scène '+(selected+1);
+    const media=byId('scriptEditorScenes').children[selected]?.querySelector('.se-media')?.cloneNode(true);
+    const copy=document.createElement('p');copy.textContent=scenes[selected];
+    const note=document.createElement('small');note.textContent='Aperçu du visuel et de sa description. La description ne constitue pas un texte incrusté dans la vidéo.';
+    target.append(title);if(media)target.append(media);target.append(copy,note);
+    [...byId('scriptEditorScenes').children].forEach((card,i)=>{card.classList.toggle('se-selected',i===selected);card.querySelector('.se-select').setAttribute('aria-pressed',String(i===selected));});
+  }
+  byId('seUndo').onclick=()=>{if(history.length>1){future.push(history.pop());restore(history.at(-1));}};
+  byId('seRedo').onclick=()=>{if(future.length){const next=future.pop();history.push(next);restore(next);}};
+  byId('scriptEditorForm').addEventListener('change',()=>{if(!saving)remember();});
+
   function field(key, label, max, target, rows = 2) {
     const wrap = document.createElement('label');
     wrap.className = 'se-field';
@@ -34,7 +52,7 @@
     byId('scriptEditorScenes').replaceChildren();
     scenes.forEach((scene, index) => {
       const card = document.createElement('article'); card.className = 'se-scene';
-      const heading = document.createElement('h4'); heading.textContent = 'Scène ' + (index + 1);
+      const heading = document.createElement('button'); heading.type='button'; heading.className='se-select'; heading.textContent = 'Scène ' + (index + 1); heading.onclick=()=>{selected=index;preview();};
       const media = document.createElement('div'); media.className = 'se-media';
       const source = snapshot.clips[order[index]]?.thumbnail || snapshot.images[order[index]];
       if (typeof source === 'string' && /^data:image\/(jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(source)) {
@@ -43,7 +61,7 @@
       const label = document.createElement('label'); label.className = 'se-field';
       const name = document.createElement('span'); name.textContent = 'Description de la scène ' + (index + 1);
       const input = document.createElement('textarea'); input.rows = 4; input.maxLength = 3000; input.value = scene; input.required = true;
-      input.setAttribute('data-user-content', ''); input.oninput = () => { scenes[index] = input.value; };
+      input.setAttribute('data-user-content', ''); input.oninput = () => { scenes[index] = input.value; selected=index; preview(); };
       label.append(name, input);
       const controls = document.createElement('div'); controls.className = 'se-move';
       for (const [delta, text] of [[-1, '← Avant'], [1, 'Après →']]) {
@@ -53,12 +71,13 @@
         button.onclick = () => {
           [scenes[index], scenes[index + delta]] = [scenes[index + delta], scenes[index]];
           [order[index], order[index + delta]] = [order[index + delta], order[index]];
-          renderScenes(); byId('scriptEditorScenes').children[index + delta].querySelector('textarea').focus();
+          selected=index+delta; remember(); renderScenes(); byId('scriptEditorScenes').children[index + delta].querySelector('textarea').focus();
         };
         controls.append(button);
       }
       card.append(heading, media, label, controls); byId('scriptEditorScenes').append(card);
     });
+    preview(); historyButtons();
   }
   function previousExport(url) {
     const link = byId('scriptEditorPrevious');
@@ -80,7 +99,7 @@
     field('hashtags', 'Hashtags', 2200, byId('scriptEditorPublication'));
     for (const [key, label, max] of [['objective', 'Objectif', 1000], ['target', 'Public cible', 1000], ['visualPrompt', 'Direction visuelle', 3000], ['style', 'Style', 120]]) field(key, label, max, byId('scriptEditorStrategy'));
     byId('scriptEditorFeedback').textContent = 'Vos modifications seront sauvegardées lorsque vous cliquerez sur Enregistrer.';
-    previousExport(null); renderScenes(); dialog.showModal(); inputs.get('title').focus();
+    selected=0; history=[]; future=[]; remember(); previousExport(null); renderScenes(); dialog.showModal(); inputs.get('title').focus();
   }
   function buttons() {
     const ready = window.olyvexScriptEditor?.snapshot()?.canEdit;
@@ -92,7 +111,7 @@
   dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); });
   byId('scriptEditorResetOrder').onclick = () => {
     const original = [0, 1, 2, 3].map(index => scenes[order.indexOf(index)]);
-    scenes = original; order = [0, 1, 2, 3]; renderScenes();
+    scenes = original; order = [0, 1, 2, 3]; remember(); renderScenes();
   };
   byId('scriptEditorForm').onsubmit = async event => {
     event.preventDefault(); if (saving) return;
@@ -113,6 +132,7 @@
       window.olyvexScriptEditor.apply(result);
       snapshot = window.olyvexScriptEditor.snapshot();
       scenes = snapshot.script.scenes.slice(); order = [0, 1, 2, 3];
+      history=[]; future=[]; remember();
       previousExport(result.campaign.campaign_data.previousExport?.videoUrl);
       byId('scriptEditorFeedback').textContent = result.changed ? 'Modifications enregistrées. Aucun crédit utilisé.' + (result.audioInvalidated ? ' Préparez une nouvelle narration avant le prochain export.' : '') : 'Le scénario est déjà à jour. Aucun crédit utilisé.';
     } catch (error) { byId('scriptEditorFeedback').textContent = error.message; }
