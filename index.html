@@ -2332,14 +2332,18 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
     function setBrainState(state) {
       document.querySelector('#brain .brain-workspace').dataset.state = state;
     }
-    function renderBrainReport(text) {
+    function renderBrainReport(text, snapshot) {
       const report = els.opportunity;
       report.replaceChildren();
       let section = null;
+      let proposalMode = false;
+      const proposalLines = [];
       for (const raw of text.split('\n')) {
         const line = raw.trim();
         if (!line) continue;
         const clean = line.replace(/^[#*\s\d.)-]+/, '').replace(/[*:]+$/, '').trim();
+        if (/^Proposition de brief$/i.test(clean)) { proposalMode = true; continue; }
+        if (proposalMode) { proposalLines.push(line); continue; }
         if (/^(Forces|Faiblesses|Opportunités|Actions prioritaires)$/i.test(clean)) {
           section = document.createElement('section');
           section.className = 'brain-report-section';
@@ -2352,6 +2356,38 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
           p.textContent = line.replace(/\*\*/g, '');
           (section || report).append(p);
         }
+      }
+
+      const proposal = proposalLines.join('\n').trim();
+      const limit = els.prompt.maxLength > 0 ? els.prompt.maxLength : 500;
+      if (proposal && proposal.length <= limit) {
+        const preview = document.createElement('details');
+        preview.className = 'brain-report-section brain-proposal';
+        const summary = document.createElement('summary');
+        summary.textContent = 'Prévisualiser le brief proposé';
+        const before = document.createElement('p');
+        before.textContent = 'Brief actuel : ' + els.prompt.value;
+        const after = document.createElement('p');
+        after.textContent = proposal;
+        const note = document.createElement('p');
+        note.textContent = 'Appliquer remplace la description du produit et réinitialise les contenus générés dans cet éditeur. Relancez ensuite l’analyse et la création des contenus.';
+        const apply = document.createElement('button');
+        apply.type = 'button';
+        apply.className = 'primary-cta';
+        apply.textContent = 'Appliquer ce brief';
+        apply.addEventListener('click', () => {
+          if (snapshot !== JSON.stringify(brainCampaign())) {
+            apply.disabled = true;
+            note.textContent = 'La campagne a changé. Relancez l’analyse avant d’appliquer une proposition.';
+            return;
+          }
+          els.prompt.value = proposal;
+          els.prompt.dispatchEvent(new Event('input', { bubbles: true }));
+          els.scoreNote.textContent = 'Brief proposé appliqué. Relancez l’analyse pour vérifier cette nouvelle version.';
+          els.brainBtn.focus();
+        });
+        preview.append(summary, before, after, note, apply);
+        report.append(preview);
       }
     }
     function updateBrain(run = false) {
@@ -2413,7 +2449,7 @@ els.visualBtn.disabled = busy || !(hasScenario && scenarioValidated);
         }
         els.score.textContent = "Analyse terminée";
         els.scoreNote.textContent = "Diagnostic IA de cette version de votre campagne.";
-        renderBrainReport(data.analysis);
+        renderBrainReport(data.analysis, snapshot);
         setBrainState('complete');
         els.recommended.textContent = "Appliquez les actions prioritaires du diagnostic, puis testez votre campagne. Les résultats restent à mesurer.";
       } catch (error) {
