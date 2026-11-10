@@ -1,3 +1,4 @@
+import {initPersonalTemplates,installPersonalTemplates} from "./personal-templates.mjs";
 import {installProductionPlan} from "./production-plan.mjs";
 import {inspectProductionMedia} from "./production-media.mjs";
 import {installAssistant} from "./assistant-service.mjs";
@@ -366,6 +367,7 @@ app.delete('/api/admin/storage/:name', requireAdmin, async (req,res) => {
 const brandProfile = installBrandProfile({app,pool,requireAuth});
 installCampaignNarration({app,pool,requireAuth,audioDirectory:AUDIO_TEMP_DIR});
 installCampaignScript({app,pool,requireAuth,decodeImage:decodePreviewImage});
+installPersonalTemplates({app,pool,requireAuth});
 for(const file of ['script-model.js','script-editor-ui.js','script-editor.css','export-model.js','export-ui.js','export-ui.css'])app.get('/'+file,(_req,res)=>res.sendFile(path.resolve(file)));
 app.get('/olyvex-logo-9208494f098d.png',(_req,res)=>{res.setHeader('Cache-Control','public, max-age=31536000, immutable');res.sendFile(path.resolve('olyvex-logo-9208494f098d.png'));});
 app.get("/api/brand/rendering",requireAuth,async (_req,res)=>res.json({available:await canRenderBrand(ffmpegPath)}));
@@ -1594,6 +1596,7 @@ async function start() {
     }
 
     await initDatabase();
+    await initPersonalTemplates(pool);
     await billing.init();
     await commerce.init();
     await authProtection.init();
