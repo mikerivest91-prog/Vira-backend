@@ -21,8 +21,10 @@
     const sceneText=value.sceneText??Array.from({length:4},()=>({text:'',size:36,color:'#ffffff',position:'center'}));
     if(!Array.isArray(sceneText)||sceneText.length!==4)throw Error('Quatre textes de scène sont requis.');
     const overlays=sceneText.map(item=>{
-      if(!item||typeof item.text!=='string'||item.text.length>120||/[\u0000-\u001f]/.test(item.text)||![24,36,48].includes(item.size)||!/^#[0-9a-f]{6}$/i.test(item.color)||!['top','center','bottom'].includes(item.position))throw Error('Vérifiez le texte, la taille, la couleur et la position des scènes.');
-      return {text:item.text.trim(),size:item.size,color:item.color,position:item.position};
+      if(!item||typeof item.text!=='string'||item.text.length>120||/[\u0000-\u001f]/.test(item.text)||(!Number.isInteger(item.size)||item.size<16||item.size>96)||!/^#[0-9a-f]{6}$/i.test(item.color)||!['top','center','bottom'].includes(item.position))throw Error('Vérifiez le texte, la taille, la couleur et la position des scènes.');
+      const x=item.x??null,y=item.y??null;
+      if((x===null)!==(y===null)||(x!==null&&(!Number.isFinite(x)||!Number.isFinite(y)||x<0||x>1||y<0||y>1))||(item.background!==undefined&&typeof item.background!=='boolean'))throw Error('Position ou fond de texte invalide.');
+      return {text:item.text.trim(),size:item.size,color:item.color,position:item.position,x,y,background:item.background===true};
     });
     return {sceneText:overlays,format,captionsEnabled:enabled,audioId,cues,sceneDurations:sceneDurations?.map(n=>Math.round(n*100)/100)??null,sceneColors};
   }
@@ -30,3 +32,5 @@
   function subtitles(cues,vtt=false){return (vtt?'WEBVTT\n\n':'')+cues.map((c,i)=>`${i+1}\n${timestamp(c.start,vtt?'.':',')} --> ${timestamp(c.end,vtt?'.':',')}\n${c.text.replace(/[<>]/g,'')}\n`).join('\n');}
   root.olyvexExportModel=Object.freeze({formats,normalize,subtitles});
 })(globalThis);
+
+
