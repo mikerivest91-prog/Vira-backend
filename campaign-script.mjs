@@ -44,7 +44,7 @@ export function installCampaignScript({app, pool, requireAuth, decodeImage}) {
       }
       if(reordered && data.exportSettings){
         next.exportSettings={...data.exportSettings};
-        for(const key of ['sceneDurations','sceneColors'])if(Array.isArray(data.exportSettings[key])&&data.exportSettings[key].length===4)next.exportSettings[key]=order.map(i=>data.exportSettings[key][i]);
+        for(const key of ['sceneDurations','sceneColors','sceneText'])if(Array.isArray(data.exportSettings[key])&&data.exportSettings[key].length===4)next.exportSettings[key]=order.map(i=>data.exportSettings[key][i]);
       }
       if(replacements.some(Boolean)){
         next.generatedImages=order.map(i=>replacements[i]||data.generatedImages?.[i]||null);

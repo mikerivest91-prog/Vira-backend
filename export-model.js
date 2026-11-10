@@ -18,7 +18,13 @@
     if(sceneDurations!==null&&(!Array.isArray(sceneDurations)||sceneDurations.length!==4||sceneDurations.some(n=>!Number.isFinite(n)||n<1||n>30)||sceneDurations.reduce((a,b)=>a+b,0)>60))throw Error('Choisissez quatre durées de 1 à 30 secondes, pour un total maximum de 60 secondes.');
     const sceneColors=value.sceneColors??['#000000','#000000','#000000','#000000'];
     if(!Array.isArray(sceneColors)||sceneColors.length!==4||sceneColors.some(c=>typeof c!=='string'||!/^#[0-9a-f]{6}$/i.test(c)))throw Error('Couleur de fond invalide.');
-    return {format,captionsEnabled:enabled,audioId,cues,sceneDurations:sceneDurations?.map(n=>Math.round(n*100)/100)??null,sceneColors};
+    const sceneText=value.sceneText??Array.from({length:4},()=>({text:'',size:36,color:'#ffffff',position:'center'}));
+    if(!Array.isArray(sceneText)||sceneText.length!==4)throw Error('Quatre textes de scène sont requis.');
+    const overlays=sceneText.map(item=>{
+      if(!item||typeof item.text!=='string'||item.text.length>120||/[\u0000-\u001f]/.test(item.text)||![24,36,48].includes(item.size)||!/^#[0-9a-f]{6}$/i.test(item.color)||!['top','center','bottom'].includes(item.position))throw Error('Vérifiez le texte, la taille, la couleur et la position des scènes.');
+      return {text:item.text.trim(),size:item.size,color:item.color,position:item.position};
+    });
+    return {sceneText:overlays,format,captionsEnabled:enabled,audioId,cues,sceneDurations:sceneDurations?.map(n=>Math.round(n*100)/100)??null,sceneColors};
   }
   function timestamp(seconds,separator){const n=Math.round(seconds*1000);return `${String(Math.floor(n/3600000)).padStart(2,'0')}:${String(Math.floor(n/60000)%60).padStart(2,'0')}:${String(Math.floor(n/1000)%60).padStart(2,'0')}${separator}${String(n%1000).padStart(3,'0')}`;}
   function subtitles(cues,vtt=false){return (vtt?'WEBVTT\n\n':'')+cues.map((c,i)=>`${i+1}\n${timestamp(c.start,vtt?'.':',')} --> ${timestamp(c.end,vtt?'.':',')}\n${c.text.replace(/[<>]/g,'')}\n`).join('\n');}

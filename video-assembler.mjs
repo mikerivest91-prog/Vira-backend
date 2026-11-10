@@ -1,4 +1,5 @@
 import "./export-model.js";
+import {sceneTextImage} from "./video-scene-text.mjs";
 import {applyVideoCaptions} from "./video-captions.mjs";
 import {applyVideoBrand} from "./video-brand.mjs";
 import { execFile } from "node:child_process";
@@ -48,11 +49,12 @@ export async function assembleVideoClips(clipPaths, audioPath = null, transition
     for (let i = 0; i < 4; i++) {
       // Preserve total duration when replacing overlapping transitions with cuts.
       const duration = settings.sceneDurations?.[i] ?? (narrationDuration ? Math.ceil(narrationDuration / 4 * 30) / 30 : transition ? transition.clipDuration - (i < 3 ? transition.fade : 0) : null);
+      const textImage=await sceneTextImage({item:settings.sceneText[i],width,height,directory,index:i});
+      const videoFilter=`scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=${settings.sceneColors[i]},setsar=1,fps=30,format=yuv420p`;
       await run([
         "-threads", "1", "-protocol_whitelist", "file,pipe", ...(duration ? ["-stream_loop", "-1"] : []), "-i", clipPaths[i],
-        "-map", "0:v:0", "-an", "-sn", "-dn",
+        ...(textImage?["-i",textImage,"-filter_complex_threads","1","-filter_complex",`[0:v]${videoFilter}[base];[base][1:v]overlay=0:0:eof_action=repeat[scene]`,"-map","[scene]"]:["-map","0:v:0","-vf",videoFilter]), "-an", "-sn", "-dn",
         ...(duration ? ["-t", String(duration)] : []),
-        "-vf", `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=${settings.sceneColors[i]},setsar=1,fps=30,format=yuv420p`,
         "-filter_threads", "1", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
         "-threads", "1", "-video_track_timescale", "15360", path.join(directory, `scene-${i}.mp4`)
       ]);
