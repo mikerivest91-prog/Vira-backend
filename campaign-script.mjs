@@ -1,3 +1,4 @@
+import './export-model.js';
 import './script-model.js';
 const model = globalThis.olyvexScriptModel;
 
@@ -6,10 +7,11 @@ export function installCampaignScript({app, pool, requireAuth, decodeImage}) {
     res.setHeader('Cache-Control', 'private, no-store');
     const id = Number(req.params.id);
     if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ok:false,error:'Campagne invalide.'});
-    let script, order, scenario, replacements;
+    let script, order, scenario, replacements, exportSettings;
     try {
       if (typeof req.body?.baseScenario !== 'string' || req.body.baseScenario.length > 40000) throw Error('Scénario d’origine invalide.');
       script = model.normalize(req.body.script);
+      if(req.body.exportSettings!==undefined)exportSettings=globalThis.olyvexExportModel.normalize(req.body.exportSettings);
       scenario = model.serialize(script);
       order = model.order(req.body.sceneOrder);
       replacements=req.body.imageReplacements??[null,null,null,null];
@@ -42,9 +44,10 @@ export function installCampaignScript({app, pool, requireAuth, decodeImage}) {
       if (reordered) for (const key of ['generatedImages', 'sourceClips']) {
         if (Array.isArray(data[key]) && data[key].length === 4) next[key] = order.map(i => data[key][i]);
       }
-      if(reordered && data.exportSettings){
-        next.exportSettings={...data.exportSettings};
-        for(const key of ['sceneDurations','sceneColors','sceneText','sceneFraming'])if(Array.isArray(data.exportSettings[key])&&data.exportSettings[key].length===4)next.exportSettings[key]=order.map(i=>data.exportSettings[key][i]);
+      if(reordered && (exportSettings || data.exportSettings)){
+        const sourceSettings=exportSettings || data.exportSettings;
+        next.exportSettings={...sourceSettings};
+        for(const key of ['sceneDurations','sceneColors','sceneText','sceneFraming'])if(Array.isArray(sourceSettings[key])&&sourceSettings[key].length===4)next.exportSettings[key]=order.map(i=>sourceSettings[key][i]);
       }
       if(replacements.some(Boolean)){
         next.generatedImages=order.map(i=>replacements[i]||data.generatedImages?.[i]||null);
@@ -65,6 +68,7 @@ export function installCampaignScript({app, pool, requireAuth, decodeImage}) {
     } finally { db.release(); }
   });
 }
+
 
 
 
