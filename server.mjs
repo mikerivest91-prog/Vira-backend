@@ -1,3 +1,4 @@
+import {imageFrameFilter} from "./image-framing.mjs";
 import {initPersonalTemplates,installPersonalTemplates} from "./personal-templates.mjs";
 import {installProductionPlan} from "./production-plan.mjs";
 import {inspectProductionMedia} from "./production-media.mjs";
@@ -1380,7 +1381,7 @@ function decodePreviewImage(source, index) {
   return { buffer, extension: match[1] === "jpeg" ? "jpg" : "png" };
 }
 
-function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0, format = "portrait", background = "#000000") {
+function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0, format = "portrait", background = "#000000", framing = null) {
   const {width,height}=globalThis.olyvexExportModel.formats[format];
   const frames = Math.max(1, Math.ceil(duration * 30));
   const zoom = sceneIndex % 2 === 0 ? `1+0.035*on/${frames}` : `1.035-0.035*on/${frames}`;
@@ -1391,7 +1392,7 @@ function createPreviewClip(imagePath, clipPath, duration = 2, sceneIndex = 0, fo
       .videoCodec("libx264")
       .format("mp4")
       .outputOptions([
-        "-vf", `scale=${width*2}:${height*2}:force_original_aspect_ratio=decrease,pad=${width*2}:${height*2}:(ow-iw)/2:(oh-ih)/2:color=${background},setsar=1,zoompan=z=\'${zoom}\':x=\'iw/2-iw/zoom/2\':y=\'ih/2-ih/zoom/2\':d=1:s=${width}x${height}:fps=30`,
+        "-vf", framing ? imageFrameFilter(width,height,background,framing) : `scale=${width*2}:${height*2}:force_original_aspect_ratio=decrease,pad=${width*2}:${height*2}:(ow-iw)/2:(oh-ih)/2:color=${background},setsar=1,zoompan=z=\'${zoom}\':x=\'iw/2-iw/zoom/2\':y=\'ih/2-ih/zoom/2\':d=1:s=${width}x${height}:fps=30`,
         "-pix_fmt", "yuv420p",
         "-r", "30",
         "-an",
@@ -1456,7 +1457,7 @@ app.post("/api/video/free-assemble", requireAuth, resourceProtection.run(async (
       temporaryFiles.push(imagePath, clipPath);
       await fs.promises.writeFile(imagePath, decoded[i].buffer);
       // Keep the input until FFmpeg has actually finished reading it.
-      await createPreviewClip(imagePath, clipPath, settings.sceneDurations?.[i] ?? transition.clipDuration, i, settings.format, settings.sceneColors[i]);
+      await createPreviewClip(imagePath, clipPath, settings.sceneDurations?.[i] ?? transition.clipDuration, i, settings.format, settings.sceneColors[i], settings.sceneFraming[i]);
       reportProgress((i+1)*10);
       clips.push(clipPath);
     }
@@ -1625,5 +1626,7 @@ async function start() {
 }
 
 start();
+
+
 
 

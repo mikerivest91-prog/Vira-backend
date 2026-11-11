@@ -26,7 +26,10 @@
       if((x===null)!==(y===null)||(x!==null&&(!Number.isFinite(x)||!Number.isFinite(y)||x<0||x>1||y<0||y>1))||(item.background!==undefined&&typeof item.background!=='boolean'))throw Error('Position ou fond de texte invalide.');
       return {text:item.text.trim(),size:item.size,color:item.color,position:item.position,x,y,background:item.background===true};
     });
-    return {sceneText:overlays,format,captionsEnabled:enabled,audioId,cues,sceneDurations:sceneDurations?.map(n=>Math.round(n*100)/100)??null,sceneColors};
+    const sceneFraming=value.sceneFraming??[null,null,null,null];
+    if(!Array.isArray(sceneFraming)||sceneFraming.length!==4)throw Error('Quatre cadrages requis.');
+    const framing=sceneFraming.map(f=>{if(f===null)return null;if(!f||!['contain','cover'].includes(f.fit)||!Number.isFinite(f.zoom)||f.zoom<1||f.zoom>3||!Number.isFinite(f.x)||f.x<0||f.x>1||!Number.isFinite(f.y)||f.y<0||f.y>1)throw Error('Cadrage invalide.');return {fit:f.fit,zoom:f.zoom,x:f.x,y:f.y};});
+    return {sceneFraming:framing,sceneText:overlays,format,captionsEnabled:enabled,audioId,cues,sceneDurations:sceneDurations?.map(n=>Math.round(n*100)/100)??null,sceneColors};
   }
   function timestamp(seconds,separator){const n=Math.round(seconds*1000);return `${String(Math.floor(n/3600000)).padStart(2,'0')}:${String(Math.floor(n/60000)%60).padStart(2,'0')}:${String(Math.floor(n/1000)%60).padStart(2,'0')}${separator}${String(n%1000).padStart(3,'0')}`;}
   function subtitles(cues,vtt=false){return (vtt?'WEBVTT\n\n':'')+cues.map((c,i)=>`${i+1}\n${timestamp(c.start,vtt?'.':',')} --> ${timestamp(c.end,vtt?'.':',')}\n${c.text.replace(/[<>]/g,'')}\n`).join('\n');}
