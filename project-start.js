@@ -13,5 +13,16 @@
  presets.forEach((preset,i)=>{const button=document.createElement('button');button.type='button';button.className='project-card project-card-'+i;const number=document.createElement('span');number.textContent=['↗','✦','◇','“'][i];number.setAttribute('aria-hidden','true');const title=document.createElement('strong');title.textContent=preset[0];const text=document.createElement('small');text.textContent=preset[1];button.append(number,title,text);button.onclick=()=>{selected=preset;lastButton=button;dialog.querySelector('h2').textContent=preset[0];dialog.querySelector('#projectGoal').textContent=preset[2];dialog.querySelector('pre').textContent=preset[3];dialog.querySelector('#projectError').textContent='';dialog.showModal();};section.querySelector('.project-grid').append(button);});
  dialog.querySelector('#projectCancel').onclick=()=>dialog.close();dialog.addEventListener('close',()=>lastButton?.focus());
  dialog.querySelector('#projectApply').onclick=()=>{if(!selected)return;try{sessionStorage.setItem('olyvexStarterBrief',JSON.stringify({idea:selected[3],goal:selected[2]}));create.click();}catch{dialog.querySelector('#projectError').textContent='Le navigateur ne permet pas de préparer le brief. Vérifiez que le stockage local est autorisé.';}};
+ const requested=new URL(location.href).searchParams.get('brief');
+ const requestedIndex=['promotion','lancement','service','temoignage'].indexOf(requested);
+ if(requestedIndex>=0){
+   const openRequested=()=>{
+     if(document.body.classList.contains('auth-pending'))return;
+     observer.disconnect();
+     const url=new URL(location.href);url.searchParams.delete('brief');history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+     section.querySelectorAll('.project-card')[requestedIndex].click();
+   };
+   const observer=new MutationObserver(openRequested);observer.observe(document.body,{attributes:true,attributeFilter:['class']});openRequested();
+ }
 })();
 
