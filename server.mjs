@@ -109,7 +109,10 @@ app.use(cors({
 app.post("/api/stripe/webhook", express.raw({ type: "application/json", limit: "1mb" }), (req, res) => billing.webhook(req, res));
 app.post("/api/commerce/webhook", express.raw({type:"application/json",limit:"1mb"}), (req,res)=>commerce.webhook(req,res));
 app.use(express.json({ limit: "2mb" }));
-app.get("/", (_req, res) => res.sendFile(path.resolve("index.html")));
+app.get("/", async (req,res) => {res.setHeader("Cache-Control","private, no-store");try{const user=await getCurrentUser(req);res.sendFile(path.resolve(user?"index.html":"home.html"));}catch{res.sendFile(path.resolve("home.html"));}});
+app.get("/accueil",(_req,res)=>res.sendFile(path.resolve("home.html")));
+app.get("/home.css",(_req,res)=>res.sendFile(path.resolve("home.css")));
+app.get("/studio",(_req,res)=>{res.setHeader("Cache-Control","private, no-store");res.sendFile(path.resolve("index.html"));});
 app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
 app.get('/videos/:filename', requireAuth, async (req,res) => {
   res.setHeader('Cache-Control','private, no-store');
