@@ -111,6 +111,7 @@ app.post("/api/commerce/webhook", express.raw({type:"application/json",limit:"1m
 app.use(express.json({ limit: "2mb" }));
 app.get("/", async (req,res) => {res.setHeader("Cache-Control","private, no-store");try{const user=await getCurrentUser(req);res.sendFile(path.resolve(user?"index.html":"home.html"));}catch{res.sendFile(path.resolve("home.html"));}});
 app.get("/accueil",(_req,res)=>res.sendFile(path.resolve("home.html")));
+for(const file of ["project-start.js","project-start.css"])app.get("/"+file,(_req,res)=>res.sendFile(path.resolve(file)));
 app.get("/home.css",(_req,res)=>res.sendFile(path.resolve("home.css")));
 app.get("/studio",(_req,res)=>{res.setHeader("Cache-Control","private, no-store");res.sendFile(path.resolve("index.html"));});
 app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
