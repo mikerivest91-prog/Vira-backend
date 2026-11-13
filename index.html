@@ -5156,6 +5156,29 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   dashboard.querySelector('#vhSearchReset').onclick=()=>{searchInput.value='';filterInput.value='all';visibleLimit=6;render();searchInput.focus();};
   dashboard.querySelector('#vhShowMore').onclick=()=>{visibleLimit+=6;render();};
 
+
+  const renameDialog=document.createElement('dialog');renameDialog.className='vh-rename';renameDialog.setAttribute('aria-labelledby','vhRenameTitle');
+  renameDialog.innerHTML='<form><h2 id="vhRenameTitle">Renommer la campagne</h2><label for="vhRenameInput">Nom de la campagne</label><input id="vhRenameInput" name="title" maxlength="160" required autocomplete="off"><p id="vhRenameError" role="status"></p><div><button type="button" id="vhRenameCancel">Annuler</button><button type="submit" id="vhRenameSave">Enregistrer</button></div></form>';document.body.append(renameDialog);
+  let renaming=null,renameBusy=false,renameTrigger=null;
+  renameDialog.querySelector('#vhRenameCancel').onclick=()=>renameDialog.close();
+  renameDialog.addEventListener('cancel',event=>{if(renameBusy)event.preventDefault();});
+  renameDialog.addEventListener('close',()=>{if(renameTrigger?.isConnected)renameTrigger.focus();else searchInput.focus();});
+  function renameCampaign(c,button){
+    renaming=c;renameTrigger=button;renameDialog.querySelector('h2').textContent=tr('Renommer la campagne','Rename campaign');
+    renameDialog.querySelector('label').textContent=tr('Nom de la campagne','Campaign name');renameDialog.querySelector('#vhRenameCancel').textContent=tr('Annuler','Cancel');renameDialog.querySelector('#vhRenameSave').textContent=tr('Enregistrer','Save');
+    renameDialog.querySelector('input').value=c.title||'';renameDialog.querySelector('#vhRenameError').textContent='';renameDialog.showModal();renameDialog.querySelector('input').select();
+  }
+  renameDialog.querySelector('form').onsubmit=async event=>{
+    event.preventDefault();if(renameBusy||!renaming)return;
+    const title=renameDialog.querySelector('input').value.trim(),error=renameDialog.querySelector('#vhRenameError');
+    if(!title||title.length>160||/[\u0000-\u001f\u007f]/.test(title)){error.textContent=tr('Saisissez un nom de 1 à 160 caractères.','Enter a name between 1 and 160 characters.');return;}
+    const campaign=renaming;renameBusy=true;renameDialog.querySelectorAll('button,input').forEach(el=>el.disabled=true);error.textContent=tr('Enregistrement…','Saving…');
+    try{const response=await fetch('/api/campaigns/'+encodeURIComponent(campaign.id)+'/title',{method:'PATCH',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({title})});const data=await response.json();if(!response.ok||!data.ok||!data.campaign)throw Error(data.error||tr('Enregistrement impossible.','Unable to save.'));
+      Object.assign(campaign,data.campaign);render();status(tr('Campagne renommée : ','Campaign renamed: ')+campaign.title);renameDialog.close();
+    }catch(e){error.textContent=e.message||tr('Connexion interrompue. Réessayez.','Connection interrupted. Try again.');}
+    finally{renameBusy=false;renameDialog.querySelectorAll('button,input').forEach(el=>el.disabled=false);}
+  };
+
   function element(tag,text,cls){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=text;return e;}
   function status(message){dashboard.querySelector('#vhStatus').textContent=message;}
   function render(){
@@ -5190,7 +5213,8 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
         observer.observe(main,{childList:true,subtree:true});const timeout=setTimeout(()=>observer.disconnect(),15000);document.getElementById('navCampaigns')?.click();
       });
       const plan=element('button',tr('Planifier','Schedule'),'vira-plan-button');plan.type='button';plan.addEventListener('click',()=>window.dispatchEvent(new CustomEvent('vira:calendar',{detail:{campaignId:String(c.id)}})));
-      actions.append(open,plan);row.append(title,element('small',label),actions);recent.append(row);
+      const rename=element('button',tr('Renommer','Rename'),'vira-calendar-button');rename.type='button';rename.setAttribute('aria-label',tr('Renommer : ','Rename: ')+(c.title||tr('Campagne','Campaign')));rename.onclick=()=>renameCampaign(c,rename);
+      actions.append(open,rename,plan);row.append(title,element('small',label),actions);recent.append(row);
     });
     try{
       if(!Array.isArray(accountPlans))throw Error();const raw=accountPlans;
@@ -5758,7 +5782,7 @@ body .app-shell .main #imageImportPanel .photo-editor-footer>button{max-width:10
 <style>
 .vh-search-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.7fr);gap:12px;padding:0 20px 12px}.vh-search-tools label{display:flex;flex-direction:column;gap:7px;min-width:0;font:400 12px/1.5 Arial,sans-serif;color:#5c6575}.vh-search-tools input,.vh-search-tools select{box-sizing:border-box;width:100%;min-width:0;min-height:42px;border:1px solid #d6dce7;border-radius:8px;padding:9px 11px;background:#fff;color:#26334a;font:400 14px Arial,sans-serif}.vh-search-tools :focus-visible,#vhShowMore:focus-visible,#vhSearchReset:focus-visible{outline:3px solid #a78ac5;outline-offset:2px}.vh-search-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 20px 12px;font:400 12px/1.5 Arial,sans-serif;color:#687488}#vhSearchReset,#vhShowMore{font:400 13px Arial,sans-serif;border:1px solid #dbd2e5;border-radius:7px;padding:8px 12px;background:#faf8fd;color:#644781;cursor:pointer}#vhShowMore{margin:16px 20px}#vhShowMore[hidden],#vhSearchReset[hidden]{display:none!important}@media(max-width:650px){.vh-search-tools{grid-template-columns:1fr;padding:0 16px 12px}.vh-search-tools input,.vh-search-tools select{font-size:16px}.vh-search-summary{padding:0 16px 12px;flex-wrap:wrap}}
 </style>
-</body>
+<style>.vh-rename{width:440px;max-width:calc(100vw - 32px);box-sizing:border-box;border:1px solid #ded6e7;border-radius:16px;padding:26px;background:#fff;color:#30263d;font:400 14px/1.6 Arial,sans-serif}.vh-rename::backdrop{background:#21162d77}.vh-rename h2{font:500 22px/1.4 Arial,sans-serif;margin:0 0 20px}.vh-rename label{display:block;margin-bottom:8px}.vh-rename input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #d2c8df;border-radius:8px;font:400 16px Arial,sans-serif}.vh-rename form>div{display:flex;justify-content:flex-end;gap:12px}.vh-rename button{padding:10px 16px;border:1px solid #d2c8df;border-radius:8px;background:#fff;color:#644781;cursor:pointer;font:500 14px Arial,sans-serif}.vh-rename button[type=submit]{background:#6f4d94;color:white}.vh-rename :disabled{opacity:.6;cursor:wait}.vh-rename :focus-visible{outline:3px solid #a78ac5;outline-offset:2px}#vhRenameError{min-height:23px;overflow-wrap:anywhere}</style></body>
 </html>
 
 

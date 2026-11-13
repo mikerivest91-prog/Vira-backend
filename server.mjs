@@ -1013,6 +1013,15 @@ app.patch("/api/campaigns/:id/publication", requireAuth, async (req, res) => {
     res.status(500).json({ error: "Enregistrement impossible." });
   }
 });
+app.patch("/api/campaigns/:id/title", requireAuth, async (req,res) => {
+  const id=Number(req.params.id),title=typeof req.body?.title==="string"?req.body.title.trim():"";
+  if(!Number.isSafeInteger(id)||id<=0||!title||title.length>160||/[\u0000-\u001f\u007f]/.test(title))return res.status(400).json({ok:false,error:"Choisissez un nom de 1 à 160 caractères, sur une seule ligne."});
+  try{
+    const result=await pool.query(`UPDATE vira_campaigns SET title=$1,campaign_data=COALESCE(campaign_data,'{}'::jsonb)||jsonb_build_object('customTitle',$1::text),updated_at=NOW() WHERE id=$2 AND user_id=$3 RETURNING id,title,updated_at`,[title,id,req.user.id]);
+    if(!result.rows[0])return res.status(404).json({ok:false,error:"Campagne introuvable."});
+    return res.json({ok:true,campaign:result.rows[0]});
+  }catch{return res.status(503).json({ok:false,error:"Le nom n’a pas pu être enregistré. Réessayez."});}
+});
 app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
   try {
     const campaignId = Number(req.params.id);
@@ -1044,9 +1053,9 @@ app.put("/api/campaigns/:id", requireAuth, async (req, res) => {
       `
         UPDATE vira_campaigns
         SET
-          title = $1,
+          title = COALESCE(NULLIF(campaign_data->>'customTitle',''),$1),
           status = $2,
-          campaign_data = $3::jsonb || jsonb_build_object('brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand'), 'previousExport', campaign_data->'previousExport', 'exportSettings', campaign_data->'exportSettings',
+          campaign_data = $3::jsonb || jsonb_build_object('customTitle', campaign_data->'customTitle', 'brand', COALESCE(campaign_data->'brand', $3::jsonb->'brand'), 'previousExport', campaign_data->'previousExport', 'exportSettings', campaign_data->'exportSettings',
             'narration', CASE WHEN campaign_data->>'scenario' IS NOT DISTINCT FROM $3::jsonb->>'scenario' THEN campaign_data->'narration' ELSE 'null'::jsonb END),
           updated_at = NOW()
         WHERE id = $4

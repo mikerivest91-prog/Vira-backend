@@ -59,7 +59,7 @@ export function installCampaignScript({app, pool, requireAuth, decodeImage}) {
       delete next.completedAt;
       const status = next.generatedImages?.length === 4 || next.sourceClips?.length === 4 ? 'visuals_ready' : 'draft';
       const saved = await db.query(`UPDATE vira_campaigns SET title=$3,status=$4,campaign_data=$5::jsonb,updated_at=NOW()
-        WHERE id=$1 AND user_id=$2 RETURNING *`, [id, req.user.id, script.title, status, JSON.stringify(next)]);
+        WHERE id=$1 AND user_id=$2 RETURNING *`, [id, req.user.id, data.customTitle || script.title, status, JSON.stringify(next)]);
       await db.query('COMMIT');
       return res.json({ok:true,campaign:saved.rows[0],changed:true,audioInvalidated,videoInvalidated:true});
     } catch {
