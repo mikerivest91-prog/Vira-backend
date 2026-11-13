@@ -5138,7 +5138,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   const english=()=>document.documentElement.lang==='en';
   const tr=(fr,en)=>english()?en:fr;
   const dashboard=document.createElement('section');dashboard.className='vh-dashboard';dashboard.id='viraDashboard';
-  dashboard.innerHTML=`<div class="vh-heading"><div><h1></h1><p></p></div><div id="vhCreate"></div></div><div class="vh-stats"><div class="vh-stat"><span></span><strong id="vhTotal">—</strong></div><div class="vh-stat"><span></span><strong id="vhDone">—</strong></div><div class="vh-stat"><span></span><strong id="vhScheduled">—</strong></div></div><div class="vh-columns"><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhRecentTitle"></h2><button type="button" class="vh-link" id="vhAll"></button></div><div class="vh-search-tools"><label><span id="vhSearchLabel">Rechercher une campagne</span><input id="vhSearch" type="search" autocomplete="off"></label><label><span id="vhFilterLabel">Statut</span><select id="vhFilter"><option value="all">Tous les statuts</option><option value="draft">En préparation</option><option value="visuals_ready">Visuels prêts</option><option value="completed">Terminée</option></select></label></div><div class="vh-search-summary"><span id="vhSearchCount" role="status" aria-live="polite"></span><button type="button" id="vhSearchReset" hidden>Effacer les filtres</button></div><div id="vhRecent"></div><button type="button" id="vhShowMore" hidden>Afficher plus</button></section><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhNextTitle"></h2><button type="button" class="vh-link" id="vhCalendar"></button></div><div id="vhNext"></div><p class="vh-note" id="vhNote"></p></section></div><p id="vhStatus" role="status"></p>`;
+  dashboard.innerHTML=`<div class="vh-heading"><div><h1></h1><p></p></div><div id="vhCreate"></div></div><div class="vh-stats"><div class="vh-stat"><span></span><strong id="vhTotal">—</strong></div><div class="vh-stat"><span></span><strong id="vhDone">—</strong></div><div class="vh-stat"><span></span><strong id="vhScheduled">—</strong></div></div><div class="vh-columns"><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhRecentTitle"></h2><button type="button" class="vh-link" id="vhAll"></button></div><div class="vh-search-tools"><label><span id="vhSearchLabel">Rechercher une campagne</span><input id="vhSearch" type="search" autocomplete="off"></label><label><span id="vhFilterLabel">Statut</span><select id="vhFilter"><option value="all">Tous les statuts</option><option value="draft">En préparation</option><option value="visuals_ready">Visuels prêts</option><option value="completed">Terminée</option></select></label><label><span id="vhSortLabel">Trier par</span><select id="vhSort"><option value="updated">Dernière modification</option><option value="created">Date de création</option><option value="title">Nom A–Z</option></select></label></div><div class="vh-search-summary"><span id="vhSearchCount" role="status" aria-live="polite"></span><button type="button" id="vhSearchReset" hidden>Effacer les filtres</button></div><div id="vhRecent"></div><button type="button" id="vhShowMore" hidden>Afficher plus</button></section><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhNextTitle"></h2><button type="button" class="vh-link" id="vhCalendar"></button></div><div id="vhNext"></div><p class="vh-note" id="vhNote"></p></section></div><p id="vhStatus" role="status"></p>`;
   welcome.before(dashboard);
   const actionWrapper=newButton.parentElement;
   dashboard.querySelector('#vhCreate').append(newButton);
@@ -5149,6 +5149,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   const hero=main.querySelector('.vb-hero');if(hero){const info=document.createElement('details');info.className='vh-intro';const summary=document.createElement('summary');summary.textContent=tr('Découvrir Olyvex Brain','Discover Olyvex Brain');hero.before(info);info.append(summary,hero);}
   let campaigns=null;let accountPlans=null;let visibleLimit=6;
   const searchInput=dashboard.querySelector('#vhSearch'),filterInput=dashboard.querySelector('#vhFilter');
+  const sortInput=dashboard.querySelector('#vhSort');sortInput.addEventListener('change',()=>{visibleLimit=6;render();});
   const normalizeSearch=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim();
   const campaignState=c=>['completed','visuals_ready'].includes(c.status)?c.status:'draft';
   searchInput.addEventListener('input',()=>{visibleLimit=6;render();});
@@ -5191,6 +5192,8 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     dashboard.querySelector('#vhSearchLabel').textContent=tr('Rechercher une campagne','Search campaigns');
     searchInput.placeholder=tr('Nom de la campagne…','Campaign name…');
     dashboard.querySelector('#vhFilterLabel').textContent=tr('Statut','Status');
+    dashboard.querySelector('#vhSortLabel').textContent=tr('Trier par','Sort by');
+    [...sortInput.options].forEach((option,i)=>option.textContent=(english()?['Last modified','Date created','Name A–Z']:['Dernière modification','Date de création','Nom A–Z'])[i]);
     [...filterInput.options].forEach((option,i)=>option.textContent=(english()?['All statuses','Draft','Visuals ready','Completed']:['Tous les statuts','En préparation','Visuels prêts','Terminées'])[i]);
     dashboard.querySelector('#vhSearchReset').textContent=tr('Effacer les filtres','Clear filters');
     dashboard.querySelector('#vhSearchReset').hidden=!searchInput.value&&filterInput.value==='all';
@@ -5200,7 +5203,11 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     dashboard.querySelector('#vhTotal').textContent=campaigns.length;
     dashboard.querySelector('#vhDone').textContent=campaigns.filter(c=>c.status==='completed').length;
     const query=normalizeSearch(searchInput.value);
-    const sorted=campaigns.filter(c=>(filterInput.value==='all'||campaignState(c)===filterInput.value)&&(!query||normalizeSearch(c.title||tr('Campagne sans titre','Untitled campaign')).includes(query))).sort((a,b)=>(Date.parse(b.created_at||b.createdAt)||0)-(Date.parse(a.created_at||a.createdAt)||0));
+    const sorted=campaigns.filter(c=>(filterInput.value==='all'||campaignState(c)===filterInput.value)&&(!query||normalizeSearch(c.title||tr('Campagne sans titre','Untitled campaign')).includes(query))).sort((a,b)=>{
+      if(sortInput.value==='title')return String(a.title||'').localeCompare(String(b.title||''),english()?'en':'fr',{sensitivity:'base',numeric:true})||String(a.id).localeCompare(String(b.id));
+      const date=c=>Date.parse(sortInput.value==='created'?(c.created_at||c.createdAt):(c.updated_at||c.updatedAt||c.created_at||c.createdAt))||0;
+      return date(b)-date(a)||String(a.id).localeCompare(String(b.id));
+    });
     dashboard.querySelector('#vhSearchCount').textContent=tr(sorted.length+' résultat'+(sorted.length===1?'':'s')+' sur '+campaigns.length,sorted.length+' result'+(sorted.length===1?'':'s')+' of '+campaigns.length);
     dashboard.querySelector('#vhShowMore').hidden=sorted.length<=visibleLimit;
 
