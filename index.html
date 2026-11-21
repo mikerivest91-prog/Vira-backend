@@ -5180,6 +5180,27 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     finally{renameBusy=false;renameDialog.querySelectorAll('button,input').forEach(el=>el.disabled=false);}
   };
 
+
+  const copyDialog=document.createElement('dialog');copyDialog.className='vh-rename';copyDialog.setAttribute('aria-labelledby','vhCopyTitle');
+  copyDialog.innerHTML='<h2 id="vhCopyTitle"></h2><p id="vhCopyName" style="overflow-wrap:anywhere"></p><p id="vhCopyDetails"></p><p id="vhCopyError" role="status"></p><div><button type="button" id="vhCopyCancel"></button> <button type="button" id="vhCopyConfirm"></button></div>';document.body.append(copyDialog);
+  let copyTarget=null,copyBusy=false,copyTrigger=null;
+  copyDialog.querySelector('#vhCopyCancel').onclick=()=>copyDialog.close();
+  copyDialog.addEventListener('cancel',e=>{if(copyBusy)e.preventDefault();});
+  copyDialog.addEventListener('close',()=>{if(copyTrigger?.isConnected)copyTrigger.focus();else searchInput.focus();});
+  function duplicateCampaign(c,button){
+    copyTarget=c;copyTrigger=button;copyDialog.querySelector('h2').textContent=tr('Dupliquer la campagne','Duplicate campaign');
+    copyDialog.querySelector('#vhCopyName').textContent=c.title||tr('Campagne sans titre','Untitled campaign');
+    copyDialog.querySelector('#vhCopyDetails').textContent=tr('Une copie en brouillon reprendra le brief, le scénario, les images, la marque et les textes de publication. La voix, les clips vidéo et le MP4 ne sont pas copiés. Aucune génération ni crédit utilisé.','A new draft will include the brief, script, images, brand and publishing text. Voice, video clips and the final MP4 are not copied. No generation or credits used.');
+    copyDialog.querySelector('#vhCopyCancel').textContent=tr('Annuler','Cancel');copyDialog.querySelector('#vhCopyConfirm').textContent=tr('Créer la copie','Create copy');copyDialog.querySelector('#vhCopyError').textContent='';copyDialog.showModal();
+  }
+  copyDialog.querySelector('#vhCopyConfirm').onclick=async()=>{
+    if(copyBusy||!copyTarget)return;const source=copyTarget;copyBusy=true;copyDialog.querySelectorAll('button').forEach(b=>b.disabled=true);const message=copyDialog.querySelector('#vhCopyError');message.textContent=tr('Création de la copie…','Creating copy…');
+    try{const response=await fetch('/api/campaigns/'+encodeURIComponent(source.id)+'/duplicate',{method:'POST',credentials:'same-origin'});const data=await response.json();if(!response.ok||!data.campaign?.id)throw Error(data.error||tr('Duplication impossible.','Unable to duplicate.'));
+      campaigns=[data.campaign,...campaigns.filter(c=>String(c.id)!==String(data.campaign.id))];searchInput.value='';filterInput.value='all';sortInput.value='updated';visibleLimit=6;render();status(tr('Copie créée : ','Copy created: ')+data.campaign.title);copyDialog.close();
+    }catch(e){message.textContent=e.message||tr('Vérifiez vos campagnes avant de réessayer.','Check your campaigns before retrying.');}
+    finally{copyBusy=false;copyDialog.querySelectorAll('button').forEach(b=>b.disabled=false);}
+  };
+
   function element(tag,text,cls){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=text;return e;}
   function status(message){dashboard.querySelector('#vhStatus').textContent=message;}
   function render(){
@@ -5221,7 +5242,8 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
       });
       const plan=element('button',tr('Planifier','Schedule'),'vira-plan-button');plan.type='button';plan.addEventListener('click',()=>window.dispatchEvent(new CustomEvent('vira:calendar',{detail:{campaignId:String(c.id)}})));
       const rename=element('button',tr('Renommer','Rename'),'vira-calendar-button');rename.type='button';rename.setAttribute('aria-label',tr('Renommer : ','Rename: ')+(c.title||tr('Campagne','Campaign')));rename.onclick=()=>renameCampaign(c,rename);
-      actions.append(open,rename,plan);row.append(title,element('small',label),actions);recent.append(row);
+      const duplicate=element('button',tr('Dupliquer','Duplicate'),'vira-calendar-button');duplicate.type='button';duplicate.setAttribute('aria-label',tr('Dupliquer : ','Duplicate: ')+(c.title||tr('Campagne','Campaign')));duplicate.onclick=()=>duplicateCampaign(c,duplicate);
+      actions.append(open,rename,duplicate,plan);row.append(title,element('small',label),actions);recent.append(row);
     });
     try{
       if(!Array.isArray(accountPlans))throw Error();const raw=accountPlans;

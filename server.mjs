@@ -911,8 +911,10 @@ app.post("/api/campaigns/:id/duplicate", requireAuth, async (req,res) => {
   try {
     const original=(await pool.query("SELECT title,campaign_data FROM vira_campaigns WHERE id=$1 AND user_id=$2",[id,req.user.id])).rows[0];
     if(!original)return res.status(404).json({error:"Campagne introuvable."});
-    const title=(original.title+" — copie").slice(0,160);
-    const result=await pool.query("INSERT INTO vira_campaigns(user_id,title,status,campaign_data) VALUES($1,$2,'draft',$3::jsonb) RETURNING id,title,status,campaign_data,created_at,updated_at",[req.user.id,title,JSON.stringify(copyCampaignData(original.campaign_data||{}))]);
+    const suffix=" — copie";
+    const title=String(original.title||"Campagne").slice(0,160-suffix.length)+suffix;
+    const copiedData={...copyCampaignData(original.campaign_data||{}),customTitle:title};
+    const result=await pool.query("INSERT INTO vira_campaigns(user_id,title,status,campaign_data) VALUES($1,$2,'draft',$3::jsonb) RETURNING id,title,status,campaign_data,created_at,updated_at",[req.user.id,title,JSON.stringify(copiedData)]);
     res.status(201).json({campaign:result.rows[0]});
   }catch{res.status(503).json({error:"Duplication impossible. Réessayez."});}
 });
