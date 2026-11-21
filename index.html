@@ -5201,6 +5201,32 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     finally{copyBusy=false;copyDialog.querySelectorAll('button').forEach(b=>b.disabled=false);}
   };
 
+
+  const peek=document.createElement('dialog');peek.className='vh-peek';peek.setAttribute('aria-labelledby','vhPeekTitle');
+  peek.innerHTML='<div class="vh-peek-head"><h2 id="vhPeekTitle"></h2><button type="button" id="vhPeekClose"></button></div><div class="vh-peek-grid"><div id="vhPeekVisual"></div><div><p id="vhPeekState"></p><h3 id="vhPeekBriefLabel"></h3><p id="vhPeekBrief"></p><dl id="vhPeekFacts"></dl></div></div><details><summary id="vhPeekScriptLabel"></summary><pre id="vhPeekScript"></pre></details><div class="vh-peek-footer"><span id="vhPeekNote"></span><button type="button" id="vhPeekOpen"></button></div>';document.body.append(peek);
+  let peekTrigger=null,peekOpen=null;
+  peek.querySelector('#vhPeekClose').onclick=()=>peek.close();peek.addEventListener('close',()=>peekTrigger?.isConnected&&peekTrigger.focus());
+  peek.querySelector('#vhPeekOpen').onclick=()=>{const action=peekOpen;peek.close();action?.click();};
+  function showCampaignPreview(c,trigger,open){
+    peekTrigger=trigger;peekOpen=open;
+    const data=c.campaign_data&&typeof c.campaign_data==='object'?c.campaign_data:{};
+    const text=value=>typeof value==='string'?value:'';
+    peek.querySelector('h2').textContent=c.title||tr('Campagne sans titre','Untitled campaign');
+    peek.querySelector('#vhPeekClose').textContent=tr('Fermer','Close');
+    peek.querySelector('#vhPeekBriefLabel').textContent=tr('Votre brief','Your brief');
+    peek.querySelector('#vhPeekBrief').textContent=text(data.brief)||tr('Aucun brief renseigné.','No brief provided.');
+    peek.querySelector('#vhPeekState').textContent=c.status==='completed'?tr('Terminée','Completed'):c.status==='visuals_ready'?tr('Visuels prêts','Visuals ready'):tr('En préparation','Draft');
+    const facts=peek.querySelector('dl');facts.replaceChildren();
+    for(const [label,value] of [[tr('Audience','Audience'),data.audience],[tr('Objectif','Goal'),data.goal],[tr('Plateforme','Platform'),data.platform],[tr('Ton','Tone'),data.tone]]){facts.append(element('dt',label),element('dd',text(value)||tr('Non renseigné','Not provided')));}
+    const visual=peek.querySelector('#vhPeekVisual');visual.replaceChildren();
+    const imageSource=[data.generatedImages?.[0],data.sourceClips?.[0]?.thumbnail].find(value=>typeof value==='string'&&/^data:image\/(?:png|jpeg|webp);base64,/i.test(value));
+    const noImage=()=>visual.replaceChildren(element('p',tr('Aucun aperçu visuel disponible.','No visual preview available.')));
+    if(imageSource){const img=document.createElement('img');img.alt=tr('Premier visuel de la campagne','First campaign visual');img.src=imageSource;img.onerror=noImage;visual.append(img);}else noImage();
+    peek.querySelector('details').open=false;peek.querySelector('#vhPeekScriptLabel').textContent=tr('Lire le scénario','Read script');peek.querySelector('#vhPeekScript').textContent=text(data.scenario)||tr('Aucun scénario enregistré.','No saved script.');
+    peek.querySelector('#vhPeekNote').textContent=tr('Aperçu des informations enregistrées · aucune modification','Preview of saved information · no changes');
+    peek.querySelector('#vhPeekOpen').textContent=tr('Ouvrir la campagne →','Open campaign →');peek.showModal();
+  }
+
   function element(tag,text,cls){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=text;return e;}
   function status(message){dashboard.querySelector('#vhStatus').textContent=message;}
   function render(){
@@ -5245,7 +5271,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
       const duplicate=element('button',tr('Dupliquer','Duplicate'),'vira-calendar-button');duplicate.type='button';duplicate.setAttribute('aria-label',tr('Dupliquer : ','Duplicate: ')+(c.title||tr('Campagne','Campaign')));duplicate.onclick=()=>duplicateCampaign(c,duplicate);
       actions.append(open,rename,duplicate,plan);
       row.classList.add('vh-project-card');
-      const preview=element('div','','vh-project-preview');preview.setAttribute('aria-hidden','true');
+      const preview=element('button','','vh-project-preview');preview.type='button';preview.setAttribute('aria-label',tr('Aperçu : ','Preview: ')+(c.title||tr('Campagne','Campaign')));preview.title=tr('Voir l’aperçu','Quick preview');preview.onclick=()=>showCampaignPreview(c,preview,open);
       const initials=String(c.title||'O').trim().split(/\s+/).slice(0,2).map(word=>Array.from(word)[0]||'').join('').toLocaleUpperCase();
       preview.textContent=initials||'O';
       const data=c.campaign_data&&typeof c.campaign_data==='object'?c.campaign_data:{};
@@ -5838,6 +5864,12 @@ body .app-shell .main .vh-project-badge[data-status=visuals_ready]{background:#e
 .vh-project-body .vh-actions{display:flex;flex-wrap:wrap;gap:6px}
 body .app-shell .main .vh-project-body .vh-actions button{font-size:12px!important;padding:7px 10px!important;min-height:36px;margin-top:10px}
 @media(max-width:650px){body .app-shell .main .vh-project-card{grid-template-columns:64px minmax(0,1fr);gap:12px;padding:16px!important}.vh-project-preview{width:64px;height:80px;font-size:22px}}
+</style><style>
+body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!important;cursor:zoom-in;box-shadow:none!important}
+.vh-project-preview:focus-visible{outline:3px solid #9476b5;outline-offset:3px}
+.vh-peek{box-sizing:border-box;width:780px;max-width:calc(100vw - 28px);max-height:90vh;overflow:auto;padding:28px;border:1px solid #ddd5e8;border-radius:16px;background:#fff;color:#30384b;font:400 14px/1.65 Arial,sans-serif}
+.vh-peek::backdrop{background:#21162d88}.vh-peek-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}.vh-peek h2{font:500 24px/1.35 Arial,sans-serif;margin:0;overflow-wrap:anywhere}.vh-peek h3{font:500 15px/1.4 Arial,sans-serif;margin:14px 0 8px}.vh-peek button{padding:9px 14px;border:1px solid #d4c8e2;border-radius:8px;background:#f7f4fb;color:#61477b;cursor:pointer;white-space:nowrap;font:500 13px Arial,sans-serif}.vh-peek button:focus-visible,.vh-peek summary:focus-visible{outline:3px solid #9476b5;outline-offset:3px}.vh-peek-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px}#vhPeekVisual{display:flex;align-items:center;justify-content:center;min-height:180px;max-height:360px;background:#f4f2f7;border-radius:12px;padding:16px;text-align:center}#vhPeekVisual img{display:block;max-width:100%;max-height:328px;object-fit:contain}#vhPeekState{display:inline-block;padding:4px 9px;background:#f0ebf7;color:#64477d;border-radius:5px;font-size:12px;margin:0}#vhPeekBrief{white-space:pre-wrap;overflow-wrap:anywhere;margin:0}#vhPeekFacts{display:grid;grid-template-columns:90px minmax(0,1fr);gap:8px;margin:20px 0 0}#vhPeekFacts dt{color:#6c7585;font-size:12px}#vhPeekFacts dd{margin:0;overflow-wrap:anywhere}.vh-peek details{margin-top:24px;border-top:1px solid #e4e6ed;padding-top:18px}.vh-peek summary{cursor:pointer}.vh-peek pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto;background:#f7f8fb;border-radius:8px;padding:16px;font:400 13px/1.7 Arial,sans-serif}.vh-peek-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:24px;border-top:1px solid #e4e6ed;padding-top:18px}.vh-peek-footer span{font-size:12px;color:#737c8d}
+@media(max-width:600px){.vh-peek{padding:20px}.vh-peek-grid{grid-template-columns:1fr}.vh-peek-footer{flex-direction:column;align-items:stretch}.vh-peek h2{font-size:21px}}
 </style></body>
 </html>
 
