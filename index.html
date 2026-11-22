@@ -5203,7 +5203,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
 
 
   const peek=document.createElement('dialog');peek.className='vh-peek';peek.setAttribute('aria-labelledby','vhPeekTitle');
-  peek.innerHTML='<div class="vh-peek-head"><h2 id="vhPeekTitle"></h2><button type="button" id="vhPeekClose"></button></div><div class="vh-peek-grid"><div id="vhPeekVisual"></div><div><p id="vhPeekState"></p><h3 id="vhPeekBriefLabel"></h3><p id="vhPeekBrief"></p><dl id="vhPeekFacts"></dl></div></div><details><summary id="vhPeekScriptLabel"></summary><pre id="vhPeekScript"></pre></details><div class="vh-peek-footer"><span id="vhPeekNote"></span><button type="button" id="vhPeekOpen"></button></div>';document.body.append(peek);
+  peek.innerHTML='<div class="vh-peek-head"><h2 id="vhPeekTitle"></h2><button type="button" id="vhPeekClose"></button></div><div class="vh-peek-grid"><div><div id="vhPeekVisual"></div><div class="vh-peek-scenes" id="vhPeekScenes" role="group"></div><p id="vhPeekSceneStatus" role="status"></p></div><div><p id="vhPeekState"></p><h3 id="vhPeekBriefLabel"></h3><p id="vhPeekBrief"></p><dl id="vhPeekFacts"></dl></div></div><details><summary id="vhPeekScriptLabel"></summary><pre id="vhPeekScript"></pre></details><div class="vh-peek-footer"><span id="vhPeekNote"></span><button type="button" id="vhPeekOpen"></button></div>';document.body.append(peek);
   let peekTrigger=null,peekOpen=null;
   peek.querySelector('#vhPeekClose').onclick=()=>peek.close();peek.addEventListener('close',()=>peekTrigger?.isConnected&&peekTrigger.focus());
   peek.querySelector('#vhPeekOpen').onclick=()=>{const action=peekOpen;peek.close();action?.click();};
@@ -5218,10 +5218,24 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     peek.querySelector('#vhPeekState').textContent=c.status==='completed'?tr('Terminée','Completed'):c.status==='visuals_ready'?tr('Visuels prêts','Visuals ready'):tr('En préparation','Draft');
     const facts=peek.querySelector('dl');facts.replaceChildren();
     for(const [label,value] of [[tr('Audience','Audience'),data.audience],[tr('Objectif','Goal'),data.goal],[tr('Plateforme','Platform'),data.platform],[tr('Ton','Tone'),data.tone]]){facts.append(element('dt',label),element('dd',text(value)||tr('Non renseigné','Not provided')));}
-    const visual=peek.querySelector('#vhPeekVisual');visual.replaceChildren();
-    const imageSource=[data.generatedImages?.[0],data.sourceClips?.[0]?.thumbnail].find(value=>typeof value==='string'&&/^data:image\/(?:png|jpeg|webp);base64,/i.test(value));
-    const noImage=()=>visual.replaceChildren(element('p',tr('Aucun aperçu visuel disponible.','No visual preview available.')));
-    if(imageSource){const img=document.createElement('img');img.alt=tr('Premier visuel de la campagne','First campaign visual');img.src=imageSource;img.onerror=noImage;visual.append(img);}else noImage();
+    const visual=peek.querySelector('#vhPeekVisual'),sceneButtons=peek.querySelector('#vhPeekScenes');
+    sceneButtons.replaceChildren();sceneButtons.setAttribute('aria-label',tr('Scènes de la campagne','Campaign scenes'));
+    const images=Array.from({length:4},(_,i)=>[data.generatedImages?.[i],data.sourceClips?.[i]?.thumbnail].find(value=>typeof value==='string'&&/^data:image\/(?:png|jpeg|webp);base64,/i.test(value)));
+    let activeScene=0;
+    const showScene=index=>{
+      activeScene=index;visual.replaceChildren();const caption=tr('Scène ','Scene ')+(index+1);
+      peek.querySelector('#vhPeekSceneStatus').textContent=caption+tr(' sur 4',' of 4');
+      [...sceneButtons.children].forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));
+      const noImage=()=>{if(activeScene===index)visual.replaceChildren(element('p',tr('Aucun aperçu enregistré pour cette scène.','No saved preview for this scene.')));};
+      if(images[index]){const image=document.createElement('img');image.alt=caption;image.src=images[index];image.onerror=()=>{if(image.parentNode===visual)noImage();};visual.append(image);}else noImage();
+    };
+    images.forEach((source,i)=>{
+      const button=element('button','','vh-peek-scene');button.type='button';button.setAttribute('aria-label',tr('Voir la scène ','View scene ')+(i+1));button.title=tr('Scène ','Scene ')+(i+1);
+      const label=element('span',tr('Scène ','Scene ')+(i+1));button.append(label);
+      if(source){const image=document.createElement('img');image.alt='';image.src=source;image.onerror=()=>image.remove();button.prepend(image);}
+      button.onclick=()=>showScene(i);button.onkeydown=event=>{let next;if(event.key==='ArrowRight')next=(i+1)%4;else if(event.key==='ArrowLeft')next=(i+3)%4;else if(event.key==='Home')next=0;else if(event.key==='End')next=3;else return;event.preventDefault();sceneButtons.children[next].focus();showScene(next);};sceneButtons.append(button);
+    });
+    showScene(0);
     peek.querySelector('details').open=false;peek.querySelector('#vhPeekScriptLabel').textContent=tr('Lire le scénario','Read script');peek.querySelector('#vhPeekScript').textContent=text(data.scenario)||tr('Aucun scénario enregistré.','No saved script.');
     peek.querySelector('#vhPeekNote').textContent=tr('Aperçu des informations enregistrées · aucune modification','Preview of saved information · no changes');
     peek.querySelector('#vhPeekOpen').textContent=tr('Ouvrir la campagne →','Open campaign →');peek.showModal();
@@ -5870,6 +5884,11 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
 .vh-peek{box-sizing:border-box;width:780px;max-width:calc(100vw - 28px);max-height:90vh;overflow:auto;padding:28px;border:1px solid #ddd5e8;border-radius:16px;background:#fff;color:#30384b;font:400 14px/1.65 Arial,sans-serif}
 .vh-peek::backdrop{background:#21162d88}.vh-peek-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}.vh-peek h2{font:500 24px/1.35 Arial,sans-serif;margin:0;overflow-wrap:anywhere}.vh-peek h3{font:500 15px/1.4 Arial,sans-serif;margin:14px 0 8px}.vh-peek button{padding:9px 14px;border:1px solid #d4c8e2;border-radius:8px;background:#f7f4fb;color:#61477b;cursor:pointer;white-space:nowrap;font:500 13px Arial,sans-serif}.vh-peek button:focus-visible,.vh-peek summary:focus-visible{outline:3px solid #9476b5;outline-offset:3px}.vh-peek-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px}#vhPeekVisual{display:flex;align-items:center;justify-content:center;min-height:180px;max-height:360px;background:#f4f2f7;border-radius:12px;padding:16px;text-align:center}#vhPeekVisual img{display:block;max-width:100%;max-height:328px;object-fit:contain}#vhPeekState{display:inline-block;padding:4px 9px;background:#f0ebf7;color:#64477d;border-radius:5px;font-size:12px;margin:0}#vhPeekBrief{white-space:pre-wrap;overflow-wrap:anywhere;margin:0}#vhPeekFacts{display:grid;grid-template-columns:90px minmax(0,1fr);gap:8px;margin:20px 0 0}#vhPeekFacts dt{color:#6c7585;font-size:12px}#vhPeekFacts dd{margin:0;overflow-wrap:anywhere}.vh-peek details{margin-top:24px;border-top:1px solid #e4e6ed;padding-top:18px}.vh-peek summary{cursor:pointer}.vh-peek pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto;background:#f7f8fb;border-radius:8px;padding:16px;font:400 13px/1.7 Arial,sans-serif}.vh-peek-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:24px;border-top:1px solid #e4e6ed;padding-top:18px}.vh-peek-footer span{font-size:12px;color:#737c8d}
 @media(max-width:600px){.vh-peek{padding:20px}.vh-peek-grid{grid-template-columns:1fr}.vh-peek-footer{flex-direction:column;align-items:stretch}.vh-peek h2{font-size:21px}}
+</style><style>
+.vh-peek-scenes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.vh-peek .vh-peek-scene{white-space:normal;padding:6px;min-width:0;min-height:74px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:#fff;border:1px solid #dcd6e6;color:#6d617e}
+.vh-peek .vh-peek-scene[aria-pressed=true]{border:2px solid #7a569f;background:#f4eef9;padding:5px;color:#50346e}
+.vh-peek-scene img{width:100%;height:46px;object-fit:contain;border-radius:3px}.vh-peek-scene span{font:400 10px/1.4 Arial,sans-serif}#vhPeekSceneStatus{margin:8px 0 0;text-align:center;font:400 12px/1.5 Arial,sans-serif;color:#758092}
 </style></body>
 </html>
 
