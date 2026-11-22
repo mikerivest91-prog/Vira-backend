@@ -5939,6 +5939,44 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
   }
 }
 </style>
+  <script>
+(() => {
+  const preview = document.querySelector(".vh-peek");
+  if (!preview) return;
+
+  let startedOutside = false;
+
+  function isOutside(event) {
+    const box = preview.getBoundingClientRect();
+    return (
+      event.clientX < box.left ||
+      event.clientX > box.right ||
+      event.clientY < box.top ||
+      event.clientY > box.bottom
+    );
+  }
+
+  preview.addEventListener("pointerdown", event => {
+    startedOutside =
+      event.target === preview && isOutside(event);
+  });
+
+  preview.addEventListener("pointerup", event => {
+    if (
+      startedOutside &&
+      event.target === preview &&
+      isOutside(event)
+    ) {
+      preview.close();
+    }
+    startedOutside = false;
+  });
+
+  preview.addEventListener("pointercancel", () => {
+    startedOutside = false;
+  });
+})();
+</script>
 </body>
 </html>
 
