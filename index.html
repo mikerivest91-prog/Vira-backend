@@ -5889,7 +5889,8 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
 .vh-peek .vh-peek-scene{white-space:normal;padding:6px;min-width:0;min-height:74px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:#fff;border:1px solid #dcd6e6;color:#6d617e}
 .vh-peek .vh-peek-scene[aria-pressed=true]{border:2px solid #7a569f;background:#f4eef9;padding:5px;color:#50346e}
 .vh-peek-scene img{width:100%;height:46px;object-fit:contain;border-radius:3px}.vh-peek-scene span{font:400 10px/1.4 Arial,sans-serif}#vhPeekSceneStatus{margin:8px 0 0;text-align:center;font:400 12px/1.5 Arial,sans-serif;color:#758092}
-  <style>
+</style>
+<style>
 /* Aperçu de campagne : commandes accessibles pendant le défilement */
 .vh-peek {
   scroll-padding-top: 90px;
@@ -6075,6 +6076,52 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
   });
+})();
+</script>
+<style>
+
+.vh-peek .vh-peek-footer{flex-wrap:wrap}
+.vh-peek #vhPeekNote{flex:1 1 100%}
+.vh-brief-export{position:relative}
+.vh-peek .vh-brief-options{position:absolute;bottom:calc(100% + 8px);left:0;z-index:5;min-width:210px;padding:6px;border:1px solid #ded5e9;border-radius:10px;background:#fff;box-shadow:0 8px 28px #2b163322;display:flex;flex-direction:column;gap:4px}
+.vh-peek .vh-brief-options[hidden]{display:none!important}
+.vh-peek .vh-brief-options button{text-align:left;min-height:44px;background:white;border-color:transparent}
+.vh-peek .vh-brief-options button:hover{background:#f4eef9}
+.vh-peek #vhExportBriefToggle{min-height:44px}
+.vh-peek .vh-brief-feedback{flex:1 1 100%;overflow-wrap:anywhere}
+.vh-peek .vh-brief-feedback:empty{display:none}
+@media(max-width:600px){.vh-brief-export{width:100%}.vh-peek #vhExportBriefToggle{width:100%}.vh-peek .vh-brief-options{left:0;right:0;min-width:0}}
+
+</style>
+<script>
+(() => {
+  const preview=document.querySelector('.vh-peek');
+  const footer=preview?.querySelector('.vh-peek-footer');
+  const copy=document.getElementById('vhCopyBrief');
+  const download=document.getElementById('vhDownloadBrief');
+  if(!footer||!copy||!download||document.getElementById('vhExportBriefToggle'))return;
+  const oldGroup=copy.parentElement;
+  const message=oldGroup.querySelector('[role="status"]');
+  const group=document.createElement('div');group.className='vh-brief-export';
+  const toggle=document.createElement('button');toggle.type='button';toggle.id='vhExportBriefToggle';
+  toggle.textContent='Exporter le brief ▾';toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-controls','vhExportBriefOptions');
+  const options=document.createElement('div');options.id='vhExportBriefOptions';options.className='vh-brief-options';options.hidden=true;
+  options.append(copy,download);group.append(toggle,options);
+  footer.insertBefore(group,document.getElementById('vhPeekOpen'));
+  if(message){message.className='vh-brief-feedback';footer.append(message);}
+  oldGroup.remove();
+  const close=(focus=false)=>{options.hidden=true;toggle.setAttribute('aria-expanded','false');if(focus&&preview.open)toggle.focus();};
+  toggle.onclick=()=>{const opening=options.hidden;options.hidden=!opening;toggle.setAttribute('aria-expanded',String(opening));};
+  toggle.onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();options.hidden=false;toggle.setAttribute('aria-expanded','true');copy.focus();}};
+  options.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();(document.activeElement===copy?download:copy).focus();}
+  });
+  options.addEventListener('click',e=>{if(e.target.closest('button'))close(true);});
+  preview.addEventListener('click',e=>{if(!group.contains(e.target))close();});
+  group.addEventListener('focusout',e=>{if(e.relatedTarget&&!group.contains(e.relatedTarget))close();});
+  preview.addEventListener('keydown',e=>{if(e.key==='Escape'&&!options.hidden){e.preventDefault();e.stopPropagation();close(true);}});
+  preview.addEventListener('cancel',e=>{if(!options.hidden){e.preventDefault();close(true);}});
+  preview.addEventListener('close',()=>close());
 })();
 </script>
 </body>
