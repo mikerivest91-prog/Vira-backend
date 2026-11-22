@@ -5977,6 +5977,72 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
   });
 })();
 </script>
+  <script>
+(() => {
+  const preview = document.querySelector(".vh-peek");
+  const footer = preview?.querySelector(".vh-peek-footer");
+
+  if (!footer || document.getElementById("vhCopyBrief")) return;
+
+  const group = document.createElement("div");
+  group.style.cssText =
+    "display:flex;flex-direction:column;gap:6px;align-items:flex-start";
+
+  const button = document.createElement("button");
+  button.id = "vhCopyBrief";
+  button.type = "button";
+  button.textContent = "Copier le brief";
+
+  const message = document.createElement("span");
+  message.setAttribute("role", "status");
+  message.style.cssText = "font-size:12px;color:#687488";
+
+  group.append(button, message);
+  footer.insertBefore(group, footer.lastElementChild);
+  footer.style.flexWrap = "wrap";
+
+  button.addEventListener("click", async () => {
+    const title = preview.querySelector("#vhPeekTitle")?.textContent || "";
+    const brief = preview.querySelector("#vhPeekBrief")?.textContent || "";
+    const facts = [];
+
+    preview.querySelectorAll("#vhPeekFacts dt").forEach(label => {
+      const value = label.nextElementSibling;
+      if (value?.tagName === "DD") {
+        facts.push(`${label.textContent} : ${value.textContent}`);
+      }
+    });
+
+    const text = [
+      title,
+      "",
+      "BRIEF",
+      brief,
+      "",
+      ...facts
+    ].join("\n");
+
+    button.disabled = true;
+    message.textContent = "";
+
+    try {
+      await navigator.clipboard.writeText(text);
+      if (preview.open) message.textContent = "Brief copié.";
+    } catch {
+      if (preview.open) {
+        message.textContent =
+          "Copie indisponible. Sélectionnez le texte pour le copier.";
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  preview.addEventListener("close", () => {
+    message.textContent = "";
+  });
+})();
+</script>
 </body>
 </html>
 
