@@ -6043,6 +6043,40 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
   });
 })();
 </script>
+<script>
+(() => {
+  const preview = document.querySelector(".vh-peek");
+  const footer = preview?.querySelector(".vh-peek-footer");
+  if (!footer || document.getElementById("vhDownloadBrief")) return;
+  const button = document.createElement("button");
+  button.id = "vhDownloadBrief";
+  button.type = "button";
+  button.textContent = "Télécharger le brief";
+  footer.insertBefore(button, footer.lastElementChild);
+  footer.style.flexWrap = "wrap";
+  button.addEventListener("click", () => {
+    const title = preview.querySelector("#vhPeekTitle")?.textContent || "Campagne";
+    const brief = preview.querySelector("#vhPeekBrief")?.textContent || "";
+    const facts = [];
+    preview.querySelectorAll("#vhPeekFacts dt").forEach(label => {
+      const value = label.nextElementSibling;
+      if (value?.tagName === "DD") facts.push(label.textContent + " : " + value.textContent);
+    });
+    const content = [title, "", "BRIEF", brief, "", ...facts].join("\r\n");
+    const filename = title.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 70) || "campagne";
+    const blob = new Blob(["\uFEFF", content], {type: "text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Olyvex-brief-" + filename + ".txt";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  });
+})();
+</script>
 </body>
 </html>
 
