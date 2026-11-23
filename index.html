@@ -5283,7 +5283,16 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
       const plan=element('button',tr('Planifier','Schedule'),'vira-plan-button');plan.type='button';plan.addEventListener('click',()=>window.dispatchEvent(new CustomEvent('vira:calendar',{detail:{campaignId:String(c.id)}})));
       const rename=element('button',tr('Renommer','Rename'),'vira-calendar-button');rename.type='button';rename.setAttribute('aria-label',tr('Renommer : ','Rename: ')+(c.title||tr('Campagne','Campaign')));rename.onclick=()=>renameCampaign(c,rename);
       const duplicate=element('button',tr('Dupliquer','Duplicate'),'vira-calendar-button');duplicate.type='button';duplicate.setAttribute('aria-label',tr('Dupliquer : ','Duplicate: ')+(c.title||tr('Campagne','Campaign')));duplicate.onclick=()=>duplicateCampaign(c,duplicate);
-      actions.append(open,rename,duplicate,plan);
+      const more=element('details','','vh-card-more');
+      const summary=element('summary',tr('Plus d’actions','More actions'));
+      summary.setAttribute('aria-label',tr('Plus d’actions pour : ','More actions for: ')+(c.title||tr('Campagne','Campaign')));
+      const options=element('div','','vh-card-more-options');
+      options.append(rename,duplicate,plan);
+      more.append(summary,options);
+      more.addEventListener('keydown',event=>{
+        if(event.key==='Escape'&&more.open){event.preventDefault();event.stopPropagation();more.open=false;summary.focus();}
+      });
+      actions.append(open,more);
       row.classList.add('vh-project-card');
       const preview=element('button','','vh-project-preview');preview.type='button';preview.setAttribute('aria-label',tr('Aperçu : ','Preview: ')+(c.title||tr('Campagne','Campaign')));preview.title=tr('Voir l’aperçu','Quick preview');preview.onclick=()=>showCampaignPreview(c,preview,open);
       const initials=String(c.title||'O').trim().split(/\s+/).slice(0,2).map(word=>Array.from(word)[0]||'').join('').toLocaleUpperCase();
@@ -6124,6 +6133,17 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
   preview.addEventListener('close',()=>close());
 })();
 </script>
+<style id="olyvex-card-actions">
+.vh-project-body .vh-actions{align-items:flex-start}
+.vh-card-more{margin-top:10px;min-width:0;max-width:100%}
+.vh-card-more summary{cursor:pointer;list-style:none;border:1px solid #dcd5e8;border-radius:8px;padding:8px 10px;font:400 12px/18px Arial,sans-serif;color:#58466f;background:#fff;min-height:36px;box-sizing:border-box}
+.vh-card-more summary::-webkit-details-marker{display:none}
+.vh-card-more summary::after{content:" ▾"}
+.vh-card-more[open] summary::after{content:" ▴"}
+.vh-card-more summary:focus-visible{outline:2px solid #7951b0;outline-offset:3px}
+.vh-card-more-options{display:flex;flex-direction:column;gap:4px;padding:6px 0}
+body .app-shell .main .vh-project-body .vh-card-more-options button{margin:0!important;text-align:left;min-height:40px;width:100%}
+</style>
 </body>
 </html>
 
