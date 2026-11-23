@@ -5157,7 +5157,16 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   const hero=main.querySelector('.vb-hero');if(hero){const info=document.createElement('details');info.className='vh-intro';const summary=document.createElement('summary');summary.textContent=tr('Découvrir Olyvex Brain','Discover Olyvex Brain');hero.before(info);info.append(summary,hero);}
   let campaigns=null;let accountPlans=null;let visibleLimit=6;
   const searchInput=dashboard.querySelector('#vhSearch'),filterInput=dashboard.querySelector('#vhFilter');
-  const sortInput=dashboard.querySelector('#vhSort');sortInput.addEventListener('change',()=>{visibleLimit=6;render();});
+  const sortInput=dashboard.querySelector('#vhSort');
+  const sortPreferenceKey='olyvex.dashboard.sort';
+  try {
+    const savedSort=localStorage.getItem(sortPreferenceKey);
+    if(['updated','created','title'].includes(savedSort))sortInput.value=savedSort;
+  } catch {}
+  sortInput.addEventListener('change',()=>{
+    try { localStorage.setItem(sortPreferenceKey,sortInput.value); } catch {}
+    visibleLimit=6;render();
+  });
   const normalizeSearch=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim();
   const campaignState=c=>['completed','visuals_ready'].includes(c.status)?c.status:'draft';
   searchInput.addEventListener('input',()=>{visibleLimit=6;render();});
