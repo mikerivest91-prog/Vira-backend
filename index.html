@@ -5138,8 +5138,16 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   const english=()=>document.documentElement.lang==='en';
   const tr=(fr,en)=>english()?en:fr;
   const dashboard=document.createElement('section');dashboard.className='vh-dashboard';dashboard.id='viraDashboard';
-  dashboard.innerHTML=`<div class="vh-heading"><div><h1></h1><p></p></div><div id="vhCreate"></div></div><div class="vh-stats"><div class="vh-stat"><span></span><strong id="vhTotal">—</strong></div><div class="vh-stat"><span></span><strong id="vhDone">—</strong></div><div class="vh-stat"><span></span><strong id="vhScheduled">—</strong></div></div><div class="vh-columns"><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhRecentTitle"></h2><button type="button" class="vh-link" id="vhAll"></button></div><div class="vh-search-tools"><label><span id="vhSearchLabel">Rechercher une campagne</span><input id="vhSearch" type="search" autocomplete="off"></label><label><span id="vhFilterLabel">Statut</span><select id="vhFilter"><option value="all">Tous les statuts</option><option value="draft">En préparation</option><option value="visuals_ready">Visuels prêts</option><option value="completed">Terminée</option></select></label><label><span id="vhSortLabel">Trier par</span><select id="vhSort"><option value="updated">Dernière modification</option><option value="created">Date de création</option><option value="title">Nom A–Z</option></select></label></div><div class="vh-search-summary"><span id="vhSearchCount" role="status" aria-live="polite"></span><button type="button" id="vhSearchReset" hidden>Effacer les filtres</button></div><div id="vhRecent"></div><button type="button" id="vhShowMore" hidden>Afficher plus</button></section><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhNextTitle"></h2><button type="button" class="vh-link" id="vhCalendar"></button></div><div id="vhNext"></div><p class="vh-note" id="vhNote"></p></section></div><p id="vhStatus" role="status"></p>`;
+  dashboard.innerHTML=`<div class="vh-heading"><div><h1></h1><p></p></div><div id="vhCreate"></div></div><div class="vh-stats"><div class="vh-stat"><span></span><strong id="vhTotal">—</strong></div><div class="vh-stat"><span></span><strong id="vhDone">—</strong></div><div class="vh-stat"><span></span><strong id="vhScheduled">—</strong></div></div><div class="vh-columns"><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhRecentTitle"></h2><button type="button" class="vh-link" id="vhAll"></button></div><div class="vh-search-tools"><label><span id="vhSearchLabel">Rechercher une campagne</span><input id="vhSearch" type="search" autocomplete="off"></label><label><span id="vhFilterLabel">Statut</span><select id="vhFilter"><option value="all">Tous les statuts</option><option value="draft">En préparation</option><option value="visuals_ready">Visuels prêts</option><option value="completed">Terminée</option></select></label><label><span id="vhSortLabel">Trier par</span><select id="vhSort"><option value="updated">Dernière modification</option><option value="created">Date de création</option><option value="title">Nom A–Z</option></select></label></div><div class="vh-search-summary"><span id="vhSearchCount" role="status" aria-live="polite"></span><button type="button" id="vhSearchReset" hidden>Effacer les filtres</button></div><div id="vhRecent"></div><button type="button" id="vhShowMore" hidden>Afficher plus</button></section><section class="vh-panel"><div class="vh-panel-head"><h2 id="vhNextTitle"></h2><button type="button" class="vh-link" id="vhCalendar"></button></div><div id="vhNext"></div><p class="vh-note" id="vhNote"></p></section></div><div id="vhFeedback" class="vh-feedback" hidden><p id="vhStatus" role="status" aria-live="polite" aria-atomic="true"></p><button type="button" id="vhFeedbackClose" aria-label="Fermer la confirmation">×</button></div>`;
   welcome.before(dashboard);
+  const feedback=dashboard.querySelector('#vhFeedback');
+  dashboard.querySelector('.vh-heading').after(feedback);
+  const feedbackClose=dashboard.querySelector('#vhFeedbackClose');
+  feedbackClose.onclick=()=>{
+    feedback.hidden=true;
+    dashboard.querySelector('#vhStatus').textContent='';
+    dashboard.querySelector('#vhSearch').focus();
+  };
   const actionWrapper=newButton.parentElement;
   dashboard.querySelector('#vhCreate').append(newButton);
   const admin=document.getElementById('adminDashboardBtn');if(admin)dashboard.querySelector('#vhCreate').append(admin);
@@ -5242,7 +5250,11 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
   }
 
   function element(tag,text,cls){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=text;return e;}
-  function status(message){dashboard.querySelector('#vhStatus').textContent=message;}
+  function status(message){
+    dashboard.querySelector('#vhStatus').textContent=message;
+    feedback.hidden=!message;
+    feedbackClose.setAttribute('aria-label',tr('Fermer la confirmation','Dismiss confirmation'));
+  }
   function render(){
     dashboard.querySelector('h1').textContent=tr('Vos idées prennent forme.','Bring your ideas to life.');
     dashboard.querySelector('.vh-heading p').textContent=tr('Retrouvez vos campagnes et préparez la suite.','Find your campaigns and plan what comes next.');
@@ -6143,6 +6155,14 @@ body .app-shell .main button.vh-project-preview{padding:0!important;margin:0!imp
 .vh-card-more summary:focus-visible{outline:2px solid #7951b0;outline-offset:3px}
 .vh-card-more-options{display:flex;flex-direction:column;gap:4px;padding:6px 0}
 body .app-shell .main .vh-project-body .vh-card-more-options button{margin:0!important;text-align:left;min-height:40px;width:100%}
+</style>
+<style id="olyvex-action-feedback">
+.vh-feedback[hidden]{display:none!important}
+.vh-feedback{display:flex;align-items:center;gap:16px;margin:0 0 24px;padding:14px 16px;border:1px solid #c9dfd6;border-radius:12px;background:#f0f8f4;color:#245643}
+.vh-feedback #vhStatus{margin:0;flex:1;min-width:0;overflow-wrap:anywhere;font:400 14px/1.6 Arial,sans-serif}
+.vh-feedback #vhFeedbackClose{flex:none;display:grid;place-items:center;width:40px;height:40px;padding:0;margin:0;border:1px solid transparent;border-radius:8px;background:transparent;color:inherit;font:400 24px/1 Arial,sans-serif;cursor:pointer}
+.vh-feedback #vhFeedbackClose:hover{background:#deeee5}
+.vh-feedback #vhFeedbackClose:focus-visible{outline:2px solid #7951b0;outline-offset:2px}
 </style>
 </body>
 </html>
