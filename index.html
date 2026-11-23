@@ -5252,7 +5252,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
       if(source){const image=document.createElement('img');image.alt='';image.src=source;image.onerror=()=>image.remove();button.prepend(image);}
       button.onclick=()=>showScene(i);button.onkeydown=event=>{let next;if(event.key==='ArrowRight')next=(i+1)%4;else if(event.key==='ArrowLeft')next=(i+3)%4;else if(event.key==='Home')next=0;else if(event.key==='End')next=3;else return;event.preventDefault();sceneButtons.children[next].focus();showScene(next);};sceneButtons.append(button);
     });
-    showScene(0);
+    showScene(Math.max(0,images.findIndex(Boolean)));
     peek.querySelector('details').open=false;peek.querySelector('#vhPeekScriptLabel').textContent=tr('Lire le scénario','Read script');peek.querySelector('#vhPeekScript').textContent=text(data.scenario)||tr('Aucun scénario enregistré.','No saved script.');
     peek.querySelector('#vhPeekNote').textContent=tr('Aperçu des informations enregistrées · aucune modification','Preview of saved information · no changes');
     peek.querySelector('#vhPeekOpen').textContent=tr('Ouvrir la campagne →','Open campaign →');peek.showModal();
@@ -5319,9 +5319,15 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
       const initials=String(c.title||'O').trim().split(/\s+/).slice(0,2).map(word=>Array.from(word)[0]||'').join('').toLocaleUpperCase();
       preview.textContent=initials||'O';
       const data=c.campaign_data&&typeof c.campaign_data==='object'?c.campaign_data:{};
-      const candidates=[data.generatedImages?.[0],data.sourceClips?.[0]?.thumbnail];
-      const imageSource=candidates.find(value=>typeof value==='string'&&/^data:image\/(?:png|jpeg|webp);base64,/i.test(value));
-      if(imageSource){const image=document.createElement('img');image.alt='';image.loading='lazy';image.decoding='async';image.src=imageSource;image.onerror=()=>{preview.textContent=initials||'O';};preview.replaceChildren(image);}
+      const candidates=Array.from({length:4},(_,i)=>[data.generatedImages?.[i],data.sourceClips?.[i]?.thumbnail]).flat();
+      const sources=[...new Set(candidates.filter(value=>typeof value==='string'&&/^data:image\/(?:png|jpeg|webp);base64,/i.test(value)))];
+      const loadThumbnail=index=>{
+        if(index>=sources.length){preview.textContent=initials||'O';return;}
+        const image=document.createElement('img');image.alt='';image.loading='lazy';image.decoding='async';
+        image.onerror=()=>{if(image.parentNode===preview)loadThumbnail(index+1);};
+        image.src=sources[index];preview.replaceChildren(image);
+      };
+      loadThumbnail(0);
       const body=element('div','','vh-project-body'),badge=element('small',label,'vh-project-badge');
       badge.dataset.status=campaignState(c);
       const dateValue=c.updated_at||c.updatedAt||c.created_at||c.createdAt;
