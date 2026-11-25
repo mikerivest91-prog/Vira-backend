@@ -3888,7 +3888,7 @@ if ([els.navHome, els.navCampaigns, els.navContent, els.navSettings, els.navStat
         const campaigns = data.campaigns.filter(c => c.id != null);
         const byId = new Map(campaigns.map(c => [String(c.id), c]));
         const localPlans = readViraPlans();
-        let plansFromServer = Array.isArray(calendarData.events) ? calendarData.events.map(e => ({id:String(e.id),campaignId:String(e.campaign_id),at:new Date(e.scheduled_at).toISOString(),platform:e.platform||"Instagram"})).filter(p => byId.has(p.campaignId)) : [];
+        let plansFromServer = Array.isArray(calendarData.events) ? calendarData.events.map(e => ({id:String(e.id),campaignId:String(e.campaign_id),at:new Date(e.scheduled_at).toISOString(),platform:e.platform||"Instagram"})).filter(p => byId.has(String(p.campaignId))) : [];
         // One-time migration: preserve browser-only plans when the account calendar is still empty.
         if (!plansFromServer.length && localPlans.length) {
           for (const old of localPlans) {
@@ -5264,6 +5264,24 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     feedback.hidden=!message;
     feedbackClose.setAttribute('aria-label',tr('Fermer la confirmation','Dismiss confirmation'));
   }
+  let cancelCampaignOpen=()=>{};
+  function openDashboardCampaign(id){
+    cancelCampaignOpen();
+    const nav=document.getElementById('navCampaigns');
+    if(!nav){status(tr('Ouvrez Campagnes pour retrouver cette campagne.','Open Campaigns to find this campaign.'));return;}
+    let timeout;
+    const observer=new MutationObserver(tryOpen);
+    function stop(){observer.disconnect();clearTimeout(timeout);}
+    function tryOpen(){
+      const card=Array.from(document.querySelectorAll('[data-vira-campaign-id]')).find(n=>n.dataset.viraCampaignId===String(id));
+      const resume=card?.querySelector('.campaign-resume');
+      if(resume){stop();resume.click();}
+    }
+    cancelCampaignOpen=stop;
+    observer.observe(main,{childList:true,subtree:true});
+    timeout=setTimeout(()=>{stop();status(tr('La campagne n’a pas pu être ouverte. Retrouvez-la dans Campagnes.','The campaign could not be opened. Find it in Campaigns.'));},15000);
+    nav.click();tryOpen();
+  }
   function render(){
     dashboard.querySelector('h1').textContent=tr('Vos idées prennent forme.','Bring your ideas to life.');
     dashboard.querySelector('.vh-heading p').textContent=tr('Retrouvez vos campagnes et préparez la suite.','Find your campaigns and plan what comes next.');
@@ -5297,10 +5315,7 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
     sorted.slice(0,visibleLimit).forEach(c=>{
       const row=element('article','','vh-row');const title=element('strong',c.title||tr('Campagne sans titre','Untitled campaign'));title.dataset.userContent='';
       const label=c.status==='completed'?tr('Terminée','Completed'):c.status==='visuals_ready'?tr('Visuels prêts','Visuals ready'):tr('En préparation','Draft');
-      const actions=element('div','','vh-actions');const open=element('button',tr('Voir la campagne','View campaign'),'vira-calendar-button');open.type='button';open.addEventListener('click',()=>{
-        const observer=new MutationObserver(()=>{const card=Array.from(document.querySelectorAll('[data-vira-campaign-id]')).find(n=>n.dataset.viraCampaignId===String(c.id));if(card){observer.disconnect();clearTimeout(timeout);card.querySelector('.campaign-resume')?.click();}});
-        observer.observe(main,{childList:true,subtree:true});const timeout=setTimeout(()=>observer.disconnect(),15000);document.getElementById('navCampaigns')?.click();
-      });
+      const actions=element('div','','vh-actions');const open=element('button',tr('Voir la campagne','View campaign'),'vira-calendar-button');open.type='button';open.addEventListener('click',()=>openDashboardCampaign(c.id));
       const plan=element('button',tr('Planifier','Schedule'),'vira-plan-button');plan.type='button';plan.addEventListener('click',()=>window.dispatchEvent(new CustomEvent('vira:calendar',{detail:{campaignId:String(c.id)}})));
       const rename=element('button',tr('Renommer','Rename'),'vira-calendar-button');rename.type='button';rename.setAttribute('aria-label',tr('Renommer : ','Rename: ')+(c.title||tr('Campagne','Campaign')));rename.onclick=()=>renameCampaign(c,rename);
       const duplicate=element('button',tr('Dupliquer','Duplicate'),'vira-calendar-button');duplicate.type='button';duplicate.setAttribute('aria-label',tr('Dupliquer : ','Duplicate: ')+(c.title||tr('Campagne','Campaign')));duplicate.onclick=()=>duplicateCampaign(c,duplicate);
@@ -5341,7 +5356,17 @@ body .app-shell .main .vs-panel .premium-action-icon{width:32px!important;height
       const byId=new Map(campaigns.map(c=>[String(c.id),c]));const plans=raw.filter(p=>p && byId.has(p.campaignId) && Date.parse(p.at)>Date.now()).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
       dashboard.querySelector('#vhScheduled').textContent=plans.length;
       if(!plans.length)next.append(element('p',tr('Aucune publication à venir. Choisissez une campagne à planifier.','No upcoming posts. Choose a campaign to schedule.'),'vh-empty'));
-      plans.slice(0,3).forEach(p=>{const row=element('article','','vh-row');const title=element('strong',byId.get(p.campaignId).title||tr('Campagne','Campaign'));title.dataset.userContent='';row.append(title,element('small',new Date(p.at).toLocaleString(english()?'en-CA':'fr-CA',{dateStyle:'medium',timeStyle:'short'})));next.append(row);});
+      plans.slice(0,3).forEach(p=>{
+        const campaign=byId.get(String(p.campaignId));
+        const row=element('article','','vh-row');
+        const title=element('strong',campaign.title||tr('Campagne','Campaign'));title.dataset.userContent='';
+        const date=element('time',new Date(p.at).toLocaleString(english()?'en-CA':'fr-CA',{dateStyle:'medium',timeStyle:'short'}));
+        date.dateTime=new Date(p.at).toISOString();date.style.display='block';
+        const open=element('button',tr('Ouvrir la campagne','Open campaign'),'vira-calendar-button');
+        open.type='button';open.setAttribute('aria-label',tr('Ouvrir la campagne : ','Open campaign: ')+(campaign.title||tr('Campagne','Campaign')));
+        open.onclick=()=>openDashboardCampaign(campaign.id);
+        row.append(title,date,open);next.append(row);
+      });
     }catch{dashboard.querySelector('#vhScheduled').textContent='—';next.append(element('p',tr('Planifications indisponibles. Ouvrez le calendrier pour vérifier.','Schedules unavailable. Open the calendar to check.'),'vh-empty'));}
   }
   dashboard.querySelector('#vhAll').onclick=()=>document.getElementById('navCampaigns')?.click();dashboard.querySelector('#vhCalendar').onclick=()=>document.getElementById('navCalendar')?.click();
