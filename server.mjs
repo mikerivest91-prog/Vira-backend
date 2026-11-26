@@ -113,6 +113,10 @@ app.get("/", async (req,res) => {res.setHeader("Cache-Control","private, no-stor
 app.get("/accueil",(_req,res)=>res.sendFile(path.resolve("home.html")));
 for(const file of ["project-start.js","project-start.css"])app.get("/"+file,(_req,res)=>res.sendFile(path.resolve(file)));
 app.get("/home.css",(_req,res)=>res.sendFile(path.resolve("home.css")));
+for(const file of ["campaign.mp4","scene-0.jpg","scene-1.jpg","scene-2.jpg","scene-3.jpg"]){
+  app.get("/demo-media/"+file,(_req,res)=>res.sendFile(path.resolve("demo-media",file)));
+}
+
 app.get("/studio",(_req,res)=>{res.setHeader("Cache-Control","private, no-store");res.sendFile(path.resolve("index.html"));});
 app.get("/index.html", (_req, res) => res.sendFile(path.resolve("index.html")));
 app.get('/videos/:filename', requireAuth, async (req,res) => {
